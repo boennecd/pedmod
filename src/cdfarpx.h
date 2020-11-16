@@ -1,5 +1,5 @@
-#ifndef RESTRICT_CDF_H
-#define RESTRICT_CDF_H
+#ifndef CDFAPRX_H
+#define CDFAPRX_H
 
 #include "arma-wrap.h"
 #include <array>
@@ -66,6 +66,17 @@ struct cor_vec_res {
 };
 
 /**
+ returns the minum number of samples as the original Fortran code.
+ */
+inline int default_minvls(int dim){
+  dim = std::max(1, dim);
+  constexpr int const def_vals[10] =
+    { 16L * 31L - 1L, 16L * 47L - 1L, 16L * 73L - 1L, 16L * 113L - 1L, 16L * 173L - 1L, 16L * 263L - 1L, 16L * 397L - 1L, 16L * 593L - 1L, 16L * 907L - 1L, 16L * 1361L - 1L };
+  return def_vals[
+    std::min(static_cast<int>(dim - 1L), 9)];
+}
+
+/**
  * @return a struct with the correlation matrix and standard deviation. The
  * correlation matrix is stored as a upper diagonal matrix.
  */
@@ -126,7 +137,7 @@ inline void copy_lower_tri
 }
 
 /**
- * TODO: what does this class do?
+ * TODO: describe what this class does.
  */
 template<class T_Functor, class out_type = typename T_Functor::out_type>
 class cdf {

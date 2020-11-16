@@ -154,7 +154,7 @@ public:
       bool const use_aprx):
     functor(functor),
     ndim(mu_in.n_elem),
-    n_integrands(functor.get_n_integrands()),
+    n_integrands(functor.get_n_integrands(mu_in, sigma_in)),
     use_aprx(use_aprx),
     infin(get_infin(lower_in, upper_in)),
     indices(ndim) {
@@ -241,9 +241,6 @@ public:
           mu_permu[i] = mu_in[uidx[i]];
         }
 
-        arma::mat sigma_permu(ndim, ndim, false, true);
-        sigma_permu = sigma_in.submat(uidx, uidx);
-
         return;
 
       } else {
@@ -300,10 +297,10 @@ public:
                  * __restrict__ lw   = lower.begin(),
                  * __restrict__ up   = upper.begin(),
                  * __restrict__ unif = unifs;
-    int const *infin = infin;
+    int const *infin_j = infin.begin();
     /* loop over variables and transform them to truncated normal
      * variables */
-    for(int j = 0; j < ndim; ++j, ++sc, ++lw, ++up, ++infin, ++unif){
+    for(int j = 0; j < ndim; ++j, ++sc, ++lw, ++up, ++infin_j, ++unif){
       double su(0.);
       double const *d = dr;
       for(int i = 0; i < j; ++i, sc++, d++)
@@ -314,11 +311,11 @@ public:
       };
       double lim_l(0.),
              lim_u(1.);
-      if(*infin == 0L)
+      if(*infin_j == 0L)
         lim_u = pnorm_use(*up - su);
-      else if(*infin == 1L)
+      else if(*infin_j == 1L)
         lim_l = pnorm_use(*lw - su);
-      else if(*infin == 2L){
+      else if(*infin_j == 2L){
         lim_l = pnorm_use(*lw - su);
         lim_u = pnorm_use(*up - su);
 
@@ -343,7 +340,7 @@ public:
     }
 
     /* evaluate the integrand and weigth the result. */
-    functor(dr, out, indices);
+    functor(dr, out, indices.begin());
 
     double * o = out;
     for(int i = 0; i < n_integrands; ++i, ++o)
@@ -368,30 +365,20 @@ public:
       throw std::invalid_argument("cdf::approximate: invalid 'maxvls'");
 #endif
 
-    // TOOD: make a special case w/ univariate
-    // if(ndim == 1L){
-    //   /* handle the one-dimensional case as a special case */
-    //   double const lw = *map_obj.lower,
-    //                up = *map_obj.upper;
-    //   output out;
-    //   out.finest = funcs::univariate(lw, up);
-    //   out.inform = 0L;
-    //   out.abserr = 0;
-    //   return out;
-    //
-    // } else if(std::isinf(*map_obj.sigma_chol)){
-    //   output out;
-    //   out.finest.resize(n_integrands);
-    //   out.finest.fill(std::numeric_limits<double>::quiet_NaN());
-    //   out.inform = -1L;
-    //   return out;
-    //
-    // }
-
-    /* perform the approximation */
+    // setup
     std::unique_ptr<double[]> int_apprx(new double[n_integrands]);
     auto sampler = parallelrng::get_unif_drawer();
 
+    if(ndim == 1L){
+      /* handle the one-dimensional case as a special case */
+      functor.univariate(int_apprx.get(), lower[0], upper[0]);
+
+      return functor.get_output(int_apprx.get(), 0, 0, 0);
+
+    } else if(std::isinf(*sigma_chol.begin()))
+      throw std::runtime_error("std::isinf(*sigma_chol.begin())");
+
+    /* perform the approximation */
     auto res = rand_Korobov(
       *this, ndim, minvls, maxvls, n_integrands, abs_eps, rel_eps,
       int_apprx.get(), sampler);
@@ -406,7 +393,6 @@ public:
  * likelihood. */
 class likelihood {
 public:
-
   constexpr static int get_n_integrands
     (arma::vec const&, arma::mat const&) {
     return 1L;
@@ -426,13 +412,11 @@ public:
     return false;
   }
 
-  static arma::vec univariate(double const lw, double const ub,
-                              double const * const wk_mem) {
-    arma::vec out(1L);
+  inline static void univariate(double * out,
+                                double const lw, double const ub) {
     double const p_ub = std::isinf(ub) ? 1 : pnorm_std(ub, 1L, 0L),
                  p_lb = std::isinf(lw) ? 0 : pnorm_std(lw, 1L, 0L);
-    out[0] = p_ub - p_lb;
-    return out;
+    *out = p_ub - p_lb;
   }
 
   struct out_type {

@@ -13,6 +13,9 @@ RoxygenNote: 7.1.1
 LinkingTo: 
     Rcpp,
     RcppArmadillo,
-    BH
+    BH, 
+    testthat
 Imports: 
     Rcpp
+Suggests: 
+    testthat

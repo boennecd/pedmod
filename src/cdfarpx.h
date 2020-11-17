@@ -3,6 +3,7 @@
 
 #include "arma-wrap.h"
 #include <array>
+#include <vector>
 #include <limits>
 #include <memory>
 #include <cmath>
@@ -116,9 +117,9 @@ inline double safe_qnorm_aprx(double const x) noexcept {
  */
 inline void copy_upper_tri
   (arma::mat const &X, double * __restrict__ x) noexcept {
-  size_t const p = X.n_cols;
-  for(unsigned c = 0; c < p; c++)
-    for(unsigned r = 0; r <= c; r++, x++)
+  int const p = X.n_cols;
+  for(int c = 0; c < p; c++)
+    for(int r = 0; r <= c; r++, x++)
       *x = X.at(r, c);
 }
 
@@ -130,9 +131,9 @@ inline void copy_upper_tri
  */
 inline void copy_lower_tri
   (arma::mat const &X, double * __restrict__ x) noexcept {
-  size_t const p = X.n_cols;
-  for(unsigned c = 0; c < p; c++)
-    for(unsigned r = c; r < p; r++, x++)
+  int const p = X.n_cols;
+  for(int c = 0; c < p; c++)
+    for(int r = c; r < p; r++, x++)
       *x = X.at(r, c);
 }
 
@@ -165,7 +166,7 @@ public:
       bool const use_aprx):
     functor(functor),
     ndim(mu_in.n_elem),
-    n_integrands(functor.get_n_integrands(mu_in, sigma_in)),
+    n_integrands(functor.get_n_integrands()),
     use_aprx(use_aprx),
     infin(get_infin(lower_in, upper_in)),
     indices(ndim) {
@@ -183,6 +184,7 @@ public:
 #endif
 
     /* re-scale */
+    // TODO: memory allocation
     arma::vec sds = arma::sqrt(arma::diagvec(sigma_in)),
                mu = mu_in / sds;
 
@@ -202,6 +204,7 @@ public:
     }
 
     if(do_reorder and ndim > 1L){
+      // TODO: memory allocation
       std::unique_ptr<double[]> tmp_mem(new double[2 * ndim]);
 
       double * const y     = draw.begin(),
@@ -216,7 +219,7 @@ public:
       int F_inform = 0L,
              nddim = ndim;
       std::fill(delta, delta + ndim, 0.);
-
+      // TODO: memory allocation
       arma::ivec infi(ndim);
 
       F77_CALL(mvsort)(
@@ -228,13 +231,10 @@ public:
       if(F_inform != 0)
         throw std::runtime_error("cdf::cdf: error in mvsort");
 
-      {
-        int const *prev = indices.begin();
-        for(int i = 0; i < ndim; ++prev, ++i){
-          if(*prev != i){
-            is_permutated = true;
-            break;
-          }
+      for(int i = 0; i < ndim; ++i){
+        if(indices[i] != i){
+          is_permutated = true;
+          break;
         }
       }
 
@@ -245,24 +245,25 @@ public:
           infin[i] = infi[i];
         }
 
+        // TODO: memory allocation
         arma::uvec uidx(ndim);
-        arma::vec mu_permu(ndim);
-        for(int i = 0; i < ndim; ++i){
-          uidx[i]     = indices[i];
-          mu_permu[i] = mu_in[uidx[i]];
-        }
+        for(int i = 0; i < ndim; ++i)
+          uidx[i] = indices[i];
+
+        // TODO: memory allocation
+        arma::mat sigma_permu = sigma_in.submat(uidx, uidx);
+        functor.prep_permutated(sigma_permu);
 
         return;
 
-      } else {
+      } else
         for(int i = 0; i < ndim; ++i){
           lower[i] = *(A + i);
           upper[i] = *(B + i);
         }
 
-      }
-
     } else if(!do_reorder and ndim > 1L) {
+      // TODO: memory allocation
       arma::mat tmp(ndim, ndim);
       tmp = sigma_in;
       tmp.each_row() /= sds.t();
@@ -351,7 +352,7 @@ public:
     }
 
     /* evaluate the integrand and weigth the result. */
-    functor(dr, out, indices.begin());
+    functor(dr, out, indices.begin(), is_permutated);
 
     double * o = out;
     for(int i = 0; i < n_integrands; ++i, ++o)
@@ -383,8 +384,10 @@ public:
     if(ndim == 1L){
       /* handle the one-dimensional case as a special case */
       functor.univariate(int_apprx.get(), lower[0], upper[0]);
+      indices[0] = 0;
 
-      return functor.get_output(int_apprx.get(), 0, 0, 0);
+      return functor.get_output(int_apprx.get(), 0, 0, 0,
+                                indices.begin());
 
     } else if(std::isinf(*sigma_chol.begin()))
       throw std::runtime_error("std::isinf(*sigma_chol.begin())");
@@ -395,7 +398,7 @@ public:
       int_apprx.get(), sampler);
 
     return functor.get_output(int_apprx.get(), res.minvls, res.inform,
-                              res.abserr);
+                              res.abserr, indices.begin());
   }
 };
 
@@ -404,13 +407,12 @@ public:
  * likelihood. */
 class likelihood {
 public:
-  constexpr static int get_n_integrands
-    (arma::vec const&, arma::mat const&) {
+  constexpr static int get_n_integrands() {
     return 1L;
   }
 
   inline void operator()
-    (double const *, double * out, int const *)
+    (double const *, double * out, int const *, bool const)
     PEDMOD_NOEXCEPT {
 #ifdef DO_CHECKS
     if(!out)
@@ -441,15 +443,221 @@ public:
      *        accuracy. In this case a value finest is returned with
      *        estimated absolute accuracy ABSERR. */
     int minvls, inform;
-    /// Maximum norm of estimated absolute accuracy of finest
+    /// maximum norm of estimated absolute accuracy of finest
     double abserr;
-    /// The likelihood approximation
+    /// likelihood approximation
     double likelihood;
   };
 
   out_type get_output(double const * res, int const minvls,
-                      int const inform, double const abserr){
+                      int const inform, double const abserr,
+                      int const *){
     return out_type { minvls, inform, abserr, *res };
+  }
+
+  inline void prep_permutated(arma::mat const&) { }
+};
+
+/**
+ * functor classes used as template argument for cdf used to approximate the
+ * derivatives of the likelihood factors for each family.
+ *
+ * The returned approximations is a) the likelihood factor, b) the
+ * derivative w.r.t. the mean vector, and c) the derivative w.r.t. each
+ * scale parameter.
+ */
+class pedigree_l_factor {
+public:
+  /// the scale matrices for the different effects
+  std::vector<arma::mat> const scale_mats;
+  /// the number of members in this family
+  int const n_mem = scale_mats[0].n_rows;
+
+private:
+  /// working memory. TODO: remove allocation
+  std::unique_ptr<double[]> wk_mem =
+    std::unique_ptr<double[]>(new double[n_mem + n_mem  * (n_mem + 1)]);
+
+  /**
+   * points to the upper triangular part of the inverse of the Cholesky
+   * decomposition.
+   */
+  double * sigma_chol_inv;
+
+  /// points to the upper triangular part of the inverse.
+  double * sig_inv;
+
+public:
+  /// sets the scale matrices. There are no checks on the validity
+  pedigree_l_factor(std::vector<arma::mat> const &scale_mats):
+  scale_mats(scale_mats) { }
+
+  inline int get_n_integrands() PEDMOD_NOEXCEPT {
+    return 1 + n_mem + scale_mats.size();
+  }
+
+  constexpr static bool needs_last_unif() {
+    return true;
+  }
+
+  /**
+   * setups the covariance matrix to use. This method must be called be
+   * prior to using the object in an approximation.
+   *
+   * Args:
+   *   sig: the covariance matrix.
+   *   scales: scale parameters.
+   */
+  void setup(arma::mat &sig, double const *scales){
+    sig.zeros(n_mem, n_mem);
+    for(unsigned i = 0; i < scale_mats.size(); ++i)
+      sig += scales[i] * scale_mats[i];
+
+    // create the objects we need
+    // TODO: memory allocation
+    arma::mat tmp_mat(n_mem, n_mem);
+    if(!arma::chol(tmp_mat, sig))
+      throw std::runtime_error("pedigree_ll_factor::setup: chol failed");
+    if(!arma::inv(tmp_mat, tmp_mat))
+      throw std::runtime_error("pedigree_ll_factor::setup: inv failed");
+    sigma_chol_inv = wk_mem.get() + n_mem;
+    copy_upper_tri(tmp_mat, sigma_chol_inv);
+
+    if(!arma::inv_sympd(tmp_mat, sig))
+      throw std::runtime_error("pedigree_ll_factor::setup: inv_sympd failed");
+    sig_inv = sigma_chol_inv + (n_mem * (n_mem + 1)) / 2;
+    copy_upper_tri(tmp_mat, sig_inv);
+  }
+
+  void prep_permutated(arma::mat const &sigma_permu) {
+    // need to re-compute the inverse of the Cholesky decomposition
+    // TODO: memory allocation
+    arma::mat tmp_mat(n_mem, n_mem);
+    if(!arma::chol(tmp_mat, sigma_permu))
+      throw std::runtime_error("pedigree_ll_factor::setup: chol failed");
+    if(!arma::inv(tmp_mat, tmp_mat))
+      throw std::runtime_error("pedigree_ll_factor::setup: inv failed");
+    copy_upper_tri(tmp_mat, sigma_chol_inv);
+  }
+
+  inline void operator()
+    (double const * __restrict__ draw, double * __restrict__ out,
+     int const *indices, bool const is_permutated) {
+      *out = 1;
+      std::fill(out + 1, out + get_n_integrands(), 0.);
+      double * __restrict__ const d_mu = out + 1,
+             * __restrict__ const d_sc = d_mu + n_mem;
+
+      // handle the derivatives w.r.t. the mean
+      {
+        double *sig_chov_inv_ele = sigma_chol_inv;
+        double const * d = draw;
+        for(int c = 0; c < n_mem; ++c, ++d){
+          double *rhs = d_mu;
+          for(int r = 0; r <= c; ++r, ++rhs, ++sig_chov_inv_ele)
+            *rhs += *d * *sig_chov_inv_ele;
+        }
+      }
+
+      // handle the derivatives w.r.t. the scale parameters
+      int const n_scales = scale_mats.size();
+      double const *d_mu_c = d_mu;
+      for(int c = 0; c < n_mem; ++c, ++d_mu_c){
+        double const *d_mu_r = d_mu;
+        arma::uword const ic = indices[c];
+
+        for(int r = 0; r < c; ++r, ++d_mu_r){
+          arma::uword const ir = indices[r];
+          for(int s = 0; s < n_scales; ++s)
+            d_sc[s] += *d_mu_c * *d_mu_r * scale_mats.at(s).at(ir, ic);
+        }
+
+        for(int s = 0; s < n_scales; ++s)
+          d_sc[s] += .5 * *d_mu_c * *d_mu_c * scale_mats.at(s).at(ic, ic);
+      }
+    }
+
+  inline void univariate(double * out, double const lw, double const ub) {
+    constexpr double const sqrt_2_pi_inv = 0.398942280401433;
+    auto dnrm = [&](double const x){
+      return std::exp(-x * x / 2.) * sqrt_2_pi_inv;
+    };
+
+    bool const f_ub = std::isinf(ub),
+               f_lb = std::isinf(lw);
+
+    double const p_ub = f_ub ? 1 : pnorm_std(ub, 1L, 0L),
+                 p_lb = f_lb ? 0 : pnorm_std(lw, 1L, 0L),
+                 d_ub = f_ub ? 0 : dnrm(ub),
+                 d_lb = f_lb ? 0 : dnrm(lw),
+              d_ub_ub = f_ub ? 0 : ub * d_ub,
+              d_lb_lb = f_lb ? 0 : lw * d_lb,
+               sd_inv = *sigma_chol_inv;
+
+    out[0L] = p_ub - p_lb;
+    out[1L] = -(d_ub - d_lb) * sd_inv;
+
+    double const d_sig = -(d_ub_ub - d_lb_lb) / 2 * sd_inv * sd_inv;
+    for(unsigned s = 0; s  < scale_mats.size(); ++s)
+      out[2 + s] = d_sig * scale_mats.at(s).at(0, 0);
+  }
+
+  struct out_type {
+    /**
+     * minvls Actual number of function evaluations used.
+     * inform INFORM = 0 for normal exit, when
+     *             ABSERR <= MAX(ABSEPS, RELEPS*||finest||)
+     *          and
+     *             INTVLS <= MAXCLS.
+     *        INFORM = 1 If MAXVLS was too small to obtain the required
+     *        accuracy. In this case a value finest is returned with
+     *        estimated absolute accuracy ABSERR. */
+    int minvls, inform;
+    /// maximum norm of estimated absolute accuracy of finest
+    double abserr;
+    /// likelihood approximation
+    double likelihood;
+    /// the derivative approximation
+    arma::vec derivs;
+  };
+
+  out_type get_output(double * res, int const minvls,
+                      int const inform, double const abserr,
+                      int const *indices){
+    out_type out;
+    out.minvls = minvls;
+    out.inform = inform;
+    out.abserr = abserr;
+
+    double const likelihood = *res;
+    out.likelihood = likelihood;
+
+    // add terms to the derivative w.r.t. the scale parameters
+    int const n_scales = scale_mats.size();
+    if(n_mem > 1){
+      double * __restrict__ const d_sc = res + n_mem + 1L;
+      double * sig_inv_ele = sig_inv;
+      for(int c = 0; c < n_mem; ++c){
+        for(int r = 0; r < c; ++r, ++sig_inv_ele)
+          for(int s = 0; s < n_scales; ++s)
+            d_sc[s] -= likelihood * *sig_inv_ele * scale_mats.at(s).at(r, c);
+
+        for(int s = 0; s < n_scales; ++s)
+          d_sc[s] -=
+            .5 * likelihood * *sig_inv_ele * scale_mats.at(s).at(c, c);
+        ++sig_inv_ele;
+      }
+    }
+
+    // set deriv elements
+    arma::vec &derivs = out.derivs;
+    derivs.set_size(n_mem + n_scales);
+    for(int i = 0; i < n_mem; ++i)
+      derivs[indices[i]] = res[i + 1];
+
+    std::copy(res + 1 + n_mem, res + 1 + n_mem + n_scales,
+              derivs.begin() + n_mem);
+    return out;
   }
 };
 } // namespace pedmod

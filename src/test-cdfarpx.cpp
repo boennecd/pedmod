@@ -128,4 +128,237 @@ context("restrictcdf unit tests") {
       expect_true(std::abs(res.likelihood - expect[i]) <  eps);
     }
   }
+
+  test_that("cdf<pedigree_l_factor> gives similar output to R (1D)") {
+/*
+ sigs <- list(matrix(.5, 1, 1), matrix(1.5, 1, 1))
+
+ lws <- c(-Inf, 1  , 1)
+ ubs <- c(   2, Inf, 2)
+ mu <- .5
+ xs <- c(.33, .5)
+
+ f <- function(x, lw, ub){
+ va <- sigs[[1]] * x[2] + sigs[[2]] * x[3]
+ pnorm(ub, x[1], sqrt(va)) - pnorm(lw, x[1], sqrt(va))
+ }
+
+ library(numDeriv)
+ dput(mapply(function(lw, ub){
+ arg <- c(mu, xs)
+ o <- f(arg, lw, ub)
+ do <- numDeriv::grad(f, arg, lw = lw, ub = ub)
+ c(o, do)
+ }, lw = lws, ub = ubs))
+ */
+    arma::vec lbs, ubs;
+    constexpr double const Inf = std::numeric_limits<double>::infinity();
+    lbs << -Inf << 1   << 1;
+    ubs << 2    << Inf << 2;
+    arma::mat expect;
+
+    expect << 0.941574032465999 << -0.121963784936641 << -0.0499851577637313 << -0.149955473284218 << 0.300588605141031 << 0.363805844373705 << 0.0497002519677031 << 0.149100755894646 << 0.24216263760703 << 0.241842059437064 << -0.000284905796028268 << -0.000854717389572365;
+    expect.reshape(4, 3);
+
+    std::vector<arma::mat> scales;
+    arma::mat s1(1, 1), s2(1, 1);
+    s1.at(0, 0) =  .5;
+    s2.at(0, 0) = 1.5;
+    scales.emplace_back(s1);
+    scales.emplace_back(s2);
+
+    pedmod::pedigree_l_factor func(scales);
+    arma::vec par;
+    par << .5 << .33 << .5;
+
+    arma::mat sig(1, 1);
+    double const eps = std::pow(std::numeric_limits<double>::epsilon(), .5);
+    for(int i = 0; i < 3; ++i){
+      func.setup(sig, par.begin() + 1);
+      arma::vec lower(1), upper(1), mu(1);
+      lower[0] = lbs[i];
+      upper[0] = ubs[i];
+      mu   [0] = par[0];
+
+      auto const res = pedmod::cdf<pedmod::pedigree_l_factor>(
+        func, lower, upper, mu, sig, true, false).approximate(
+            1000000L, 1e-8, -1);
+
+      arma::vec const ex_res = expect.col(i);
+      expect_true(res.inform == 0L);
+      expect_true(res.abserr                           <= 0);
+
+      expect_true(std::abs(res.likelihood - ex_res[0]) <  eps);
+      for(int j = 0; j < 3; ++j)
+        expect_true(std::abs(res.derivs[j] - ex_res[j + 1]) <  eps);
+    }
+  }
+
+  test_that("cdf<pedigree_l_factor> gives similar output to R with one scale matrix") {
+    /*
+     sigs <- list(matrix(c(1, .25, 0, .25, 1, .1, 0, .1, 1), 3))
+
+     lws <- c(-Inf, -1  , -1.5)
+     ubs <- c(   2, Inf , 1)
+     mu <- c(.5, -.25, 0)
+     sc <- .5
+
+     library(mvtnorm)
+     f <- function(x){
+     set.seed(1)
+     mu <- x[1:3]
+     Sigma <- sigs[[1L]] * x[4]
+     pmvnorm(lower = lws, upper = ubs, mean = mu, sigma = Sigma,
+     algorithm = GenzBretz(maxpts = 1000000L, abseps = 1e-10,
+     releps = 0))
+     }
+
+     dput(f(c(mu, sc)))
+     library(numDeriv)
+     dput(grad(f, c(mu, sc)))
+     */
+    std::vector<unsigned> seeds = { 1L };
+    parallelrng::set_rng_seeds(seeds);
+
+    arma::vec lbs, ubs, expect, mu;
+    constexpr double const Inf = std::numeric_limits<double>::infinity();
+    lbs << -Inf << -1  << -1.5;
+    ubs << 2    << Inf << 1;
+    expect << 0.757090496673361 << -0.0510313065618294 << 0.292217686124752 << -0.133769372428677 << -0.546515613536537;
+    mu << .5 << -.25 << 0;
+
+    arma::mat s1;
+    s1 << 1 << .25 << 0 << .25 << 1 << .1 << 0 << .1 << 1;
+    s1.reshape(3, 3);
+    std::vector<arma::mat> scales;
+    scales.emplace_back(s1);
+
+    pedmod::pedigree_l_factor func(scales);
+
+    arma::mat sig(3, 3);
+    double const scalar = .5;
+    func.setup(sig, &scalar);
+    double const eps =
+      std::pow(std::numeric_limits<double>::epsilon(), .25);
+    constexpr unsigned const n_deriv = 4;
+
+    {
+      auto const res = pedmod::cdf<pedmod::pedigree_l_factor>(
+        func, lbs, ubs, mu, sig, false, false).approximate(
+            10000000L, eps / 10, -1);
+
+      expect_true(std::abs(res.likelihood - expect[0]) <  eps);
+      expect_true(res.derivs.n_elem == n_deriv);
+      for(unsigned i = 0; i < n_deriv; ++i)
+        expect_true(std::abs(res.derivs[i] - expect[i + 1]) <  eps);
+    }
+
+    {
+      auto const res = pedmod::cdf<pedmod::pedigree_l_factor>(
+        func, lbs, ubs, mu, sig, true, false).approximate(
+            10000000L, eps / 10, -1);
+
+      expect_true(std::abs(res.likelihood - expect[0]) <  eps);
+      expect_true(res.derivs.n_elem == n_deriv);
+      for(unsigned i = 0; i < n_deriv; ++i)
+        expect_true(std::abs(res.derivs[i] - expect[i + 1]) <  eps);
+    }
+
+    {
+      auto const res = pedmod::cdf<pedmod::pedigree_l_factor>(
+        func, lbs, ubs, mu, sig, true, true).approximate(
+            10000000L, eps / 10, -1);
+
+      expect_true(std::abs(res.likelihood - expect[0]) <  eps);
+      expect_true(res.derivs.n_elem == n_deriv);
+      for(unsigned i = 0; i < n_deriv; ++i)
+        expect_true(std::abs(res.derivs[i] - expect[i + 1]) <  eps);
+    }
+  }
+
+  test_that("cdf<pedigree_l_factor> gives similar output to R with two scale matrices") {
+    /*
+     sigs <- list(matrix(c(1, .25, 0, .25, 1, .1, 0, .1, 1), 3),
+     matrix(c(1, 0, 1, 0, 1, 0, 1, 0, 1), 3))
+
+     lws <- c(-Inf, -1  , -1.5)
+     ubs <- c(   2, Inf , 1)
+     mu <- c(.5, -.25, 0)
+     sc <- c(.5, .67)
+
+     library(mvtnorm)
+     f <- function(x){
+     set.seed(1)
+     mu <- x[1:3]
+     Sigma <- sigs[[1L]] * x[4] + sigs[[2L]] * x[5]
+     pmvnorm(lower = lws, upper = ubs, mean = mu, sigma = Sigma,
+     algorithm = GenzBretz(maxpts = 1000000L, abseps = 1e-10,
+     releps = 0))
+     }
+
+     dput(f(c(mu, sc)))
+     library(numDeriv)
+     dput(grad(f, c(mu, sc)))
+     */
+    std::vector<unsigned> seeds = { 1L };
+    parallelrng::set_rng_seeds(seeds);
+
+    arma::vec lbs, ubs, expect, mu;
+    constexpr double const Inf = std::numeric_limits<double>::infinity();
+    lbs << -Inf << -1  << -1.5;
+    ubs << 2    << Inf << 1;
+    expect << 0.528113607673159 << -0.0635331336760654 << 0.206551124706129 << -0.0523906509478266 << -0.27157001616986 << -0.216238317754731;
+    mu << .5 << -.25 << 0;
+
+    arma::mat s1, s2;
+    s1 << 1 << .25 << 0 << .25 << 1 << .1 << 0 << .1 << 1;
+    s2 << 1 << 0 << 1 << 0 << 1 << 0 << 1 << 0 << 1;
+    s1.reshape(3, 3);
+    s2.reshape(3, 3);
+    std::vector<arma::mat> scales;
+    scales.emplace_back(s1);
+    scales.emplace_back(s2);
+
+    pedmod::pedigree_l_factor func(scales);
+
+    arma::mat sig(3, 3);
+    double const scs[2] = { .5, .67 };
+    func.setup(sig, scs);
+    double const eps =
+      std::pow(std::numeric_limits<double>::epsilon(), .25);
+    constexpr unsigned const n_deriv = 5;
+
+    {
+      auto const res = pedmod::cdf<pedmod::pedigree_l_factor>(
+        func, lbs, ubs, mu, sig, false, false).approximate(
+            10000000L, eps / 10, -1);
+
+      expect_true(std::abs(res.likelihood - expect[0]) <  eps);
+      expect_true(res.derivs.n_elem == n_deriv);
+      for(unsigned i = 0; i < n_deriv; ++i)
+        expect_true(std::abs(res.derivs[i] - expect[i + 1]) <  eps);
+    }
+
+    {
+      auto const res = pedmod::cdf<pedmod::pedigree_l_factor>(
+        func, lbs, ubs, mu, sig, true, false).approximate(
+            10000000L, eps / 10, -1);
+
+      expect_true(std::abs(res.likelihood - expect[0]) <  eps);
+      expect_true(res.derivs.n_elem == n_deriv);
+      for(unsigned i = 0; i < n_deriv; ++i)
+        expect_true(std::abs(res.derivs[i] - expect[i + 1]) <  eps);
+    }
+
+    {
+      auto const res = pedmod::cdf<pedmod::pedigree_l_factor>(
+        func, lbs, ubs, mu, sig, true, true).approximate(
+            10000000L, eps / 10, -1);
+
+      expect_true(std::abs(res.likelihood - expect[0]) <  eps);
+      expect_true(res.derivs.n_elem == n_deriv);
+      for(unsigned i = 0; i < n_deriv; ++i)
+        expect_true(std::abs(res.derivs[i] - expect[i + 1]) <  eps);
+    }
+  }
 }

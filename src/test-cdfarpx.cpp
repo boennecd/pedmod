@@ -139,7 +139,7 @@ context("restrictcdf unit tests") {
  xs <- c(.33, .5)
 
  f <- function(x, lw, ub){
- va <- sigs[[1]] * x[2] + sigs[[2]] * x[3]
+ va <- sigs[[1]] * x[2] + sigs[[2]] * x[3] + 1
  pnorm(ub, x[1], sqrt(va)) - pnorm(lw, x[1], sqrt(va))
  }
 
@@ -157,7 +157,7 @@ context("restrictcdf unit tests") {
     ubs << 2    << Inf << 2;
     arma::mat expect;
 
-    expect << 0.941574032465999 << -0.121963784936641 << -0.0499851577637313 << -0.149955473284218 << 0.300588605141031 << 0.363805844373705 << 0.0497002519677031 << 0.149100755894646 << 0.24216263760703 << 0.241842059437064 << -0.000284905796028268 << -0.000854717389572365;
+    expect << 0.860805198822333 << -0.160210819773154 << -0.0313728759304053 << -0.0941186277942389 << 0.358932107909215 << 0.270070701739698 << 0.0176286358843925 << 0.0528859076385526 << 0.219737306731548 << 0.109859881966544 << -0.0137442400460128 << -0.0412327201556863;
     expect.reshape(4, 3);
 
     std::vector<arma::mat> scales;
@@ -208,6 +208,7 @@ context("restrictcdf unit tests") {
      set.seed(1)
      mu <- x[1:3]
      Sigma <- sigs[[1L]] * x[4]
+     diag(Sigma) <- diag(Sigma) + 1
      pmvnorm(lower = lws, upper = ubs, mean = mu, sigma = Sigma,
      algorithm = GenzBretz(maxpts = 1000000L, abseps = 1e-10,
      releps = 0))
@@ -224,7 +225,7 @@ context("restrictcdf unit tests") {
     constexpr double const Inf = std::numeric_limits<double>::infinity();
     lbs << -Inf << -1  << -1.5;
     ubs << 2    << Inf << 1;
-    expect << 0.757090496673361 << -0.0510313065618294 << 0.292217686124752 << -0.133769372428677 << -0.546515613536537;
+    expect << 0.438847591008297 << -0.0800167903883939 << 0.166356462364297 << -0.0550185761207399 << -0.186593525090286;
     mu << .5 << -.25 << 0;
 
     arma::mat s1;
@@ -245,7 +246,7 @@ context("restrictcdf unit tests") {
     {
       auto const res = pedmod::cdf<pedmod::pedigree_l_factor>(
         func, lbs, ubs, mu, sig, false, false).approximate(
-            10000000L, eps / 10, -1);
+            10000000L, eps / 1000, -1);
 
       expect_true(std::abs(res.likelihood - expect[0]) <  eps);
       expect_true(res.derivs.n_elem == n_deriv);
@@ -256,7 +257,7 @@ context("restrictcdf unit tests") {
     {
       auto const res = pedmod::cdf<pedmod::pedigree_l_factor>(
         func, lbs, ubs, mu, sig, true, false).approximate(
-            10000000L, eps / 10, -1);
+            10000000L, eps / 1000, -1);
 
       expect_true(std::abs(res.likelihood - expect[0]) <  eps);
       expect_true(res.derivs.n_elem == n_deriv);
@@ -267,7 +268,7 @@ context("restrictcdf unit tests") {
     {
       auto const res = pedmod::cdf<pedmod::pedigree_l_factor>(
         func, lbs, ubs, mu, sig, true, true).approximate(
-            10000000L, eps / 10, -1);
+            10000000L, eps / 1000, -1);
 
       expect_true(std::abs(res.likelihood - expect[0]) <  eps);
       expect_true(res.derivs.n_elem == n_deriv);
@@ -291,6 +292,7 @@ context("restrictcdf unit tests") {
      set.seed(1)
      mu <- x[1:3]
      Sigma <- sigs[[1L]] * x[4] + sigs[[2L]] * x[5]
+     diag(Sigma) <- diag(Sigma) + 1
      pmvnorm(lower = lws, upper = ubs, mean = mu, sigma = Sigma,
      algorithm = GenzBretz(maxpts = 1000000L, abseps = 1e-10,
      releps = 0))
@@ -307,7 +309,7 @@ context("restrictcdf unit tests") {
     constexpr double const Inf = std::numeric_limits<double>::infinity();
     lbs << -Inf << -1  << -1.5;
     ubs << 2    << Inf << 1;
-    expect << 0.528113607673159 << -0.0635331336760654 << 0.206551124706129 << -0.0523906509478266 << -0.27157001616986 << -0.216238317754731;
+    expect << 0.355656058666919 << -0.065516198469146 << 0.123908592190096 << -0.0184193612120618 << -0.116799569758003 << -0.0926881442370132;
     mu << .5 << -.25 << 0;
 
     arma::mat s1, s2;
@@ -342,7 +344,7 @@ context("restrictcdf unit tests") {
     {
       auto const res = pedmod::cdf<pedmod::pedigree_l_factor>(
         func, lbs, ubs, mu, sig, true, false).approximate(
-            10000000L, eps / 10, -1);
+            10000000L, eps / 1000, -1);
 
       expect_true(std::abs(res.likelihood - expect[0]) <  eps);
       expect_true(res.derivs.n_elem == n_deriv);
@@ -353,7 +355,7 @@ context("restrictcdf unit tests") {
     {
       auto const res = pedmod::cdf<pedmod::pedigree_l_factor>(
         func, lbs, ubs, mu, sig, true, true).approximate(
-            10000000L, eps / 10, -1);
+            10000000L, eps / 1000, -1);
 
       expect_true(std::abs(res.likelihood - expect[0]) <  eps);
       expect_true(res.derivs.n_elem == n_deriv);

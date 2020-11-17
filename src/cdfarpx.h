@@ -507,11 +507,16 @@ public:
    * Args:
    *   sig: the covariance matrix.
    *   scales: scale parameters.
+   *   only_cov: true if only the covariance matrix should be computed
    */
-  void setup(arma::mat &sig, double const *scales){
+  void setup(arma::mat &sig, double const *scales,
+             bool const only_cov = false){
     sig.zeros(n_mem, n_mem);
+    sig.diag() += 1;
     for(unsigned i = 0; i < scale_mats.size(); ++i)
       sig += scales[i] * scale_mats[i];
+    if(only_cov)
+      return;
 
     // create the objects we need
     // TODO: memory allocation
@@ -640,7 +645,8 @@ public:
       for(int c = 0; c < n_mem; ++c){
         for(int r = 0; r < c; ++r, ++sig_inv_ele)
           for(int s = 0; s < n_scales; ++s)
-            d_sc[s] -= likelihood * *sig_inv_ele * scale_mats.at(s).at(r, c);
+            d_sc[s] -=
+              likelihood * *sig_inv_ele * scale_mats.at(s).at(r, c);
 
         for(int s = 0; s < n_scales; ++s)
           d_sc[s] -=

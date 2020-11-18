@@ -58,7 +58,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // eval_pedigree_grad
-Rcpp::NumericVector eval_pedigree_grad(SEXP ptr, arma::vec par, int const maxvls, double const abs_eps, double const rel_eps, int const minvls, bool const do_reorder, bool const use_aprx, unsigned const n_threads);
+Rcpp::NumericVector eval_pedigree_grad(SEXP ptr, arma::vec par, int const maxvls, double const abs_eps, double const rel_eps, int const minvls, bool const do_reorder, bool const use_aprx, unsigned n_threads);
 RcppExport SEXP _pedmod_eval_pedigree_grad(SEXP ptrSEXP, SEXP parSEXP, SEXP maxvlsSEXP, SEXP abs_epsSEXP, SEXP rel_epsSEXP, SEXP minvlsSEXP, SEXP do_reorderSEXP, SEXP use_aprxSEXP, SEXP n_threadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -71,7 +71,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int const >::type minvls(minvlsSEXP);
     Rcpp::traits::input_parameter< bool const >::type do_reorder(do_reorderSEXP);
     Rcpp::traits::input_parameter< bool const >::type use_aprx(use_aprxSEXP);
-    Rcpp::traits::input_parameter< unsigned const >::type n_threads(n_threadsSEXP);
+    Rcpp::traits::input_parameter< unsigned >::type n_threads(n_threadsSEXP);
     rcpp_result_gen = Rcpp::wrap(eval_pedigree_grad(ptr, par, maxvls, abs_eps, rel_eps, minvls, do_reorder, use_aprx, n_threads));
     return rcpp_result_gen;
 END_RCPP

@@ -96,20 +96,25 @@ gr <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE,
 # check output at the starting values
 system.time(ll <- -fn(c(beta, sc)))
 #>    user  system elapsed 
-#>   0.380   0.000   0.098
+#>   0.394   0.000   0.100
 ll # the log likelihood at the starting values
 #> [1] -3466.776
 system.time(gr_val <- gr(c(beta, sc)))
 #>    user  system elapsed 
-#>   1.160   0.000   0.309
+#>   1.202   0.000   0.315
 gr_val # the gradient at the starting values
-#> [1] 252.941129 -81.637206 -24.192560   7.615037  -1.340035
+#> [1] 252.823566 -81.291375 -24.616236   7.646901  -1.308681
 #> attr(,"value")
-#> [1] 3466.778
+#> [1] 3466.773
 
 # variance of the approximation
 sd(sapply(1:25, function(seed) fn(c(beta, sc), seed = seed)))
 #> [1] 0.01587955
+
+# w/ higher precision
+sd(sapply(1:25, function(seed) 
+  fn(c(beta, sc), seed = seed, rel_eps = 1e-3)))
+#> [1] 0.007572819
 
 # verify the gradient (may not be exactly equal due to MC error)
 numDeriv::grad(fn, c(beta, sc))
@@ -118,30 +123,30 @@ numDeriv::grad(fn, c(beta, sc))
 # optimize the log likelihood approximation
 system.time(opt <- optim(c(beta, sc), fn, gr, method = "BFGS"))
 #>    user  system elapsed 
-#> 115.575   0.007  29.352
+#>  51.409   0.001  13.035
 ```
 
 The output from the optimization is shown below:
 
 ``` r
 -opt$value      # the maximum log likelihood
-#> [1] -3441.126
+#> [1] -3441.148
 opt$convergence # check convergence
 #> [1] 0
 
 # compare the estimated fixed effects with the true values
 rbind(truth     = dat$beta, 
       estimated = head(opt$par, length(dat$beta)))
-#>           (Intercept)        X1       X2
-#> truth       -1.000000 0.3000000 0.200000
-#> estimated   -1.046019 0.3019174 0.193374
+#>           (Intercept)        X1        X2
+#> truth       -1.000000 0.3000000 0.2000000
+#> estimated   -1.022425 0.2952501 0.1904846
 
 # compare estimated scale parameters with the true values
 rbind(truth     = dat$sc, 
       estimated = exp(tail(opt$par, length(dat$sc))))
-#>              Gentic Maternal
-#> truth     0.5000000  0.33000
-#> estimated 0.8042808  0.22129
+#>              Gentic  Maternal
+#> truth     0.5000000 0.3300000
+#> estimated 0.6889466 0.2487918
 ```
 
 ### The Multivariate Normal CDF Approximation
@@ -237,7 +242,7 @@ The new implementation is faster when the approximation is used:
 ``` r
 rowMeans(sim_res[, "time", ])
 #>          mvtnorm mvndst (no aprx) mvndst (w/ aprx) 
-#>       0.01714242       0.01668486       0.01098029
+#>       0.01707832       0.01653099       0.01094785
 par(mar = c(5, 4, 1, 1))
 boxplot(t(sim_res[, "time", ]))
 ```

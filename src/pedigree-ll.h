@@ -53,11 +53,14 @@ public:
           }
       }
 
-      return pedigree_l_factor(out);
+      return pedigree_l_factor(out, max_threads);
     })()) {
     // checks
     if(l_factor.n_mem != n_members)
       throw std::invalid_argument("pedigree_ll_term::pedigree_ll_term: X and scale matrices dimension do not match");
+
+    // set working memory
+    likelihood::set_cache(n_members, max_threads);
   }
 
   /**

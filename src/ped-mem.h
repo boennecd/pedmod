@@ -19,7 +19,7 @@ class cache_mem {
 
 public:
   /// set the size of the memory to hold
-  void set_n_mem(size_t n_mem, size_t const max_threads){
+  inline void set_n_mem(size_t n_mem, size_t const max_threads){
     constexpr size_t const mult = cacheline_size() / sizeof(T);
     n_mem  = std::max(n_mem, mult) + mult;
     n_mem  = (n_mem + mult - 1L) / mult;

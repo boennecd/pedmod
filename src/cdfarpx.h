@@ -181,8 +181,6 @@ public:
 
     imem.set_n_mem(3 * max_ndim           , max_threads);
     dmem.set_n_mem(7 * max_ndim + n_up_tri, max_threads);
-
-    T_Functor::set_cache(max_ndim, max_threads);
   }
 
   cdf(T_Functor &functor, arma::vec const &lower_in,
@@ -430,7 +428,7 @@ public:
       throw std::runtime_error("std::isinf(*sigma_chol.begin())");
 
     /* perform the approximation */
-    auto res = rand_Korobov(
+    auto res = rand_Korobov<cdf<T_Functor> >::comp(
       *this, ndim, minvls, maxvls, n_integrands, abs_eps, rel_eps,
       int_apprx.get(), sampler);
 
@@ -449,6 +447,12 @@ cache_mem<double> cdf<T_Functor, out_type>::dmem;
  * likelihood. */
 class likelihood {
 public:
+  static void set_cache
+  (unsigned const max_dim, unsigned const max_threads){
+    rand_Korobov<cdf<likelihood> >::set_cache(
+        get_n_integrands(), max_dim, max_threads);
+  }
+
   constexpr static int get_n_integrands() {
     return 1L;
   }
@@ -498,8 +502,6 @@ public:
   }
 
   inline void prep_permutated(arma::mat const&) { }
-
-  static void set_cache(int const, int const) { }
 };
 
 /**
@@ -531,14 +533,9 @@ private:
   double * sig_inv;
 
 public:
-  /// must be called prior to calling the member functions
-  static void set_cache(int const max_ndim, int const max_threads) {
-    dmem.set_n_mem(2 * max_ndim * max_ndim + max_ndim * (max_ndim + 1),
-                   max_threads);
-  }
-
   /// sets the scale matrices. There are no checks on the validity
-  pedigree_l_factor(std::vector<arma::mat> const &scale_mats):
+  pedigree_l_factor(std::vector<arma::mat> const &scale_mats,
+                    unsigned const max_threads):
   scale_mats(scale_mats) {
     // checks
     if(scale_mats.size() < 1)
@@ -547,6 +544,12 @@ public:
     for(auto &S : scale_mats)
       if(S.n_rows != u_mem or S.n_rows != u_mem)
         throw std::invalid_argument("pedigree_l_factor::pedigree_l_factor: not all scale matrices are square matrices or have the same dimensions");
+
+    // setup working memory
+    rand_Korobov<cdf<pedigree_l_factor> >::set_cache(
+        get_n_integrands(), n_mem, max_threads);
+    dmem.set_n_mem(2 * n_mem * n_mem + n_mem * (n_mem + 1),
+                   max_threads);
   }
 
   inline int get_n_integrands() PEDMOD_NOEXCEPT {

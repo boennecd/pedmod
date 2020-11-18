@@ -16,6 +16,7 @@ Rcpp::NumericVector mvndst
   parallelrng::set_rng_seeds(1);
 
   pedmod::cdf<pedmod::likelihood>::set_cache(lower.n_elem, 1);
+  pedmod::likelihood::set_cache(lower.n_elem, 1);
   auto const out = pedmod::cdf<pedmod::likelihood>(
     func, lower, upper, mu, sigma, do_reorder, use_aprx).approximate(
         maxvls, abs_eps, rel_eps, minvls);
@@ -28,46 +29,52 @@ Rcpp::NumericVector mvndst
   return res;
 }
 
+namespace {
+struct pedigree_terms {
+  unsigned const max_threads;
+  std::vector<pedmod::pedigree_ll_term > terms;
+
+  pedigree_terms(Rcpp::List data, unsigned const max_threads):
+    max_threads(max_threads) {
+
+    terms.reserve(data.size());
+
+    for(auto x : data){
+      Rcpp::List xl(static_cast<SEXP>(x)),
+      s_mats(static_cast<SEXP>(xl["scale_mats"]));
+
+      arma::mat const X = Rcpp::as<arma::mat>(xl["X"]);
+      arma::vec const y = Rcpp::as<arma::vec>(xl["y"]);
+      std::vector<arma::mat> scale_mats;
+      scale_mats.reserve(s_mats.size());
+      for(auto &s : s_mats)
+        scale_mats.emplace_back(Rcpp::as<arma::mat>(s));
+
+      terms.emplace_back(X, y, scale_mats, max_threads);
+    }
+
+    // checks
+    if(terms.size() < 1)
+      throw std::invalid_argument("pedigree_terms: no terms");
+    int const n_fix = terms[0].n_fix_effect,
+      n_scales = terms[0].l_factor.scale_mats.size();
+    for(auto &tr : terms){
+      if(tr.n_fix_effect != n_fix)
+        throw std::invalid_argument("pedigree_terms: number of fixed effects do not match");
+      if(tr.l_factor.scale_mats.size() != static_cast<size_t>(n_scales))
+        throw std::invalid_argument("pedigree_terms: number of scale matrices do not match");
+    }
+  }
+};
+
+static pedmod::cache_mem<double> r_mem;
+} // namespace
+
 //' @export
 // [[Rcpp::export]]
 SEXP get_pedigree_ll_terms(Rcpp::List data, unsigned const max_threads){
-  Rcpp::XPtr<std::vector<pedmod::pedigree_ll_term> > terms_ptr(
-      new std::vector<pedmod::pedigree_ll_term >());
-  std::vector<pedmod::pedigree_ll_term > &terms = *terms_ptr;
-  terms.reserve(data.size());
-
-  for(auto x : data){
-    Rcpp::List xl(static_cast<SEXP>(x)),
-           s_mats(static_cast<SEXP>(xl["scale_mats"]));
-
-    arma::mat const X = Rcpp::as<arma::mat>(xl["X"]);
-    arma::vec const y = Rcpp::as<arma::vec>(xl["y"]);
-    std::vector<arma::mat> scale_mats;
-    scale_mats.reserve(s_mats.size());
-    for(auto &s : s_mats)
-      scale_mats.emplace_back(Rcpp::as<arma::mat>(s));
-
-    terms.emplace_back(X, y, scale_mats, max_threads);
-  }
-
-  // checks
-  if(terms.size() < 1)
-    throw std::invalid_argument("get_pedigree_ll_terms: no terms");
-  int const n_fix = terms[0].n_fix_effect,
-         n_scales = terms[0].l_factor.scale_mats.size();
-  for(auto &tr : terms){
-    if(tr.n_fix_effect != n_fix)
-      throw std::invalid_argument("get_pedigree_ll_terms: number of fixed effects do not match");
-    if(tr.l_factor.scale_mats.size() != static_cast<size_t>(n_scales))
-      throw std::invalid_argument("get_pedigree_ll_terms: number of scale matrices do not match");
-  }
-
-  return terms_ptr;
+  return Rcpp::XPtr<pedigree_terms>(new pedigree_terms(data, max_threads));
 }
-
-namespace {
-static pedmod::cache_mem<double> r_mem;
-} // namespace
 
 //' @export
 // [[Rcpp::export]]
@@ -80,9 +87,11 @@ double eval_pedigree_ll
   n_threads = 1L;
 #endif
 
+  Rcpp::XPtr<pedigree_terms> terms_ptr(ptr);
+  std::vector<pedmod::pedigree_ll_term > &terms = terms_ptr->terms;
+  n_threads = std::min(n_threads, terms_ptr->max_threads);
+
   parallelrng::set_rng_seeds(n_threads);
-  Rcpp::XPtr<std::vector<pedmod::pedigree_ll_term> > terms_ptr(ptr);
-  std::vector<pedmod::pedigree_ll_term > &terms = *terms_ptr;
 
   // checks
   int const n_fix = terms[0].n_fix_effect,
@@ -126,14 +135,14 @@ Rcpp::NumericVector eval_pedigree_grad
   (SEXP ptr, arma::vec par, int const maxvls,
    double const abs_eps, double const rel_eps, int const minvls = -1,
    bool const do_reorder = true, bool const use_aprx = false,
-   unsigned const n_threads = 1L){
+   unsigned n_threads = 1L){
 #ifndef _OPENMP
   n_threads = 1L;
 #endif
 
-  parallelrng::set_rng_seeds(n_threads);
-  Rcpp::XPtr<std::vector<pedmod::pedigree_ll_term> > terms_ptr(ptr);
-  std::vector<pedmod::pedigree_ll_term > &terms = *terms_ptr;
+  Rcpp::XPtr<pedigree_terms> terms_ptr(ptr);
+  std::vector<pedmod::pedigree_ll_term > &terms = terms_ptr->terms;
+  n_threads = std::min(n_threads, terms_ptr->max_threads);
 
   // checks
   int const n_fix = terms[0].n_fix_effect,

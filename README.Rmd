@@ -101,6 +101,10 @@ gr_val # the gradient at the starting values
 # variance of the approximation
 sd(sapply(1:25, function(seed) fn(c(beta, sc), seed = seed)))
 
+# w/ higher precision
+sd(sapply(1:25, function(seed) 
+  fn(c(beta, sc), seed = seed, rel_eps = 1e-3)))
+
 # verify the gradient (may not be exactly equal due to MC error)
 numDeriv::grad(fn, c(beta, sc))
 

@@ -44,6 +44,7 @@ context("restrictcdf unit tests") {
                                    .33);
     double constexpr E_prop(0.0693596863013216);
     pedmod::cdf<pedmod::likelihood>::set_cache(4, 1);
+    pedmod::likelihood::set_cache(4, 1);
     pedmod::likelihood func;
     {
       auto res = pedmod::cdf<pedmod::likelihood>(
@@ -97,6 +98,7 @@ context("restrictcdf unit tests") {
 
     double const eps = std::pow(std::numeric_limits<double>::epsilon(), .5);
     pedmod::cdf<pedmod::likelihood>::set_cache(1, 1);
+    pedmod::likelihood::set_cache(1, 1);
     pedmod::likelihood func;
     for(size_t i = 0; i < 3; ++i){
       arma::vec l(1), u(1), m(1);
@@ -169,7 +171,7 @@ context("restrictcdf unit tests") {
     scales.emplace_back(s1);
     scales.emplace_back(s2);
 
-    pedmod::pedigree_l_factor func(scales);
+    pedmod::pedigree_l_factor func(scales, 1L);
     arma::vec par;
     par << .5 << .33 << .5;
 
@@ -237,7 +239,7 @@ context("restrictcdf unit tests") {
     std::vector<arma::mat> scales;
     scales.emplace_back(s1);
 
-    pedmod::pedigree_l_factor func(scales);
+    pedmod::pedigree_l_factor func(scales, 1L);
 
     arma::mat sig(3, 3);
     double const scalar = .5;
@@ -325,7 +327,7 @@ context("restrictcdf unit tests") {
     scales.emplace_back(s1);
     scales.emplace_back(s2);
 
-    pedmod::pedigree_l_factor func(scales);
+    pedmod::pedigree_l_factor func(scales, 1L);
 
     arma::mat sig(3, 3);
     double const scs[2] = { .5, .67 };

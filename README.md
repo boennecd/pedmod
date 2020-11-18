@@ -14,23 +14,23 @@ source(system.file("gen-pedigree-data.R", package = "pedmod"))
 
 # simulate a data set
 set.seed(68167102)
-dat <- sim_pedigree_data(n_families = 400L)
+dat <- sim_pedigree_data(n_families = 1000L)
 #> Loading required package: Matrix
 #> Loading required package: quadprog
 
 # distribution of family sizes
 table(sapply(dat$sim_data, function(x) length(x$y)))
 #> 
-#>  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 
-#>  5  5  3  2  2  4  5 12 19 59 56 80 65 35 28 14  5  1
+#>   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23 
+#>  13  12   7   7   5   8  17  24  46 121 148 198 166  98  73  35  14   8
 
 # total number of observations
 sum(sapply(dat$sim_data, function(x) length(x$y)))
-#> [1] 6616
+#> [1] 16665
 
 # average event rate
 mean(unlist(sapply(dat$sim_data, `[[`, "y")))
-#> [1] 0.2362455
+#> [1] 0.2354635
 
 # TODO: show more about the families
 ```
@@ -67,10 +67,10 @@ start_fit <-  glm.fit(X, y, family = binomial("probit"))
 
 # log-likelihood at the starting values without random effects
 -sum(start_fit$deviance) / 2     
-#> [1] -3514.243
+#> [1] -8825.879
 (beta <- start_fit$coefficients) # starting values for fixed effects 
 #> (Intercept)          X1             
-#>  -0.7367778   0.2081875   0.1406641
+#>  -0.7413368   0.2085147   0.1518448
 
 # start at moderate sized scale parameters
 sc <- rep(log(.2), 2)
@@ -78,75 +78,90 @@ sc <- rep(log(.2), 2)
 # check log likelihood at the starting values. First we assign a function 
 # to approximate the log likelihood and the gradient
 fn <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE, 
-               n_threads = 4L){
+               n_threads = 4L, indices = seq_along(dat_arg), 
+               maxvls = 10000L){
   set.seed(seed)
   -eval_pedigree_ll(
-    ll_terms, par = par, maxvls = 10000L, abs_eps = 0, rel_eps = rel_eps, 
-    minvls = 1000L, use_aprx = use_aprx, n_threads = n_threads)
+    ll_terms, par = par, maxvls = maxvls, abs_eps = 0, rel_eps = rel_eps, 
+    minvls = 1000L, use_aprx = use_aprx, n_threads = n_threads, 
+    indices = indices)
 }
 gr <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE, 
-               n_threads = 4L){
+               n_threads = 4L, indices = seq_along(dat_arg), 
+               maxvls = 10000L){
   set.seed(seed)
   out <- -eval_pedigree_grad(
-    ll_terms, par = par, maxvls = 10000L, abs_eps = 0, rel_eps = rel_eps, 
-    minvls = 1000L, use_aprx = use_aprx, n_threads = n_threads)
+    ll_terms, par = par, maxvls = maxvls, abs_eps = 0, rel_eps = rel_eps, 
+    minvls = 1000L, use_aprx = use_aprx, n_threads = n_threads, 
+    indices = indices)
   structure(c(out), value = -attr(out, "logLik"))
 }
 
 # check output at the starting values
 system.time(ll <- -fn(c(beta, sc)))
 #>    user  system elapsed 
-#>   0.394   0.000   0.100
+#>   0.966   0.000   0.244
 ll # the log likelihood at the starting values
-#> [1] -3466.776
+#> [1] -8687.09
 system.time(gr_val <- gr(c(beta, sc)))
 #>    user  system elapsed 
-#>   1.202   0.000   0.315
+#>   3.106   0.003   0.809
 gr_val # the gradient at the starting values
-#> [1] 252.823566 -81.291375 -24.616236   7.646901  -1.308681
+#> [1]  635.879395 -175.241684  -83.048473   17.660212   -8.328734
 #> attr(,"value")
-#> [1] 3466.773
+#> [1] 8687.083
 
 # variance of the approximation
 sd(sapply(1:25, function(seed) fn(c(beta, sc), seed = seed)))
-#> [1] 0.01587955
-
-# w/ higher precision
-sd(sapply(1:25, function(seed) 
-  fn(c(beta, sc), seed = seed, rel_eps = 1e-3)))
-#> [1] 0.007572819
+#> [1] 0.03049123
 
 # verify the gradient (may not be exactly equal due to MC error)
 numDeriv::grad(fn, c(beta, sc))
-#> [1] 253.087610 -81.625789 -24.351739   7.580726  -1.397081
+#> [1]  636.312515 -175.447580  -83.008941   17.578706   -8.509126
 
 # optimize the log likelihood approximation
 system.time(opt <- optim(c(beta, sc), fn, gr, method = "BFGS"))
 #>    user  system elapsed 
-#>  51.409   0.001  13.035
+#> 222.061   0.000  56.587
+
+# w/ higher precision
+system.time(opt_prec <- optim(opt$par, fn, gr, method = "BFGS", 
+                              rel_eps = 1e-3, maxvls = 25000L))
+#>    user  system elapsed 
+#> 453.707   0.000 117.270
 ```
 
 The output from the optimization is shown below:
 
 ``` r
 -opt$value      # the maximum log likelihood
-#> [1] -3441.148
+#> [1] -8620.118
 opt$convergence # check convergence
 #> [1] 0
 
+# w/ higher precision
+-opt_prec$value
+#> [1] -8620.088
+opt_prec$convergence
+#> [1] 0
+
 # compare the estimated fixed effects with the true values
-rbind(truth     = dat$beta, 
-      estimated = head(opt$par, length(dat$beta)))
-#>           (Intercept)        X1        X2
-#> truth       -1.000000 0.3000000 0.2000000
-#> estimated   -1.022425 0.2952501 0.1904846
+rbind(truth                     = dat$beta, 
+      estimated                 = head(opt$par, length(dat$beta)), 
+      `estimated (higher prec)` = head(opt_prec$par, length(dat$beta)))
+#>                         (Intercept)        X1        X2
+#> truth                     -1.000000 0.3000000 0.2000000
+#> estimated                 -1.021337 0.2874056 0.2086335
+#> estimated (higher prec)   -1.037563 0.2922601 0.2124689
 
 # compare estimated scale parameters with the true values
-rbind(truth     = dat$sc, 
-      estimated = exp(tail(opt$par, length(dat$sc))))
-#>              Gentic  Maternal
-#> truth     0.5000000 0.3300000
-#> estimated 0.6889466 0.2487918
+rbind(truth                     = dat$sc, 
+      estimated                 = exp(tail(opt$par     , length(dat$sc))), 
+      `estimated (higher prec)` = exp(tail(opt_prec$par, length(dat$sc))))
+#>                            Gentic  Maternal
+#> truth                   0.5000000 0.3300000
+#> estimated               0.6286649 0.2856720
+#> estimated (higher prec) 0.7071673 0.2672134
 ```
 
 ### The Multivariate Normal CDF Approximation

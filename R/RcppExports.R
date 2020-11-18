@@ -12,12 +12,12 @@ get_pedigree_ll_terms <- function(data, max_threads) {
 }
 
 #' @export
-eval_pedigree_ll <- function(ptr, par, maxvls, abs_eps, rel_eps, minvls = -1L, do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L) {
-    .Call(`_pedmod_eval_pedigree_ll`, ptr, par, maxvls, abs_eps, rel_eps, minvls, do_reorder, use_aprx, n_threads)
+eval_pedigree_ll <- function(ptr, par, maxvls, abs_eps, rel_eps, indices, minvls = -1L, do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L) {
+    .Call(`_pedmod_eval_pedigree_ll`, ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder, use_aprx, n_threads)
 }
 
 #' @export
-eval_pedigree_grad <- function(ptr, par, maxvls, abs_eps, rel_eps, minvls = -1L, do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L) {
-    .Call(`_pedmod_eval_pedigree_grad`, ptr, par, maxvls, abs_eps, rel_eps, minvls, do_reorder, use_aprx, n_threads)
+eval_pedigree_grad <- function(ptr, par, maxvls, abs_eps, rel_eps, indices, minvls = -1L, do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L) {
+    .Call(`_pedmod_eval_pedigree_grad`, ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder, use_aprx, n_threads)
 }
 

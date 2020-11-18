@@ -27,7 +27,7 @@ source(system.file("gen-pedigree-data.R", package = "pedmod"))
 
 # simulate a data set
 set.seed(68167102)
-dat <- sim_pedigree_data(n_families = 400L)
+dat <- sim_pedigree_data(n_families = 1000L)
 
 # distribution of family sizes
 table(sapply(dat$sim_data, function(x) length(x$y)))
@@ -77,18 +77,22 @@ sc <- rep(log(.2), 2)
 # check log likelihood at the starting values. First we assign a function 
 # to approximate the log likelihood and the gradient
 fn <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE, 
-               n_threads = 4L){
+               n_threads = 4L, indices = seq_along(dat_arg), 
+               maxvls = 10000L){
   set.seed(seed)
   -eval_pedigree_ll(
-    ll_terms, par = par, maxvls = 10000L, abs_eps = 0, rel_eps = rel_eps, 
-    minvls = 1000L, use_aprx = use_aprx, n_threads = n_threads)
+    ll_terms, par = par, maxvls = maxvls, abs_eps = 0, rel_eps = rel_eps, 
+    minvls = 1000L, use_aprx = use_aprx, n_threads = n_threads, 
+    indices = indices)
 }
 gr <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE, 
-               n_threads = 4L){
+               n_threads = 4L, indices = seq_along(dat_arg), 
+               maxvls = 10000L){
   set.seed(seed)
   out <- -eval_pedigree_grad(
-    ll_terms, par = par, maxvls = 10000L, abs_eps = 0, rel_eps = rel_eps, 
-    minvls = 1000L, use_aprx = use_aprx, n_threads = n_threads)
+    ll_terms, par = par, maxvls = maxvls, abs_eps = 0, rel_eps = rel_eps, 
+    minvls = 1000L, use_aprx = use_aprx, n_threads = n_threads, 
+    indices = indices)
   structure(c(out), value = -attr(out, "logLik"))
 }
 
@@ -101,15 +105,15 @@ gr_val # the gradient at the starting values
 # variance of the approximation
 sd(sapply(1:25, function(seed) fn(c(beta, sc), seed = seed)))
 
-# w/ higher precision
-sd(sapply(1:25, function(seed) 
-  fn(c(beta, sc), seed = seed, rel_eps = 1e-3)))
-
 # verify the gradient (may not be exactly equal due to MC error)
 numDeriv::grad(fn, c(beta, sc))
 
 # optimize the log likelihood approximation
 system.time(opt <- optim(c(beta, sc), fn, gr, method = "BFGS"))
+
+# w/ higher precision
+system.time(opt_prec <- optim(opt$par, fn, gr, method = "BFGS", 
+                              rel_eps = 1e-3, maxvls = 25000L))
 ```
 
 The output from the optimization is shown below:
@@ -118,14 +122,96 @@ The output from the optimization is shown below:
 -opt$value      # the maximum log likelihood
 opt$convergence # check convergence
 
+# w/ higher precision
+-opt_prec$value
+opt_prec$convergence
+
 # compare the estimated fixed effects with the true values
-rbind(truth     = dat$beta, 
-      estimated = head(opt$par, length(dat$beta)))
+rbind(truth                     = dat$beta, 
+      estimated                 = head(opt$par, length(dat$beta)), 
+      `estimated (higher prec)` = head(opt_prec$par, length(dat$beta)))
 
 # compare estimated scale parameters with the true values
-rbind(truth     = dat$sc, 
-      estimated = exp(tail(opt$par, length(dat$sc))))
+rbind(truth                     = dat$sc, 
+      estimated                 = exp(tail(opt$par     , length(dat$sc))), 
+      `estimated (higher prec)` = exp(tail(opt_prec$par, length(dat$sc))))
 ```
+
+```{r, eval = FALSE, echo = FALSE}
+#####
+# performs stochastic gradient descent instead (using SVRG).
+#
+# Args:
+#   par: starting value.
+#   gr: gradient function which return the function value as an attributate
+#       called value.
+#   n_clust: number of clusters.
+#   batch_size: number of observations in each batch.
+#   maxit: maximum number of iteration.
+#   lr: learning rate.
+#   verbose: print output during the estimation.
+#   decay: numeric scalar used to decrease the learning rate.
+#   ...: arguments passed to fn and gr.
+svrg <- function(par, gr, n_clust, batch_size, maxit = 10L, 
+                 lr, verbose = FALSE, decay = .98, ...){
+  indices <- sample.int(n_clust, replace = FALSE) - 1L
+  blocks <- tapply(indices, (seq_along(indices) - 1L) %/% batch_size,
+                   identity, simplify = FALSE)
+
+  n_blocks <- length(blocks)
+  n_par <- length(par)
+  estimates <- matrix(NA_real_, n_par, maxit + 1L)
+  fun_vals <- numeric(maxit + 1L)
+  estimates[, 1L] <- par
+
+  lr_use <- lr / decay
+  V_mult <- qnorm(1 - .99 / maxit)
+  for(k in 1:maxit + 1L){
+    old_val <- estimates[, k - 1L]
+    old_grs <- sapply(1:n_blocks - 1L, function(ii){
+      idx_b <- (ii %% n_blocks) + 1L
+      res_old <- gr(old_val, indices = blocks[[idx_b]], ...)
+      c(attr(res_old, "value"), res_old)
+    })
+
+    fun_vals[k - 1L] <- sum(old_grs[1, ])
+    old_grs <- old_grs[-1L, , drop = FALSE ]
+    old_gr <- rowSums(old_grs) / n_blocks
+
+    lr_use <- lr_use * decay
+    for(ii in 1:n_blocks - 1L){
+      idx_b <- (ii %% n_blocks) + 1L
+      res <- gr(par, indices = blocks[[idx_b]], ...)
+      fun_vals[k] <- fun_vals[k] + attr(res, "value")
+      dir <- res - old_grs[, ii + 1L] + old_gr
+
+      par <- par - lr_use * dir
+    }
+
+    estimates[, k] <- par
+
+    if(verbose)
+      cat(
+        sprintf("End if iteration %4d with learning rate %.8f", k - 1L,
+                lr_use),
+        sprintf("Log marginal likelihood approximation is %12.2f", fun_vals[k]),
+        sprintf("Previous approximate gradient norm was %14.2f\n",
+                n_blocks * norm(as.matrix(old_gr))),
+        sep = "\n")
+
+    old_v <- fun_vals[k - 1L]
+    new_v <- fun_vals[k]
+  }
+
+  list(result = par, fun_vals = fun_vals[2:k],
+       estimates = estimates[, 2:k, drop = FALSE])
+}
+
+set.seed(1)
+svrg_res <- svrg(c(beta, sc), gr = gr, n_clust = length(dat_arg), 
+                 batch_size = 200L, lr = 2e-3, verbose = TRUE, maxit = 50L)
+```
+
 
 ### The Multivariate Normal CDF Approximation
 

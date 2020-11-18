@@ -80,9 +80,9 @@ SEXP get_pedigree_ll_terms(Rcpp::List data, unsigned const max_threads){
 // [[Rcpp::export]]
 double eval_pedigree_ll
   (SEXP ptr, arma::vec par, int const maxvls,
-   double const abs_eps, double const rel_eps, int const minvls = -1,
-   bool const do_reorder = true, bool const use_aprx = false,
-   unsigned n_threads = 1L){
+   double const abs_eps, double const rel_eps, Rcpp::IntegerVector indices,
+   int const minvls = -1, bool const do_reorder = true,
+   bool const use_aprx = false, unsigned n_threads = 1L){
 #ifndef _OPENMP
   n_threads = 1L;
 #endif
@@ -106,6 +106,7 @@ double eval_pedigree_ll
   r_mem.set_n_mem(1, n_threads);
 
   // compute
+  int const * idx = &indices[0];
 #ifdef _OPENMP
 #pragma omp parallel num_threads(n_threads)
 {
@@ -115,9 +116,12 @@ double eval_pedigree_ll
 #ifdef _OPENMP
 #pragma omp for schedule(static)
 #endif
-  for(unsigned i = 0; i < terms.size(); ++i)
-    *wmem += terms.at(i).fn(
+  for(int i = 0; i < indices.size(); ++i){
+    if(idx[i] >= static_cast<int>(terms.size()))
+      continue;
+    *wmem += terms.at(idx[i]).fn(
       &par[0], maxvls, abs_eps, rel_eps, minvls, do_reorder, use_aprx);
+  }
 #ifdef _OPENMP
 }
 #endif
@@ -133,9 +137,9 @@ double eval_pedigree_ll
 // [[Rcpp::export]]
 Rcpp::NumericVector eval_pedigree_grad
   (SEXP ptr, arma::vec par, int const maxvls,
-   double const abs_eps, double const rel_eps, int const minvls = -1,
-   bool const do_reorder = true, bool const use_aprx = false,
-   unsigned n_threads = 1L){
+   double const abs_eps, double const rel_eps, Rcpp::IntegerVector indices,
+   int const minvls = -1, bool const do_reorder = true,
+   bool const use_aprx = false, unsigned n_threads = 1L){
 #ifndef _OPENMP
   n_threads = 1L;
 #endif
@@ -143,6 +147,8 @@ Rcpp::NumericVector eval_pedigree_grad
   Rcpp::XPtr<pedigree_terms> terms_ptr(ptr);
   std::vector<pedmod::pedigree_ll_term > &terms = terms_ptr->terms;
   n_threads = std::min(n_threads, terms_ptr->max_threads);
+
+  parallelrng::set_rng_seeds(n_threads);
 
   // checks
   int const n_fix = terms[0].n_fix_effect,
@@ -157,6 +163,7 @@ Rcpp::NumericVector eval_pedigree_grad
   r_mem.set_n_mem(1 + par.size(), n_threads);
 
   // compute
+  int const * idx = &indices[0];
 #ifdef _OPENMP
 #pragma omp parallel num_threads(n_threads)
 {
@@ -166,10 +173,13 @@ Rcpp::NumericVector eval_pedigree_grad
 #ifdef _OPENMP
 #pragma omp for schedule(static)
 #endif
-  for(unsigned i = 0; i < terms.size(); ++i)
-    *wmem += terms.at(i).gr(
+  for(int i = 0; i < indices.size(); ++i){
+    if(idx[i] >= static_cast<int>(terms.size()))
+      continue;
+    *wmem += terms.at(idx[i]).gr(
       &par[0], wmem + 1, maxvls, abs_eps, rel_eps, minvls, do_reorder,
       use_aprx);
+  }
 #ifdef _OPENMP
 }
 #endif

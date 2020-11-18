@@ -14,6 +14,7 @@
 #include "new-mvt.h"
 #include "norm-cdf-approx.h"
 #include <cmath>
+#include <stdexcept>
 
 namespace pedmod {
 extern "C"
@@ -334,9 +335,11 @@ public:
       }
 
       if(lim_l < lim_u){
-        w *= lim_u - lim_l;
+        double const l_diff = lim_u - lim_l;
+        w *= l_diff;
+
         if(needs_last_unif or j + 1 < ndim){
-          double const quant_val = lim_l + *unif * (lim_u - lim_l);
+          double const quant_val = lim_l + *unif * l_diff;
           *(dr + j) =
             use_aprx ?
             safe_qnorm_aprx(quant_val) :
@@ -344,7 +347,7 @@ public:
         }
 
       } else {
-        w = 0.;
+        w = 0;
         std::fill(dr + j, dr + ndim, 0.);
         break;
 
@@ -490,7 +493,15 @@ private:
 public:
   /// sets the scale matrices. There are no checks on the validity
   pedigree_l_factor(std::vector<arma::mat> const &scale_mats):
-  scale_mats(scale_mats) { }
+  scale_mats(scale_mats) {
+    // checks
+    if(scale_mats.size() < 1)
+      throw std::invalid_argument("pedigree_l_factor::pedigree_l_factor: not scale matrices are passed");
+    arma::uword const u_mem = n_mem;
+    for(auto &S : scale_mats)
+      if(S.n_rows != u_mem or S.n_rows != u_mem)
+        throw std::invalid_argument("pedigree_l_factor::pedigree_l_factor: not all scale matrices are square matrices or have the same dimensions");
+  }
 
   inline int get_n_integrands() PEDMOD_NOEXCEPT {
     return 1 + n_mem + scale_mats.size();

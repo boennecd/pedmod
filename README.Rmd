@@ -2,8 +2,6 @@
 output: github_document
 ---
 
-<!-- README.md is generated from README.Rmd. Please edit that file -->
-
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -13,24 +11,123 @@ knitr::opts_chunk$set(
   out.width = "100%", fig.width = 7, fig.height = 4
 )
 ```
-# pedmod
 
-<!-- badges: start -->
-<!-- badges: end -->
+# pedmod: Pedigree Models
 
-The goal of pedmod is to ...
-
-## Installation
-
-You can install the released version of pedmod from [CRAN](https://CRAN.R-project.org) with:
-
-``` r
-install.packages("pedmod")
-```
+TODO: write about the package.
 
 ## Example
 
-TODO: write text about the example
+First, we source a file to get a function to simulate a data set with 
+a maternal effect and a genetic effect:
+
+```{r source_sim_file}
+# souce the file to get the simulation function
+source(system.file("gen-pedigree-data.R", package = "pedmod"))
+
+# simulate a data set
+set.seed(68167102)
+dat <- sim_pedigree_data(n_families = 400L)
+
+# distribution of family sizes
+table(sapply(dat$sim_data, function(x) length(x$y)))
+
+# total number of observations
+sum(sapply(dat$sim_data, function(x) length(x$y)))
+
+# average event rate
+mean(unlist(sapply(dat$sim_data, `[[`, "y")))
+
+# TODO: show more about the families
+```
+
+Then we perform the model estimation:
+
+```{r est_mod, cache=1}
+# the true parameters are
+dat$beta
+dat$sc
+
+# prepare the data to pass to the functions in the package
+dat_arg <- lapply(dat$sim_data, function(x){
+  # we need the following for each family: 
+  #   y: the zero-one outcomes.
+  #   X: the design matrix for the fixed effects. 
+  #   scale_mats: list with the scale matrices for each type of effect.
+  list(y = as.numeric(x$y), X = x$X,
+       scale_mats = list(x$rel_mat, x$met_mat))
+})
+
+# create a C++ object
+library(pedmod)
+ll_terms <- get_pedigree_ll_terms(dat_arg)
+
+# get the starting values. This is very fast
+y <- unlist(lapply(dat_arg, `[[`, "y"))
+X <- do.call(rbind, lapply(dat_arg, `[[`, "X"))
+start_fit <-  glm.fit(X, y, family = binomial("probit"))
+
+# log-likelihood at the starting values without random effects
+-sum(start_fit$deviance) / 2     
+(beta <- start_fit$coefficients) # starting values for fixed effects 
+
+# start at moderate sized scale parameters
+sc <- rep(log(.2), 2)
+
+# check log likelihood at the starting values. First we assign a function 
+# to approximate the log likelihood and the gradient
+fn <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE){
+  set.seed(seed)
+  -eval_pedigree_ll(
+    ll_terms, par = par, maxvls = 10000L, abs_eps = 0, rel_eps = rel_eps, 
+    minvls = 1000L, use_aprx = use_aprx)
+}
+gr <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE){
+  set.seed(seed)
+  out <- -eval_pedigree_grad(
+    ll_terms, par = par, maxvls = 10000L, abs_eps = 0, rel_eps = rel_eps, 
+    minvls = 1000L, use_aprx = use_aprx)
+  structure(c(out), value = -attr(out, "logLik"))
+}
+
+# check output at the starting values
+system.time(ll <- -fn(c(beta, sc)))
+ll # the log likelihood at the starting values
+system.time(gr_val <- gr(c(beta, sc)))
+gr_val # the gradient at the starting values
+
+# variance of the approximation
+sd(sapply(1:25, function(seed) fn(c(beta, sc), seed = seed)))
+
+# verify the gradient (may not be exactly equal due to MC error)
+numDeriv::grad(fn, c(beta, sc))
+
+# optimize the log likelihood approximation
+system.time(opt <- optim(c(beta, sc), fn, gr, method = "BFGS"))
+```
+
+The output from the optimization is shown below:
+
+```{r show_est_mod}
+-opt$value      # the maximum log likelihood
+opt$convergence # check convergence
+
+# compare the estimated fixed effects with the true values
+rbind(truth     = dat$beta, 
+      estimated = head(opt$par, length(dat$beta)))
+
+# compare estimated scale parameters with the true values
+rbind(truth     = dat$sc, 
+      estimated = exp(tail(opt$par, length(dat$sc))))
+```
+
+### The Multivariate Normal CDF Approximation
+
+We compare the multivariate normal CDF approximation in this section 
+with the approximation from the mvtnorm package. The same algorithm is used 
+but the version in this package is re-written in C++ and differs slightly.
+Moreover, we have implemented an approximation of the standard normal CDF
+and its inverse which reduces the computation time as we will show below.
 
 ```{r compare_w_mvtnorm, cache = 1}
 #####
@@ -63,7 +160,8 @@ sim_res <- replicate(expr = {
   # get a very precise estimate
   truth <- use_mvtnorm(rel_eps / 100)
   
-  # computes the error in a repeated approximations and takes the time
+  # computes the error with repeated approximations and compute the time it
+  # takes
   n_rep <- 5L
   run_n_time <- function(expr){
     expr <- substitute(expr)
@@ -89,6 +187,7 @@ They have about the same average relative error as expected:
 
 ```{r show_averge_rel_err}
 rowMeans(sim_res[, "SE", ])
+par(mar = c(5, 4, 1, 1))
 boxplot(t(sim_res[, "SE", ]))
 
 # without extreme values
@@ -101,5 +200,6 @@ The new implementation is faster when the approximation is used:
 
 ```{r use_new_impl}
 rowMeans(sim_res[, "time", ])
+par(mar = c(5, 4, 1, 1))
 boxplot(t(sim_res[, "time", ]))
 ```

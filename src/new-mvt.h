@@ -55,6 +55,7 @@ rand_Korobov_output rand_Korobov
   std::unique_ptr<int[]> pr(new int[ndim]);
   std::fill(pr.get(), pr.get() + ndim, 0L); // not needed?
 
+  // TODO: memory allocation
   std::unique_ptr<double[]> wk_mem(new double[5 * nf + 3 * ndim]);
   double * const __restrict__ finval = wk_mem.get(),
          * const __restrict__ varsqr = finval + nf,

@@ -26,11 +26,63 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// get_pedigree_ll_terms
+SEXP get_pedigree_ll_terms(Rcpp::List data);
+RcppExport SEXP _pedmod_get_pedigree_ll_terms(SEXP dataSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::List >::type data(dataSEXP);
+    rcpp_result_gen = Rcpp::wrap(get_pedigree_ll_terms(data));
+    return rcpp_result_gen;
+END_RCPP
+}
+// eval_pedigree_ll
+double eval_pedigree_ll(SEXP ptr, arma::vec par, int const maxvls, double const abs_eps, double const rel_eps, int const minvls, bool const do_reorder, bool const use_aprx, unsigned const n_threads);
+RcppExport SEXP _pedmod_eval_pedigree_ll(SEXP ptrSEXP, SEXP parSEXP, SEXP maxvlsSEXP, SEXP abs_epsSEXP, SEXP rel_epsSEXP, SEXP minvlsSEXP, SEXP do_reorderSEXP, SEXP use_aprxSEXP, SEXP n_threadsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type ptr(ptrSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type par(parSEXP);
+    Rcpp::traits::input_parameter< int const >::type maxvls(maxvlsSEXP);
+    Rcpp::traits::input_parameter< double const >::type abs_eps(abs_epsSEXP);
+    Rcpp::traits::input_parameter< double const >::type rel_eps(rel_epsSEXP);
+    Rcpp::traits::input_parameter< int const >::type minvls(minvlsSEXP);
+    Rcpp::traits::input_parameter< bool const >::type do_reorder(do_reorderSEXP);
+    Rcpp::traits::input_parameter< bool const >::type use_aprx(use_aprxSEXP);
+    Rcpp::traits::input_parameter< unsigned const >::type n_threads(n_threadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(eval_pedigree_ll(ptr, par, maxvls, abs_eps, rel_eps, minvls, do_reorder, use_aprx, n_threads));
+    return rcpp_result_gen;
+END_RCPP
+}
+// eval_pedigree_grad
+Rcpp::NumericVector eval_pedigree_grad(SEXP ptr, arma::vec par, int const maxvls, double const abs_eps, double const rel_eps, int const minvls, bool const do_reorder, bool const use_aprx, unsigned const n_threads);
+RcppExport SEXP _pedmod_eval_pedigree_grad(SEXP ptrSEXP, SEXP parSEXP, SEXP maxvlsSEXP, SEXP abs_epsSEXP, SEXP rel_epsSEXP, SEXP minvlsSEXP, SEXP do_reorderSEXP, SEXP use_aprxSEXP, SEXP n_threadsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type ptr(ptrSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type par(parSEXP);
+    Rcpp::traits::input_parameter< int const >::type maxvls(maxvlsSEXP);
+    Rcpp::traits::input_parameter< double const >::type abs_eps(abs_epsSEXP);
+    Rcpp::traits::input_parameter< double const >::type rel_eps(rel_epsSEXP);
+    Rcpp::traits::input_parameter< int const >::type minvls(minvlsSEXP);
+    Rcpp::traits::input_parameter< bool const >::type do_reorder(do_reorderSEXP);
+    Rcpp::traits::input_parameter< bool const >::type use_aprx(use_aprxSEXP);
+    Rcpp::traits::input_parameter< unsigned const >::type n_threads(n_threadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(eval_pedigree_grad(ptr, par, maxvls, abs_eps, rel_eps, minvls, do_reorder, use_aprx, n_threads));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 RcppExport SEXP run_testthat_tests(SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
     {"_pedmod_mvndst", (DL_FUNC) &_pedmod_mvndst, 10},
+    {"_pedmod_get_pedigree_ll_terms", (DL_FUNC) &_pedmod_get_pedigree_ll_terms, 1},
+    {"_pedmod_eval_pedigree_ll", (DL_FUNC) &_pedmod_eval_pedigree_ll, 9},
+    {"_pedmod_eval_pedigree_grad", (DL_FUNC) &_pedmod_eval_pedigree_grad, 9},
     {"run_testthat_tests", (DL_FUNC) &run_testthat_tests, 1},
     {NULL, NULL, 0}
 };

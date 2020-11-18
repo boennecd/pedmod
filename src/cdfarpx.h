@@ -15,6 +15,7 @@
 #include "norm-cdf-approx.h"
 #include <cmath>
 #include <stdexcept>
+#include "ped-mem.h"
 
 namespace pedmod {
 extern "C"
@@ -57,11 +58,12 @@ extern "C"
 }
 
 /**
+ * @parma out Vector with result.
  * @param lower The lower bounds.
  * @param upper The upper bounds.
- * @return the infin argument for the mvtdst subroutine.
  */
-arma::ivec get_infin(arma::vec const &lower, arma::vec const &upper);
+arma::ivec get_infin
+(arma::ivec &out, arma::vec const &lower, arma::vec const &upper);
 
 struct cor_vec_res {
   arma::vec cor_vec, sds;
@@ -152,15 +154,37 @@ class cdf {
   static constexpr bool const
     needs_last_unif = T_Functor::needs_last_unif();
 
-  // TODO: memory allocations
+  // cached memory to use
+  static cache_mem<int   > imem;
+  static cache_mem<double> dmem;
+
   arma::ivec infin;
   arma::ivec indices;
-  arma::vec lower = arma::vec(ndim),
-            upper = arma::vec(ndim),
-       sigma_chol = arma::vec((ndim * (ndim + 1L)) / 2L),
-             draw = arma::vec(ndim);
+
+  arma::vec lower = arma::vec(dmem.get_mem() , ndim, false),
+            upper = arma::vec(lower.end()    , ndim, false),
+       sigma_chol = arma::vec(upper.end()    , (ndim * (ndim + 1L)) / 2L,
+                              false),
+             draw = arma::vec(sigma_chol.end(), ndim, false);
+
+  // memory that can be used
+  int * const itmp_mem = indices.end();
+  double * const dtmp_mem = draw.end();
 
 public:
+  /**
+   * must be called perior to calling the constructor or any member
+   * functions.
+   */
+  static void set_cache(int const max_ndim, int const max_threads) {
+    int const n_up_tri = (max_ndim * (max_ndim + 1)) / 2;
+
+    imem.set_n_mem(3 * max_ndim           , max_threads);
+    dmem.set_n_mem(7 * max_ndim + n_up_tri, max_threads);
+
+    T_Functor::set_cache(max_ndim, max_threads);
+  }
+
   cdf(T_Functor &functor, arma::vec const &lower_in,
       arma::vec const &upper_in, arma::vec const &mu_in,
       arma::mat const &sigma_in, bool const do_reorder,
@@ -169,8 +193,12 @@ public:
     ndim(mu_in.n_elem),
     n_integrands(functor.get_n_integrands()),
     use_aprx(use_aprx),
-    infin(get_infin(lower_in, upper_in)),
-    indices(ndim) {
+    infin(([&](){
+      arma::ivec out(imem.get_mem(), ndim, false);
+      get_infin(out, lower_in, upper_in);
+      return out;
+    })()),
+    indices(infin.end(), ndim, false) {
     /* checks */
 #ifdef DO_CHECKS
     if(sigma_in.n_cols != static_cast<size_t>(ndim) or
@@ -185,9 +213,19 @@ public:
 #endif
 
     /* re-scale */
-    // TODO: memory allocation
-    arma::vec sds = arma::sqrt(arma::diagvec(sigma_in)),
-               mu = mu_in / sds;
+    double * cur_dtmp_mem = dtmp_mem;
+    auto get_dmem = [&](int const n_ele) -> double * {
+      double * out = cur_dtmp_mem;
+      cur_dtmp_mem += n_ele;
+      return out;
+    };
+
+    arma::vec sds(get_dmem(ndim), ndim, false),
+              mu (get_dmem(ndim), ndim, false);
+    for(int i = 0; i < ndim; ++i){
+      sds[i] = std::sqrt(sigma_in.at(i, i));
+      mu [i] = mu_in[i] / sds[i];
+    }
 
     lower  = lower_in;
     lower /= sds;
@@ -205,13 +243,10 @@ public:
     }
 
     if(do_reorder and ndim > 1L){
-      // TODO: memory allocation
-      std::unique_ptr<double[]> tmp_mem(new double[2 * ndim]);
-
       double * const y     = draw.begin(),
-             * const A     = tmp_mem.get(),
-             * const B     = A + ndim,
-             * const DL    = sds.memptr(),
+             * const A     = get_dmem(ndim),
+             * const B     = get_dmem(ndim),
+             * const DL    = sds.begin(),
              * const delta = mu.begin();
       sds.zeros();
 
@@ -220,8 +255,7 @@ public:
       int F_inform = 0L,
              nddim = ndim;
       std::fill(delta, delta + ndim, 0.);
-      // TODO: memory allocation
-      arma::ivec infi(ndim);
+      arma::ivec infi(itmp_mem, ndim, false);
 
       F77_CALL(mvsort)(
         &ndim, lower.memptr(), upper.memptr(), delta,
@@ -405,6 +439,11 @@ public:
   }
 };
 
+template<class T_Functor, class out_type>
+cache_mem<int   > cdf<T_Functor, out_type>::imem;
+template<class T_Functor, class out_type>
+cache_mem<double> cdf<T_Functor, out_type>::dmem;
+
 /**
  * functor classes used as template argument for cdf used to approximate the
  * likelihood. */
@@ -459,6 +498,8 @@ public:
   }
 
   inline void prep_permutated(arma::mat const&) { }
+
+  static void set_cache(int const, int const) { }
 };
 
 /**
@@ -477,9 +518,8 @@ public:
   int const n_mem = scale_mats[0].n_rows;
 
 private:
-  /// working memory. TODO: remove allocation
-  std::unique_ptr<double[]> wk_mem =
-    std::unique_ptr<double[]>(new double[n_mem + n_mem  * (n_mem + 1)]);
+  /// working memory
+  static cache_mem<double> dmem;
 
   /**
    * points to the upper triangular part of the inverse of the Cholesky
@@ -491,6 +531,12 @@ private:
   double * sig_inv;
 
 public:
+  /// must be called prior to calling the member functions
+  static void set_cache(int const max_ndim, int const max_threads) {
+    dmem.set_n_mem(2 * max_ndim * max_ndim + max_ndim * (max_ndim + 1),
+                   max_threads);
+  }
+
   /// sets the scale matrices. There are no checks on the validity
   pedigree_l_factor(std::vector<arma::mat> const &scale_mats):
   scale_mats(scale_mats) {
@@ -530,30 +576,30 @@ public:
       return;
 
     // create the objects we need
-    // TODO: memory allocation
-    arma::mat tmp_mat(n_mem, n_mem);
-    if(!arma::chol(tmp_mat, sig))
+    arma::mat t1(dmem.get_mem(), n_mem, n_mem, false),
+              t2(t1.end()      , n_mem, n_mem, false);
+    if(!arma::chol(t1, sig))
       throw std::runtime_error("pedigree_ll_factor::setup: chol failed");
-    if(!arma::inv(tmp_mat, tmp_mat))
+    if(!arma::inv(t2, t1))
       throw std::runtime_error("pedigree_ll_factor::setup: inv failed");
-    sigma_chol_inv = wk_mem.get() + n_mem;
-    copy_upper_tri(tmp_mat, sigma_chol_inv);
+    sigma_chol_inv = t2.end();
+    copy_upper_tri(t2, sigma_chol_inv);
 
-    if(!arma::inv_sympd(tmp_mat, sig))
+    if(!arma::inv_sympd(t1, sig))
       throw std::runtime_error("pedigree_ll_factor::setup: inv_sympd failed");
     sig_inv = sigma_chol_inv + (n_mem * (n_mem + 1)) / 2;
-    copy_upper_tri(tmp_mat, sig_inv);
+    copy_upper_tri(t1, sig_inv);
   }
 
   void prep_permutated(arma::mat const &sigma_permu) {
     // need to re-compute the inverse of the Cholesky decomposition
-    // TODO: memory allocation
-    arma::mat tmp_mat(n_mem, n_mem);
-    if(!arma::chol(tmp_mat, sigma_permu))
+    arma::mat t1(dmem.get_mem(), n_mem, n_mem, false),
+              t2(t1.end()      , n_mem, n_mem, false);
+    if(!arma::chol(t1, sigma_permu))
       throw std::runtime_error("pedigree_ll_factor::setup: chol failed");
-    if(!arma::inv(tmp_mat, tmp_mat))
+    if(!arma::inv(t2, t1))
       throw std::runtime_error("pedigree_ll_factor::setup: inv failed");
-    copy_upper_tri(tmp_mat, sigma_chol_inv);
+    copy_upper_tri(t2, sigma_chol_inv);
   }
 
   inline void operator()

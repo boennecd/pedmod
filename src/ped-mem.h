@@ -14,15 +14,14 @@ template<class T>
 class cache_mem {
   std::unique_ptr<T[]> mem;
   size_t cur_max_threads = 0,
-               cur_n_mem = 0L,
-               cur_size  = 0L;
+               cur_n_mem = 0,
+               cur_size  = 0;
 
 public:
   /// set the size of the memory to hold
   void set_n_mem(size_t n_mem, size_t const max_threads){
-    constexpr size_t const mult = cacheline_size() / sizeof(T),
-                       min_size = 2L * mult;
-    n_mem  = std::max(n_mem, min_size);
+    constexpr size_t const mult = cacheline_size() / sizeof(T);
+    n_mem  = std::max(n_mem, mult) + mult;
     n_mem  = (n_mem + mult - 1L) / mult;
     n_mem *= mult;
 

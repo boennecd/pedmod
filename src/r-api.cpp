@@ -14,6 +14,8 @@ Rcpp::NumericVector mvndst
 
   pedmod::likelihood func;
   parallelrng::set_rng_seeds(1);
+
+  pedmod::cdf<pedmod::likelihood>::set_cache(lower.n_elem, 1);
   auto const out = pedmod::cdf<pedmod::likelihood>(
     func, lower, upper, mu, sigma, do_reorder, use_aprx).approximate(
         maxvls, abs_eps, rel_eps, minvls);
@@ -28,7 +30,7 @@ Rcpp::NumericVector mvndst
 
 //' @export
 // [[Rcpp::export]]
-SEXP get_pedigree_ll_terms(Rcpp::List data){
+SEXP get_pedigree_ll_terms(Rcpp::List data, unsigned const max_threads){
   Rcpp::XPtr<std::vector<pedmod::pedigree_ll_term> > terms_ptr(
       new std::vector<pedmod::pedigree_ll_term >());
   std::vector<pedmod::pedigree_ll_term > &terms = *terms_ptr;
@@ -45,7 +47,7 @@ SEXP get_pedigree_ll_terms(Rcpp::List data){
     for(auto &s : s_mats)
       scale_mats.emplace_back(Rcpp::as<arma::mat>(s));
 
-    terms.emplace_back(X, y, scale_mats);
+    terms.emplace_back(X, y, scale_mats, max_threads);
   }
 
   // checks

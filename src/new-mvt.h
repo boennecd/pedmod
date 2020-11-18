@@ -55,7 +55,7 @@ rand_Korobov_output rand_Korobov
 
   // workign objects. TODO: these may be allocated once.
   std::unique_ptr<int[]> pr(new int[ndim]);
-  std::fill(pr.get(), pr.get() + ndim, 0L); // not needed?
+  std::fill(pr.get(), pr.get() + ndim, 0L); // TODO: not needed?
 
   // TODO: memory allocation
   std::unique_ptr<double[]> wk_mem(new double[5 * nf + 3 * ndim]);

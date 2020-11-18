@@ -18,7 +18,8 @@ public:
          n_fix_effect = X.n_cols;
 
   pedigree_ll_term(arma::mat const &X_in, arma::vec const &y,
-                   std::vector<arma::mat> const &scale_mats):
+                   std::vector<arma::mat> const &scale_mats,
+                   unsigned const max_threads):
     X(([&](){
       if(X_in.n_rows != y.n_elem)
         throw std::invalid_argument("pedigree_ll_term::pedigree_ll_term: y and X's dimension do not match");
@@ -31,6 +32,10 @@ public:
       return out;
     })()),
     l_factor(([&](){
+      // set cache
+      cdf<likelihood       >::set_cache(y.n_elem, max_threads);
+      cdf<pedigree_l_factor>::set_cache(y.n_elem, max_threads);
+
       arma::vec z(y.n_elem);
       for(arma::uword i = 0; i < y.n_elem; ++i)
         z[i] = y[i] > 0 ? 1 : -1;

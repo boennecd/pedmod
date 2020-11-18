@@ -43,6 +43,7 @@ context("restrictcdf unit tests") {
     double const abs_eps = std::pow(std::numeric_limits<double>::epsilon(),
                                    .33);
     double constexpr E_prop(0.0693596863013216);
+    pedmod::cdf<pedmod::likelihood>::set_cache(4, 1);
     pedmod::likelihood func;
     {
       auto res = pedmod::cdf<pedmod::likelihood>(
@@ -95,6 +96,7 @@ context("restrictcdf unit tests") {
     double const va(.8);
 
     double const eps = std::pow(std::numeric_limits<double>::epsilon(), .5);
+    pedmod::cdf<pedmod::likelihood>::set_cache(1, 1);
     pedmod::likelihood func;
     for(size_t i = 0; i < 3; ++i){
       arma::vec l(1), u(1), m(1);
@@ -173,6 +175,7 @@ context("restrictcdf unit tests") {
 
     arma::mat sig(1, 1);
     double const eps = std::pow(std::numeric_limits<double>::epsilon(), .5);
+    pedmod::cdf<pedmod::pedigree_l_factor>::set_cache(1, 1);
     for(int i = 0; i < 3; ++i){
       func.setup(sig, par.begin() + 1);
       arma::vec lower(1), upper(1), mu(1);
@@ -243,6 +246,7 @@ context("restrictcdf unit tests") {
       std::pow(std::numeric_limits<double>::epsilon(), .25);
     constexpr unsigned const n_deriv = 4;
 
+    pedmod::cdf<pedmod::pedigree_l_factor>::set_cache(3, 1);
     {
       auto const res = pedmod::cdf<pedmod::pedigree_l_factor>(
         func, lbs, ubs, mu, sig, false, false).approximate(
@@ -330,6 +334,7 @@ context("restrictcdf unit tests") {
       std::pow(std::numeric_limits<double>::epsilon(), .25);
     constexpr unsigned const n_deriv = 5;
 
+    pedmod::cdf<pedmod::pedigree_l_factor>::set_cache(3, 1);
     {
       auto const res = pedmod::cdf<pedmod::pedigree_l_factor>(
         func, lbs, ubs, mu, sig, false, false).approximate(

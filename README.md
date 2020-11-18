@@ -58,7 +58,7 @@ dat_arg <- lapply(dat$sim_data, function(x){
 
 # create a C++ object
 library(pedmod)
-ll_terms <- get_pedigree_ll_terms(dat_arg)
+ll_terms <- get_pedigree_ll_terms(dat_arg, max_threads = 4L)
 
 # get the starting values. This is very fast
 y <- unlist(lapply(dat_arg, `[[`, "y"))
@@ -96,12 +96,12 @@ gr <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE,
 # check output at the starting values
 system.time(ll <- -fn(c(beta, sc)))
 #>    user  system elapsed 
-#>   0.392   0.000   0.099
+#>   0.380   0.000   0.098
 ll # the log likelihood at the starting values
 #> [1] -3466.776
 system.time(gr_val <- gr(c(beta, sc)))
 #>    user  system elapsed 
-#>   1.159   0.000   0.309
+#>   1.160   0.000   0.309
 gr_val # the gradient at the starting values
 #> [1] 252.941129 -81.637206 -24.192560   7.615037  -1.340035
 #> attr(,"value")
@@ -118,7 +118,7 @@ numDeriv::grad(fn, c(beta, sc))
 # optimize the log likelihood approximation
 system.time(opt <- optim(c(beta, sc), fn, gr, method = "BFGS"))
 #>    user  system elapsed 
-#> 115.246   0.009  29.271
+#> 115.575   0.007  29.352
 ```
 
 The output from the optimization is shown below:

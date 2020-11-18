@@ -2,14 +2,13 @@
 
 namespace pedmod {
 
-arma::ivec get_infin(arma::vec const &lower, arma::vec const &upper){
+arma::ivec get_infin(
+    arma::ivec &out, arma::vec const &lower, arma::vec const &upper){
   arma::uword const n = lower.size();
 #ifdef DO_CHECKS
   if(upper.size() != n)
     throw std::invalid_argument("get_infin: invalid 'upper'");
 #endif
-  arma::ivec out(n);
-
   double const *l = lower.begin(),
                *u = upper.begin();
   for(auto &o : out){
@@ -51,5 +50,7 @@ cor_vec_res get_cor_vec(const arma::mat &cov){
 
   return out;
 }
+
+cache_mem<double> pedigree_l_factor::dmem;
 
 } // namespace pedmod {

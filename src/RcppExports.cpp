@@ -27,13 +27,14 @@ BEGIN_RCPP
 END_RCPP
 }
 // get_pedigree_ll_terms
-SEXP get_pedigree_ll_terms(Rcpp::List data);
-RcppExport SEXP _pedmod_get_pedigree_ll_terms(SEXP dataSEXP) {
+SEXP get_pedigree_ll_terms(Rcpp::List data, unsigned const max_threads);
+RcppExport SEXP _pedmod_get_pedigree_ll_terms(SEXP dataSEXP, SEXP max_threadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::List >::type data(dataSEXP);
-    rcpp_result_gen = Rcpp::wrap(get_pedigree_ll_terms(data));
+    Rcpp::traits::input_parameter< unsigned const >::type max_threads(max_threadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(get_pedigree_ll_terms(data, max_threads));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -80,7 +81,7 @@ RcppExport SEXP run_testthat_tests(SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
     {"_pedmod_mvndst", (DL_FUNC) &_pedmod_mvndst, 10},
-    {"_pedmod_get_pedigree_ll_terms", (DL_FUNC) &_pedmod_get_pedigree_ll_terms, 1},
+    {"_pedmod_get_pedigree_ll_terms", (DL_FUNC) &_pedmod_get_pedigree_ll_terms, 2},
     {"_pedmod_eval_pedigree_ll", (DL_FUNC) &_pedmod_eval_pedigree_ll, 9},
     {"_pedmod_eval_pedigree_grad", (DL_FUNC) &_pedmod_eval_pedigree_grad, 9},
     {"run_testthat_tests", (DL_FUNC) &run_testthat_tests, 1},

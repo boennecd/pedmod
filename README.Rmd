@@ -2,7 +2,7 @@
 output: github_document
 ---
 
-```{r, include = FALSE}
+```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
@@ -60,7 +60,7 @@ dat_arg <- lapply(dat$sim_data, function(x){
 
 # create a C++ object
 library(pedmod)
-ll_terms <- get_pedigree_ll_terms(dat_arg)
+ll_terms <- get_pedigree_ll_terms(dat_arg, max_threads = 4L)
 
 # get the starting values. This is very fast
 y <- unlist(lapply(dat_arg, `[[`, "y"))

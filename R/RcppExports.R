@@ -7,8 +7,8 @@ mvndst <- function(lower, upper, mu, sigma, maxvls = 25000L, abs_eps = .001, rel
 }
 
 #' @export
-get_pedigree_ll_terms <- function(data) {
-    .Call(`_pedmod_get_pedigree_ll_terms`, data)
+get_pedigree_ll_terms <- function(data, max_threads) {
+    .Call(`_pedmod_get_pedigree_ll_terms`, data, max_threads)
 }
 
 #' @export

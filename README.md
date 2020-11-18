@@ -1,6 +1,4 @@
 
-<!-- README.md is generated from README.Rmd. Please edit that file -->
-
 # pedmod: Pedigree Models
 
 TODO: write about the package.
@@ -79,53 +77,55 @@ sc <- rep(log(.2), 2)
 
 # check log likelihood at the starting values. First we assign a function 
 # to approximate the log likelihood and the gradient
-fn <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE){
+fn <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE, 
+               n_threads = 4L){
   set.seed(seed)
   -eval_pedigree_ll(
     ll_terms, par = par, maxvls = 10000L, abs_eps = 0, rel_eps = rel_eps, 
-    minvls = 1000L, use_aprx = use_aprx)
+    minvls = 1000L, use_aprx = use_aprx, n_threads = n_threads)
 }
-gr <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE){
+gr <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE, 
+               n_threads = 4L){
   set.seed(seed)
   out <- -eval_pedigree_grad(
     ll_terms, par = par, maxvls = 10000L, abs_eps = 0, rel_eps = rel_eps, 
-    minvls = 1000L, use_aprx = use_aprx)
+    minvls = 1000L, use_aprx = use_aprx, n_threads = n_threads)
   structure(c(out), value = -attr(out, "logLik"))
 }
 
 # check output at the starting values
 system.time(ll <- -fn(c(beta, sc)))
 #>    user  system elapsed 
-#>   0.377   0.000   0.377
+#>   0.392   0.000   0.099
 ll # the log likelihood at the starting values
-#> [1] -3466.762
+#> [1] -3466.776
 system.time(gr_val <- gr(c(beta, sc)))
 #>    user  system elapsed 
-#>   1.090   0.000   1.091
+#>   1.159   0.000   0.309
 gr_val # the gradient at the starting values
-#> [1] 252.540359 -81.802282 -24.431434   7.701268  -1.169861
+#> [1] 252.941129 -81.637206 -24.192560   7.615037  -1.340035
 #> attr(,"value")
-#> [1] 3466.812
+#> [1] 3466.778
 
 # variance of the approximation
 sd(sapply(1:25, function(seed) fn(c(beta, sc), seed = seed)))
-#> [1] 0.01784194
+#> [1] 0.01587955
 
 # verify the gradient (may not be exactly equal due to MC error)
 numDeriv::grad(fn, c(beta, sc))
-#> [1] 253.048871 -81.588776 -24.382946   7.576311  -1.427000
+#> [1] 253.087610 -81.625789 -24.351739   7.580726  -1.397081
 
 # optimize the log likelihood approximation
 system.time(opt <- optim(c(beta, sc), fn, gr, method = "BFGS"))
 #>    user  system elapsed 
-#>  62.608   0.000  62.608
+#> 115.246   0.009  29.271
 ```
 
 The output from the optimization is shown below:
 
 ``` r
 -opt$value      # the maximum log likelihood
-#> [1] -3441.116
+#> [1] -3441.126
 opt$convergence # check convergence
 #> [1] 0
 
@@ -134,14 +134,14 @@ rbind(truth     = dat$beta,
       estimated = head(opt$par, length(dat$beta)))
 #>           (Intercept)        X1       X2
 #> truth       -1.000000 0.3000000 0.200000
-#> estimated   -1.033492 0.2985111 0.192626
+#> estimated   -1.046019 0.3019174 0.193374
 
 # compare estimated scale parameters with the true values
 rbind(truth     = dat$sc, 
       estimated = exp(tail(opt$par, length(dat$sc))))
-#>              Gentic  Maternal
-#> truth     0.5000000 0.3300000
-#> estimated 0.7469729 0.2301525
+#>              Gentic Maternal
+#> truth     0.5000000  0.33000
+#> estimated 0.8042808  0.22129
 ```
 
 ### The Multivariate Normal CDF Approximation

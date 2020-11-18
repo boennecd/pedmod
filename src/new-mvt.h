@@ -4,6 +4,8 @@
 #include <algorithm>
 #include "threat-safe-random.h"
 
+namespace pedmod {
+
 struct rand_Korobov_output {
   size_t minvls;
   double abserr;
@@ -207,5 +209,7 @@ rand_Korobov_output rand_Korobov
 
   return { intvls, abserr, inform };
 }
+
+} // namespace pedmod
 
 #endif

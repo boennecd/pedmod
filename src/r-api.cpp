@@ -1,4 +1,5 @@
 #include "pedigree-ll.h"
+#include "ped-mem.h"
 
 //' @export
 // [[Rcpp::export]]
@@ -62,13 +63,21 @@ SEXP get_pedigree_ll_terms(Rcpp::List data){
   return terms_ptr;
 }
 
+namespace {
+static pedmod::cache_mem<double> r_mem;
+} // namespace
+
 //' @export
 // [[Rcpp::export]]
 double eval_pedigree_ll
   (SEXP ptr, arma::vec par, int const maxvls,
    double const abs_eps, double const rel_eps, int const minvls = -1,
    bool const do_reorder = true, bool const use_aprx = false,
-   unsigned const n_threads = 1L){
+   unsigned n_threads = 1L){
+#ifndef _OPENMP
+  n_threads = 1L;
+#endif
+
   parallelrng::set_rng_seeds(n_threads);
   Rcpp::XPtr<std::vector<pedmod::pedigree_ll_term> > terms_ptr(ptr);
   std::vector<pedmod::pedigree_ll_term > &terms = *terms_ptr;
@@ -83,11 +92,28 @@ double eval_pedigree_ll
   for(int i = n_fix; i < n_fix + n_scales; ++i)
     par[i] = std::exp(par[i]);
 
+  r_mem.set_n_mem(1, n_threads);
+
   // compute
+#ifdef _OPENMP
+#pragma omp parallel num_threads(n_threads)
+{
+#endif
+  double *wmem = r_mem.get_mem();
+  *wmem = 0;
+#ifdef _OPENMP
+#pragma omp for schedule(static)
+#endif
+  for(unsigned i = 0; i < terms.size(); ++i)
+    *wmem += terms.at(i).fn(
+      &par[0], maxvls, abs_eps, rel_eps, minvls, do_reorder, use_aprx);
+#ifdef _OPENMP
+}
+#endif
+
   double out(0.);
-  for(auto &t : terms)
-    out += t.fn(&par[0], maxvls, abs_eps, rel_eps, minvls, do_reorder,
-                use_aprx);
+  for(unsigned i = 0; i < n_threads; ++i)
+    out += *r_mem.get_mem(i);
 
   return out;
 }
@@ -99,6 +125,10 @@ Rcpp::NumericVector eval_pedigree_grad
    double const abs_eps, double const rel_eps, int const minvls = -1,
    bool const do_reorder = true, bool const use_aprx = false,
    unsigned const n_threads = 1L){
+#ifndef _OPENMP
+  n_threads = 1L;
+#endif
+
   parallelrng::set_rng_seeds(n_threads);
   Rcpp::XPtr<std::vector<pedmod::pedigree_ll_term> > terms_ptr(ptr);
   std::vector<pedmod::pedigree_ll_term > &terms = *terms_ptr;
@@ -110,16 +140,40 @@ Rcpp::NumericVector eval_pedigree_grad
     throw std::invalid_argument("eval_pedigree_ll: invalid par parameter");
 
   // transform scale parameters
-  for(int i = n_fix; i < n_fix + n_scales; ++i)
+  for(unsigned i = n_fix; i < par.size(); ++i)
     par[i] = std::exp(par[i]);
 
+  r_mem.set_n_mem(1 + par.size(), n_threads);
+
   // compute
+#ifdef _OPENMP
+#pragma omp parallel num_threads(n_threads)
+{
+#endif
+  double *wmem = r_mem.get_mem();
+  std::fill(wmem, wmem + 1 + par.size(), 0.);
+#ifdef _OPENMP
+#pragma omp for schedule(static)
+#endif
+  for(unsigned i = 0; i < terms.size(); ++i)
+    *wmem += terms.at(i).gr(
+      &par[0], wmem + 1, maxvls, abs_eps, rel_eps, minvls, do_reorder,
+      use_aprx);
+#ifdef _OPENMP
+}
+#endif
+
+  // aggregate the result
   Rcpp::NumericVector grad(n_fix + n_scales);
   double ll(0.);
-  for(auto &t : terms)
-    ll += t.gr(&par[0], &grad[0], maxvls, abs_eps, rel_eps, minvls,
-               do_reorder, use_aprx);
+  for(unsigned i = 0; i < n_threads; ++i){
+    double *wmem = r_mem.get_mem(i);
+    ll += *wmem;
+    for(unsigned j = 0; j <  par.size(); ++j)
+      grad[j] += wmem[j + 1];
+  }
 
+  // account for exp(...)
   for(int i = n_fix; i < n_fix + n_scales; ++i)
     grad[i] *= par[i];
   grad.attr("logLik") = Rcpp::NumericVector::create(ll);

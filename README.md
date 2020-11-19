@@ -100,12 +100,12 @@ gr <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE,
 # check output at the starting values
 system.time(ll <- -fn(c(beta, sc)))
 #>    user  system elapsed 
-#>   0.966   0.000   0.244
+#>   0.966   0.000   0.242
 ll # the log likelihood at the starting values
 #> [1] -8687.09
 system.time(gr_val <- gr(c(beta, sc)))
 #>    user  system elapsed 
-#>   3.106   0.003   0.809
+#>   3.096   0.000   0.809
 gr_val # the gradient at the starting values
 #> [1]  635.879395 -175.241684  -83.048473   17.660212   -8.328734
 #> attr(,"value")
@@ -122,13 +122,7 @@ numDeriv::grad(fn, c(beta, sc))
 # optimize the log likelihood approximation
 system.time(opt <- optim(c(beta, sc), fn, gr, method = "BFGS"))
 #>    user  system elapsed 
-#> 222.061   0.000  56.587
-
-# w/ higher precision
-system.time(opt_prec <- optim(opt$par, fn, gr, method = "BFGS", 
-                              rel_eps = 1e-3, maxvls = 25000L))
-#>    user  system elapsed 
-#> 453.707   0.000 117.270
+#> 212.942   0.005  54.377
 ```
 
 The output from the optimization is shown below:
@@ -139,29 +133,137 @@ The output from the optimization is shown below:
 opt$convergence # check convergence
 #> [1] 0
 
-# w/ higher precision
--opt_prec$value
-#> [1] -8620.088
-opt_prec$convergence
-#> [1] 0
-
 # compare the estimated fixed effects with the true values
-rbind(truth                     = dat$beta, 
-      estimated                 = head(opt$par, length(dat$beta)), 
-      `estimated (higher prec)` = head(opt_prec$par, length(dat$beta)))
-#>                         (Intercept)        X1        X2
-#> truth                     -1.000000 0.3000000 0.2000000
-#> estimated                 -1.021337 0.2874056 0.2086335
-#> estimated (higher prec)   -1.037563 0.2922601 0.2124689
+rbind(truth     = dat$beta, 
+      estimated = head(opt$par, length(dat$beta)))
+#>           (Intercept)        X1        X2
+#> truth       -1.000000 0.3000000 0.2000000
+#> estimated   -1.021337 0.2874056 0.2086335
 
 # compare estimated scale parameters with the true values
-rbind(truth                     = dat$sc, 
-      estimated                 = exp(tail(opt$par     , length(dat$sc))), 
-      `estimated (higher prec)` = exp(tail(opt_prec$par, length(dat$sc))))
-#>                            Gentic  Maternal
-#> truth                   0.5000000 0.3300000
-#> estimated               0.6286649 0.2856720
-#> estimated (higher prec) 0.7071673 0.2672134
+rbind(truth     = dat$sc, 
+      estimated = exp(tail(opt$par, length(dat$sc))))
+#>              Gentic Maternal
+#> truth     0.5000000 0.330000
+#> estimated 0.6286649 0.285672
+```
+
+### Using ADAM
+
+We use stochastic gradient descent with the ADAM method in this section.
+We define a function to do so below and use it to estimate the model.
+
+``` r
+#####
+# performs stochastic gradient descent (using ADAM).
+#
+# Args:
+#   par: starting value.
+#   gr: function to evaluate the log marginal likelihood.
+#   n_clust: number of observation.
+#   n_blocks: number of blocks.
+#   maxit: maximum number of iteration.
+#   seed: seed to use.
+#   epsilon, alpha, beta_1, beta_2: ADAM parameters.
+#   maxvls: maximum number of samples to draw.
+#   verbose: print output during the estimation.
+#   ...: arguments passed to gr.
+adam <- function(par, gr, n_clust, n_blocks, maxit = 10L,
+                 seed = 1L, epsilon = 1e-8, alpha = .001, beta_1 = .9,
+                 beta_2 = .999, maxvls = rep(10000L, maxit), 
+                 verbose = FALSE, ...){
+  grp_dummy <- (seq_len(n_clust) - 1L) %% n_blocks
+  n_par <- length(par)
+  m <- v <- numeric(n_par)
+  fun_vals <- numeric(maxit)
+  estimates <- matrix(NA_real_, n_par, maxit)
+  i <- -1L
+
+  for(k in 1:maxit){
+    # sample groups
+    indices <- sample.int(n_clust, replace = FALSE) - 1L
+    blocks <- tapply(indices, grp_dummy, identity, simplify = FALSE)
+    
+    for(ii in 1:n_blocks){
+      i <- i + 1L
+      idx_b <- (i %% n_blocks) + 1L
+      m_old <- m
+      v_old <- v
+      res <- gr(par, indices = blocks[[idx_b]], maxvls = maxvls[k])
+      fun_vals[(i %/% n_blocks) + 1L] <-
+        fun_vals[(i %/% n_blocks) + 1L] + attr(res, "value")
+      res <- c(res)
+
+      m <- beta_1 * m_old + (1 - beta_1) * res
+      v <- beta_2 * v_old + (1 - beta_2) * res^2
+
+      m_hat <- m / (1 - beta_1^(i + 1))
+      v_hat <- v / (1 - beta_2^(i + 1))
+
+      par <- par - alpha * m_hat / (sqrt(v_hat) + epsilon)
+    }
+    
+    if(verbose){
+      cat(sprintf("Ended iteration %4d. Running estimate of the function value is: %14.2f\n", 
+                  k, fun_vals[k]))
+      cat("Parameter estimates are:\n")
+      cat(capture.output(print(par)), sep = "\n")
+      cat("\n")
+    }
+
+    estimates[, k] <- par
+  }
+
+  list(par = par, estimates = estimates, fun_vals = fun_vals)
+}
+
+#####
+# use the function
+# assign the maximum number of samples we will use
+maxit <- 100L
+minvls <- 250L
+maxpts <- 10000L
+maxpts_use <- exp(seq(log(2 * minvls), log(maxpts), length.out = maxit))
+
+# show the maximum number of samples we use
+par(mar = c(5, 4, 1, 1))
+plot(maxpts_use, pch = 16, xlab = "Iteration number", bty = "l",
+     ylab = "Maximum number of samples", ylim = range(0, maxpts_use))
+```
+
+<img src="man/figures/README-use_adam-1.png" width="100%" />
+
+``` r
+
+set.seed(1)
+system.time(
+  adam_res <- adam(c(beta, sc), gr = gr, n_clust = length(dat_arg), 
+                   n_blocks = 10L, alpha = 1e-2, maxit = maxit, 
+                   verbose = FALSE, maxvls = maxpts_use, 
+                   minvls = minvls))
+#>    user  system elapsed 
+#> 272.938   0.000  69.320
+```
+
+The result is shown below.
+
+``` r
+-fn(adam_res$par) # the maximum log likelihood
+#> [1] -8620.295
+
+# compare the estimated fixed effects with the true values
+rbind(truth     = dat$beta, 
+      estimated = head(adam_res$par, length(dat$beta)))
+#>           (Intercept)        X1        X2
+#> truth       -1.000000 0.3000000 0.2000000
+#> estimated   -1.004824 0.2829206 0.2070569
+
+# compare estimated scale parameters with the true values
+rbind(truth     = dat$sc, 
+      estimated = exp(tail(adam_res$par, length(dat$sc))))
+#>              Gentic  Maternal
+#> truth     0.5000000 0.3300000
+#> estimated 0.5489559 0.3048112
 ```
 
 ### The Multivariate Normal CDF Approximation

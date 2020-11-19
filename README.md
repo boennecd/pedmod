@@ -65,14 +65,14 @@ the heritability. The scale parameters, the
 "\\sigma_k^2")s, may be the primary interest in an analysis.
 
 This package provides randomized quasi Monte Carlo methods to
-approximate the marginal log likelihood for these types of models with
+approximate the log marginal likelihood for these types of models with
 an arbitrary number scale matrices,
 ![K](https://latex.codecogs.com/svg.latex?K "K"), and the derivatives
 with respect to
 ![(\\vec\\beta^\\top, 2\\log\\sigma\_1,\\dots, 2\\log\\sigma\_K)^\\top](https://latex.codecogs.com/svg.latex?%28%5Cvec%5Cbeta%5E%5Ctop%2C%202%5Clog%5Csigma_1%2C%5Cdots%2C%202%5Clog%5Csigma_K%29%5E%5Ctop
 "(\\vec\\beta^\\top, 2\\log\\sigma_1,\\dots, 2\\log\\sigma_K)^\\top").
 We have re-written the Fortran code by Genz and Bretz (2002) in C++,
-made it easy to extend from a marginal log likelihood approximation to
+made it easy to extend from a log marginal likelihood approximation to
 other approximations such as the derivatives, and added less precise but
 faster approximations of the
 ![\\Phi](https://latex.codecogs.com/svg.latex?%5CPhi "\\Phi") and
@@ -229,10 +229,10 @@ start_fit <-  glm.fit(X, y, family = binomial("probit"))
 
 # log-likelihood at the starting values without random effects
 -sum(start_fit$deviance) / 2     
-#> [1] -26480.15
+#> [1] -26480
 (beta <- start_fit$coefficients) # starting values for fixed effects 
 #> (Intercept)          X1             
-#>  -0.7342081   0.2234018   0.1348577
+#>     -0.7342      0.2234      0.1349
 
 # start at moderate sized scale parameters
 sc <- rep(log(.2), 2)
@@ -240,8 +240,7 @@ sc <- rep(log(.2), 2)
 # check log likelihood at the starting values. First we assign a function 
 # to approximate the log likelihood and the gradient
 fn <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE, 
-               n_threads = 4L, indices = seq_along(dat_arg), 
-               maxvls = 10000L){
+               n_threads = 4L, indices = NULL, maxvls = 10000L){
   set.seed(seed)
   -eval_pedigree_ll(
     ll_terms, par = par, maxvls = maxvls, abs_eps = 0, rel_eps = rel_eps, 
@@ -249,8 +248,7 @@ fn <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE,
     indices = indices)
 }
 gr <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE, 
-               n_threads = 4L, indices = seq_along(dat_arg), 
-               maxvls = 10000L){
+               n_threads = 4L, indices = NULL, maxvls = 10000L){
   set.seed(seed)
   out <- -eval_pedigree_grad(
     ll_terms, par = par, maxvls = maxvls, abs_eps = 0, rel_eps = rel_eps, 
@@ -262,36 +260,48 @@ gr <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE,
 # check output at the starting values
 system.time(ll <- -fn(c(beta, sc)))
 #>    user  system elapsed 
-#>   7.892   0.004   1.995
+#>   7.508   0.000   1.917
 ll # the log likelihood at the starting values
-#> [1] -26011
+#> [1] -26042
 system.time(gr_val <- gr(c(beta, sc)))
 #>    user  system elapsed 
-#>  32.901   0.000   8.394
+#>  34.175   0.012   8.924
 gr_val # the gradient at the starting values
-#> [1] 1893.76562 -545.43927 -238.06966   47.20176  -48.23157
+#> [1] 1889.61 -550.85 -235.72   47.34  -47.96
 #> attr(,"value")
-#> [1] 26011.03
+#> [1] 26043
 
-# variance of the approximation
+# standard deviation of the approximation
 sd(sapply(1:25, function(seed) fn(c(beta, sc), seed = seed)))
-#> [1] 0.08668047
+#> [1] 0.09254
+
+# we do the same for the gradient elements but only for a subset of the 
+# log marginal likelihood elements
+gr_hats <- sapply(1:25, function(seed) gr(c(beta, sc), seed = seed, 
+                                          indices = 0:99))
+apply(gr_hats, 1, sd)
+#> [1] 0.14350 0.29321 0.16317 0.05283 0.06568
 
 # verify the gradient (may not be exactly equal due to MC error)
-numDeriv::grad(fn, c(beta, sc))
-#> [1] 1861.88878  216.55846  304.32079  -12.26919  -46.27824
+rbind(numDeriv = numDeriv::grad(fn, c(beta, sc), indices = 0:10, 
+                                rel_eps = 1e-3, maxvls = 1e6), 
+      pedmod   = gr(c(beta, sc), indices = 0:10, rel_eps = 1e-3, 
+                    maxvls = 1e6))
+#>           [,1]    [,2]  [,3]  [,4]   [,5]
+#> numDeriv 27.99 -0.2912 7.416 1.105 -1.075
+#> pedmod   27.98 -0.3203 7.424 1.105 -1.076
 
 # optimize the log likelihood approximation
 system.time(opt <- optim(c(beta, sc), fn, gr, method = "BFGS"))
 #>     user   system  elapsed 
-#> 2646.498    0.019  678.535
+#> 2425.120    0.048  620.494
 ```
 
 The output from the optimization is shown below:
 
 ``` r
 -opt$value      # the maximum log likelihood
-#> [1] -25791
+#> [1] -25823
 opt$convergence # check convergence
 #> [1] 0
 
@@ -299,15 +309,15 @@ opt$convergence # check convergence
 rbind(truth     = dat$beta, 
       estimated = head(opt$par, length(dat$beta)))
 #>           (Intercept)     X1    X2
-#> truth          -1.000 0.3000 0.200
-#> estimated      -1.017 0.3068 0.189
+#> truth         -1.0000 0.3000 0.200
+#> estimated     -0.9965 0.3022 0.183
 
 # compare estimated scale parameters with the true values
 rbind(truth     = dat$sc, 
       estimated = exp(tail(opt$par, length(dat$sc))))
 #>           Gentic Maternal
 #> truth     0.5000   0.3300
-#> estimated 0.5642   0.3525
+#> estimated 0.4696   0.3736
 ```
 
 ### Computation in Parallel
@@ -326,20 +336,13 @@ microbenchmark(
   `gr (4 threads)` = gr(c(beta, sc), n_threads = 4),
   times = 3)
 #> Unit: seconds
-#>            expr       min        lq      mean    median        uq       max
-#>   fn (1 thread)  7.446051  7.460586  7.520465  7.475122  7.557673  7.640224
-#>  fn (2 threads)  3.784194  3.784356  3.785882  3.784519  3.786726  3.788934
-#>  fn (4 threads)  1.957820  1.975745  1.988392  1.993669  2.003678  2.013687
-#>   gr (1 thread) 28.718582 28.741266 28.750657 28.763950 28.766694 28.769438
-#>  gr (2 threads) 14.632176 14.759819 14.871989 14.887462 14.991896 15.096330
-#>  gr (4 threads)  7.571400  7.744695  7.899354  7.917990  8.063331  8.208673
-#>  neval
-#>      3
-#>      3
-#>      3
-#>      3
-#>      3
-#>      3
+#>            expr    min     lq   mean median     uq    max neval
+#>   fn (1 thread)  7.446  7.450  7.583  7.453  7.652  7.851     3
+#>  fn (2 threads)  3.735  3.821  3.877  3.907  3.949  3.991     3
+#>  fn (4 threads)  1.982  1.984  2.009  1.985  2.022  2.059     3
+#>   gr (1 thread) 30.358 30.667 30.778 30.976 30.988 30.999     3
+#>  gr (2 threads) 17.147 17.180 17.237 17.214 17.283 17.352     3
+#>  gr (4 threads)  9.062  9.095  9.332  9.128  9.467  9.807     3
 ```
 
 ### Using ADAM
@@ -440,24 +443,24 @@ system.time(
                    n_blocks = 10L, alpha = 1e-2, maxit = maxit, 
                    verbose = FALSE, maxvls = maxpts_use, 
                    minvls = minvls))
-#>     user   system  elapsed 
-#> 1992.353    0.045  513.645
+#>    user  system elapsed 
+#> 2085.19    0.02  537.20
 ```
 
 The result is shown below.
 
 ``` r
 -fn(adam_res$par) # the maximum log likelihood
-#> [1] -25792
+#> [1] -25823
 
 # compare the estimated fixed effects with the true values
 rbind(truth             = dat$beta,
       `estimated optim` = head(opt$par     , length(dat$beta)),
       `estimated ADAM`  = head(adam_res$par, length(dat$beta)))
 #>                 (Intercept)     X1     X2
-#> truth                -1.000 0.3000 0.2000
-#> estimated optim      -1.017 0.3068 0.1890
-#> estimated ADAM       -1.005 0.3066 0.1856
+#> truth               -1.0000 0.3000 0.2000
+#> estimated optim     -0.9965 0.3022 0.1830
+#> estimated ADAM      -1.0046 0.3066 0.1856
 
 # compare estimated scale parameters with the true values
 rbind(truth             = dat$sc, 
@@ -465,7 +468,7 @@ rbind(truth             = dat$sc,
       `estimated ADAM`  = exp(tail(adam_res$par, length(dat$sc))))
 #>                 Gentic Maternal
 #> truth           0.5000   0.3300
-#> estimated optim 0.5642   0.3525
+#> estimated optim 0.4696   0.3736
 #> estimated ADAM  0.5160   0.3639
 
 # could possibly have stopped much earlier maybe. Dashed lines are final 
@@ -572,7 +575,7 @@ The new implementation is faster when the approximation is used:
 ``` r
 rowMeans(sim_res[, "time", ])
 #>          mvtnorm mvndst (no aprx) mvndst (w/ aprx) 
-#>          0.01760          0.01679          0.01115
+#>          0.01710          0.01664          0.01097
 par(mar = c(5, 4, 1, 1))
 boxplot(t(sim_res[, "time", ]))
 ```

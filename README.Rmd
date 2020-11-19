@@ -53,11 +53,11 @@ the heritability. The scale parameters, the $\sigma_k^2$s, may be the
 primary interest in an analysis.
 
 This package provides randomized quasi Monte Carlo methods to approximate 
-the marginal log likelihood for these types of 
+the log marginal likelihood for these types of 
 models with an arbitrary number scale matrices, $K$, and the derivatives 
 with respect to $(\vec\beta^\top, 2\log\sigma_1,\dots, 2\log\sigma_K)^\top$.
 We have re-written the Fortran code by @Genz02 in C++, made it easy to 
-extend from a marginal log likelihood approximation to other approximations 
+extend from a log marginal likelihood approximation to other approximations 
 such as the derivatives, and added less precise but faster approximations 
 of the $\Phi$ and $\Phi^{-1}$. Our own experience suggests that using the 
 latter has a small effect on the precision of the result but can yield 
@@ -79,6 +79,13 @@ Since the implementation is easy to extend, possible extensions are:
     multinomial outcomes with a probit link. The method we use here may be
     beneficial if the number of random effects per cluster is not much 
     smaller then the number observations in each cluster.
+    
+## Installation
+The package can be installed from Github by calling:
+
+```{r how_to_install, eval = FALSE}
+remotes::install_github("boennecd/pedmod")
+```
 
 ## Example
 
@@ -172,8 +179,7 @@ sc <- rep(log(.2), 2)
 # check log likelihood at the starting values. First we assign a function 
 # to approximate the log likelihood and the gradient
 fn <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE, 
-               n_threads = 4L, indices = seq_along(dat_arg), 
-               maxvls = 10000L){
+               n_threads = 4L, indices = NULL, maxvls = 10000L){
   set.seed(seed)
   -eval_pedigree_ll(
     ll_terms, par = par, maxvls = maxvls, abs_eps = 0, rel_eps = rel_eps, 
@@ -181,8 +187,7 @@ fn <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE,
     indices = indices)
 }
 gr <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE, 
-               n_threads = 4L, indices = seq_along(dat_arg), 
-               maxvls = 10000L){
+               n_threads = 4L, indices = NULL, maxvls = 10000L){
   set.seed(seed)
   out <- -eval_pedigree_grad(
     ll_terms, par = par, maxvls = maxvls, abs_eps = 0, rel_eps = rel_eps, 
@@ -197,11 +202,20 @@ ll # the log likelihood at the starting values
 system.time(gr_val <- gr(c(beta, sc)))
 gr_val # the gradient at the starting values
 
-# variance of the approximation
+# standard deviation of the approximation
 sd(sapply(1:25, function(seed) fn(c(beta, sc), seed = seed)))
 
+# we do the same for the gradient elements but only for a subset of the 
+# log marginal likelihood elements
+gr_hats <- sapply(1:25, function(seed) gr(c(beta, sc), seed = seed, 
+                                          indices = 0:99))
+apply(gr_hats, 1, sd)
+
 # verify the gradient (may not be exactly equal due to MC error)
-numDeriv::grad(fn, c(beta, sc))
+rbind(numDeriv = numDeriv::grad(fn, c(beta, sc), indices = 0:10, 
+                                rel_eps = 1e-3, maxvls = 1e6), 
+      pedmod   = gr(c(beta, sc), indices = 0:10, rel_eps = 1e-3, 
+                    maxvls = 1e6))
 
 # optimize the log likelihood approximation
 system.time(opt <- optim(c(beta, sc), fn, gr, method = "BFGS"))
@@ -222,7 +236,7 @@ rbind(truth     = dat$sc,
       estimated = exp(tail(opt$par, length(dat$sc))))
 ```
 
-```{r, eval = FALSE, echo = FALSE}
+```{r svrg, eval = FALSE, echo = FALSE}
 #####
 # performs stochastic gradient descent instead (using SVRG).
 #

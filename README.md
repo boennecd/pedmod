@@ -23,11 +23,11 @@ Y_{ij} \\mid \\epsilon_{ij} = e
 \\end{align*}")  
 
 where ![Y\_{ij}](https://latex.codecogs.com/svg.latex?Y_%7Bij%7D
-"Y_{ij}") is the binary outcome of interest for indvidual
+"Y_{ij}") is the binary outcome of interest for individual
 ![j](https://latex.codecogs.com/svg.latex?j "j") in family/cluster
 ![i](https://latex.codecogs.com/svg.latex?i "i"), ![\\vec
 x\_{ij}](https://latex.codecogs.com/svg.latex?%5Cvec%20x_%7Bij%7D
-"\\vec x_{ij}") is the indvidual’s known covariates,
+"\\vec x_{ij}") is the individual’s known covariates,
 ![\\Phi](https://latex.codecogs.com/svg.latex?%5CPhi "\\Phi") is the
 standard normal distribution’s CDF, and
 ![\\text{Bin}](https://latex.codecogs.com/svg.latex?%5Ctext%7BBin%7D
@@ -77,11 +77,11 @@ other approximations such as the derivatives, and added less precise but
 faster approximations of the
 ![\\Phi](https://latex.codecogs.com/svg.latex?%5CPhi "\\Phi") and
 ![\\Phi^{-1}](https://latex.codecogs.com/svg.latex?%5CPhi%5E%7B-1%7D
-"\\Phi^{-1}"). Our own experince suggests that using the latter has a
+"\\Phi^{-1}"). Our own experience suggests that using the latter has a
 small effect on the precision of the result but can yield substantial
 reduction in computation times for moderate sized families/clusters.
 
-The approximation by Genz and Bretz (2002) have alrady been used to
+The approximation by Genz and Bretz (2002) have already been used to
 estimate these types of models (Pawitan et al. 2004). However, not
 having the gradients may slow down estimation substantially. Moreover,
 our implementation supports computation in parallel which is a major
@@ -128,9 +128,69 @@ sum(sapply(dat$sim_data, function(x) length(x$y)))
 
 # average event rate
 mean(unlist(sapply(dat$sim_data, `[[`, "y")))
-#> [1] 0.2385692
+#> [1] 0.2386
+```
 
-# TODO: show more about the families
+As Mahjani et al. (2020), we have data families linked by three
+generations but we only have data for the last generation. We illustrate
+this with the first family in the simulated data set:
+
+``` r
+# this is the full family 
+library(kinship2)
+fam1 <- dat$sim_data[[1L]]
+plot(fam1$pedAll)
+```
+
+<img src="man/figures/README-one_family-1.png" width="100%" />
+
+``` r
+# here is the C matrix for the genetic effect
+rev_img <- function(x, ...)
+  image(x[, NROW(x):1], ...)
+cl <- colorRampPalette(c("Red", "White", "Blue"))(101)
+
+par(mar = c(2, 2, 1, 1))
+rev_img(fam1$rel_mat, xaxt = "n", yaxt = "n", col = cl, 
+        zlim = c(-1, 1))
+```
+
+<img src="man/figures/README-one_family-2.png" width="100%" />
+
+``` r
+# the first part of the matrix is given below
+with(fam1, rel_mat[seq_len(min(10, NROW(rel_mat))), 
+                   seq_len(min(10, NROW(rel_mat)))])
+#>        9    10    15    16    17    21    22    28    29    36
+#> 9  1.000 0.500 0.125 0.125 0.125 0.000 0.000 0.125 0.125 0.000
+#> 10 0.500 1.000 0.125 0.125 0.125 0.000 0.000 0.125 0.125 0.000
+#> 15 0.125 0.125 1.000 0.500 0.500 0.125 0.125 0.000 0.000 0.000
+#> 16 0.125 0.125 0.500 1.000 0.500 0.125 0.125 0.000 0.000 0.000
+#> 17 0.125 0.125 0.500 0.500 1.000 0.125 0.125 0.000 0.000 0.000
+#> 21 0.000 0.000 0.125 0.125 0.125 1.000 0.500 0.000 0.000 0.000
+#> 22 0.000 0.000 0.125 0.125 0.125 0.500 1.000 0.000 0.000 0.000
+#> 28 0.125 0.125 0.000 0.000 0.000 0.000 0.000 1.000 0.500 0.125
+#> 29 0.125 0.125 0.000 0.000 0.000 0.000 0.000 0.500 1.000 0.125
+#> 36 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.125 0.125 1.000
+
+# here is the C matrix for the maternal effect
+rev_img(fam1$met_mat, xaxt = "n", yaxt = "n", col = cl, 
+        zlim = c(-1, 1))
+```
+
+<img src="man/figures/README-one_family-3.png" width="100%" />
+
+``` r
+# each simulated family has such two matrices in addition to a design matrix
+# for the fixed effects, X, and a vector with outcomes, y
+str(fam1[c("X", "y")])
+#> List of 2
+#>  $ X: num [1:52, 1:3] 1 1 1 1 1 1 1 1 1 1 ...
+#>   ..- attr(*, "dimnames")=List of 2
+#>   .. ..$ : NULL
+#>   .. ..$ : chr [1:3] "(Intercept)" "X1" ""
+#>  $ y: Named logi [1:52] FALSE TRUE TRUE TRUE FALSE FALSE ...
+#>   ..- attr(*, "names")= chr [1:52] "9" "10" "15" "16" ...
 ```
 
 Then we perform the model estimation:
@@ -231,23 +291,55 @@ The output from the optimization is shown below:
 
 ``` r
 -opt$value      # the maximum log likelihood
-#> [1] -25791.25
+#> [1] -25791
 opt$convergence # check convergence
 #> [1] 0
 
 # compare the estimated fixed effects with the true values
 rbind(truth     = dat$beta, 
       estimated = head(opt$par, length(dat$beta)))
-#>           (Intercept)        X1        X2
-#> truth       -1.000000 0.3000000 0.2000000
-#> estimated   -1.016517 0.3067737 0.1889867
+#>           (Intercept)     X1    X2
+#> truth          -1.000 0.3000 0.200
+#> estimated      -1.017 0.3068 0.189
 
 # compare estimated scale parameters with the true values
 rbind(truth     = dat$sc, 
       estimated = exp(tail(opt$par, length(dat$sc))))
-#>              Gentic  Maternal
-#> truth     0.5000000 0.3300000
-#> estimated 0.5642374 0.3524706
+#>           Gentic Maternal
+#> truth     0.5000   0.3300
+#> estimated 0.5642   0.3525
+```
+
+### Computation in Parallel
+
+The method scales reasonably well in the number of threads as shown
+below:
+
+``` r
+library(microbenchmark)
+microbenchmark(
+  `fn (1 thread)`  = fn(c(beta, sc), n_threads = 1),
+  `fn (2 threads)` = fn(c(beta, sc), n_threads = 2),
+  `fn (4 threads)` = fn(c(beta, sc), n_threads = 4),
+  `gr (1 thread)`  = gr(c(beta, sc), n_threads = 1),
+  `gr (2 threads)` = gr(c(beta, sc), n_threads = 2),
+  `gr (4 threads)` = gr(c(beta, sc), n_threads = 4),
+  times = 3)
+#> Unit: seconds
+#>            expr       min        lq      mean    median        uq       max
+#>   fn (1 thread)  7.446051  7.460586  7.520465  7.475122  7.557673  7.640224
+#>  fn (2 threads)  3.784194  3.784356  3.785882  3.784519  3.786726  3.788934
+#>  fn (4 threads)  1.957820  1.975745  1.988392  1.993669  2.003678  2.013687
+#>   gr (1 thread) 28.718582 28.741266 28.750657 28.763950 28.766694 28.769438
+#>  gr (2 threads) 14.632176 14.759819 14.871989 14.887462 14.991896 15.096330
+#>  gr (4 threads)  7.571400  7.744695  7.899354  7.917990  8.063331  8.208673
+#>  neval
+#>      3
+#>      3
+#>      3
+#>      3
+#>      3
+#>      3
 ```
 
 ### Using ADAM
@@ -356,25 +448,25 @@ The result is shown below.
 
 ``` r
 -fn(adam_res$par) # the maximum log likelihood
-#> [1] -25791.57
+#> [1] -25792
 
 # compare the estimated fixed effects with the true values
 rbind(truth             = dat$beta,
       `estimated optim` = head(opt$par     , length(dat$beta)),
       `estimated ADAM`  = head(adam_res$par, length(dat$beta)))
-#>                 (Intercept)        X1        X2
-#> truth             -1.000000 0.3000000 0.2000000
-#> estimated optim   -1.016517 0.3067737 0.1889867
-#> estimated ADAM    -1.004550 0.3066084 0.1855774
+#>                 (Intercept)     X1     X2
+#> truth                -1.000 0.3000 0.2000
+#> estimated optim      -1.017 0.3068 0.1890
+#> estimated ADAM       -1.005 0.3066 0.1856
 
 # compare estimated scale parameters with the true values
 rbind(truth             = dat$sc, 
       `estimated optim` = exp(tail(opt$par     , length(dat$sc))), 
       `estimated ADAM`  = exp(tail(adam_res$par, length(dat$sc))))
-#>                    Gentic  Maternal
-#> truth           0.5000000 0.3300000
-#> estimated optim 0.5642374 0.3524706
-#> estimated ADAM  0.5159528 0.3639202
+#>                 Gentic Maternal
+#> truth           0.5000   0.3300
+#> estimated optim 0.5642   0.3525
+#> estimated ADAM  0.5160   0.3639
 
 # could possibly have stopped much earlier maybe. Dashed lines are final 
 # estimates
@@ -456,7 +548,7 @@ They have about the same average relative error as expected:
 ``` r
 rowMeans(sim_res[, "SE", ])
 #>          mvtnorm mvndst (no aprx) mvndst (w/ aprx) 
-#>     0.0000282989     0.0000316296     0.0164280867
+#>        2.830e-05        3.163e-05        1.643e-02
 par(mar = c(5, 4, 1, 1))
 boxplot(t(sim_res[, "SE", ]))
 ```
@@ -469,7 +561,7 @@ sum(keep <- colSums(sim_res[, "SE", ] > .5) < 1)
 #> [1] 99
 rowMeans(sim_res [, "SE", keep])
 #>          mvtnorm mvndst (no aprx) mvndst (w/ aprx) 
-#>     2.831528e-05     3.176110e-05     3.157978e-05
+#>        2.832e-05        3.176e-05        3.158e-05
 boxplot(t(sim_res[, "SE", keep]))
 ```
 
@@ -480,7 +572,7 @@ The new implementation is faster when the approximation is used:
 ``` r
 rowMeans(sim_res[, "time", ])
 #>          mvtnorm mvndst (no aprx) mvndst (w/ aprx) 
-#>       0.01759767       0.01678964       0.01114578
+#>          0.01760          0.01679          0.01115
 par(mar = c(5, 4, 1, 1))
 boxplot(t(sim_res[, "time", ]))
 ```

@@ -13,6 +13,7 @@ knitr::opts_chunk$set(
   cache.path = "cache/README-",
   out.width = "100%", fig.width = 7, fig.height = 4
 )
+options(digits = 4)
 ```
 
 # pedmod: Pedigree Models
@@ -29,8 +30,8 @@ Y_{ij} \mid \epsilon_{ij} = e
   \right)
 \end{align*}$$
 
-where $Y_{ij}$ is the binary outcome of interest for indvidual $j$ in 
-family/cluster $i$, $\vec x_{ij}$ is the indvidual's known covariates, 
+where $Y_{ij}$ is the binary outcome of interest for individual $j$ in 
+family/cluster $i$, $\vec x_{ij}$ is the individual's known covariates, 
 $\Phi$ is the standard normal distribution's CDF, and 
 $\text{Bin}$ implies a binomial distribution such if 
 $z\sim \text{Bin}(p, n)$ then the density of $z$ is:
@@ -58,12 +59,12 @@ with respect to $(\vec\beta^\top, 2\log\sigma_1,\dots, 2\log\sigma_K)^\top$.
 We have re-written the Fortran code by @Genz02 in C++, made it easy to 
 extend from a marginal log likelihood approximation to other approximations 
 such as the derivatives, and added less precise but faster approximations 
-of the $\Phi$ and $\Phi^{-1}$. Our own experince suggests that using the 
+of the $\Phi$ and $\Phi^{-1}$. Our own experience suggests that using the 
 latter has a small effect on the precision of the result but can yield 
 substantial reduction in computation times for moderate sized 
 families/clusters.
 
-The approximation by @Genz02 have alrady been used to estimate these 
+The approximation by @Genz02 have already been used to estimate these 
 types of models [@Pawitan04]. However, not having the gradients may slow 
 down estimation substantially. Moreover, our implementation supports 
 computation in parallel which is a major advantage given the 
@@ -101,8 +102,35 @@ sum(sapply(dat$sim_data, function(x) length(x$y)))
 
 # average event rate
 mean(unlist(sapply(dat$sim_data, `[[`, "y")))
+```
 
-# TODO: show more about the families
+As @Mahjani20, we have data families linked by three generations but we 
+only have data for the last generation. We illustrate this with the first 
+family in the simulated data set:
+
+```{r one_family}
+# this is the full family 
+library(kinship2)
+fam1 <- dat$sim_data[[1L]]
+plot(fam1$pedAll)
+# here is the C matrix for the genetic effect
+rev_img <- function(x, ...)
+  image(x[, NROW(x):1], ...)
+cl <- colorRampPalette(c("Red", "White", "Blue"))(101)
+
+par(mar = c(2, 2, 1, 1))
+rev_img(fam1$rel_mat, xaxt = "n", yaxt = "n", col = cl, 
+        zlim = c(-1, 1))
+# the first part of the matrix is given below
+with(fam1, rel_mat[seq_len(min(10, NROW(rel_mat))), 
+                   seq_len(min(10, NROW(rel_mat)))])
+
+# here is the C matrix for the maternal effect
+rev_img(fam1$met_mat, xaxt = "n", yaxt = "n", col = cl, 
+        zlim = c(-1, 1))
+# each simulated family has such two matrices in addition to a design matrix
+# for the fixed effects, X, and a vector with outcomes, y
+str(fam1[c("X", "y")])
 ```
 
 Then we perform the model estimation:
@@ -267,6 +295,28 @@ svrg <- function(par, gr, n_clust, batch_size, maxit = 10L,
 set.seed(1)
 svrg_res <- svrg(c(beta, sc), gr = gr, n_clust = length(dat_arg), 
                  batch_size = 200L, lr = 2e-3, verbose = TRUE, maxit = 50L)
+```
+
+### Computation in Parallel
+
+```{r pre_comp_par, echo = FALSE}
+library(pedmod)
+ll_terms <- get_pedigree_ll_terms(dat_arg, max_threads = 4L)
+```
+
+The method scales reasonably well in the number of threads as 
+shown below:
+
+```{r time_mult, cache = 1}
+library(microbenchmark)
+microbenchmark(
+  `fn (1 thread)`  = fn(c(beta, sc), n_threads = 1),
+  `fn (2 threads)` = fn(c(beta, sc), n_threads = 2),
+  `fn (4 threads)` = fn(c(beta, sc), n_threads = 4),
+  `gr (1 thread)`  = gr(c(beta, sc), n_threads = 1),
+  `gr (2 threads)` = gr(c(beta, sc), n_threads = 2),
+  `gr (4 threads)` = gr(c(beta, sc), n_threads = 4),
+  times = 3)
 ```
 
 ### Using ADAM

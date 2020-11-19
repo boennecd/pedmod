@@ -143,7 +143,7 @@ sim_fam <- function(rchild, rmatch, max_depth = 2L, max_members = 100L){
 #####
 # parameters. Start with family settings
 function(
-  max_depth = 2L, max_members = 50L,
+  max_depth = 2L, max_members = 150L,
   sc = c(Gentic = .5, Maternal = .33),
   n_families = 100L, do_plot = FALSE,
   gen_X = function(n)

@@ -45,6 +45,10 @@ struct pedigree_terms {
 
       arma::mat const X = Rcpp::as<arma::mat>(xl["X"]);
       arma::vec const y = Rcpp::as<arma::vec>(xl["y"]);
+      if(y.n_elem > 1000 or y.n_elem < 1)
+        throw std::invalid_argument(
+            "pedigree_terms: Either dimension zero or dimension greater than 1000");
+
       std::vector<arma::mat> scale_mats;
       scale_mats.reserve(s_mats.size());
       for(auto &s : s_mats)

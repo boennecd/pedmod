@@ -2,6 +2,7 @@
 output: 
   github_document: 
     pandoc_args: --webtex=https://latex.codecogs.com/svg.latex?
+bibliography: ref.bib
 ---
 
 ```{r setup, include = FALSE}
@@ -16,23 +17,72 @@ knitr::opts_chunk$set(
 
 # pedmod: Pedigree Models
 
-The pedmod package provides function to estimate models for pedigree data. 
-Particularly, the package provides functions to estimate mixed  models of 
+The pedmod package provides functions to estimate models for pedigree data. 
+Particularly, the package provides functions to estimate mixed models of 
 the form:
 
 $$\begin{align*}
-Y_{ij} &= \text{Bin}(\Phi(\vec\beta^\top\vec x_{ij} + \epsilon_{ij}), 1) \\
+Y_{ij} \mid \epsilon_{ij} = e 
+  &\sim \text{Bin}(\Phi(\vec\beta^\top\vec x_{ij} + e), 1) \\
 \vec\epsilon_i &= (\epsilon_{i1}, \dots, \epsilon_{in_i})^\top \sim
   N^{(n_i)}\left(\vec 0, \sum_{l = 1}^K\sigma_l^2 C_{il}
   \right)
 \end{align*}$$
 
+where $Y_{ij}$ is the binary outcome of interest for indvidual $j$ in 
+family/cluster $i$, $\vec x_{ij}$ is the indvidual's known covariates, 
+$\Phi$ is the standard normal distribution's CDF, and 
+$\text{Bin}$ implies a binomial distribution such if 
+$z\sim \text{Bin}(p, n)$ then the density of $z$ is:
 
+$$
+f(z) = \begin{pmatrix} n \\ z \end{pmatrix}p^zp^{n-z}
+$$
+
+The $C_{il}$s are known scale/correlation matrices where each of the $l$'th 
+types correspond to a type of effect. A 
+typical example is that $C_{il}$ is two times the kinship matrix in which 
+case we call:
+
+$$
+\frac{\sigma_l^2}{1 + \sum_{k = 1}^K\sigma_k^2}
+$$
+
+the heritability. The scale parameters, the $\sigma_k^2$s, may be the 
+primary interest in an analysis.
+
+This package provides randomized quasi Monte Carlo methods to approximate 
+the marginal log likelihood for these types of 
+models with an arbitrary number scale matrices, $K$, and the derivatives 
+with respect to $(\vec\beta^\top, 2\log\sigma_1,\dots, 2\log\sigma_K)^\top$.
+We have re-written the Fortran code by @Genz02 in C++, made it easy to 
+extend from a marginal log likelihood approximation to other approximations 
+such as the derivatives, and added less precise but faster approximations 
+of the $\Phi$ and $\Phi^{-1}$. Our own experince suggests that using the 
+latter has a small effect on the precision of the result but can yield 
+substantial reduction in computation times for moderate sized 
+families/clusters.
+
+The approximation by @Genz02 have alrady been used to estimate these 
+types of models [@Pawitan04]. However, not having the gradients may slow 
+down estimation substantially. Moreover, our implementation supports 
+computation in parallel which is a major advantage given the 
+availability of multi-core processors. 
+
+Since the implementation is easy to extend, possible extensions are: 
+
+ 1. Survival times using mixed generalized survival models [@Liu17] with 
+    a similar random effect structure as the model shown above. This way, 
+    one avoids dichotomizing outcomes and can account for censoring.
+ 2. Generalized linear mixed model with binary, binomial, ordinal, or 
+    multinomial outcomes with a probit link. The method we use here may be
+    beneficial if the number of random effects per cluster is not much 
+    smaller then the number observations in each cluster.
 
 ## Example
 
 First, we source a file to get a function to simulate a data set with 
-a maternal effect and a genetic effect:
+a maternal effect and a genetic effect like in @Mahjani20:
 
 ```{r source_sim_file}
 # souce the file to get the simulation function
@@ -43,8 +93,9 @@ set.seed(68167102)
 dat <- sim_pedigree_data(n_families = 1000L)
 
 # distribution of family sizes
-table(sapply(dat$sim_data, function(x) length(x$y)))
-
+par(mar = c(5, 4, 1, 1))
+plot(table(sapply(dat$sim_data, function(x) length(x$y))), 
+     xlab = "Family size", ylab = "Number of families", bty = "l")
 # total number of observations
 sum(sapply(dat$sim_data, function(x) length(x$y)))
 
@@ -56,10 +107,13 @@ mean(unlist(sapply(dat$sim_data, `[[`, "y")))
 
 Then we perform the model estimation:
 
+<!-- knitr::opts_knit$set(output.dir = ".") -->
+<!-- knitr::load_cache("est_mod", path = "cache/README-") -->
+
 ```{r est_mod, cache=1}
 # the true parameters are
 dat$beta
-dat$sc
+dat$sc # the sigmas squared
 
 # prepare the data to pass to the functions in the package
 dat_arg <- lapply(dat$sim_data, function(x){
@@ -216,8 +270,17 @@ svrg_res <- svrg(c(beta, sc), gr = gr, n_clust = length(dat_arg),
 ```
 
 ### Using ADAM
-We use stochastic gradient descent with the ADAM method in this section. 
-We define a function to do so below and use it to estimate the model.
+We use stochastic gradient descent with the ADAM method [@Kingma15] in 
+this section. We define a function below to apply ADAM and use it 
+to estimate the model.
+
+<!-- knitr::opts_knit$set(output.dir = ".") -->
+<!-- knitr::load_cache("use_adam", path = "cache/README-") -->
+
+```{r re_create_ptr, echo = FALSE}
+library(pedmod)
+ll_terms <- get_pedigree_ll_terms(dat_arg, max_threads = 4L)
+```
 
 ```{r use_adam, cache = 1}
 #####
@@ -296,7 +359,6 @@ maxpts_use <- exp(seq(log(2 * minvls), log(maxpts), length.out = maxit))
 par(mar = c(5, 4, 1, 1))
 plot(maxpts_use, pch = 16, xlab = "Iteration number", bty = "l",
      ylab = "Maximum number of samples", ylim = range(0, maxpts_use))
-
 set.seed(1)
 system.time(
   adam_res <- adam(c(beta, sc), gr = gr, n_clust = length(dat_arg), 
@@ -307,22 +369,38 @@ system.time(
 
 The result is shown below.
 
+```{r adam_re_create_ptr, echo = FALSE}
+library(pedmod)
+ll_terms <- get_pedigree_ll_terms(dat_arg, max_threads = 4L)
+```
+
 ```{r res_adam}
 -fn(adam_res$par) # the maximum log likelihood
 
 # compare the estimated fixed effects with the true values
-rbind(truth     = dat$beta, 
-      estimated = head(adam_res$par, length(dat$beta)))
+rbind(truth             = dat$beta,
+      `estimated optim` = head(opt$par     , length(dat$beta)),
+      `estimated ADAM`  = head(adam_res$par, length(dat$beta)))
 
 # compare estimated scale parameters with the true values
-rbind(truth     = dat$sc, 
-      estimated = exp(tail(adam_res$par, length(dat$sc))))
+rbind(truth             = dat$sc, 
+      `estimated optim` = exp(tail(opt$par     , length(dat$sc))), 
+      `estimated ADAM`  = exp(tail(adam_res$par, length(dat$sc))))
+
+# could possibly have stopped much earlier maybe. Dashed lines are final 
+# estimates
+par(mar = c(5, 4, 1, 1))
+matplot(t(adam_res$estimates), type = "l", col = "Black", lty = 1, 
+        bty = "l", xlab = "Iteration", ylab = "Estimate")
+for(s in adam_res$par)
+  abline(h = s, lty = 2)
 ```
 
 ### The Multivariate Normal CDF Approximation
 
 We compare the multivariate normal CDF approximation in this section 
-with the approximation from the mvtnorm package. The same algorithm is used 
+with the approximation from the mvtnorm package which uses the implementation 
+by @Genz02. The same algorithm is used 
 but the version in this package is re-written in C++ and differs slightly.
 Moreover, we have implemented an approximation of the standard normal CDF
 and its inverse which reduces the computation time as we will show below.
@@ -387,7 +465,6 @@ They have about the same average relative error as expected:
 rowMeans(sim_res[, "SE", ])
 par(mar = c(5, 4, 1, 1))
 boxplot(t(sim_res[, "SE", ]))
-
 # without extreme values
 sum(keep <- colSums(sim_res[, "SE", ] > .5) < 1)
 rowMeans(sim_res [, "SE", keep])
@@ -401,3 +478,5 @@ rowMeans(sim_res[, "time", ])
 par(mar = c(5, 4, 1, 1))
 boxplot(t(sim_res[, "time", ]))
 ```
+
+## References

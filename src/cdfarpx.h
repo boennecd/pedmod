@@ -198,6 +198,9 @@ public:
     })()),
     indices(infin.end(), ndim, false) {
     /* checks */
+    if(lower_in.n_elem > 1000 or lower_in.n_elem < 1)
+      throw std::invalid_argument("cdf<T_Functor, out_type>: Either dimension zero or dimension greater than 1000");
+
 #ifdef DO_CHECKS
     if(sigma_in.n_cols != static_cast<size_t>(ndim) or
          sigma_in.n_rows != static_cast<size_t>(ndim))

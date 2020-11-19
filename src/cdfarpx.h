@@ -413,15 +413,17 @@ public:
 #endif
 
     // setup
-    std::unique_ptr<double[]> int_apprx(new double[n_integrands]);
+    // needs to have at least n_integrands memory to use.
+    double * const int_apprx = functor.get_wk_mem();
+
     auto sampler = parallelrng::get_unif_drawer();
 
     if(ndim == 1L){
       /* handle the one-dimensional case as a special case */
-      functor.univariate(int_apprx.get(), lower[0], upper[0]);
+      functor.univariate(int_apprx, lower[0], upper[0]);
       indices[0] = 0;
 
-      return functor.get_output(int_apprx.get(), 0, 0, 0,
+      return functor.get_output(int_apprx, 0, 0, 0,
                                 indices.begin());
 
     } else if(std::isinf(*sigma_chol.begin()))
@@ -430,9 +432,9 @@ public:
     /* perform the approximation */
     auto res = rand_Korobov<cdf<T_Functor> >::comp(
       *this, ndim, minvls, maxvls, n_integrands, abs_eps, rel_eps,
-      int_apprx.get(), sampler);
+      int_apprx, sampler);
 
-    return functor.get_output(int_apprx.get(), res.minvls, res.inform,
+    return functor.get_output(int_apprx, res.minvls, res.inform,
                               res.abserr, indices.begin());
   }
 };
@@ -446,11 +448,18 @@ cache_mem<double> cdf<T_Functor, out_type>::dmem;
  * functor classes used as template argument for cdf used to approximate the
  * likelihood. */
 class likelihood {
+  static cache_mem<double> dmen;
+
 public:
   static void set_cache
   (unsigned const max_dim, unsigned const max_threads){
     rand_Korobov<cdf<likelihood> >::set_cache(
         get_n_integrands(), max_dim, max_threads);
+    dmen.set_n_mem(1, max_threads);
+  }
+
+  double * get_wk_mem(){
+    return dmen.get_mem();
   }
 
   constexpr static int get_n_integrands() {
@@ -532,6 +541,9 @@ private:
   /// points to the upper triangular part of the inverse.
   double * sig_inv;
 
+  /// working memory to be used by cdf
+  double * cdf_mem;
+
 public:
   /// sets the scale matrices. There are no checks on the validity
   pedigree_l_factor(std::vector<arma::mat> const &scale_mats,
@@ -548,12 +560,17 @@ public:
     // setup working memory
     rand_Korobov<cdf<pedigree_l_factor> >::set_cache(
         get_n_integrands(), n_mem, max_threads);
-    dmem.set_n_mem(2 * n_mem * n_mem + n_mem * (n_mem + 1),
-                   max_threads);
+    dmem.set_n_mem(
+      2 * n_mem * n_mem + n_mem * (n_mem + 1) + get_n_integrands(),
+      max_threads);
   }
 
   inline int get_n_integrands() PEDMOD_NOEXCEPT {
     return 1 + n_mem + scale_mats.size();
+  }
+
+  double * get_wk_mem(){
+    return cdf_mem;
   }
 
   constexpr static bool needs_last_unif() {
@@ -592,6 +609,8 @@ public:
       throw std::runtime_error("pedigree_ll_factor::setup: inv_sympd failed");
     sig_inv = sigma_chol_inv + (n_mem * (n_mem + 1)) / 2;
     copy_upper_tri(t1, sig_inv);
+
+    cdf_mem = sig_inv + (n_mem * (n_mem + 1)) / 2;
   }
 
   void prep_permutated(arma::mat const &sigma_permu) {

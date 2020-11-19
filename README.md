@@ -100,12 +100,12 @@ gr <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE,
 # check output at the starting values
 system.time(ll <- -fn(c(beta, sc)))
 #>    user  system elapsed 
-#>   0.966   0.000   0.242
+#>   0.973   0.000   0.245
 ll # the log likelihood at the starting values
 #> [1] -8687.09
 system.time(gr_val <- gr(c(beta, sc)))
 #>    user  system elapsed 
-#>   3.096   0.000   0.809
+#>   3.065   0.000   0.797
 gr_val # the gradient at the starting values
 #> [1]  635.879395 -175.241684  -83.048473   17.660212   -8.328734
 #> attr(,"value")
@@ -122,7 +122,7 @@ numDeriv::grad(fn, c(beta, sc))
 # optimize the log likelihood approximation
 system.time(opt <- optim(c(beta, sc), fn, gr, method = "BFGS"))
 #>    user  system elapsed 
-#> 212.942   0.005  54.377
+#> 211.815   0.000  54.146
 ```
 
 The output from the optimization is shown below:
@@ -165,7 +165,8 @@ We define a function to do so below and use it to estimate the model.
 #   maxit: maximum number of iteration.
 #   seed: seed to use.
 #   epsilon, alpha, beta_1, beta_2: ADAM parameters.
-#   maxvls: maximum number of samples to draw.
+#   maxvls: maximum number of samples to draw in each iteration. Thus, it 
+#           needs maxit elements.
 #   verbose: print output during the estimation.
 #   ...: arguments passed to gr.
 adam <- function(par, gr, n_clust, n_blocks, maxit = 10L,
@@ -242,7 +243,7 @@ system.time(
                    verbose = FALSE, maxvls = maxpts_use, 
                    minvls = minvls))
 #>    user  system elapsed 
-#> 272.938   0.000  69.320
+#> 282.378   0.088  71.864
 ```
 
 The result is shown below.
@@ -359,7 +360,7 @@ The new implementation is faster when the approximation is used:
 ``` r
 rowMeans(sim_res[, "time", ])
 #>          mvtnorm mvndst (no aprx) mvndst (w/ aprx) 
-#>       0.01707832       0.01653099       0.01094785
+#>       0.01759767       0.01678964       0.01114578
 par(mar = c(5, 4, 1, 1))
 boxplot(t(sim_res[, "time", ]))
 ```

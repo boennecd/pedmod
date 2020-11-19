@@ -1,5 +1,7 @@
 ---
-output: github_document
+output: 
+  github_document: 
+    pandoc_args: --webtex=https://latex.codecogs.com/svg.latex?
 ---
 
 ```{r setup, include = FALSE}
@@ -14,7 +16,18 @@ knitr::opts_chunk$set(
 
 # pedmod: Pedigree Models
 
-TODO: write about the package.
+The pedmod package provides function to estimate models for pedigree data. 
+Particularly, the package provides functions to estimate mixed  models of 
+the form:
+
+$$\begin{align*}
+Y_{ij} &= \text{Bin}(\Phi(\vec\beta^\top\vec x_{ij} + \epsilon_{ij}), 1) \\
+\vec\epsilon_i &= (\epsilon_{i1}, \dots, \epsilon_{in_i})^\top \sim
+  N^{(n_i)}\left(\vec 0, \sum_{l = 1}^K\sigma_l^2 C_{il}
+  \right)
+\end{align*}$$
+
+
 
 ## Example
 
@@ -218,7 +231,8 @@ We define a function to do so below and use it to estimate the model.
 #   maxit: maximum number of iteration.
 #   seed: seed to use.
 #   epsilon, alpha, beta_1, beta_2: ADAM parameters.
-#   maxvls: maximum number of samples to draw.
+#   maxvls: maximum number of samples to draw in each iteration. Thus, it 
+#           needs maxit elements.
 #   verbose: print output during the estimation.
 #   ...: arguments passed to gr.
 adam <- function(par, gr, n_clust, n_blocks, maxit = 10L,

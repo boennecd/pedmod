@@ -13,7 +13,7 @@ namespace pedmod {
 template<class T>
 class cache_mem {
   std::unique_ptr<T[]> mem;
-  size_t cur_max_threads = 0,
+  size_t cur_max_threads = 1,
                cur_n_mem = 0,
                cur_size  = 0;
 

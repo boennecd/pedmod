@@ -10,6 +10,8 @@ class pedigree_ll_term {
   /// design matrix for the fixed effects
   arma::mat const X;
 
+  static cache_mem<double> dmem;
+
 public:
   /// object to compute the likelihood factor
   pedigree_l_factor l_factor;
@@ -61,6 +63,8 @@ public:
 
     // set working memory
     likelihood::set_cache(n_members, max_threads);
+    dmem.set_n_mem(
+      3 * n_members + n_members * n_members, max_threads);
   }
 
   /**
@@ -70,19 +74,18 @@ public:
     (double const * par, int const maxvls, double const abs_eps,
      double const rel_eps, int minvls, bool const do_reorder,
      bool const use_aprx){
-    // TODO: memory allocations
-    arma::vec mu(n_members),
-           lower(n_members),
-           upper(n_members, arma::fill::zeros);
+    arma::vec mu(dmem.get_mem(), n_members, false),
+           lower(mu.end()      , n_members, false),
+           upper(lower.end()   , n_members, false);
     std::fill(lower.begin(), lower.end(),
               -std::numeric_limits<double>::infinity());
+    upper.zeros();
 
     arma::vec beta(const_cast<double *>(par), n_fix_effect, false);
     for(int i = 0; i < n_members; ++i)
       mu[i] = arma::dot(beta, X.row(i));
 
-    // TODO: memory allocations
-    arma::mat sig(n_members, n_members);
+    arma::mat sig(upper.end(), n_members, n_members, false);
     l_factor.setup(sig, par + n_fix_effect, true);
 
     likelihood func;
@@ -102,19 +105,18 @@ public:
     (double const * par, double * d_par, int const maxvls,
      double const abs_eps, double const rel_eps, int minvls,
      bool const do_reorder, bool const use_aprx){
-    // TODO: memory allocations
-    arma::vec mu(n_members),
-    lower(n_members),
-    upper(n_members, arma::fill::zeros);
+    arma::vec mu(dmem.get_mem(), n_members, false),
+           lower(mu.end()      , n_members, false),
+           upper(lower.end()   , n_members, false);
     std::fill(lower.begin(), lower.end(),
               -std::numeric_limits<double>::infinity());
+    upper.zeros();
 
     arma::vec beta(const_cast<double *>(par), n_fix_effect, false);
     for(int i = 0; i < n_members; ++i)
       mu[i] = arma::dot(beta, X.row(i));
 
-    // TODO: memory allocations
-    arma::mat sig(n_members, n_members);
+    arma::mat sig(upper.end(), n_members, n_members, false);
     l_factor.setup(sig, par + n_fix_effect, false);
 
     if(minvls < 0)

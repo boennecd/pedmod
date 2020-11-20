@@ -39,7 +39,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // eval_pedigree_ll
-double eval_pedigree_ll(SEXP ptr, arma::vec par, int const maxvls, double const abs_eps, double const rel_eps, Rcpp::Nullable<Rcpp::IntegerVector> indices, int const minvls, bool const do_reorder, bool const use_aprx, unsigned n_threads);
+Rcpp::NumericVector eval_pedigree_ll(SEXP ptr, arma::vec par, int const maxvls, double const abs_eps, double const rel_eps, Rcpp::Nullable<Rcpp::IntegerVector> indices, int const minvls, bool const do_reorder, bool const use_aprx, unsigned n_threads);
 RcppExport SEXP _pedmod_eval_pedigree_ll(SEXP ptrSEXP, SEXP parSEXP, SEXP maxvlsSEXP, SEXP abs_epsSEXP, SEXP rel_epsSEXP, SEXP indicesSEXP, SEXP minvlsSEXP, SEXP do_reorderSEXP, SEXP use_aprxSEXP, SEXP n_threadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;

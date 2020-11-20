@@ -73,7 +73,8 @@ public:
   double fn
     (double const * par, int const maxvls, double const abs_eps,
      double const rel_eps, int minvls, bool const do_reorder,
-     bool const use_aprx){
+     bool const use_aprx, bool &did_fail){
+    did_fail = true;
     arma::vec mu(dmem.get_mem(), n_members, false),
            lower(mu.end()      , n_members, false),
            upper(lower.end()   , n_members, false);
@@ -95,6 +96,8 @@ public:
       func, lower, upper, mu, sig, do_reorder, use_aprx).approximate(
           maxvls, abs_eps, rel_eps, minvls);
 
+    did_fail = res.inform > 0;
+
     return std::log(res.likelihood);
   }
 
@@ -104,7 +107,8 @@ public:
   double gr
     (double const * par, double * d_par, int const maxvls,
      double const abs_eps, double const rel_eps, int minvls,
-     bool const do_reorder, bool const use_aprx){
+     bool const do_reorder, bool const use_aprx, bool &did_fail){
+    did_fail = true;
     arma::vec mu(dmem.get_mem(), n_members, false),
            lower(mu.end()      , n_members, false),
            upper(lower.end()   , n_members, false);
@@ -139,6 +143,8 @@ public:
     int const n_scales = l_factor.scale_mats.size();
     for(int i = 0; i < n_scales; ++i)
       *rhs++ += *lhs++ / res.likelihood;
+
+    did_fail = res.inform > 0;
 
     return std::log(res.likelihood);
   }

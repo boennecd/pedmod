@@ -114,8 +114,6 @@ Rcpp::IntegerVector get_indices
     out[i] = i;
   return out;
 }
-
-static pedmod::cache_mem<double> r_mem;
 } // namespace
 
 //' Get C++ Object for Log Marginal Likelihood Approximations
@@ -160,10 +158,13 @@ SEXP get_pedigree_ll_terms(Rcpp::List data, unsigned const max_threads){
 //'
 //' @return \code{eval_pedigree_ll}:
 //' a scalar with the log marginal likelihood approximation.
+//' It has an attribute called \code{"n_fails"} which show the number of
+//' log marginal likelihood term approximations which do not satisfy
+//' the \code{abs_eps} and \code{rel_eps} criterion.
 //'
 //' @export
 // [[Rcpp::export]]
-double eval_pedigree_ll
+Rcpp::NumericVector eval_pedigree_ll
   (SEXP ptr, arma::vec par, int const maxvls,
    double const abs_eps, double const rel_eps,
    Rcpp::Nullable<Rcpp::IntegerVector> indices = R_NilValue,
@@ -189,26 +190,32 @@ double eval_pedigree_ll
   for(int i = n_fix; i < n_fix + n_scales; ++i)
     par[i] = std::exp(par[i]);
 
+  pedmod::cache_mem<double> r_mem;
   r_mem.set_n_mem(1, n_threads);
 
   // compute
   auto all_idx = get_indices(indices, *terms_ptr);
   int const * idx = &all_idx[0];
 
+  int n_fails(0);
 #ifdef _OPENMP
 #pragma omp parallel num_threads(n_threads)
 {
 #endif
   double *wmem = r_mem.get_mem();
   *wmem = 0;
+
 #ifdef _OPENMP
-#pragma omp for schedule(static)
+#pragma omp for schedule(static) reduction(+:n_fails)
 #endif
   for(int i = 0; i < all_idx.size(); ++i){
     if(idx[i] >= static_cast<int>(terms.size()))
       continue;
+    bool did_fail(false);
     *wmem += terms.at(idx[i]).fn(
-      &par[0], maxvls, abs_eps, rel_eps, minvls, do_reorder, use_aprx);
+      &par[0], maxvls, abs_eps, rel_eps, minvls, do_reorder, use_aprx,
+      did_fail);
+    n_fails += did_fail;
   }
 #ifdef _OPENMP
 }
@@ -218,7 +225,9 @@ double eval_pedigree_ll
   for(unsigned i = 0; i < n_threads; ++i)
     out += *r_mem.get_mem(i);
 
-  return out;
+  Rcpp::NumericVector v_out = Rcpp::NumericVector::create(out);
+  v_out.attr("n_fails") = Rcpp::IntegerVector::create(n_fails);
+  return v_out;
 }
 
 //' @rdname eval_pedigree
@@ -247,7 +256,7 @@ Rcpp::NumericVector eval_pedigree_grad
 
   // checks
   int const n_fix = terms[0].n_fix_effect,
-    n_scales = terms[0].l_factor.scale_mats.size();
+         n_scales = terms[0].l_factor.scale_mats.size();
   if(static_cast<int>(par.size()) != n_fix + n_scales)
     throw std::invalid_argument("eval_pedigree_ll: invalid par parameter");
 
@@ -255,11 +264,13 @@ Rcpp::NumericVector eval_pedigree_grad
   for(unsigned i = n_fix; i < par.size(); ++i)
     par[i] = std::exp(par[i]);
 
+  pedmod::cache_mem<double> r_mem;
   r_mem.set_n_mem(1 + par.size(), n_threads);
 
   // compute
   auto all_idx = get_indices(indices, *terms_ptr);
   int const * idx = &all_idx[0];
+  int n_fails(0);
 
 #ifdef _OPENMP
 #pragma omp parallel num_threads(n_threads)
@@ -267,15 +278,18 @@ Rcpp::NumericVector eval_pedigree_grad
 #endif
   double *wmem = r_mem.get_mem();
   std::fill(wmem, wmem + 1 + par.size(), 0.);
+
 #ifdef _OPENMP
-#pragma omp for schedule(static)
+#pragma omp for schedule(static) reduction(+:n_fails)
 #endif
   for(int i = 0; i < all_idx.size(); ++i){
     if(idx[i] >= static_cast<int>(terms.size()))
       continue;
+    bool did_fail(false);
     *wmem += terms.at(idx[i]).gr(
       &par[0], wmem + 1, maxvls, abs_eps, rel_eps, minvls, do_reorder,
-      use_aprx);
+      use_aprx, did_fail);
+    n_fails += did_fail;
   }
 #ifdef _OPENMP
 }
@@ -294,7 +308,9 @@ Rcpp::NumericVector eval_pedigree_grad
   // account for exp(...)
   for(int i = n_fix; i < n_fix + n_scales; ++i)
     grad[i] *= par[i];
-  grad.attr("logLik") = Rcpp::NumericVector::create(ll);
+  grad.attr("logLik")  = Rcpp::NumericVector::create(ll);
+  grad.attr("n_fails") = Rcpp::IntegerVector::create(n_fails);
 
   return grad;
 }
+

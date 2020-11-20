@@ -67,6 +67,9 @@ get_pedigree_ll_terms <- function(data, max_threads) {
 #'
 #' @return \code{eval_pedigree_ll}:
 #' a scalar with the log marginal likelihood approximation.
+#' It has an attribute called \code{"n_fails"} which show the number of
+#' log marginal likelihood term approximations which do not satisfy
+#' the \code{abs_eps} and \code{rel_eps} criterion.
 #'
 #' @export
 eval_pedigree_ll <- function(ptr, par, maxvls, abs_eps, rel_eps, indices = NULL, minvls = -1L, do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L) {

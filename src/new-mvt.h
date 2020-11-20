@@ -67,18 +67,18 @@ public:
     // workign objects.
     int * const pr = imem.get_mem();
 
-    double * const __restrict__ finval = dmem.get_mem(),
-           * const __restrict__ varsqr = finval + nf,
-           * const __restrict__ varest = varsqr + nf,
-           * const __restrict__ x      = varest + nf,
-           * const __restrict__ r      = x + ndim,
-           * const __restrict__ vk     = r + ndim,
-           * const __restrict__ values = vk + ndim,
-           * const __restrict__ fs     = values + nf;
+    double * const __restrict__ finval     = dmem.get_mem(),
+           * const __restrict__ M          = finval + nf,
+           * const __restrict__ finest_var = M + nf,
+           * const __restrict__ x          = finest_var + nf,
+           * const __restrict__ r          = x + ndim,
+           * const __restrict__ vk         = r + ndim,
+           * const __restrict__ values     = vk + ndim,
+           * const __restrict__ fs         = values + nf;
 
     // initalize
-    std::fill(finest, finest + nf, 0.);
-    std::fill(varest, varest + nf, 0.);
+    std::fill(finest    , finest     + nf, 0);
+    std::fill(finest_var, finest_var + nf, 0);
     int sampls = minsmp;
     int np(0L);
     {
@@ -116,8 +116,9 @@ public:
         }
       }
 
+      // reset variance estimator and estimator of the output
       std::fill(finval, finval + nf, 0.);
-      std::fill(varsqr, varsqr + nf, 0.);
+      std::fill(M     , M      + nf, 0.);
 
       auto mvkrsv =
         [&](double * __restrict__ const values, int const prime,
@@ -177,28 +178,42 @@ public:
 
       for(int i = 0; i < sampls; ++i){
         mvkrsv(values, p[np], vk, x, r, pr, fs);
+        // stable version of Welford's online algorithm
         for(int k = 0; k < nf; ++k){
-          double const difint = (values[k] - finval[k]) / (i + 1);
-          finval[k] +=  difint;
-          // TODO: Welford's online algorithm (numerically unstable version!)
-          varsqr[k] = (i - 1) * varsqr[k] / (i + 1) + difint * difint;
+          double const term_diff = values[k] - finval[k];
+          finval[k] +=  term_diff / (i + 1.);
+          M     [k] += term_diff * (values[k] - finval[k]);
         }
       }
 
       intvls += 2 * sampls * p[np];
-      int idx_max = 0L;
-      double varprd(0);
+      bool passes_conv_check = true;
       for(int k = 0; k < nf; ++k){
-        varprd = varest[k] * varsqr[k];
-        finest[k] += (finval[k] - finest[k]) / (1 + varprd);
-        if(varsqr[k] > 0.)
-          varest[k] = (1 + varprd) / varsqr[k];
-        if(std::abs(finest[k]) > std::abs(finest[idx_max]))
-          idx_max = k;
+        // update the mean estimator and variance estimator
+        double const sig_new =
+          M[k] / (sampls - 1.) / static_cast<double>(sampls);
+        if(finest_var[k] <= 0){
+          // no prior term or deterministic
+          finest[k]     = finval[k];
+          finest_var[k] = sig_new;
+
+        } else {
+          // there is a previous estimator. Update mean
+          double const sig_old = finest_var[k],
+                       w_denom = 1 / sig_old + 1 / sig_new;
+          finest[k] = (finest[k] / sig_old + finval[k] / sig_new) / w_denom;
+
+          // update the variance
+          finest_var[k] = sig_old * sig_new / (sig_old + sig_new);
+        }
+
+        // passes criteria
+        abserr = 7 / 2 * std::sqrt(finest_var[k]);
+        passes_conv_check = passes_conv_check &
+          abserr <= std::max(abseps, std::abs(finest[k]) * releps);
       }
 
-      abserr = 7 / 2 * std::sqrt(varsqr[idx_max] / (1 + varprd));
-      if(abserr > std::max(abseps, std::abs(finest[idx_max]) * releps)){
+      if(!passes_conv_check){
         if(np < plim - 1)
           ++np;
         else {

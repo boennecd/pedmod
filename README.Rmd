@@ -187,7 +187,7 @@ fn <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE,
     indices = indices)
 }
 gr <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE, 
-               n_threads = 4L, indices = NULL, maxvls = 50000L){
+               n_threads = 4L, indices = NULL, maxvls = 25000L){
   set.seed(seed)
   out <- -eval_pedigree_grad(
     ll_terms, par = par, maxvls = maxvls, abs_eps = 0, rel_eps = rel_eps, 
@@ -329,7 +329,7 @@ microbenchmark(
   `gr (1 thread)`  = gr(c(beta, sc), n_threads = 1),
   `gr (2 threads)` = gr(c(beta, sc), n_threads = 2),
   `gr (4 threads)` = gr(c(beta, sc), n_threads = 4),
-  times = 3)
+  times = 1)
 ```
 
 ### Using ADAM
@@ -415,7 +415,7 @@ adam <- function(par, gr, n_clust, n_blocks, maxit = 10L,
 # assign the maximum number of samples we will use
 maxit <- 100L
 minvls <- 250L
-maxpts <- 10000L
+maxpts <- formals(gr)$maxvls
 maxpts_use <- exp(seq(log(2 * minvls), log(maxpts), length.out = maxit))
 
 # show the maximum number of samples we use

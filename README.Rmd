@@ -179,7 +179,7 @@ sc <- rep(log(.2), 2)
 # check log likelihood at the starting values. First we assign a function 
 # to approximate the log likelihood and the gradient
 fn <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE, 
-               n_threads = 4L, indices = NULL, maxvls = 10000L){
+               n_threads = 4L, indices = NULL, maxvls = 25000L){
   set.seed(seed)
   -eval_pedigree_ll(
     ll_terms, par = par, maxvls = maxvls, abs_eps = 0, rel_eps = rel_eps, 
@@ -187,7 +187,7 @@ fn <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE,
     indices = indices)
 }
 gr <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE, 
-               n_threads = 4L, indices = NULL, maxvls = 10000L){
+               n_threads = 4L, indices = NULL, maxvls = 50000L){
   set.seed(seed)
   out <- -eval_pedigree_grad(
     ll_terms, par = par, maxvls = maxvls, abs_eps = 0, rel_eps = rel_eps, 
@@ -213,8 +213,7 @@ gr_hats <- sapply(1:25, function(seed) gr(c(beta, sc), seed = seed,
 apply(gr_hats, 1, sd)
 
 # verify the gradient (may not be exactly equal due to MC error)
-rbind(numDeriv = numDeriv::grad(fn, c(beta, sc), indices = 0:10, 
-                                rel_eps = 1e-3, maxvls = 1e6), 
+rbind(numDeriv = numDeriv::grad(fn, c(beta, sc), indices = 0:10), 
       pedmod   = gr(c(beta, sc), indices = 0:10))
 
 # optimize the log likelihood approximation
@@ -224,8 +223,8 @@ system.time(opt <- optim(c(beta, sc), fn, gr, method = "BFGS"))
 The output from the optimization is shown below:
 
 ```{r show_est_mod}
--opt$value      # the maximum log likelihood
-opt$convergence # check convergence
+print(-opt$value, digits = 8) # the maximum log likelihood
+opt$convergence               # check convergence
 
 # compare the estimated fixed effects with the true values
 rbind(truth     = dat$beta, 
@@ -439,7 +438,7 @@ ll_terms <- get_pedigree_ll_terms(dat_arg, max_threads = 4L)
 ```
 
 ```{r res_adam}
--fn(adam_res$par) # the maximum log likelihood
+print(-fn(adam_res$par), digits = 8) # the maximum log likelihood
 
 # compare the estimated fixed effects with the true values
 rbind(truth             = dat$beta,
@@ -529,10 +528,6 @@ They have about the same average relative error as expected:
 rowMeans(sim_res[, "SE", ])
 par(mar = c(5, 4, 1, 1))
 boxplot(t(sim_res[, "SE", ]))
-# without extreme values
-sum(keep <- colSums(sim_res[, "SE", ] > .5) < 1)
-rowMeans(sim_res [, "SE", keep])
-boxplot(t(sim_res[, "SE", keep]))
 ```
 
 The new implementation is faster when the approximation is used:

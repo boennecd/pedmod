@@ -530,6 +530,11 @@ public:
   std::vector<arma::mat> const scale_mats;
   /// the number of members in this family
   int const n_mem = scale_mats[0].n_rows;
+  /// design matrix for the fixed effects
+  arma::mat const X;
+  /// the number of fixed effects
+  int const n_fix = X.n_rows,
+     n_integrands = 1 + n_fix + scale_mats.size();
 
 private:
   /// working memory
@@ -550,8 +555,8 @@ private:
 public:
   /// sets the scale matrices. There are no checks on the validity
   pedigree_l_factor(std::vector<arma::mat> const &scale_mats,
-                    unsigned const max_threads):
-  scale_mats(scale_mats) {
+                    unsigned const max_threads, arma::mat const &X):
+  scale_mats(scale_mats), X(X) {
     // checks
     if(scale_mats.size() < 1)
       throw std::invalid_argument("pedigree_l_factor::pedigree_l_factor: not scale matrices are passed");
@@ -559,17 +564,19 @@ public:
     for(auto &S : scale_mats)
       if(S.n_rows != u_mem or S.n_rows != u_mem)
         throw std::invalid_argument("pedigree_l_factor::pedigree_l_factor: not all scale matrices are square matrices or have the same dimensions");
+    if(X.n_cols != u_mem)
+      throw std::invalid_argument("pedigree_l_factor::pedigree_l_factor: invalid X");
 
     // setup working memory
     rand_Korobov<cdf<pedigree_l_factor> >::set_cache(
         get_n_integrands(), n_mem, max_threads);
     dmem.set_n_mem(
-      2 * n_mem * n_mem + n_mem * (n_mem + 1) + get_n_integrands(),
+      2 * n_mem * n_mem + n_mem * (n_mem + 1) + get_n_integrands() + n_mem,
       max_threads);
   }
 
   inline int get_n_integrands() PEDMOD_NOEXCEPT {
-    return 1 + n_mem + scale_mats.size();
+    return n_integrands;
   }
 
   double * get_wk_mem(){
@@ -631,9 +638,12 @@ public:
     (double const * __restrict__ draw, double * __restrict__ out,
      int const *indices, bool const is_permutated) {
       *out = 1;
+      double * __restrict__ const d_mu  = get_wk_mem() + get_n_integrands(),
+             * __restrict__ const d_fix = out + 1,
+             * __restrict__ const d_sc  = d_fix + n_fix;
+
+      std::fill(d_mu   , d_mu + n_mem            , 0.);
       std::fill(out + 1, out + get_n_integrands(), 0.);
-      double * __restrict__ const d_mu = out + 1,
-             * __restrict__ const d_sc = d_mu + n_mem;
 
       // handle the derivatives w.r.t. the mean
       {
@@ -644,6 +654,14 @@ public:
           for(int r = 0; r <= c; ++r, ++rhs, ++sig_chov_inv_ele)
             *rhs += *d * *sig_chov_inv_ele;
         }
+      }
+
+      // derivatives w.r.t. the fixed effects
+      for(int i = 0; i < n_mem; ++i){
+        double const *x = X.colptr(indices[i]);
+        double *d_fixj =  d_fix;
+        for(int j = 0; j < n_fix; ++j)
+          *d_fixj++ += *x++ * d_mu[i];
       }
 
       // handle the derivatives w.r.t. the scale parameters
@@ -682,11 +700,13 @@ public:
                sd_inv = *sigma_chol_inv;
 
     out[0L] = p_ub - p_lb;
-    out[1L] = -(d_ub - d_lb) * sd_inv;
+    double const d_mu = -(d_ub - d_lb) * sd_inv;
+    for(int j = 0; j < n_fix; ++j)
+      out[j + 1] = X.at(j, 0) * d_mu;
 
     double const d_sig = -(d_ub_ub - d_lb_lb) / 2 * sd_inv * sd_inv;
     for(unsigned s = 0; s  < scale_mats.size(); ++s)
-      out[2 + s] = d_sig * scale_mats.at(s).at(0, 0);
+      out[s + n_fix + 1] = d_sig * scale_mats.at(s).at(0, 0);
   }
 
   struct out_type {
@@ -722,7 +742,7 @@ public:
     // add terms to the derivative w.r.t. the scale parameters
     int const n_scales = scale_mats.size();
     if(n_mem > 1){
-      double * __restrict__ const d_sc = res + n_mem + 1L;
+      double * __restrict__ const d_sc = res + n_fix + 1L;
       double * sig_inv_ele = sig_inv;
       for(int c = 0; c < n_mem; ++c){
         for(int r = 0; r < c; ++r, ++sig_inv_ele)
@@ -739,12 +759,9 @@ public:
 
     // set deriv elements
     arma::vec &derivs = out.derivs;
-    derivs.set_size(n_mem + n_scales);
-    for(int i = 0; i < n_mem; ++i)
-      derivs[indices[i]] = res[i + 1];
-
-    std::copy(res + 1 + n_mem, res + 1 + n_mem + n_scales,
-              derivs.begin() + n_mem);
+    int const n_derivs = n_fix + n_scales;
+    derivs.set_size(n_derivs);
+    std::copy(res + 1, res + 1 + n_derivs, derivs.begin());
     return out;
   }
 };

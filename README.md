@@ -213,7 +213,7 @@ dat$beta
 #> (Intercept)          X1          X2 
 #>        -1.0         0.3         0.2
 dat$sc # the sigmas squared
-#>   Gentic Maternal 
+#>  Genetic Maternal 
 #>     0.50     0.33
 
 # prepare the data to pass to the functions in the package
@@ -269,20 +269,20 @@ gr <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE,
 # check output at the starting values
 system.time(ll <- -fn(c(beta, sc)))
 #>    user  system elapsed 
-#>   7.740   0.000   1.966
+#>   7.731   0.000   1.970
 ll # the log likelihood at the starting values
 #> [1] -26042
 #> attr(,"n_fails")
 #> [1] 0
 system.time(gr_val <- gr(c(beta, sc)))
 #>    user  system elapsed 
-#>  127.29    0.00   32.31
+#>  113.29    0.00   28.71
 gr_val # the gradient at the starting values
-#> [1] 1891.97 -549.50 -235.72   46.99  -47.98
+#> [1] 1894.52 -549.92 -235.39   47.16  -47.96
 #> attr(,"value")
 #> [1] 26042
 #> attr(,"n_fails")
-#> [1] 966
+#> [1] 721
 
 # standard deviation of the approximation
 sd(sapply(1:25, function(seed) fn(c(beta, sc), seed = seed)))
@@ -293,26 +293,26 @@ sd(sapply(1:25, function(seed) fn(c(beta, sc), seed = seed)))
 gr_hats <- sapply(1:25, function(seed) gr(c(beta, sc), seed = seed, 
                                           indices = 0:99))
 apply(gr_hats, 1, sd)
-#> [1] 0.07303 0.10282 0.07835 0.03090 0.03068
+#> [1] 0.06021 0.09439 0.06420 0.02612 0.02770
 
 # verify the gradient (may not be exactly equal due to MC error)
 rbind(numDeriv = numDeriv::grad(fn, c(beta, sc), indices = 0:10), 
       pedmod   = gr(c(beta, sc), indices = 0:10))
 #>           [,1]    [,2]  [,3]  [,4]   [,5]
 #> numDeriv 28.00 -0.2980 7.415 1.105 -1.071
-#> pedmod   28.01 -0.2767 7.380 1.107 -1.076
+#> pedmod   27.98 -0.3099 7.395 1.105 -1.076
 
 # optimize the log likelihood approximation
 system.time(opt <- optim(c(beta, sc), fn, gr, method = "BFGS"))
 #>     user   system  elapsed 
-#> 3240.303    0.356  824.742
+#> 4027.907    0.004 1025.348
 ```
 
 The output from the optimization is shown below:
 
 ``` r
 print(-opt$value, digits = 8) # the maximum log likelihood
-#> [1] -25823.136
+#> [1] -25823.042
 opt$convergence               # check convergence
 #> [1] 0
 
@@ -321,14 +321,14 @@ rbind(truth     = dat$beta,
       estimated = head(opt$par, length(dat$beta)))
 #>           (Intercept)     X1     X2
 #> truth          -1.000 0.3000 0.2000
-#> estimated      -1.021 0.3092 0.1894
+#> estimated      -1.007 0.3075 0.1844
 
 # compare estimated scale parameters with the true values
 rbind(truth     = dat$sc, 
       estimated = exp(tail(opt$par, length(dat$sc))))
-#>           Gentic Maternal
-#> truth      0.500   0.3300
-#> estimated  0.597   0.3438
+#>           Genetic Maternal
+#> truth      0.5000    0.330
+#> estimated  0.5112    0.368
 ```
 
 ### Computation in Parallel
@@ -348,12 +348,12 @@ microbenchmark(
   times = 1)
 #> Unit: seconds
 #>            expr     min      lq    mean  median      uq     max neval
-#>   fn (1 thread)   7.653   7.653   7.653   7.653   7.653   7.653     1
-#>  fn (2 threads)   3.934   3.934   3.934   3.934   3.934   3.934     1
-#>  fn (4 threads)   1.980   1.980   1.980   1.980   1.980   1.980     1
-#>   gr (1 thread) 112.549 112.549 112.549 112.549 112.549 112.549     1
-#>  gr (2 threads)  61.975  61.975  61.975  61.975  61.975  61.975     1
-#>  gr (4 threads)  32.361  32.361  32.361  32.361  32.361  32.361     1
+#>   fn (1 thread)   8.207   8.207   8.207   8.207   8.207   8.207     1
+#>  fn (2 threads)   3.793   3.793   3.793   3.793   3.793   3.793     1
+#>  fn (4 threads)   2.027   2.027   2.027   2.027   2.027   2.027     1
+#>   gr (1 thread) 103.930 103.930 103.930 103.930 103.930 103.930     1
+#>  gr (2 threads)  55.551  55.551  55.551  55.551  55.551  55.551     1
+#>  gr (4 threads)  30.690  30.690  30.690  30.690  30.690  30.690     1
 ```
 
 ### Using ADAM
@@ -455,14 +455,14 @@ system.time(
                    verbose = FALSE, maxvls = maxpts_use, 
                    minvls = minvls))
 #>     user   system  elapsed 
-#> 4259.601    0.128 1090.462
+#> 4179.478    0.112 1072.667
 ```
 
 The result is shown below.
 
 ``` r
 print(-fn(adam_res$par), digits = 8) # the maximum log likelihood
-#> [1] -25823.198
+#> [1] -25823.001
 #> attr(,"n_fails")
 #> [1] 0
 
@@ -472,17 +472,17 @@ rbind(truth             = dat$beta,
       `estimated ADAM`  = head(adam_res$par, length(dat$beta)))
 #>                 (Intercept)     X1     X2
 #> truth                -1.000 0.3000 0.2000
-#> estimated optim      -1.021 0.3092 0.1894
-#> estimated ADAM       -1.004 0.3062 0.1854
+#> estimated optim      -1.007 0.3075 0.1844
+#> estimated ADAM       -1.007 0.3072 0.1860
 
 # compare estimated scale parameters with the true values
 rbind(truth             = dat$sc, 
       `estimated optim` = exp(tail(opt$par     , length(dat$sc))), 
       `estimated ADAM`  = exp(tail(adam_res$par, length(dat$sc))))
-#>                 Gentic Maternal
-#> truth           0.5000   0.3300
-#> estimated optim 0.5970   0.3438
-#> estimated ADAM  0.5107   0.3660
+#>                 Genetic Maternal
+#> truth            0.5000   0.3300
+#> estimated optim  0.5112   0.3680
+#> estimated ADAM   0.5242   0.3635
 
 # could possibly have stopped much earlier maybe. Dashed lines are final 
 # estimates
@@ -576,7 +576,7 @@ The new implementation is faster when the approximation is used:
 ``` r
 rowMeans(sim_res[, "time", ])
 #>          mvtnorm mvndst (no aprx) mvndst (w/ aprx) 
-#>          0.01744          0.01664          0.01123
+#>          0.01727          0.01673          0.01120
 par(mar = c(5, 4, 1, 1))
 boxplot(t(sim_res[, "time", ]))
 ```

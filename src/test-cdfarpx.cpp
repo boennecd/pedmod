@@ -170,8 +170,9 @@ context("restrictcdf unit tests") {
     s2.at(0, 0) = 1.5;
     scales.emplace_back(s1);
     scales.emplace_back(s2);
+    arma::mat X(1, 1, arma::fill::ones);
 
-    pedmod::pedigree_l_factor func(scales, 1L);
+    pedmod::pedigree_l_factor func(scales, 1L, X);
     arma::vec par;
     par << .5 << .33 << .5;
 
@@ -239,7 +240,9 @@ context("restrictcdf unit tests") {
     std::vector<arma::mat> scales;
     scales.emplace_back(s1);
 
-    pedmod::pedigree_l_factor func(scales, 1L);
+    arma::mat X(3, 3, arma::fill::zeros);
+    X.diag().ones();
+    pedmod::pedigree_l_factor func(scales, 1L, X);
 
     arma::mat sig(3, 3);
     double const scalar = .5;
@@ -327,7 +330,9 @@ context("restrictcdf unit tests") {
     scales.emplace_back(s1);
     scales.emplace_back(s2);
 
-    pedmod::pedigree_l_factor func(scales, 1L);
+    arma::mat X(3, 3, arma::fill::zeros);
+    X.diag().ones();
+    pedmod::pedigree_l_factor func(scales, 1L, X);
 
     arma::mat sig(3, 3);
     double const scs[2] = { .5, .67 };

@@ -55,7 +55,7 @@ public:
           }
       }
 
-      return pedigree_l_factor(out, max_threads);
+      return pedigree_l_factor(out, max_threads, X.t());
     })()) {
     // checks
     if(l_factor.n_mem != n_members)
@@ -130,16 +130,12 @@ public:
           maxvls, abs_eps, rel_eps, minvls);
 
     // derivatives for the slopes
-    for(int i = 0; i < n_fix_effect; ++i){
-      double term(0.);
-      for(int j = 0; j < n_members; ++j)
-        term += res.derivs[j] * X.at(j, i);
-      d_par[i] += term / res.likelihood;
-    }
+    for(int i = 0; i < n_fix_effect; ++i)
+      d_par[i] += res.derivs[i] / res.likelihood;
 
     // derivatives for the scale parameters
-    double * rhs = d_par + n_fix_effect;
-    double const * lhs = res.derivs.begin() + n_members;
+    double * rhs       = d_par              + n_fix_effect;
+    double const * lhs = res.derivs.begin() + n_fix_effect;
     int const n_scales = l_factor.scale_mats.size();
     for(int i = 0; i < n_scales; ++i)
       *rhs++ += *lhs++ / res.likelihood;

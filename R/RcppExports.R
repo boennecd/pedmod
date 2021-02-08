@@ -21,6 +21,36 @@
 #' \code{\link{pnorm}} and \code{\link{qnorm}} should be used. This may
 #' reduce the computation time while not affecting the result much.
 #'
+#' @return
+#' An approximation of the CDF. The \code{"n_it"} attribute shows the number of
+#' integrand evaluations, the \code{"inform"} attribute is zero if the
+#' requested precision is achieved, and the \code{"abserr"} attribute
+#' shows 3.5 times the estimated standard error.
+#'
+#' @examples
+#' # simulate covariance matrix and the upper bound
+#' set.seed(1)
+#' n <- 10L
+#' S <- drop(rWishart(1L, 2 * n, diag(n) / 2 / n))
+#' u <- rnorm(n)
+#'
+#' system.time(pedmod_res <- mvndst(
+#'   lower = rep(-Inf, n), upper = u, sigma = S, mu = numeric(n),
+#'   maxvls = 1e6, abs_eps = 0, rel_eps = 1e-4, use_aprx = TRUE))
+#' pedmod_res
+#'
+#' # compare with mvtnorm
+#' if(require(mvtnorm)){
+#'   mvtnorm_time <- system.time(mvtnorm_res <- pmvnorm(
+#'     upper = u, sigma = S, algorithm = GenzBretz(
+#'       maxpts = 1e6, abseps = 0, releps = 1e-4)))
+#'   cat("mvtnorm_res:\n")
+#'   print(mvtnorm_res)
+#'
+#'   cat("mvtnorm_time:\n")
+#'   print(mvtnorm_time)
+#' }
+#'
 #' @export
 mvndst <- function(lower, upper, mu, sigma, maxvls = 25000L, abs_eps = .001, rel_eps = 0L, minvls = -1L, do_reorder = TRUE, use_aprx = FALSE) {
     .Call(`_pedmod_mvndst`, lower, upper, mu, sigma, maxvls, abs_eps, rel_eps, minvls, do_reorder, use_aprx)
@@ -41,6 +71,60 @@ mvndst <- function(lower, upper, mu, sigma, maxvls = 25000L, abs_eps = .001, rel
 #' scale/correlation matrix for a particular type of effect.}
 #' }
 #' @param max_threads maximum number of threads to use.
+#'
+#' @details
+#' An intercept column is not added to the \code{X} matrices
+#' like what \code{\link{lm.fit}} and \code{\link{glm.fit}} do.
+#' Thus, it is often important that the user adds an intercept column
+#' to these matrices as it is hardly ever justified to not include the
+#' intercept (the exceptions being e.g. when splines are used which include
+#' the intercept and with certain dummy designs).
+#'
+#' @examples
+#' # three families as an example
+#' fam_dat <- list(
+#'   list(
+#'     y = c(FALSE, TRUE, FALSE, FALSE),
+#'     X = structure(c(
+#'       1, 1, 1, 1, 1.2922654151273, 0.358134905909256, -0.734963997107464,
+#'       0.855235473516044, -1.16189500386223, -0.387298334620742,
+#'       0.387298334620742, 1.16189500386223),
+#'       .Dim = 4:3, .Dimnames = list( NULL, c("(Intercept)", "X1", ""))),
+#'     rel_mat = structure(c(
+#'       1, 0.5, 0.5, 0.125, 0.5, 1, 0.5, 0.125, 0.5, 0.5,
+#'       1, 0.125, 0.125, 0.125, 0.125, 1), .Dim = c(4L, 4L)),
+#'     met_mat = structure(c(1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 1),
+#'                         .Dim = c(4L, 4L))),
+#'   list(
+#'     y = c(FALSE, FALSE, FALSE),
+#'     X = structure(c(
+#'       1, 1, 1, -0.0388728997202442, -0.0913782435233639,
+#'       -0.0801619722392612, -1, 0, 1), .Dim = c(3L, 3L)),
+#'     rel_mat = structure(c(
+#'       1, 0.5, 0.125, 0.5, 1, 0.125, 0.125, 0.125, 1), .Dim = c(3L, 3L)),
+#'     met_mat = structure(c(
+#'       1, 1, 0, 1, 1, 0, 0, 0, 1), .Dim = c(3L, 3L))),
+#'   list(
+#'     y = c(TRUE, FALSE),
+#'     X = structure(c(
+#'       1, 1, 0.305275750370738, -1.49482995913648,  -0.707106781186547,
+#'       0.707106781186547),
+#'       .Dim = 2:3, .Dimnames = list( NULL, c("(Intercept)", "X1", ""))),
+#'     rel_mat = structure(c(1, 0.5,  0.5, 1), .Dim = c(2L, 2L)),
+#'     met_mat = structure(c(1, 1, 1, 1), .Dim = c(2L,  2L))))
+#'
+#' # get the data into the format needed for the package
+#' dat_arg <- lapply(fam_dat, function(x){
+#'   # we need the following for each family:
+#'   #   y: the zero-one outcomes.
+#'   #   X: the design matrix for the fixed effects.
+#'   #   scale_mats: list with the scale matrices for each type of effect.
+#'   list(y = as.numeric(x$y), X = x$X,
+#'        scale_mats = list(x$rel_mat, x$met_mat))
+#' })
+#'
+#' # get a pointer to the C++ object
+#' ptr <- get_pedigree_ll_terms(dat_arg, max_threads = 1L)
 #'
 #' @export
 get_pedigree_ll_terms <- function(data, max_threads) {
@@ -71,6 +155,68 @@ get_pedigree_ll_terms <- function(data, max_threads) {
 #' log marginal likelihood term approximations which do not satisfy
 #' the \code{abs_eps} and \code{rel_eps} criterion.
 #'
+#' @examples
+#' # three families as an example
+#' fam_dat <- list(
+#'   list(
+#'     y = c(FALSE, TRUE, FALSE, FALSE),
+#'     X = structure(c(
+#'       1, 1, 1, 1, 1.2922654151273, 0.358134905909256, -0.734963997107464,
+#'       0.855235473516044, -1.16189500386223, -0.387298334620742,
+#'       0.387298334620742, 1.16189500386223),
+#'       .Dim = 4:3, .Dimnames = list( NULL, c("(Intercept)", "X1", ""))),
+#'     rel_mat = structure(c(
+#'       1, 0.5, 0.5, 0.125, 0.5, 1, 0.5, 0.125, 0.5, 0.5,
+#'       1, 0.125, 0.125, 0.125, 0.125, 1), .Dim = c(4L, 4L)),
+#'     met_mat = structure(c(1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 1),
+#'                         .Dim = c(4L, 4L))),
+#'   list(
+#'     y = c(FALSE, FALSE, FALSE),
+#'     X = structure(c(
+#'       1, 1, 1, -0.0388728997202442, -0.0913782435233639,
+#'       -0.0801619722392612, -1, 0, 1), .Dim = c(3L, 3L)),
+#'     rel_mat = structure(c(
+#'       1, 0.5, 0.125, 0.5, 1, 0.125, 0.125, 0.125, 1), .Dim = c(3L, 3L)),
+#'     met_mat = structure(c(
+#'       1, 1, 0, 1, 1, 0, 0, 0, 1), .Dim = c(3L, 3L))),
+#'   list(
+#'     y = c(TRUE, FALSE),
+#'     X = structure(c(
+#'       1, 1, 0.305275750370738, -1.49482995913648,  -0.707106781186547,
+#'       0.707106781186547),
+#'       .Dim = 2:3, .Dimnames = list( NULL, c("(Intercept)", "X1", ""))),
+#'     rel_mat = structure(c(1, 0.5,  0.5, 1), .Dim = c(2L, 2L)),
+#'     met_mat = structure(c(1, 1, 1, 1), .Dim = c(2L,  2L))))
+#'
+#' # get the data into the format needed for the package
+#' dat_arg <- lapply(fam_dat, function(x){
+#'   # we need the following for each family:
+#'   #   y: the zero-one outcomes.
+#'   #   X: the design matrix for the fixed effects.
+#'   #   scale_mats: list with the scale matrices for each type of effect.
+#'   list(y = as.numeric(x$y), X = x$X,
+#'        scale_mats = list(x$rel_mat, x$met_mat))
+#' })
+#'
+#' # get a pointer to the C++ object
+#' ptr <- get_pedigree_ll_terms(dat_arg, max_threads = 1L)
+#'
+#' # approximate the log marginal likelihood
+#' beta <- c(-1, 0.3, 0.2) # fixed effect coefficients
+#' scs <- c(0.5, 0.33)     # scales parameters
+#'
+#' set.seed(44492929)
+#' system.time(ll1 <- eval_pedigree_ll(
+#'   ptr = ptr, par = c(beta, log(scs)), abs_eps = -1, maxvls = 1e5,
+#'   rel_eps = 1e-5, minvls = 2000, use_aprx = FALSE))
+#' ll1 # the approximation
+#'
+#' # with the approximation of pnorm and qnorm
+#' system.time(ll2 <- eval_pedigree_ll(
+#'   ptr = ptr, par = c(beta, log(scs)), abs_eps = -1, maxvls = 1e5,
+#'   rel_eps = 1e-5, minvls = 2000, use_aprx = TRUE))
+#' all.equal(ll1, ll2, tolerance = 1e-5)
+#'
 #' @export
 eval_pedigree_ll <- function(ptr, par, maxvls, abs_eps, rel_eps, indices = NULL, minvls = -1L, do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L) {
     .Call(`_pedmod_eval_pedigree_ll`, ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder, use_aprx, n_threads)
@@ -78,9 +224,10 @@ eval_pedigree_ll <- function(ptr, par, maxvls, abs_eps, rel_eps, indices = NULL,
 
 #' @rdname eval_pedigree
 #'
-#' @return \code{eval_pedigree}: a vector with the derivatives with
-#' respect to \code{par}. An attribute called \code{"logLik"} contains the
-#' log marginal likelihood approximation.
+#' @return \code{eval_pedigree_grad}: a vector with the derivatives with
+#' respect to \code{par}. An attribute called \code{"value"} contains the
+#' log marginal likelihood approximation. There will also be \code{"n_fails"}
+#' attribute like for \code{eval_pedigree_ll}.
 #'
 #' @export
 eval_pedigree_grad <- function(ptr, par, maxvls, abs_eps, rel_eps, indices = NULL, minvls = -1L, do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L) {

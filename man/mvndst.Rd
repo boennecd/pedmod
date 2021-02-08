@@ -42,7 +42,38 @@ be used. \code{TRUE} is likely the best value.}
 \code{\link{pnorm}} and \code{\link{qnorm}} should be used. This may
 reduce the computation time while not affecting the result much.}
 }
+\value{
+An approximation of the CDF. The \code{"n_it"} attribute shows the number of
+integrand evaluations, the \code{"inform"} attribute is zero if the
+requested precision is achieved, and the \code{"abserr"} attribute
+shows 3.5 times the estimated standard error.
+}
 \description{
 Provides an approximation of the multivariate normal distribution CDF
 over a hyperrectangle.
+}
+\examples{
+# simulate covariance matrix and the upper bound
+set.seed(1)
+n <- 10L
+S <- drop(rWishart(1L, 2 * n, diag(n) / 2 / n))
+u <- rnorm(n)
+
+system.time(pedmod_res <- mvndst(
+  lower = rep(-Inf, n), upper = u, sigma = S, mu = numeric(n),
+  maxvls = 1e6, abs_eps = 0, rel_eps = 1e-4, use_aprx = TRUE))
+pedmod_res
+
+# compare with mvtnorm
+if(require(mvtnorm)){
+  mvtnorm_time <- system.time(mvtnorm_res <- pmvnorm(
+    upper = u, sigma = S, algorithm = GenzBretz(
+      maxpts = 1e6, abseps = 0, releps = 1e-4)))
+  cat("mvtnorm_res:\n")
+  print(mvtnorm_res)
+
+  cat("mvtnorm_time:\n")
+  print(mvtnorm_time)
+}
+
 }

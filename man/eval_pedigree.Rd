@@ -62,12 +62,79 @@ reduce the computation time while not affecting the result much.}
 \value{
 \code{eval_pedigree_ll}:
 a scalar with the log marginal likelihood approximation.
+It has an attribute called \code{"n_fails"} which show the number of
+log marginal likelihood term approximations which do not satisfy
+the \code{abs_eps} and \code{rel_eps} criterion.
 
-\code{eval_pedigree}: a vector with the derivatives with
-respect to \code{par}. An attribute called \code{"logLik"} contains the
-log marginal likelihood approximation.
+\code{eval_pedigree_grad}: a vector with the derivatives with
+respect to \code{par}. An attribute called \code{"value"} contains the
+log marginal likelihood approximation. There will also be \code{"n_fails"}
+attribute like for \code{eval_pedigree_ll}.
 }
 \description{
 Approximate the log marginal likelihood and the derivatives with
 respect to the model parameters.
+}
+\examples{
+# three families as an example
+fam_dat <- list(
+  list(
+    y = c(FALSE, TRUE, FALSE, FALSE),
+    X = structure(c(
+      1, 1, 1, 1, 1.2922654151273, 0.358134905909256, -0.734963997107464,
+      0.855235473516044, -1.16189500386223, -0.387298334620742,
+      0.387298334620742, 1.16189500386223),
+      .Dim = 4:3, .Dimnames = list( NULL, c("(Intercept)", "X1", ""))),
+    rel_mat = structure(c(
+      1, 0.5, 0.5, 0.125, 0.5, 1, 0.5, 0.125, 0.5, 0.5,
+      1, 0.125, 0.125, 0.125, 0.125, 1), .Dim = c(4L, 4L)),
+    met_mat = structure(c(1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 1),
+                        .Dim = c(4L, 4L))),
+  list(
+    y = c(FALSE, FALSE, FALSE),
+    X = structure(c(
+      1, 1, 1, -0.0388728997202442, -0.0913782435233639,
+      -0.0801619722392612, -1, 0, 1), .Dim = c(3L, 3L)),
+    rel_mat = structure(c(
+      1, 0.5, 0.125, 0.5, 1, 0.125, 0.125, 0.125, 1), .Dim = c(3L, 3L)),
+    met_mat = structure(c(
+      1, 1, 0, 1, 1, 0, 0, 0, 1), .Dim = c(3L, 3L))),
+  list(
+    y = c(TRUE, FALSE),
+    X = structure(c(
+      1, 1, 0.305275750370738, -1.49482995913648,  -0.707106781186547,
+      0.707106781186547),
+      .Dim = 2:3, .Dimnames = list( NULL, c("(Intercept)", "X1", ""))),
+    rel_mat = structure(c(1, 0.5,  0.5, 1), .Dim = c(2L, 2L)),
+    met_mat = structure(c(1, 1, 1, 1), .Dim = c(2L,  2L))))
+
+# get the data into the format needed for the package
+dat_arg <- lapply(fam_dat, function(x){
+  # we need the following for each family:
+  #   y: the zero-one outcomes.
+  #   X: the design matrix for the fixed effects.
+  #   scale_mats: list with the scale matrices for each type of effect.
+  list(y = as.numeric(x$y), X = x$X,
+       scale_mats = list(x$rel_mat, x$met_mat))
+})
+
+# get a pointer to the C++ object
+ptr <- get_pedigree_ll_terms(dat_arg, max_threads = 1L)
+
+# approximate the log marginal likelihood
+beta <- c(-1, 0.3, 0.2) # fixed effect coefficients
+scs <- c(0.5, 0.33)     # scales parameters
+
+set.seed(44492929)
+system.time(ll1 <- eval_pedigree_ll(
+  ptr = ptr, par = c(beta, log(scs)), abs_eps = -1, maxvls = 1e5,
+  rel_eps = 1e-5, minvls = 2000, use_aprx = FALSE))
+ll1 # the approximation
+
+# with the approximation of pnorm and qnorm
+system.time(ll2 <- eval_pedigree_ll(
+  ptr = ptr, par = c(beta, log(scs)), abs_eps = -1, maxvls = 1e5,
+  rel_eps = 1e-5, minvls = 2000, use_aprx = TRUE))
+all.equal(ll1, ll2, tolerance = 1e-5)
+
 }

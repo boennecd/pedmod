@@ -35,8 +35,8 @@ public:
     })()),
     l_factor(([&](){
       // set cache
-      cdf<likelihood       >::set_cache(y.n_elem, max_threads);
-      cdf<pedigree_l_factor>::set_cache(y.n_elem, max_threads);
+      cdf<likelihood       >::alloc_mem(y.n_elem, max_threads);
+      cdf<pedigree_l_factor>::alloc_mem(y.n_elem, max_threads);
 
       arma::vec z(y.n_elem);
       for(arma::uword i = 0; i < y.n_elem; ++i)
@@ -62,7 +62,7 @@ public:
       throw std::invalid_argument("pedigree_ll_term::pedigree_ll_term: X and scale matrices dimension do not match");
 
     // set working memory
-    likelihood::set_cache(n_members, max_threads);
+    likelihood::alloc_mem(n_members, max_threads);
     dmem.set_n_mem(
       3 * n_members + n_members * n_members, max_threads);
   }

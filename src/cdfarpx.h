@@ -176,11 +176,13 @@ public:
    * must be called perior to calling the constructor or any member
    * functions.
    */
-  static void set_cache(int const max_ndim, int const max_threads) {
+  static void alloc_mem(int const max_ndim, int const max_threads) {
     int const n_up_tri = (max_ndim * (max_ndim + 1)) / 2;
 
-    imem.set_n_mem(3 * max_ndim           , max_threads);
-    dmem.set_n_mem(7 * max_ndim + n_up_tri, max_threads);
+    imem.set_n_mem(3 * max_ndim                                 ,
+                   max_threads);
+    dmem.set_n_mem(7 * max_ndim + n_up_tri + max_ndim * max_ndim,
+                   max_threads);
   }
 
   cdf(T_Functor &functor, arma::vec const &lower_in,
@@ -228,10 +230,12 @@ public:
       mu [i] = mu_in[i] / sds[i];
     }
 
+    // TODO: this is the wrong order
     lower  = lower_in;
     lower /= sds;
     lower -= mu;
 
+    // TODO: this is the wrong order
     upper  = upper_in;
     upper /= sds;
     upper -= mu;
@@ -281,13 +285,10 @@ public:
           infin[i] = infi[i];
         }
 
-        // TODO: memory allocation
-        arma::uvec uidx(ndim);
-        for(int i = 0; i < ndim; ++i)
-          uidx[i] = indices[i];
-
-        // TODO: memory allocation
-        arma::mat sigma_permu = sigma_in.submat(uidx, uidx);
+        arma::mat sigma_permu(get_dmem(ndim * ndim), ndim, ndim, false);
+        for(int j = 0; j < ndim; ++j)
+          for(int i = 0; i < ndim; ++i)
+            sigma_permu.at(i, j) = sigma_in.at(indices[i], indices[j]);
         functor.prep_permutated(sigma_permu);
 
         return;
@@ -299,12 +300,11 @@ public:
         }
 
     } else if(!do_reorder and ndim > 1L) {
-      // TODO: memory allocation
-      arma::mat tmp(ndim, ndim);
+      arma::mat tmp(get_dmem(ndim * ndim), ndim, ndim, false);
       tmp = sigma_in;
       tmp.each_row() /= sds.t();
       tmp.each_col() /= sds;
-      if(!arma::chol(tmp, tmp))
+      if(!arma::chol(tmp, tmp)) // TODO: memory allocation
         sigma_chol.fill(std::numeric_limits<double>::infinity());
       else
         copy_upper_tri(tmp, sigma_chol.memptr());
@@ -454,10 +454,10 @@ class likelihood {
   static cache_mem<double> dmen;
 
 public:
-  static void set_cache
+  static void alloc_mem
   (unsigned const max_dim, unsigned const max_threads){
-    rand_Korobov<cdf<likelihood> >::set_cache(
-        get_n_integrands(), max_dim, max_threads);
+    rand_Korobov<cdf<likelihood> >::alloc_mem(
+        max_dim, get_n_integrands(), max_threads);
     dmen.set_n_mem(1, max_threads);
   }
 
@@ -568,8 +568,8 @@ public:
       throw std::invalid_argument("pedigree_l_factor::pedigree_l_factor: invalid X");
 
     // setup working memory
-    rand_Korobov<cdf<pedigree_l_factor> >::set_cache(
-        get_n_integrands(), n_mem, max_threads);
+    rand_Korobov<cdf<pedigree_l_factor> >::alloc_mem(
+        n_mem, get_n_integrands(), max_threads);
     dmem.set_n_mem(
       2 * n_mem * n_mem + n_mem * (n_mem + 1) + get_n_integrands() + n_mem,
       max_threads);

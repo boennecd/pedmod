@@ -18,7 +18,7 @@ public:
     int inform;
   };
 
-  static void set_cache
+  static void alloc_mem
     (int const max_ndim, int const max_nf, int const max_threads) {
     dmem.set_n_mem(5 * max_nf + 3 * max_ndim, max_threads);
     imem.set_n_mem(max_ndim                 , max_threads);

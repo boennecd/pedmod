@@ -22,3 +22,58 @@ scale/correlation matrix for a particular type of effect.}
 Constructs an object needed for \code{\link{eval_pedigree_ll}} and
 \code{\link{eval_pedigree_grad}}.
 }
+\details{
+An intercept column is not added to the \code{X} matrices
+like what \code{\link{lm.fit}} and \code{\link{glm.fit}} do.
+Thus, it is often important that the user adds an intercept column
+to these matrices as it is hardly ever justified to not include the
+intercept (the exceptions being e.g. when splines are used which include
+the intercept and with certain dummy designs).
+}
+\examples{
+# three families as an example
+fam_dat <- list(
+  list(
+    y = c(FALSE, TRUE, FALSE, FALSE),
+    X = structure(c(
+      1, 1, 1, 1, 1.2922654151273, 0.358134905909256, -0.734963997107464,
+      0.855235473516044, -1.16189500386223, -0.387298334620742,
+      0.387298334620742, 1.16189500386223),
+      .Dim = 4:3, .Dimnames = list( NULL, c("(Intercept)", "X1", ""))),
+    rel_mat = structure(c(
+      1, 0.5, 0.5, 0.125, 0.5, 1, 0.5, 0.125, 0.5, 0.5,
+      1, 0.125, 0.125, 0.125, 0.125, 1), .Dim = c(4L, 4L)),
+    met_mat = structure(c(1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 1),
+                        .Dim = c(4L, 4L))),
+  list(
+    y = c(FALSE, FALSE, FALSE),
+    X = structure(c(
+      1, 1, 1, -0.0388728997202442, -0.0913782435233639,
+      -0.0801619722392612, -1, 0, 1), .Dim = c(3L, 3L)),
+    rel_mat = structure(c(
+      1, 0.5, 0.125, 0.5, 1, 0.125, 0.125, 0.125, 1), .Dim = c(3L, 3L)),
+    met_mat = structure(c(
+      1, 1, 0, 1, 1, 0, 0, 0, 1), .Dim = c(3L, 3L))),
+  list(
+    y = c(TRUE, FALSE),
+    X = structure(c(
+      1, 1, 0.305275750370738, -1.49482995913648,  -0.707106781186547,
+      0.707106781186547),
+      .Dim = 2:3, .Dimnames = list( NULL, c("(Intercept)", "X1", ""))),
+    rel_mat = structure(c(1, 0.5,  0.5, 1), .Dim = c(2L, 2L)),
+    met_mat = structure(c(1, 1, 1, 1), .Dim = c(2L,  2L))))
+
+# get the data into the format needed for the package
+dat_arg <- lapply(fam_dat, function(x){
+  # we need the following for each family:
+  #   y: the zero-one outcomes.
+  #   X: the design matrix for the fixed effects.
+  #   scale_mats: list with the scale matrices for each type of effect.
+  list(y = as.numeric(x$y), X = x$X,
+       scale_mats = list(x$rel_mat, x$met_mat))
+})
+
+# get a pointer to the C++ object
+ptr <- get_pedigree_ll_terms(dat_arg, max_threads = 1L)
+
+}

@@ -18,6 +18,8 @@ options(digits = 4)
 
 # pedmod: Pedigree Models
 
+[![R-CMD-check](https://github.com/boennecd/pedmod/workflows/R-CMD-check/badge.svg)](https://github.com/boennecd/pedmod/actions)
+
 The pedmod package provides functions to estimate models for pedigree data. 
 Particularly, the package provides functions to estimate mixed models of 
 the form:
@@ -25,7 +27,7 @@ the form:
 $$\begin{align*}
 Y_{ij} \mid \epsilon_{ij} = e 
   &\sim \text{Bin}(\Phi(\vec\beta^\top\vec x_{ij} + e), 1) \\
-\vec\epsilon_i &= (\epsilon_{i1}, \dots, \epsilon_{in_i})^\top \sim
+\vec\epsilon_i = (\epsilon_{i1}, \dots, \epsilon_{in_i})^\top &\sim
   N^{(n_i)}\left(\vec 0, \sum_{l = 1}^K\sigma_l^2 C_{il}
   \right)
 \end{align*}$$
@@ -40,8 +42,26 @@ $$
 f(z) = \begin{pmatrix} n \\ z \end{pmatrix}p^zp^{n-z}
 $$
 
+A different and equivalent way of writing the model is as:
+
+$$\begin{align*}
+Y_{ij} \mid \epsilon_{ij} = e 
+  &= \begin{cases}
+    1 & \vec\beta^\top\vec x_{ij} + e > 0 \\
+    0 & \text{otherwise}
+    \end{cases} \\
+\vec\epsilon_i = (\epsilon_{i1}, \dots, \epsilon_{in_i})^\top &\sim
+  N^{(n_i)}\left(\vec 0, I_{n_i} + \sum_{l = 1}^K\sigma_l^2 C_{il}
+  \right)
+\end{align*}$$
+
+where $I_{n_i}$ is the $n_i$ dimensional identity matrix which comes from the 
+unshared/individual specific random effect. This effect is always included. 
+
 The $C_{il}$s are known scale/correlation matrices where each of the $l$'th 
-types correspond to a type of effect. A 
+types correspond to a type of effect. An arbitrary number of such matrices can 
+be passed to include e.g. a genetic effect, a maternal effect, a paternal, an 
+effect of a shared adult environment etc. A 
 typical example is that $C_{il}$ is two times the kinship matrix in which 
 case we call:
 
@@ -50,7 +70,11 @@ $$
 $$
 
 the heritability. The scale parameters, the $\sigma_k^2$s, may be the 
-primary interest in an analysis.
+primary interest in an analysis. We fix the unshared random effect to have 
+variance one which gives the one in the denominator. Other authors prefer that
+the denominator is restricted to be one. Both restriction can be applied to 
+ensure identification and they do not have any implications as the scale 
+is arbitrary. 
 
 This package provides randomized quasi Monte Carlo methods to approximate 
 the log marginal likelihood for these types of 

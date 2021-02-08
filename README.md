@@ -1,23 +1,23 @@
 
 # pedmod: Pedigree Models
 
+[![R-CMD-check](https://github.com/boennecd/pedmod/workflows/R-CMD-check/badge.svg)](https://github.com/boennecd/pedmod/actions)
+
 The pedmod package provides functions to estimate models for pedigree
 data. Particularly, the package provides functions to estimate mixed
 models of the form:
 
   
-![\\begin{align\*}
-Y\_{ij} \\mid \\epsilon\_{ij} = e 
-&\\sim \\text{Bin}(\\Phi(\\vec\\beta^\\top\\vec x\_{ij} + e), 1) \\\\
-\\vec\\epsilon\_i &= (\\epsilon\_{i1}, \\dots, \\epsilon\_{in\_i})^\\top
-\\sim
-N^{(n\_i)}\\left(\\vec 0, \\sum\_{l = 1}^K\\sigma\_l^2 C\_{il}
-\\right)
-\\end{align\*}](https://latex.codecogs.com/svg.latex?%5Cbegin%7Balign%2A%7D%0AY_%7Bij%7D%20%5Cmid%20%5Cepsilon_%7Bij%7D%20%3D%20e%20%0A%20%20%26%5Csim%20%5Ctext%7BBin%7D%28%5CPhi%28%5Cvec%5Cbeta%5E%5Ctop%5Cvec%20x_%7Bij%7D%20%2B%20e%29%2C%201%29%20%5C%5C%0A%5Cvec%5Cepsilon_i%20%26%3D%20%28%5Cepsilon_%7Bi1%7D%2C%20%5Cdots%2C%20%5Cepsilon_%7Bin_i%7D%29%5E%5Ctop%20%5Csim%0A%20%20N%5E%7B%28n_i%29%7D%5Cleft%28%5Cvec%200%2C%20%5Csum_%7Bl%20%3D%201%7D%5EK%5Csigma_l%5E2%20C_%7Bil%7D%0A%20%20%5Cright%29%0A%5Cend%7Balign%2A%7D
+![\\begin{align\*}&#10;Y\_{ij} \\mid \\epsilon\_{ij} = e &#10; &\\sim
+\\text{Bin}(\\Phi(\\vec\\beta^\\top\\vec x\_{ij} + e), 1)
+\\\\&#10;\\vec\\epsilon\_i = (\\epsilon\_{i1}, \\dots,
+\\epsilon\_{in\_i})^\\top &\\sim&#10; N^{(n\_i)}\\left(\\vec 0,
+\\sum\_{l = 1}^K\\sigma\_l^2 C\_{il}&#10;
+\\right)&#10;\\end{align\*}](https://latex.codecogs.com/svg.latex?%5Cbegin%7Balign%2A%7D%0AY_%7Bij%7D%20%5Cmid%20%5Cepsilon_%7Bij%7D%20%3D%20e%20%0A%20%20%26%5Csim%20%5Ctext%7BBin%7D%28%5CPhi%28%5Cvec%5Cbeta%5E%5Ctop%5Cvec%20x_%7Bij%7D%20%2B%20e%29%2C%201%29%20%5C%5C%0A%5Cvec%5Cepsilon_i%20%3D%20%28%5Cepsilon_%7Bi1%7D%2C%20%5Cdots%2C%20%5Cepsilon_%7Bin_i%7D%29%5E%5Ctop%20%26%5Csim%0A%20%20N%5E%7B%28n_i%29%7D%5Cleft%28%5Cvec%200%2C%20%5Csum_%7Bl%20%3D%201%7D%5EK%5Csigma_l%5E2%20C_%7Bil%7D%0A%20%20%5Cright%29%0A%5Cend%7Balign%2A%7D
 "\\begin{align*}
 Y_{ij} \\mid \\epsilon_{ij} = e 
   &\\sim \\text{Bin}(\\Phi(\\vec\\beta^\\top\\vec x_{ij} + e), 1) \\\\
-\\vec\\epsilon_i &= (\\epsilon_{i1}, \\dots, \\epsilon_{in_i})^\\top \\sim
+\\vec\\epsilon_i = (\\epsilon_{i1}, \\dots, \\epsilon_{in_i})^\\top &\\sim
   N^{(n_i)}\\left(\\vec 0, \\sum_{l = 1}^K\\sigma_l^2 C_{il}
   \\right)
 \\end{align*}")  
@@ -38,31 +38,62 @@ n)](https://latex.codecogs.com/svg.latex?z%5Csim%20%5Ctext%7BBin%7D%28p%2C%20n%2
 ![z](https://latex.codecogs.com/svg.latex?z "z") is:
 
   
-![
-f(z) = \\begin{pmatrix} n \\\\ z \\end{pmatrix}p^zp^{n-z}
-](https://latex.codecogs.com/svg.latex?%0Af%28z%29%20%3D%20%5Cbegin%7Bpmatrix%7D%20n%20%5C%5C%20z%20%5Cend%7Bpmatrix%7Dp%5Ezp%5E%7Bn-z%7D%0A
+![&#10;f(z) = \\begin{pmatrix} n \\\\ z
+\\end{pmatrix}p^zp^{n-z}&#10;](https://latex.codecogs.com/svg.latex?%0Af%28z%29%20%3D%20%5Cbegin%7Bpmatrix%7D%20n%20%5C%5C%20z%20%5Cend%7Bpmatrix%7Dp%5Ezp%5E%7Bn-z%7D%0A
 "
 f(z) = \\begin{pmatrix} n \\\\ z \\end{pmatrix}p^zp^{n-z}
 ")  
 
+A different and equivalent way of writing the model is as:
+
+  
+![\\begin{align\*}&#10;Y\_{ij} \\mid \\epsilon\_{ij} = e &#10; &=
+\\begin{cases}&#10; 1 & \\vec\\beta^\\top\\vec x\_{ij} + e \> 0
+\\\\&#10; 0 & \\text{otherwise}&#10; \\end{cases}
+\\\\&#10;\\vec\\epsilon\_i = (\\epsilon\_{i1}, \\dots,
+\\epsilon\_{in\_i})^\\top &\\sim&#10; N^{(n\_i)}\\left(\\vec 0,
+I\_{n\_i} + \\sum\_{l = 1}^K\\sigma\_l^2 C\_{il}&#10;
+\\right)&#10;\\end{align\*}](https://latex.codecogs.com/svg.latex?%5Cbegin%7Balign%2A%7D%0AY_%7Bij%7D%20%5Cmid%20%5Cepsilon_%7Bij%7D%20%3D%20e%20%0A%20%20%26%3D%20%5Cbegin%7Bcases%7D%0A%20%20%20%201%20%26%20%5Cvec%5Cbeta%5E%5Ctop%5Cvec%20x_%7Bij%7D%20%2B%20e%20%3E%200%20%5C%5C%0A%20%20%20%200%20%26%20%5Ctext%7Botherwise%7D%0A%20%20%20%20%5Cend%7Bcases%7D%20%5C%5C%0A%5Cvec%5Cepsilon_i%20%3D%20%28%5Cepsilon_%7Bi1%7D%2C%20%5Cdots%2C%20%5Cepsilon_%7Bin_i%7D%29%5E%5Ctop%20%26%5Csim%0A%20%20N%5E%7B%28n_i%29%7D%5Cleft%28%5Cvec%200%2C%20I_%7Bn_i%7D%20%2B%20%5Csum_%7Bl%20%3D%201%7D%5EK%5Csigma_l%5E2%20C_%7Bil%7D%0A%20%20%5Cright%29%0A%5Cend%7Balign%2A%7D
+"\\begin{align*}
+Y_{ij} \\mid \\epsilon_{ij} = e 
+  &= \\begin{cases}
+    1 & \\vec\\beta^\\top\\vec x_{ij} + e \> 0 \\\\
+    0 & \\text{otherwise}
+    \\end{cases} \\\\
+\\vec\\epsilon_i = (\\epsilon_{i1}, \\dots, \\epsilon_{in_i})^\\top &\\sim
+  N^{(n_i)}\\left(\\vec 0, I_{n_i} + \\sum_{l = 1}^K\\sigma_l^2 C_{il}
+  \\right)
+\\end{align*}")  
+
+where ![I\_{n\_i}](https://latex.codecogs.com/svg.latex?I_%7Bn_i%7D
+"I_{n_i}") is the ![n\_i](https://latex.codecogs.com/svg.latex?n_i
+"n_i") dimensional identity matrix which comes from the
+unshared/individual specific random effect. This effect is always
+included.
+
 The ![C\_{il}](https://latex.codecogs.com/svg.latex?C_%7Bil%7D
 "C_{il}")s are known scale/correlation matrices where each of the
 ![l](https://latex.codecogs.com/svg.latex?l "l")’th types correspond to
-a type of effect. A typical example is that
+a type of effect. An arbitrary number of such matrices can be passed to
+include e.g. a genetic effect, a maternal effect, a paternal, an effect
+of a shared adult environment etc. A typical example is that
 ![C\_{il}](https://latex.codecogs.com/svg.latex?C_%7Bil%7D "C_{il}") is
 two times the kinship matrix in which case we call:
 
   
-![
-\\frac{\\sigma\_l^2}{1 + \\sum\_{k = 1}^K\\sigma\_k^2}
-](https://latex.codecogs.com/svg.latex?%0A%5Cfrac%7B%5Csigma_l%5E2%7D%7B1%20%2B%20%5Csum_%7Bk%20%3D%201%7D%5EK%5Csigma_k%5E2%7D%0A
+![&#10;\\frac{\\sigma\_l^2}{1 + \\sum\_{k
+= 1}^K\\sigma\_k^2}&#10;](https://latex.codecogs.com/svg.latex?%0A%5Cfrac%7B%5Csigma_l%5E2%7D%7B1%20%2B%20%5Csum_%7Bk%20%3D%201%7D%5EK%5Csigma_k%5E2%7D%0A
 "
 \\frac{\\sigma_l^2}{1 + \\sum_{k = 1}^K\\sigma_k^2}
 ")  
 
 the heritability. The scale parameters, the
 ![\\sigma\_k^2](https://latex.codecogs.com/svg.latex?%5Csigma_k%5E2
-"\\sigma_k^2")s, may be the primary interest in an analysis.
+"\\sigma_k^2")s, may be the primary interest in an analysis. We fix the
+unshared random effect to have variance one which gives the one in the
+denominator. Other authors prefer that the denominator is restricted to
+be one. Both restriction can be applied to ensure identification and
+they do not have any implications as the scale is arbitrary.
 
 This package provides randomized quasi Monte Carlo methods to
 approximate the log marginal likelihood for these types of models with
@@ -269,14 +300,14 @@ gr <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE,
 # check output at the starting values
 system.time(ll <- -fn(c(beta, sc)))
 #>    user  system elapsed 
-#>   7.731   0.000   1.970
+#>   7.780   0.000   1.971
 ll # the log likelihood at the starting values
 #> [1] -26042
 #> attr(,"n_fails")
 #> [1] 0
 system.time(gr_val <- gr(c(beta, sc)))
 #>    user  system elapsed 
-#>  113.29    0.00   28.71
+#> 116.865   0.055  29.597
 gr_val # the gradient at the starting values
 #> [1] 1894.52 -549.92 -235.39   47.16  -47.96
 #> attr(,"value")
@@ -304,8 +335,8 @@ rbind(numDeriv = numDeriv::grad(fn, c(beta, sc), indices = 0:10),
 
 # optimize the log likelihood approximation
 system.time(opt <- optim(c(beta, sc), fn, gr, method = "BFGS"))
-#>     user   system  elapsed 
-#> 4027.907    0.004 1025.348
+#>    user  system elapsed 
+#> 4064.00    0.24 1033.57
 ```
 
 The output from the optimization is shown below:
@@ -348,12 +379,12 @@ microbenchmark(
   times = 1)
 #> Unit: seconds
 #>            expr     min      lq    mean  median      uq     max neval
-#>   fn (1 thread)   8.207   8.207   8.207   8.207   8.207   8.207     1
-#>  fn (2 threads)   3.793   3.793   3.793   3.793   3.793   3.793     1
-#>  fn (4 threads)   2.027   2.027   2.027   2.027   2.027   2.027     1
-#>   gr (1 thread) 103.930 103.930 103.930 103.930 103.930 103.930     1
-#>  gr (2 threads)  55.551  55.551  55.551  55.551  55.551  55.551     1
-#>  gr (4 threads)  30.690  30.690  30.690  30.690  30.690  30.690     1
+#>   fn (1 thread)   7.861   7.861   7.861   7.861   7.861   7.861     1
+#>  fn (2 threads)   4.389   4.389   4.389   4.389   4.389   4.389     1
+#>  fn (4 threads)   2.113   2.113   2.113   2.113   2.113   2.113     1
+#>   gr (1 thread) 104.909 104.909 104.909 104.909 104.909 104.909     1
+#>  gr (2 threads)  57.379  57.379  57.379  57.379  57.379  57.379     1
+#>  gr (4 threads)  29.250  29.250  29.250  29.250  29.250  29.250     1
 ```
 
 ### Using ADAM
@@ -455,7 +486,7 @@ system.time(
                    verbose = FALSE, maxvls = maxpts_use, 
                    minvls = minvls))
 #>     user   system  elapsed 
-#> 4179.478    0.112 1072.667
+#> 3965.651    0.196 1016.098
 ```
 
 The result is shown below.
@@ -576,7 +607,7 @@ The new implementation is faster when the approximation is used:
 ``` r
 rowMeans(sim_res[, "time", ])
 #>          mvtnorm mvndst (no aprx) mvndst (w/ aprx) 
-#>          0.01727          0.01673          0.01120
+#>          0.01719          0.01652          0.01107
 par(mar = c(5, 4, 1, 1))
 boxplot(t(sim_res[, "time", ]))
 ```
@@ -591,7 +622,7 @@ boxplot(t(sim_res[, "time", ]))
 
 Genz, Alan, and Frank Bretz. 2002. “Comparison of Methods for the
 Computation of Multivariate T Probabilities.” *Journal of Computational
-and Graphical Statistics* 11 (4). Taylor & Francis: 950–71.
+and Graphical Statistics* 11 (4): 950–71.
 <https://doi.org/10.1198/106186002394>.
 
 </div>

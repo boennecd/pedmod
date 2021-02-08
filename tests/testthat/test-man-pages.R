@@ -72,4 +72,27 @@ test_that("examples in manual pages gives the correct answer for eval_pedigree_[
     ptr = ptr, par = c(beta, log(scs)), abs_eps = -1, maxvls = 1e6,
     rel_eps = 1e-5, minvls = 2000, use_aprx = TRUE)
   expect_equal(ll2, truth, tolerance = 1e-5)
+
+  # w/ weights
+  # truth_dat <- dat_arg[c(1, 2, 2, 2, 3)]
+  # truth_ptr <- get_pedigree_ll_terms(truth_dat, 1L)
+  # deriv_truth <- eval_pedigree_grad(
+  #   ptr = truth_ptr, par = c(beta, log(scs)), abs_eps = -1, maxvls = 1e8,
+  #   rel_eps = 1e-6, minvls = 2000, use_aprx = FALSE)
+  deriv_truth <- structure(
+    c(-1.67694764673088, 0.77284090098782, -1.96837632270557,
+      -0.25468774753068, -0.292904494898345), logLik = -6.7438625781489,
+    n_fails = 0L)
+
+  deriv_w_weight <- eval_pedigree_grad(
+    ptr = ptr, par = c(beta, log(scs)), abs_eps = -1, maxvls = 1e6,
+    rel_eps = 1e-3, minvls = 2000, use_aprx = TRUE,
+    cluster_weights = c(1, 3, 1))
+  expect_equal(deriv_w_weight, deriv_truth, tolerance = 1e-3)
+
+  ll_w_weight <- eval_pedigree_ll(
+    ptr = ptr, par = c(beta, log(scs)), abs_eps = -1, maxvls = 1e6,
+    rel_eps = 1e-3, minvls = 2000, use_aprx = TRUE,
+    cluster_weights = c(1, 3, 1))
+  expect_equal(c(ll_w_weight), attr(deriv_truth, "logLik"), tolerance = 1e-3)
 })

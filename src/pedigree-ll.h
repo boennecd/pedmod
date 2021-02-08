@@ -107,7 +107,8 @@ public:
   double gr
     (double const * par, double * d_par, int const maxvls,
      double const abs_eps, double const rel_eps, int minvls,
-     bool const do_reorder, bool const use_aprx, bool &did_fail){
+     bool const do_reorder, bool const use_aprx, bool &did_fail,
+     double const weight){
     did_fail = true;
     arma::vec mu(dmem.get_mem(), n_members, false),
            lower(mu.end()      , n_members, false),
@@ -131,18 +132,18 @@ public:
 
     // derivatives for the slopes
     for(int i = 0; i < n_fix_effect; ++i)
-      d_par[i] += res.derivs[i] / res.likelihood;
+      d_par[i] += weight * res.derivs[i] / res.likelihood;
 
     // derivatives for the scale parameters
     double * rhs       = d_par              + n_fix_effect;
     double const * lhs = res.derivs.begin() + n_fix_effect;
     int const n_scales = l_factor.scale_mats.size();
     for(int i = 0; i < n_scales; ++i)
-      *rhs++ += *lhs++ / res.likelihood;
+      *rhs++ += weight * *lhs++ / res.likelihood;
 
     did_fail = res.inform > 0;
 
-    return std::log(res.likelihood);
+    return weight * std::log(res.likelihood);
   }
 };
 

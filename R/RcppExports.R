@@ -140,11 +140,13 @@ get_pedigree_ll_terms <- function(data, max_threads) {
 #'
 #' @param ptr object from \code{\link{get_pedigree_ll_terms}}.
 #' @param par numeric vector with fixed effect coefficients and log scale
-#' parameters.
+#' parameters. The log scale parameters should be last.
 #' @param indices zero-based vector with indices of which log marginal
 #' likelihood terms to include. Use \code{NULL} if all indices should be
 #' used.
 #' @param n_threads number of threads to use.
+#' @param cluster_weights numeric vector with weights for each cluster. Use
+#' \code{NULL} if all clusters have weight one.
 #'
 #' @inheritParams get_pedigree_ll_terms
 #' @inheritParams mvndst
@@ -217,20 +219,33 @@ get_pedigree_ll_terms <- function(data, max_threads) {
 #'   rel_eps = 1e-5, minvls = 2000, use_aprx = TRUE))
 #' all.equal(ll1, ll2, tolerance = 1e-5)
 #'
+#' # cluster weights can be used as follows to repeat the second family three times
+#' system.time(deriv_w_weight <- eval_pedigree_grad(
+#'   ptr = ptr, par = c(beta, log(scs)), abs_eps = -1, maxvls = 1e6,
+#'   rel_eps = 1e-3, minvls = 2000, use_aprx = TRUE,
+#'   cluster_weights = c(1, 3, 1)))
+#'
+#' # the same as manually repeating
+#' dum_dat <- dat_arg[c(1, 2, 2, 2, 3)]
+#' dum_ptr <- get_pedigree_ll_terms(dum_dat, 1L)
+#' system.time(deriv_dum <- eval_pedigree_grad(
+#'   ptr = dum_ptr, par = c(beta, log(scs)), abs_eps = -1, maxvls = 1e6,
+#'   rel_eps = 1e-3, minvls = 2000, use_aprx = TRUE))
+#' all.equal(deriv_dum, deriv_w_weight, tolerance = 1e-3)
 #' @export
-eval_pedigree_ll <- function(ptr, par, maxvls, abs_eps, rel_eps, indices = NULL, minvls = -1L, do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L) {
-    .Call(`_pedmod_eval_pedigree_ll`, ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder, use_aprx, n_threads)
+eval_pedigree_ll <- function(ptr, par, maxvls, abs_eps, rel_eps, indices = NULL, minvls = -1L, do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L, cluster_weights = NULL) {
+    .Call(`_pedmod_eval_pedigree_ll`, ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder, use_aprx, n_threads, cluster_weights)
 }
 
 #' @rdname eval_pedigree
 #'
 #' @return \code{eval_pedigree_grad}: a vector with the derivatives with
-#' respect to \code{par}. An attribute called \code{"value"} contains the
+#' respect to \code{par}. An attribute called \code{"logLik"} contains the
 #' log marginal likelihood approximation. There will also be \code{"n_fails"}
 #' attribute like for \code{eval_pedigree_ll}.
 #'
 #' @export
-eval_pedigree_grad <- function(ptr, par, maxvls, abs_eps, rel_eps, indices = NULL, minvls = -1L, do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L) {
-    .Call(`_pedmod_eval_pedigree_grad`, ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder, use_aprx, n_threads)
+eval_pedigree_grad <- function(ptr, par, maxvls, abs_eps, rel_eps, indices = NULL, minvls = -1L, do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L, cluster_weights = NULL) {
+    .Call(`_pedmod_eval_pedigree_grad`, ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder, use_aprx, n_threads, cluster_weights)
 }
 

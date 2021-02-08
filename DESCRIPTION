@@ -32,4 +32,5 @@ Imports:
     Rcpp
 Suggests: 
     testthat, 
-    mvtnorm
+    mvtnorm, 
+    xml2

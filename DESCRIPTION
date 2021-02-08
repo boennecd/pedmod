@@ -17,8 +17,11 @@ Authors@R: c(
   person("R-core", email = "R-core@R-project.org",
          role = "cph"))
 Maintainer: Benjamin Christoffersen <boennecd@gmail.com>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Description: Provides functions to estimate models for mixed models using, for 
+    instance, pedigree data like in <10.1002/sim.1603>. The approximation is 
+    based on direct log marginal likelihood approximations like the randomized 
+    Quasi-Monte Carlo suggested by <10.1198/106186002394> with a similar 
+    procedure to approximate the derivatives. 
 License: GPL-2
 Encoding: UTF-8
 LazyData: true

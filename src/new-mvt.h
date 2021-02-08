@@ -209,7 +209,7 @@ public:
 
         // passes criteria
         abserr = 7 / 2 * std::sqrt(finest_var[k]);
-        passes_conv_check = passes_conv_check &
+        passes_conv_check &=
           abserr <= std::max(abseps, std::abs(finest[k]) * releps);
       }
 

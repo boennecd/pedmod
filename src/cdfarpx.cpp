@@ -4,8 +4,8 @@ namespace pedmod {
 
 arma::ivec get_infin(
     arma::ivec &out, arma::vec const &lower, arma::vec const &upper){
-  arma::uword const n = lower.size();
 #ifdef DO_CHECKS
+  arma::uword const n = lower.size();
   if(upper.size() != n)
     throw std::invalid_argument("get_infin: invalid 'upper'");
 #endif

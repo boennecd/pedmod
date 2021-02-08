@@ -326,14 +326,15 @@ SEXP get_pedigree_ll_terms(Rcpp::List data, unsigned const max_threads){
 //'   rel_eps = 1e-5, minvls = 2000, use_aprx = TRUE))
 //' all.equal(ll1, ll2, tolerance = 1e-5)
 //'
-//' # cluster weights can be used as follows to repeat the second family three times
+//' # cluster weights can be used as follows to repeat the second family three
+//' # times and remove the third
 //' system.time(deriv_w_weight <- eval_pedigree_grad(
 //'   ptr = ptr, par = c(beta, log(scs)), abs_eps = -1, maxvls = 1e6,
 //'   rel_eps = 1e-3, minvls = 2000, use_aprx = TRUE,
-//'   cluster_weights = c(1, 3, 1)))
+//'   cluster_weights = c(1, 3, 0)))
 //'
-//' # the same as manually repeating
-//' dum_dat <- dat_arg[c(1, 2, 2, 2, 3)]
+//' # the same as manually repeating second cluster and not including the third
+//' dum_dat <- dat_arg[c(1, 2, 2, 2)]
 //' dum_ptr <- get_pedigree_ll_terms(dum_dat, 1L)
 //' system.time(deriv_dum <- eval_pedigree_grad(
 //'   ptr = dum_ptr, par = c(beta, log(scs)), abs_eps = -1, maxvls = 1e6,
@@ -403,6 +404,9 @@ Rcpp::NumericVector eval_pedigree_ll
       continue;
     bool did_fail(false);
     double const w_i = has_weights ? c_weights[idx[i]] : 1;
+    if(std::abs(w_i) < std::numeric_limits<double>::epsilon())
+      continue;
+
     *wmem += w_i * terms.at(idx[i]).fn(
       &par[0], maxvls, abs_eps, rel_eps, minvls, do_reorder, use_aprx,
       did_fail);
@@ -492,6 +496,9 @@ Rcpp::NumericVector eval_pedigree_grad
       continue;
     bool did_fail(false);
     double const w_i = has_weights ? c_weights[idx[i]] : 1;
+    if(std::abs(w_i) < std::numeric_limits<double>::epsilon())
+      continue;
+
     *wmem += terms.at(idx[i]).gr(
       &par[0], wmem + 1, maxvls, abs_eps, rel_eps, minvls, do_reorder,
       use_aprx, did_fail, w_i);

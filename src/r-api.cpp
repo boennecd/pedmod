@@ -1,5 +1,6 @@
 #include "pedigree-ll.h"
 #include "ped-mem.h"
+#include "openmp-exception_ptr.h"
 
 //' Multivariate Normal Distribution CDF
 //' @description
@@ -389,6 +390,8 @@ Rcpp::NumericVector eval_pedigree_ll
   int const * idx = &all_idx[0];
 
   int n_fails(0);
+  openmp_exception_ptr exception_handler;
+
 #ifdef _OPENMP
 #pragma omp parallel num_threads(n_threads)
 {
@@ -399,22 +402,25 @@ Rcpp::NumericVector eval_pedigree_ll
 #ifdef _OPENMP
 #pragma omp for schedule(static) reduction(+:n_fails)
 #endif
-  for(int i = 0; i < all_idx.size(); ++i){
-    if(idx[i] >= static_cast<int>(terms.size()))
-      continue;
-    bool did_fail(false);
-    double const w_i = has_weights ? c_weights[idx[i]] : 1;
-    if(std::abs(w_i) < std::numeric_limits<double>::epsilon())
-      continue;
+  for(int i = 0; i < all_idx.size(); ++i)
+    exception_handler.run([&]() -> void {
+      if(idx[i] >= static_cast<int>(terms.size()))
+        return;
+      bool did_fail(false);
+      double const w_i = has_weights ? c_weights[idx[i]] : 1;
+      if(std::abs(w_i) < std::numeric_limits<double>::epsilon())
+        return;
 
-    *wmem += w_i * terms.at(idx[i]).fn(
-      &par[0], maxvls, abs_eps, rel_eps, minvls, do_reorder, use_aprx,
-      did_fail);
-    n_fails += did_fail;
-  }
+      *wmem += w_i * terms.at(idx[i]).fn(
+        &par[0], maxvls, abs_eps, rel_eps, minvls, do_reorder, use_aprx,
+        did_fail);
+      n_fails += did_fail;
+    });
 #ifdef _OPENMP
 }
 #endif
+
+  exception_handler.rethrow_if_error();
 
   double out(0.);
   for(unsigned i = 0; i < n_threads; ++i)
@@ -481,6 +487,7 @@ Rcpp::NumericVector eval_pedigree_grad
   int const * idx = &all_idx[0];
   int n_fails(0);
 
+  openmp_exception_ptr exception_handler;
 #ifdef _OPENMP
 #pragma omp parallel num_threads(n_threads)
 {
@@ -491,22 +498,25 @@ Rcpp::NumericVector eval_pedigree_grad
 #ifdef _OPENMP
 #pragma omp for schedule(static) reduction(+:n_fails)
 #endif
-  for(int i = 0; i < all_idx.size(); ++i){
-    if(idx[i] >= static_cast<int>(terms.size()))
-      continue;
-    bool did_fail(false);
-    double const w_i = has_weights ? c_weights[idx[i]] : 1;
-    if(std::abs(w_i) < std::numeric_limits<double>::epsilon())
-      continue;
+  for(int i = 0; i < all_idx.size(); ++i)
+    exception_handler.run([&]() -> void {
+      if(idx[i] >= static_cast<int>(terms.size()))
+        return;
+      bool did_fail(false);
+      double const w_i = has_weights ? c_weights[idx[i]] : 1;
+      if(std::abs(w_i) < std::numeric_limits<double>::epsilon())
+        return;
 
-    *wmem += terms.at(idx[i]).gr(
-      &par[0], wmem + 1, maxvls, abs_eps, rel_eps, minvls, do_reorder,
-      use_aprx, did_fail, w_i);
-    n_fails += did_fail;
-  }
+      *wmem += terms.at(idx[i]).gr(
+        &par[0], wmem + 1, maxvls, abs_eps, rel_eps, minvls, do_reorder,
+        use_aprx, did_fail, w_i);
+      n_fails += did_fail;
+    });
 #ifdef _OPENMP
 }
 #endif
+
+  exception_handler.rethrow_if_error();
 
   // aggregate the result
   Rcpp::NumericVector grad(n_fix + n_scales);

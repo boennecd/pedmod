@@ -117,7 +117,7 @@ First, we source a file to get a function to simulate a data set with
 a maternal effect and a genetic effect like in @Mahjani20:
 
 ```{r source_sim_file}
-# souce the file to get the simulation function
+# source the file to get the simulation function
 source(system.file("gen-pedigree-data.R", package = "pedmod"))
 
 # simulate a data set

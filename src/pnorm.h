@@ -2,14 +2,10 @@
 #define PNORM_H
 
 #include <Rmath.h>
-
-#ifdef __cplusplus
-#include <cmath>
-using std::isinf;
-using std::isnan;
-#else
-#include <math.h>
-#endif
+// I ran into issues with likes those mentioned here
+//   https://bugs.webkit.org/show_bug.cgi?id=59249
+// Thus, we always use math.h
+#include <math.h> // may be included anyway?
 
 /**
  * evaluates the standard normal CDF after avoiding some checks in the

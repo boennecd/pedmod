@@ -246,7 +246,7 @@ system.time(
     ptr = ll_terms, par = c(beta_scaled, sc), maxvls = 5000L, abs_eps = 0, 
     rel_eps = 1e-2, minvls = 500L, use_aprx = TRUE, n_threads = 4L))
 #>    user  system elapsed 
-#>  37.866   0.005   9.524
+#>  38.182   0.000   9.608
 
 # then we use more samples to increase the precision starting at the previous
 # results
@@ -257,7 +257,7 @@ system.time(
     # we changed the parameters
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 #>    user  system elapsed 
-#> 109.919   0.044  27.621
+#>  110.22    0.00   27.63
 ```
 
 The results are shown below:
@@ -512,12 +512,12 @@ system.time(ll_res <- eval_pedigree_ll(
   ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4))
 #>    user  system elapsed 
-#>   2.091   0.000   0.576
+#>   2.104   0.000   0.579
 system.time(grad_res <- eval_pedigree_grad(
   ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4))
 #>    user  system elapsed 
-#>   67.14    0.00   16.85
+#>   73.17    0.00   18.36
 
 # find the duplicated combinations of pedigrees, covariates, and outcomes. One 
 # likely needs to change this code if the pedigrees are not identical but are if 
@@ -539,13 +539,13 @@ system.time(ll_res_fast <- eval_pedigree_ll(
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4, 
   cluster_weights = c_weights))
 #>    user  system elapsed 
-#>   1.174   0.000   0.304
+#>   1.158   0.000   0.298
 system.time(grad_res_fast <- eval_pedigree_grad(
   ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4, 
   cluster_weights = c_weights))
 #>    user  system elapsed 
-#>  27.871   0.000   6.979
+#>  31.190   0.000   7.806
 
 # show that we get the same (up to a Monte Carlo error)
 print(c(redundant = ll_res, fast = ll_res_fast), digits = 6)
@@ -587,7 +587,7 @@ system.time(
     rel_eps = 1e-2, minvls = 500L, use_aprx = TRUE, n_threads = 4L, 
     cluster_weights = c_weights))
 #>    user  system elapsed 
-#>  25.455   0.000   6.383
+#>  26.494   0.000   6.632
 
 # then we use more samples to increase the precision starting at the previous
 # results
@@ -598,7 +598,7 @@ system.time(
     # we changed the parameters
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 #>    user  system elapsed 
-#>   47.93    0.00   12.31
+#>   48.11    0.00   12.41
 ```
 
 The results are shown below:

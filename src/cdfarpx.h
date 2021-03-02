@@ -161,15 +161,15 @@ class cdf {
   arma::ivec infin;
   arma::ivec indices;
 
-  arma::vec lower = arma::vec(dmem.get_mem() , ndim, false),
-            upper = arma::vec(lower.end()    , ndim, false),
-       sigma_chol = arma::vec(upper.end()    , (ndim * (ndim + 1L)) / 2L,
-                              false),
-             draw = arma::vec(sigma_chol.end(), ndim, false);
+  double * __restrict__ const lower      = dmem.get_mem(),
+         * __restrict__ const upper      = lower + ndim,
+         * __restrict__ const sigma_chol = upper + ndim,
+         * __restrict__ const draw       =
+         sigma_chol + (ndim * (ndim + 1L)) / 2L,
+         * __restrict__ const dtmp_mem   = draw + ndim;
 
   // memory that can be used
   int * const itmp_mem = indices.end();
-  double * const dtmp_mem = draw.end();
 
 public:
   /**
@@ -223,22 +223,12 @@ public:
       return out;
     };
 
-    arma::vec sds(get_dmem(ndim), ndim, false),
-              mu (get_dmem(ndim), ndim, false);
+    double * sds = get_dmem(ndim);
     for(int i = 0; i < ndim; ++i){
       sds[i] = std::sqrt(sigma_in.at(i, i));
-      mu [i] = mu_in[i] / sds[i];
+      lower[i] = (lower_in[i] - mu_in[i]) / sds[i];
+      upper[i] = (upper_in[i] - mu_in[i]) / sds[i];
     }
-
-    // TODO: this is the wrong order
-    lower  = lower_in;
-    lower /= sds;
-    lower -= mu;
-
-    // TODO: this is the wrong order
-    upper  = upper_in;
-    upper /= sds;
-    upper -= mu;
 
     is_permutated = false;
     {
@@ -248,12 +238,12 @@ public:
     }
 
     if(do_reorder and ndim > 1L){
-      double * const y     = draw.begin(),
+      double * const y     = draw,
              * const A     = get_dmem(ndim),
              * const B     = get_dmem(ndim),
-             * const DL    = sds.begin(),
-             * const delta = mu.begin();
-      sds.zeros();
+             * const DL    = sds,
+             * const delta = get_dmem(ndim);
+      std::fill(sds, sds + ndim, 0.);
 
       auto const correl = get_cor_vec(sigma_in);
       int const pivot = 1L, doscale = 1L;
@@ -263,9 +253,9 @@ public:
       arma::ivec infi(itmp_mem, ndim, false);
 
       F77_CALL(mvsort)(
-        &ndim, lower.memptr(), upper.memptr(), delta,
+        &ndim, lower, upper, delta,
         correl.cor_vec.memptr(), infin.begin(), y, &pivot, &nddim, A, B,
-        DL, sigma_chol.memptr(), infi.memptr(), &F_inform, indices.begin(),
+        DL, sigma_chol, infi.memptr(), &F_inform, indices.begin(),
         &doscale);
 
       if(F_inform != 0)
@@ -280,8 +270,8 @@ public:
 
       if(is_permutated){
         for(int i = 0; i < ndim; ++i){
-          lower[i] = *(A + i);
-          upper[i] = *(B + i);
+          lower[i] = A[i];
+          upper[i] = B[i];
           infin[i] = infi[i];
         }
 
@@ -295,25 +285,28 @@ public:
 
       } else
         for(int i = 0; i < ndim; ++i){
-          lower[i] = *(A + i);
-          upper[i] = *(B + i);
+          lower[i] = A[i];
+          upper[i] = B[i];
         }
 
     } else if(!do_reorder and ndim > 1L) {
       arma::mat tmp(get_dmem(ndim * ndim), ndim, ndim, false);
       tmp = sigma_in;
-      tmp.each_row() /= sds.t();
-      tmp.each_col() /= sds;
+      for(int i = 0; i < ndim; ++i)
+        for(int j = 0; j <ndim; ++j)
+          tmp.at(i, j) /= sds[i] * sds[j];
+
       if(!arma::chol(tmp, tmp)) // TODO: memory allocation
-        sigma_chol.fill(std::numeric_limits<double>::infinity());
+        std::fill(sigma_chol, sigma_chol + (ndim * (ndim + 1L)) / 2L,
+                  std::numeric_limits<double>::infinity());
       else
-        copy_upper_tri(tmp, sigma_chol.memptr());
+        copy_upper_tri(tmp, sigma_chol);
 
       if(ndim > 1L){
-        /* rescale such that choleksy decomposition has ones in the diagonal */
-        double * sc = sigma_chol.begin();
+        /* rescale such that Choleksy decomposition has ones in the diagonal */
+        double * sc = sigma_chol;
         for(int i = 0; i < ndim; ++i){
-          double const scal = *(sc + i);
+          double const scal = sc[i];
           lower[i] /= scal;
           upper[i] /= scal;
           double * const sc_end = sc + i + 1L;
@@ -321,7 +314,8 @@ public:
             *sc /= scal;
         }
       }
-    }
+    } else
+      *sigma_chol = 1.;
   }
 
   /**
@@ -338,12 +332,12 @@ public:
 #endif
 
     double * const __restrict__ out = integrand_val,
-           * const __restrict__ dr  = draw.begin();
+           * const __restrict__ dr  = draw;
 
     double w(1.);
-    double const * __restrict__ sc   = sigma_chol.begin(),
-                 * __restrict__ lw   = lower.begin(),
-                 * __restrict__ up   = upper.begin(),
+    double const * __restrict__ sc   = sigma_chol,
+                 * __restrict__ lw   = lower,
+                 * __restrict__ up   = upper,
                  * __restrict__ unif = unifs;
     int const *infin_j = infin.begin();
     /* loop over variables and transform them to truncated normal
@@ -354,7 +348,7 @@ public:
       for(int i = 0; i < j; ++i, sc++, d++)
         su += *sc * *d;
 
-      auto pnorm_use = [&](double const x){
+      auto pnorm_use = [&](double const x) -> double {
         return use_aprx ? pnorm_approx(x) : pnorm_std(x, 1L, 0L);
       };
       double lim_l(0.),
@@ -369,13 +363,13 @@ public:
 
       }
 
-      if(lim_l < lim_u){ // TODO: change to <=
+      if(lim_l < lim_u){
         double const l_diff = lim_u - lim_l;
         w *= l_diff;
 
         if(needs_last_unif or j + 1 < ndim){
           double const quant_val = lim_l + *unif * l_diff;
-          *(dr + j) =
+          dr[j] =
             use_aprx ?
             safe_qnorm_aprx(quant_val) :
             safe_qnorm_w   (quant_val);
@@ -429,7 +423,7 @@ public:
       return functor.get_output(int_apprx, 0, 0, 0,
                                 indices.begin());
 
-    } else if(std::isinf(*sigma_chol.begin()))
+    } else if(std::isinf(*sigma_chol))
       throw std::runtime_error("std::isinf(*sigma_chol.begin())");
 
     /* perform the approximation */

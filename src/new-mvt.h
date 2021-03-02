@@ -64,7 +64,7 @@ public:
       { 858339L, 918142L, 501970L, 234813L, 460565L, 31996L, 753018L, 256150L, 199809L, 993599L, 245149L, 794183L, 121349L, 150619L, 376952L, 809123L, 809123L, 804319L, 67352L, 969594L, 434796L, 969594L, 804319L, 391368L, 761041L, 754049L, 466264L, 754049L, 754049L, 466264L, 754049L, 754049L, 282852L, 429907L, 390017L, 276645L, 994856L, 250142L, 144595L, 907454L, 689648L, 687580L, 687580L, 687580L, 687580L, 978368L, 687580L, 552742L, 105195L, 942843L, 768249L, 307142L, 307142L, 307142L, 307142L, 880619L, 880619L, 880619L, 880619L, 880619L, 880619L, 880619L, 117185L, 117185L, 117185L, 117185L, 117185L, 117185L, 117185L, 117185L, 117185L, 117185L, 117185L, 60731L, 60731L, 60731L, 60731L, 60731L, 60731L, 60731L, 60731L, 60731L, 60731L, 60731L, 178309L, 178309L, 178309L, 178309L, 74373L, 74373L, 74373L, 74373L, 74373L, 74373L, 74373L, 74373L, 214965L, 214965L, 214965L }
     };
 
-    // workign objects.
+    // working objects.
     int * const pr = imem.get_mem();
 
     double * const __restrict__ finval     = dmem.get_mem(),
@@ -76,7 +76,7 @@ public:
            * const __restrict__ values     = vk + ndim,
            * const __restrict__ fs         = values + nf;
 
-    // initalize
+    // initialize
     std::fill(finest    , finest     + nf, 0);
     std::fill(finest_var, finest_var + nf, 0);
     int sampls = minsmp;
@@ -145,7 +145,7 @@ public:
             }
           }
 
-          // apply latice rule
+          // apply lattice rule
           for(int k = 0; k < prime; ++k){
             {
               double * rj = r,

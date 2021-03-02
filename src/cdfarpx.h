@@ -70,7 +70,7 @@ struct cor_vec_res {
 };
 
 /**
- returns the minum number of samples as the original Fortran code.
+ returns the minimum number of samples as the original Fortran code.
  */
 inline int default_minvls(int dim){
   dim = std::max(1, dim);
@@ -115,7 +115,7 @@ inline double safe_qnorm_aprx(double const x) noexcept {
 /**
  * copies the upper triangular matrix.
  *
- * @param X Matrix top copy.
+ * @param X Matrix to copy.
  * @param x Pointer to copy to.
  */
 inline void copy_upper_tri
@@ -129,7 +129,7 @@ inline void copy_upper_tri
 /**
  * copies the lower triangular matrix.
  *
- * @param X Matrix top copy.
+ * @param X Matrix to copy.
  * @param x Pointer to copy to.
  */
 inline void copy_lower_tri
@@ -173,7 +173,7 @@ class cdf {
 
 public:
   /**
-   * must be called perior to calling the constructor or any member
+   * must be called prior to calling the constructor or any member
    * functions.
    */
   static void alloc_mem(int const max_ndim, int const max_threads) {
@@ -369,7 +369,7 @@ public:
 
       }
 
-      if(lim_l < lim_u){
+      if(lim_l < lim_u){ // TODO: change to <=
         double const l_diff = lim_u - lim_l;
         w *= l_diff;
 
@@ -389,7 +389,7 @@ public:
       }
     }
 
-    /* evaluate the integrand and weigth the result. */
+    /* evaluate the integrand and weight the result. */
     functor(dr, out, indices.begin(), is_permutated);
 
     double * o = out;

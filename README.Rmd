@@ -1,7 +1,7 @@
 ---
 output: 
   github_document: 
-    pandoc_args: --webtex=https://latex.codecogs.com/svg.latex?
+    pandoc_args: --webtex=https://render.githubusercontent.com/render/math?math=
 bibliography: ref.bib
 ---
 
@@ -11,8 +11,8 @@ knitr::opts_chunk$set(
   comment = "#>",
   fig.path = "man/figures/README-",
   cache.path = "cache/README-",
-  out.width = "100%", fig.width = 7, fig.height = 4
-)
+  out.width = "100%", fig.width = 7, fig.height = 4,
+  message = FALSE, warning = FALSE, error = FALSE)
 options(digits = 4)
 ```
 
@@ -38,9 +38,7 @@ $\Phi$ is the standard normal distribution's CDF, and
 $\text{Bin}$ implies a binomial distribution such if 
 $z\sim \text{Bin}(p, n)$ then the density of $z$ is:
 
-$$
-f(z) = \begin{pmatrix} n \\ z \end{pmatrix}p^zp^{n-z}
-$$
+$$f(z) = \begin{pmatrix} n \\ z \end{pmatrix}p^zp^{n-z}$$
 
 A different and equivalent way of writing the model is as:
 
@@ -65,21 +63,22 @@ effect of a shared adult environment etc. A
 typical example is that $C_{il}$ is two times the kinship matrix in which 
 case we call:
 
-$$
-\frac{\sigma_l^2}{1 + \sum_{k = 1}^K\sigma_k^2}
-$$
+$$\frac{\sigma_l^2}{1 + \sum_{k = 1}^K\sigma_k^2}$$
 
-the heritability. The scale parameters, the $\sigma_k^2$s, may be the 
-primary interest in an analysis. We fix the unshared random effect to have 
-variance one which gives the one in the denominator. Other authors prefer that
+the heritability (the proportion of the variance attributable to the direct 
+genetic effect). 
+The scale parameters, the $\sigma_k^2$s, may be the 
+primary interest in an analysis. We fix the unshared random effect' 
+variance to be one which gives the one in the denominator. Other authors prefer that
 the denominator is restricted to be one. Both restriction can be applied to 
 ensure identification and they do not have any implications as the scale 
 is arbitrary. 
 
-This package provides randomized quasi Monte Carlo methods to approximate 
+This package provides randomized quasi-Monte Carlo methods to approximate 
 the log marginal likelihood for these types of 
 models with an arbitrary number scale matrices, $K$, and the derivatives 
-with respect to $(\vec\beta^\top, 2\log\sigma_1,\dots, 2\log\sigma_K)^\top$.
+with respect to $(\vec\beta^\top, 2\log\sigma_1,\dots, 2\log\sigma_K)^\top$
+(that is, we work with $\theta_k = 2\log\sigma_k$).
 We have re-written the Fortran code by @Genz02 in C++, made it easy to 
 extend from a log marginal likelihood approximation to other approximations 
 such as the derivatives, and added less precise but faster approximations 
@@ -113,7 +112,578 @@ remotes::install_github("boennecd/pedmod")
 
 ## Example
 
-First, we source a file to get a function to simulate a data set with 
+We start with a simple example only with a direct genetic effect. We have one 
+type of family which consists of two couples which are related through by one 
+of the parents being cousins.
+
+```{r setup_simple}
+# create the family we will use
+fam <- data.frame(id = 1:10, sex = rep(1:2, 5L),
+                  father = c(NA, NA, 1L, NA, 1L, NA, 3L, 3L, 5L, 5L), 
+                  mother = c(NA, NA, 2L, NA, 2L, NA, 4L, 4L, 6L, 6L))
+
+# plot the pedigree
+library(kinship2)
+ped <- with(fam, pedigree(id = id, dadid = father, momid = mother, sex = sex))
+plot(ped)
+```
+
+We set the scale matrix to be two times the kinship matrix to model the direct
+genetic effect. Each individual also have a standard normally distributed 
+covariate and a binary covariate. Thus, we can simulate a data set with a 
+function like:
+
+```{r assign_sim_dat}
+# simulates a data set. 
+# 
+# Args:
+#   n_fams: number of families.
+#   beta: the fixed effect coefficients.
+#   sig_sq: the scale parameter.
+sim_dat <- function(n_fams, beta = c(-3, 1, 2), sig_sq = 3){
+  # setup before the simulations
+  Cmat <- 2 * kinship(ped)
+  n_obs <- NROW(fam)
+  Sig <- diag(n_obs) + sig_sq * Cmat
+  Sig_chol <- chol(Sig)
+  
+  # simulate the data
+  out <- replicate(
+    n_fams, {
+      # simulate covariates
+      X <- cbind(`(Intercept)` = 1, Continuous = rnorm(n_obs), 
+                 Binary = runif(n_obs) > .5)
+      
+      # assign the linear predictor + noise
+      eta <- drop(X %*% beta) + drop(rnorm(n_obs) %*% Sig_chol)
+      
+      # return the list in the format needed for the package
+      list(y = as.numeric(eta > 0), X = X, scale_mats = list(Cmat))
+    }, simplify = FALSE)
+  
+  # add attributes with the true values and return 
+  attributes(out) <- list(beta = beta, sig_sq = sig_sq)
+  out
+}
+```
+
+We can now estimate the model with a simulated data set as follows:
+
+```{r est_simple, cache = 1}
+# simulate a data set
+set.seed(27107390)
+dat <- sim_dat(n_fams = 400L)
+
+# get the starting values for the fixed effects. This is fast
+y <- unlist(lapply(dat, `[[`, "y"))
+X <- do.call(rbind, lapply(dat, `[[`, "X"))
+start_fit <-  glm.fit(X, y, family = binomial("probit"))
+
+# a bit far from the true values because of scaling but the signs are right
+(beta <- start_fit$coefficients)
+attributes(dat) # the true values
+
+# log likelihood of the model without random effects
+-sum(start_fit$deviance) / 2 
+
+# select starting values for the scale parameter
+sc <- log(1)
+
+# ad-hock re-scale the fixed effects to match the scale parameter
+# (we should use sum if there are more effects)
+beta_scaled <- beta * sqrt(1 + sum(exp(sc)))
+
+# perform the optimization
+library(pedmod)
+ll_terms <- get_pedigree_ll_terms(dat, max_threads = 4L)
+
+# we start by using few samples
+system.time(
+  opt_out_quick <- pedmod_opt(
+    ptr = ll_terms, par = c(beta_scaled, sc), maxvls = 5000L, abs_eps = 0, 
+    rel_eps = 1e-2, minvls = 500L, use_aprx = TRUE, n_threads = 4L))
+
+# then we use more samples to increase the precision starting at the previous
+# results
+system.time(
+  opt_out <- pedmod_opt(
+    ptr = ll_terms, par = opt_out_quick$par, abs_eps = 0, use_aprx = TRUE, 
+    n_threads = 4L, 
+    # we changed the parameters
+    maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
+```
+
+The results are shown below:
+
+```{r est_simple_res}
+# parameter estimates versus the truth
+rbind(opt_out       = head(opt_out      $par, -1), 
+      opt_out_quick = head(opt_out_quick$par, -1), 
+      truth         = attr(dat, "beta"))
+c(opt_out       = exp(tail(opt_out      $par, 1)), 
+  opt_out_quick = exp(tail(opt_out_quick$par, 1)), 
+  truth         = attr(dat, "sig_sq"))
+
+# log marginal likelihoods
+print(-opt_out_quick$value, digits = 8)
+print(-opt_out      $value, digits = 8)
+```
+
+We can create can compute a profile likelihood curve like this:
+
+```{r simple_ex_profile_likelihood, cache = 1}
+rg <- range(exp(tail(opt_out$par, 1) / 2) * c(.75, 1.33),
+            sqrt(attr(dat, "sig_sq")) * c(.9, 1.1))
+sigs <- seq(rg[1], rg[2], length.out = 10)
+sigs <- sort(c(sigs, exp(tail(opt_out$par, 1) / 2)))
+
+ll_terms <- get_pedigree_ll_terms(dat, max_threads = 4L)
+pl_curve_res <- lapply(sigs, function(sig){
+  # set the parameters to pass
+  sig_sq_log <- 2 * log(sig)
+  beta_scaled <- beta * sqrt(1 + sig^2)
+  
+  # optimize like before but using the fix argument
+  opt_out_quick <- pedmod_opt(
+    ptr = ll_terms, par = c(beta_scaled, sig_sq_log), maxvls = 5000L, abs_eps = 0, 
+    rel_eps = 1e-2, minvls = 500L, use_aprx = TRUE, n_threads = 4L, 
+    fix = length(beta) + 1L)
+  opt_out <- pedmod_opt(
+    ptr = ll_terms, par = c(opt_out_quick$par, sig_sq_log), abs_eps = 0, 
+    use_aprx = TRUE, n_threads = 4L, fix = length(beta) + 1L,
+    # we changed the parameters
+    maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L)
+  
+  # report to console and return
+  message(sprintf("\nLog-likelihood %.5f (%.5f). Estimated parameters:", 
+                  -opt_out$value, -opt_out_quick$value))
+  message(paste0(capture.output(print(
+    c(opt_out$par, Scale = sig))), collapse = "\n"))
+  
+  list(opt_out_quick = opt_out_quick, opt_out = opt_out)
+})
+```
+
+```{r plot_simple_ex_profile_likelihood}
+par(mar = c(5, 5, 1, 1))
+pls <- -sapply(pl_curve_res, function(x) x$opt_out$value)
+plot(sigs, pls, bty = "l",
+     pch = 16, xlab = expression(sigma), ylab = "Profile likelihood")
+grid()
+lines(smooth.spline(sigs, pls))
+abline(v = exp(tail(opt_out$par, 1) / 2), lty = 2) # the estimate
+abline(v = sqrt(attr(dat, "sig_sq")), lty = 3)     # the true value
+```
+
+We make a small simulation study below where we are interested in the estimation 
+time and bias.
+
+```{r clean_pre_sim_study_simple, echo = FALSE}
+rm(list = setdiff(ls(), c("sim_dat", "ped", "fam")))
+```
+
+```{r sim_study_simple}
+# the seeds we will use
+seeds <- c(36451989L, 18774630L, 76585289L, 31898455L, 55733878L, 99681114L, 37725150L, 99188448L, 66989159L, 20673587L, 47985954L, 42571905L, 53089211L, 18457743L, 96049437L, 70222325L, 86393368L, 45380572L, 81116968L, 48291155L, 89755299L, 69891073L, 1846862L, 15263013L, 37537710L, 
+           25194071L, 14471551L, 38278606L, 55596031L, 5436537L, 75008107L, 83382936L, 50689482L, 71708788L, 52258337L, 23423931L, 61069524L, 24452554L, 32406673L, 14900280L, 24818537L, 59733700L, 82407492L, 95500692L, 62528680L, 88728797L, 9891891L, 36354594L, 69630736L, 41755287L)
+
+# run the simulation study
+sim_study <- lapply(seeds, function(s){
+  set.seed(s)
+  
+  # only run the result if it has not been computed
+  f <- file.path("cache", "sim_study_simple", paste0("simple-", s, ".RDS"))
+  if(!file.exists(f)){
+    # simulate the data
+    dat <- sim_dat(n_fams = 400L)
+    
+    # get the starting values
+    y <- unlist(lapply(dat, `[[`, "y"))
+    X <- do.call(rbind, lapply(dat, `[[`, "X"))
+    start_fit <-  glm.fit(X, y, family = binomial("probit"))
+    beta <- start_fit$coefficients
+    
+    sc <- log(1)
+    beta_scaled <- beta * sqrt(1 + sum(exp(sc)))
+    
+    # get the log likelihood without random effects
+    ll_no_rng <-  -sum(start_fit$deviance) / 2 
+    
+    # fit the model 
+    library(pedmod)
+    ll_terms <- get_pedigree_ll_terms(dat, max_threads = 4L)
+
+    ti_quick <- system.time(
+      opt_out_quick <- pedmod_opt(
+        ptr = ll_terms, par = c(beta_scaled, sc), maxvls = 5000L, abs_eps = 0, 
+        rel_eps = 1e-2, minvls = 500L, use_aprx = TRUE, n_threads = 4L))
+    opt_out_quick$time <- ti_quick
+    
+    ti_slow <- system.time(
+      opt_out <- pedmod_opt(
+        ptr = ll_terms, par = opt_out_quick$par, abs_eps = 0, use_aprx = TRUE, 
+        n_threads = 4L, 
+        maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
+    opt_out$time <- ti_slow
+    
+    out <- list(opt_out_quick = opt_out_quick, opt_out = opt_out, 
+                ll_no_rng = ll_no_rng)
+    saveRDS(out, f)
+  }
+  
+  # report to console and return 
+  out <- readRDS(f)
+  message(paste0(capture.output(out$opt_out$par), collapse = "\n"))
+  
+  out
+})
+
+# gather the estimates
+beta_est <- sapply(sim_study, function(x) head(x$opt_out$par, 3))
+sigma_est <- sapply(sim_study, function(x) exp(tail(x$opt_out$par, 1) / 2))
+
+# compute the errors
+tmp <- sim_dat(2L)
+err <- rbind(beta_est, sigma = sigma_est) - 
+  c(attr(tmp, "beta"), sqrt(attr(tmp, "sig_sq")))
+
+# get the bias estimates and the standard errors
+rbind(Bias = rowMeans(err), 
+      SE   = apply(err, 1, sd) / sqrt(NCOL(err)))
+
+# make a box plot
+par(mar = c(5, 5, 1, 1))
+boxplot(t(err), ylab = "Error")
+abline(h = 0, lty = 2)
+grid()
+# get the average computation times
+time_vals <- 
+  sapply(sim_study, function(x) 
+    x$opt_out$time["elapsed"] + x$opt_out_quick$time["elapsed"] )
+summary(time_vals)
+```
+
+### Adding Environmental Effects 
+
+```{r clean_pre_simple_w_ev, echo = FALSE}
+rm(list = setdiff(ls(), c("ped", "fam")))
+```
+
+As an extension, we can add an environmental effect. The new scale matrix, 
+the $C_{i2}$'s, can be written as:
+
+```{r xtra_mat_simple_w_ev}
+C_env <- matrix(0., NROW(fam), NROW(fam))
+C_env[c(1:3, 5)   , c(1:3, 5)   ] <- 1
+C_env[c(3:4, 7:8) , c(3:4, 7:8) ] <- 1
+C_env[c(5:6, 9:10), c(5:6, 9:10)] <- 1
+
+Matrix::Matrix(C_env, sparse = TRUE)
+```
+
+We assign the new simulation function below but this time we include only 
+binary covariates:
+
+```{r simple_w_ev_assign_sim_dat}
+# simulates a data set. 
+# 
+# Args:
+#   n_fams: number of families.
+#   beta: the fixed effect coefficients.
+#   sig_sq: the scale parameters.
+sim_dat <- function(n_fams, beta = c(-3, 4), sig_sq = c(2, 1)){
+  # setup before the simulations
+  Cmat <- 2 * kinship(ped)
+  n_obs <- NROW(fam)
+  Sig <- diag(n_obs) + sig_sq[1] * Cmat + sig_sq[2] * C_env
+  Sig_chol <- chol(Sig)
+  
+  # simulate the data
+  out <- replicate(
+    n_fams, {
+      # simulate covariates
+      X <- cbind(`(Intercept)` = 1, Binary = runif(n_obs) > .9)
+      
+      # assign the linear predictor + noise
+      eta <- drop(X %*% beta) + drop(rnorm(n_obs) %*% Sig_chol)
+      
+      # return the list in the format needed for the package
+      list(y = as.numeric(eta > 0), X = X, scale_mats = list(
+        Genetic = Cmat, Environment = C_env))
+    }, simplify = FALSE)
+  
+  # add attributes with the true values and return 
+  attributes(out) <- list(beta = beta, sig_sq = sig_sq)
+  out
+}
+```
+
+In this case, we exploit that some of log marginal likelihood terms are 
+identical. That is, some of the combinations of pedigrees, covariates, and 
+outcomes match. Therefor, we can use the `cluster_weights` arguments to reduce 
+the computation time:
+
+```{r simple_w_ev_sim, cache = 1}
+# simulate a data set
+set.seed(27107390)
+dat <- sim_dat(n_fams = 1000L)
+
+# compute the log marginal likelihood by not using that some of the log marginal 
+# likelihood terms are identical
+beta_true   <- attr(dat, "beta")
+sig_sq_true <- attr(dat, "sig_sq")
+
+library(pedmod)
+ll_terms <- get_pedigree_ll_terms(dat, max_threads = 4L)
+system.time(ll_res <- eval_pedigree_ll(
+  ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
+  rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4))
+system.time(grad_res <- eval_pedigree_grad(
+  ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
+  rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4))
+
+# find the duplicated combinations of pedigrees, covariates, and outcomes. One 
+# likely needs to change this code if the pedigrees are not identical but are if 
+# they are permuted. In this case, the code below will miss identical terms
+dat_unqiue <- dat[!duplicated(dat)]
+attributes(dat_unqiue) <- attributes(dat)
+length(dat_unqiue) # number of unique terms
+
+# get the weights. This can be written in a much more efficient way
+c_weights <- sapply(dat_unqiue, function(x)
+  sum(sapply(dat, identical, y = x)))
+
+# get the C++ object and show that the computation time is reduced
+ll_terms <- get_pedigree_ll_terms(dat_unqiue, max_threads = 4L)
+
+system.time(ll_res_fast <- eval_pedigree_ll(
+  ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
+  rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4, 
+  cluster_weights = c_weights))
+system.time(grad_res_fast <- eval_pedigree_grad(
+  ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
+  rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4, 
+  cluster_weights = c_weights))
+
+# show that we get the same (up to a Monte Carlo error)
+print(c(redundant = ll_res, fast = ll_res_fast), digits = 6)
+rbind(redundant = grad_res, fast = grad_res_fast)
+rm(dat) # will not need this anymore
+
+# get the starting values for the fixed effects. Here we need to pass a weights
+# argument
+y <- unlist(lapply(dat_unqiue, `[[`, "y"))
+X <- do.call(rbind, lapply(dat_unqiue, `[[`, "X"))
+w <- unlist(Map(
+  rep, c_weights, times = sapply(dat_unqiue, function(x) length(x$y))))
+start_fit <-  glm.fit(X, y, weights = w, family = binomial("probit"))
+
+# a bit far from the true values because of scaling but the signs are right
+(beta <- start_fit$coefficients)
+
+# log likelihood of the model without random effects
+-sum(start_fit$deviance) / 2 
+
+# select starting values for the scale parameter
+sc <- log(c(1 ,1))
+
+# ad-hock re-scale the fixed effects to match the scale parameter
+beta_scaled <- beta * sqrt(1 + sum(exp(sc)))
+
+# we start by using few samples
+system.time(
+  opt_out_quick <- pedmod_opt(
+    ptr = ll_terms, par = c(beta_scaled, sc), maxvls = 5000L, abs_eps = 0, 
+    rel_eps = 1e-2, minvls = 500L, use_aprx = TRUE, n_threads = 4L, 
+    cluster_weights = c_weights))
+
+# then we use more samples to increase the precision starting at the previous
+# results
+system.time(
+  opt_out <- pedmod_opt(
+    ptr = ll_terms, par = opt_out_quick$par, abs_eps = 0, use_aprx = TRUE, 
+    n_threads = 4L,  cluster_weights = c_weights,
+    # we changed the parameters
+    maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
+```
+
+The results are shown below:
+
+```{r est_simple_w_res}
+# parameter estimates versus the truth
+rbind(opt_out       = head(opt_out      $par, -2), 
+      opt_out_quick = head(opt_out_quick$par, -2), 
+      truth         = attr(dat_unqiue, "beta"))
+rbind(opt_out       = exp(tail(opt_out      $par, 2)), 
+      opt_out_quick = exp(tail(opt_out_quick$par, 2)), 
+      truth         = attr(dat_unqiue, "sig_sq"))
+
+# log marginal likelihoods
+print(-opt_out_quick$value, digits = 8)
+print(-opt_out      $value, digits = 8)
+```
+
+We can make a 2D profile likelihood curve as follows:
+
+```{r simple_w_ev_ex_profile_likelihood, cache = 1}
+# get the values at which we evaluate the profile likelihood
+rg <- Map(function(est, truth)
+  range(exp(est / 2) * c(.8, 1.25), truth), 
+  est = tail(opt_out$par, 2), truth = sqrt(attr(dat_unqiue, "sig_sq")))
+
+sig_vals1 <- seq(rg[[1]][1], rg[[1]][2], length.out = 5)
+sig_vals2 <- seq(rg[[2]][1], rg[[2]][2], length.out = 5)
+sigs <- expand.grid(sigma1 = sig_vals1,
+                    sigma2 = sig_vals2)
+
+# compute the profile likelihood
+ll_terms <- get_pedigree_ll_terms(dat_unqiue, max_threads = 4L)
+pl_curve_res <- Map(function(sig1, sig2){
+  # set the parameters to pass
+  sig <- c(sig1, sig2)
+  sig_sq_log <- 2 * log(sig)
+  beta_scaled <- beta * sqrt(1 + sum(sig^2))
+  
+  # optimize like before but using the fix argument
+  opt_out_quick <- pedmod_opt(
+    ptr = ll_terms, par = c(beta_scaled, sig_sq_log), maxvls = 5000L, abs_eps = 0, 
+    rel_eps = 1e-2, minvls = 500L, use_aprx = TRUE, n_threads = 4L, 
+    fix = length(beta) + 1:2, cluster_weights = c_weights)
+  
+  opt_out <- pedmod_opt(
+    ptr = ll_terms, par = c(opt_out_quick$par, sig_sq_log), abs_eps = 0, 
+    use_aprx = TRUE, n_threads = 4L, fix = length(beta) + 1:2,
+    cluster_weights = c_weights,
+    # we changed the parameters
+    maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L)
+  
+  # report to console and return
+  message(sprintf("\nLog-likelihood %.5f (%.5f). Estimated parameters:", 
+                  -opt_out$value, -opt_out_quick$value))
+  message(paste0(capture.output(print(
+    c(opt_out$par, Scale = sig))), collapse = "\n"))
+  
+  list(opt_out_quick = opt_out_quick, opt_out = opt_out)
+}, sig1 = sigs$sigma1, sig2 = sigs$sigma2)
+```
+
+```{r draw_simple_w_ev_ex_profile_likelihood}
+par(mfcol = c(2, 2), mar = c(1, 1, 1, 1))
+pls <- -sapply(pl_curve_res, function(x) x$opt_out$value)
+for(i in 1:3 - 1L)
+  persp(sig_vals1, sig_vals2, matrix(pls, length(sig_vals1)), 
+        xlab = "\nGenetic", ylab = "\nEnvironment", 
+        zlab = "\n\nProfile likelihood", theta = 65 + i * 90, 
+        ticktype = "detailed")
+```
+
+We make a small simulation study below where we are interested in the estimation 
+time and bias.
+
+```{r clean_pre_sim_simple_w_ev, echo = FALSE}
+rm(list = setdiff(ls(), c("sim_dat", "ped", "fam", "C_env")))
+```
+
+```{r sim_study_simple_w}
+# the seeds we will use
+seeds <- c(36451989L, 18774630L, 76585289L, 31898455L, 55733878L, 99681114L, 37725150L, 99188448L, 66989159L, 20673587L, 47985954L, 42571905L, 53089211L, 18457743L, 96049437L, 70222325L, 86393368L, 45380572L, 81116968L, 48291155L, 89755299L, 69891073L, 1846862L, 15263013L, 37537710L, 
+           25194071L, 14471551L, 38278606L, 55596031L, 5436537L, 75008107L, 83382936L, 50689482L, 71708788L, 52258337L, 23423931L, 61069524L, 24452554L, 32406673L, 14900280L, 24818537L, 59733700L, 82407492L, 95500692L, 62528680L, 88728797L, 9891891L, 36354594L, 69630736L, 41755287L)
+
+# run the simulation study
+sim_study <- lapply(seeds, function(s){
+  set.seed(s)
+  
+  # only run the result if it has not been computed
+  f <- file.path("cache", "sim_study_simple_w_env", 
+                 paste0("simple-", s, ".RDS"))
+  if(!file.exists(f)){
+    # simulate the data
+    dat <- sim_dat(n_fams = 1000L)
+    
+    # get the weighted data set
+    dat_unqiue <- dat[!duplicated(dat)]
+    attributes(dat_unqiue) <- attributes(dat)
+    c_weights <- sapply(dat_unqiue, function(x)
+      sum(sapply(dat, identical, y = x)))
+    rm(dat)
+    
+    # get the starting values
+    y <- unlist(lapply(dat_unqiue, `[[`, "y"))
+    X <- do.call(rbind, lapply(dat_unqiue, `[[`, "X"))
+    w <- unlist(Map(
+      rep, c_weights, times = sapply(dat_unqiue, function(x) length(x$y))))
+    start_fit <-  glm.fit(X, y, weights = w, family = binomial("probit"))
+    beta <- start_fit$coefficients
+    
+    sc <- log(c(1, 1))
+    beta_scaled <- beta * sqrt(1 + sum(exp(sc)))
+    
+    # get the log likelihood without random effects
+    ll_no_rng <-  -sum(start_fit$deviance) / 2 
+    
+    # fit the model 
+    library(pedmod)
+    ll_terms <- get_pedigree_ll_terms(dat_unqiue, max_threads = 4L)
+
+    ti_quick <- system.time(
+      opt_out_quick <- pedmod_opt(
+        ptr = ll_terms, par = c(beta_scaled, sc), maxvls = 5000L, abs_eps = 0, 
+        rel_eps = 1e-2, minvls = 500L, use_aprx = TRUE, n_threads = 4L, 
+        cluster_weights = c_weights))
+    opt_out_quick$time <- ti_quick
+    
+    ti_slow <- system.time(
+      opt_out <- pedmod_opt(
+        ptr = ll_terms, par = opt_out_quick$par, abs_eps = 0, use_aprx = TRUE, 
+        n_threads = 4L, cluster_weights = c_weights,
+        maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
+    opt_out$time <- ti_slow
+    
+    out <- list(opt_out_quick = opt_out_quick, opt_out = opt_out, 
+                ll_no_rng = ll_no_rng)
+    saveRDS(out, f)
+  }
+  
+  # report to console and return 
+  out <- readRDS(f)
+  message(paste0(capture.output(out$opt_out$par), collapse = "\n"))
+  
+  out
+})
+
+# gather the estimates
+tmp <- sim_dat(2L)
+beta_est <- sapply(sim_study, function(x) head(x$opt_out$par, 2))
+sigma_est <- sapply(sim_study, function(x) exp(tail(x$opt_out$par, 2) / 2))
+rownames(sigma_est) <- names(tmp[[1L]]$scale_mats)
+
+# compute the errors
+err <- rbind(beta_est, sigma_est) - 
+  c(attr(tmp, "beta"), sqrt(attr(tmp, "sig_sq")))
+
+# get the bias estimates and the standard errors
+rbind(Bias = rowMeans(err), 
+      SE   = apply(err, 1, sd) / sqrt(NCOL(err)))
+
+# make a box plot
+par(mar = c(5, 5, 1, 1))
+boxplot(t(err), ylab = "Error")
+abline(h = 0, lty = 2)
+grid()
+# get the average computation times
+time_vals <- 
+  sapply(sim_study, function(x) 
+    x$opt_out$time["elapsed"] + x$opt_out_quick$time["elapsed"] )
+summary(time_vals)
+```
+
+### More Complicated Example
+
+```{r clean_up_complicated, echo = FALSE}
+rm(list = ls())
+```
+
+We source a file to get a function to simulate a data set with 
 a maternal effect and a genetic effect like in @Mahjani20:
 
 ```{r source_sim_file}

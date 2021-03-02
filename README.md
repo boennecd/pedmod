@@ -246,7 +246,7 @@ system.time(
     ptr = ll_terms, par = c(beta_scaled, sc), maxvls = 5000L, abs_eps = 0, 
     rel_eps = 1e-2, minvls = 500L, use_aprx = TRUE, n_threads = 4L))
 #>    user  system elapsed 
-#>  38.182   0.000   9.608
+#>  38.838   0.019   9.774
 
 # then we use more samples to increase the precision starting at the previous
 # results
@@ -257,7 +257,7 @@ system.time(
     # we changed the parameters
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 #>    user  system elapsed 
-#>  110.22    0.00   27.63
+#> 106.651   0.025  26.761
 ```
 
 The results are shown below:
@@ -403,9 +403,9 @@ err <- rbind(beta_est, sigma = sigma_est) -
 # get the bias estimates and the standard errors
 rbind(Bias = rowMeans(err), 
       SE   = apply(err, 1, sd) / sqrt(NCOL(err)))
-#>      (Intercept) Continous  Binary   sigma
-#> Bias    -0.06284   0.02724 0.03541 0.05418
-#> SE       0.05054   0.01708 0.03344 0.03886
+#>      (Intercept) Continuous  Binary   sigma
+#> Bias    -0.06284    0.02724 0.03541 0.05418
+#> SE       0.05054    0.01708 0.03344 0.03886
 
 # make a box plot
 par(mar = c(5, 5, 1, 1))
@@ -423,7 +423,7 @@ time_vals <-
     x$opt_out$time["elapsed"] + x$opt_out_quick$time["elapsed"] )
 summary(time_vals)
 #>    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-#>    7.98   15.29   24.17   22.93   27.95   67.83
+#>    7.96   14.87   24.22   23.10   27.67   71.05
 ```
 
 ### Adding Environmental Effects
@@ -512,12 +512,12 @@ system.time(ll_res <- eval_pedigree_ll(
   ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4))
 #>    user  system elapsed 
-#>   2.104   0.000   0.579
+#>   2.233   0.001   0.612
 system.time(grad_res <- eval_pedigree_grad(
   ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4))
 #>    user  system elapsed 
-#>   73.17    0.00   18.36
+#>   78.17    0.00   19.62
 
 # find the duplicated combinations of pedigrees, covariates, and outcomes. One 
 # likely needs to change this code if the pedigrees are not identical but are if 
@@ -539,13 +539,13 @@ system.time(ll_res_fast <- eval_pedigree_ll(
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4, 
   cluster_weights = c_weights))
 #>    user  system elapsed 
-#>   1.158   0.000   0.298
+#>   1.195   0.000   0.309
 system.time(grad_res_fast <- eval_pedigree_grad(
   ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4, 
   cluster_weights = c_weights))
 #>    user  system elapsed 
-#>  31.190   0.000   7.806
+#>   32.51    0.00    8.15
 
 # show that we get the same (up to a Monte Carlo error)
 print(c(redundant = ll_res, fast = ll_res_fast), digits = 6)
@@ -587,7 +587,7 @@ system.time(
     rel_eps = 1e-2, minvls = 500L, use_aprx = TRUE, n_threads = 4L, 
     cluster_weights = c_weights))
 #>    user  system elapsed 
-#>  26.494   0.000   6.632
+#>  28.033   0.000   7.015
 
 # then we use more samples to increase the precision starting at the previous
 # results
@@ -598,7 +598,7 @@ system.time(
     # we changed the parameters
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 #>    user  system elapsed 
-#>   48.11    0.00   12.41
+#>  50.912   0.003  13.108
 ```
 
 The results are shown below:
@@ -767,8 +767,8 @@ err <- rbind(beta_est, sigma_est) -
 rbind(Bias = rowMeans(err), 
       SE   = apply(err, 1, sd) / sqrt(NCOL(err)))
 #>      (Intercept)  Binary  Genetic Environment
-#> Bias    -0.01876 0.02593 0.009831    -0.01154
-#> SE       0.04768 0.06509 0.038129     0.01317
+#> Bias    -0.01882 0.02599 0.009956    -0.01159
+#> SE       0.04766 0.06506 0.038090     0.01318
 
 # make a box plot
 par(mar = c(5, 5, 1, 1))
@@ -786,7 +786,7 @@ time_vals <-
     x$opt_out$time["elapsed"] + x$opt_out_quick$time["elapsed"] )
 summary(time_vals)
 #>    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-#>    11.1    30.6    35.6    35.2    39.7    66.9
+#>    11.0    30.5    35.7    34.8    39.2    68.6
 ```
 
 ### More Complicated Example
@@ -950,14 +950,14 @@ gr <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE,
 # check output at the starting values
 system.time(ll <- -fn(c(beta, sc)))
 #>    user  system elapsed 
-#>   8.046   0.000   2.051
+#>   7.923   0.000   2.038
 ll # the log likelihood at the starting values
 #> [1] -26042
 #> attr(,"n_fails")
 #> [1] 0
 system.time(gr_val <- gr(c(beta, sc)))
 #>    user  system elapsed 
-#>  117.54    0.00   29.66
+#>   131.0     0.0    33.2
 gr_val # the gradient at the starting values
 #> [1] 1894.52 -549.92 -235.39   47.16  -47.96
 #> attr(,"value")
@@ -986,7 +986,7 @@ rbind(numDeriv = numDeriv::grad(fn, c(beta, sc), indices = 0:10),
 # optimize the log likelihood approximation
 system.time(opt <- optim(c(beta, sc), fn, gr, method = "BFGS"))
 #>     user   system  elapsed 
-#> 4020.445    0.024 1022.587
+#> 4157.410    0.048 1056.047
 ```
 
 The output from the optimization is shown below:
@@ -1029,12 +1029,12 @@ microbenchmark(
   times = 1)
 #> Unit: seconds
 #>            expr     min      lq    mean  median      uq     max neval
-#>   fn (1 thread)   7.566   7.566   7.566   7.566   7.566   7.566     1
-#>  fn (2 threads)   3.871   3.871   3.871   3.871   3.871   3.871     1
-#>  fn (4 threads)   2.035   2.035   2.035   2.035   2.035   2.035     1
-#>   gr (1 thread) 100.800 100.800 100.800 100.800 100.800 100.800     1
-#>  gr (2 threads)  55.496  55.496  55.496  55.496  55.496  55.496     1
-#>  gr (4 threads)  29.464  29.464  29.464  29.464  29.464  29.464     1
+#>   fn (1 thread)   7.496   7.496   7.496   7.496   7.496   7.496     1
+#>  fn (2 threads)   3.928   3.928   3.928   3.928   3.928   3.928     1
+#>  fn (4 threads)   2.099   2.099   2.099   2.099   2.099   2.099     1
+#>   gr (1 thread) 113.448 113.448 113.448 113.448 113.448 113.448     1
+#>  gr (2 threads)  61.071  61.071  61.071  61.071  61.071  61.071     1
+#>  gr (4 threads)  31.761  31.761  31.761  31.761  31.761  31.761     1
 ```
 
 ### Using ADAM
@@ -1136,7 +1136,7 @@ system.time(
                    verbose = FALSE, maxvls = maxpts_use, 
                    minvls = minvls))
 #>     user   system  elapsed 
-#> 3988.369    0.136 1022.772
+#> 4329.841    0.048 1109.790
 ```
 
 The result is shown below.
@@ -1245,7 +1245,7 @@ They have about the same average relative error as expected:
 ``` r
 rowMeans(sim_res[, "SE", ])
 #>          mvtnorm mvndst (no aprx) mvndst (w/ aprx) 
-#>        2.830e-05        3.163e-05        3.165e-05
+#>        2.830e-05        3.163e-05        3.196e-05
 par(mar = c(5, 4, 1, 1))
 boxplot(t(sim_res[, "SE", ]))
 ```
@@ -1257,7 +1257,7 @@ The new implementation is faster when the approximation is used:
 ``` r
 rowMeans(sim_res[, "time", ])
 #>          mvtnorm mvndst (no aprx) mvndst (w/ aprx) 
-#>          0.01721          0.01659          0.01107
+#>          0.01701          0.01636          0.01105
 par(mar = c(5, 4, 1, 1))
 boxplot(t(sim_res[, "time", ]))
 ```

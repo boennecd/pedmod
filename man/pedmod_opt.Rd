@@ -29,15 +29,14 @@ pedmod_start(
   maxvls = 1000L,
   abs_eps = 0,
   rel_eps = 0.01,
-  opt_func = NULL,
   seed = 1L,
   indices = NULL,
+  scale_max = 9,
   minvls = 100L,
   do_reorder = TRUE,
   use_aprx = TRUE,
   n_threads = 1L,
-  cluster_weights = NULL,
-  ...
+  cluster_weights = NULL
 )
 }
 \arguments{
@@ -84,6 +83,10 @@ for computing profile likelihoods. \code{NULL} yield all parameters.}
 
 \item{data}{the \code{\link{list}} that was passed to
 \code{\link{get_pedigree_ll_terms}}.}
+
+\item{scale_max}{the maximum value for the scale parameters. Sometimes, the
+optimization method tends to find large scale parameters and get stuck.
+Setting a maximum solves this.}
 }
 \value{
 \code{pedmod_opt}: The output from the \code{opt_func} argument.

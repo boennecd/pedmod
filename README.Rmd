@@ -188,8 +188,7 @@ dat <- sim_dat(n_fams = 400L)
 # perform the optimization. We start with finding the starting values
 library(pedmod)
 ll_terms <- get_pedigree_ll_terms(dat, max_threads = 4L)
-system.time(start <- pedmod_start(
-  ptr = ll_terms, data = dat, n_threads = 4L))
+system.time(start <- pedmod_start(ptr = ll_terms, data = dat, n_threads = 4L))
 
 # log-likelihood without the random effects and at the starting values
 start$logLik_no_rng
@@ -222,11 +221,13 @@ print(-opt_out$value     , digits = 8)
 We can compute a profile likelihood curve like this:
 
 ```{r simple_ex_profile_likelihood, cache = 1}
+# assign the scale parameter at which we will evaluate the profile likelihood
 rg <- range(exp(tail(opt_out$par, 1) / 2) * c(.5, 2),
             sqrt(attr(dat, "sig_sq")) * c(.9, 1.1))
 sigs <- seq(rg[1], rg[2], length.out = 10)
 sigs <- sort(c(sigs, exp(tail(opt_out$par, 1) / 2)))
 
+# compute the profile likelihood
 ll_terms <- get_pedigree_ll_terms(dat, max_threads = 4L)
 pl_curve_res <- lapply(sigs, function(sig){
   # set the parameters to pass
@@ -311,9 +312,11 @@ seeds to check if this does not change the estimates.  We will likely need to
 use more samples if the result depends on the seed.
 
 ```{r simple_ex_more_profile_likelihood, cache = 1}
+# assign the seeds we will use along with the grid of seeds and scale parameters
 seeds <- 1:4
 seeds_n_sigs <- expand.grid(seed = seeds, sig = sigs)
 
+# compute the profile likelihood
 ll_terms <- get_pedigree_ll_terms(dat, max_threads = 4L)
 pl_curve_res <- Map(function(sig, seed){
   # set the parameters to pass

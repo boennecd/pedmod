@@ -83,6 +83,9 @@ pedmod_opt <- function(ptr, par, maxvls, abs_eps, rel_eps,
 #' @rdname pedmod_opt
 #' @param data the \code{\link{list}} that was passed to
 #' \code{\link{get_pedigree_ll_terms}}.
+#' @param scale_max the maximum value for the scale parameters. Sometimes, the
+#' optimization method tends to find large scale parameters and get stuck.
+#' Setting a maximum solves this.
 #' @return
 #' \code{pedmod_start}: A \code{list} with:
 #' \itemize{
@@ -95,9 +98,14 @@ pedmod_opt <- function(ptr, par, maxvls, abs_eps, rel_eps,
 #' @importFrom utils tail
 #' @export
 pedmod_start <- function(ptr, data, maxvls = 1000L, abs_eps = 0, rel_eps = 1e-2,
-                         opt_func = NULL, seed = 1L, indices = NULL,
+                         seed = 1L, indices = NULL, scale_max = 9,
                          minvls = 100L, do_reorder = TRUE, use_aprx = TRUE,
-                         n_threads = 1L, cluster_weights = NULL, ...){
+                         n_threads = 1L, cluster_weights = NULL){
+  # checks
+  stopifnot(is.numeric(scale_max), length(scale_max) == 1L,
+            scale_max > 0,
+            is.numeric(seed), length(seed) %in% 0:1)
+
   #####
   # get the starting values for the fixed effects
   y <- unlist(lapply(data, `[[`, "y"))
@@ -160,33 +168,34 @@ pedmod_start <- function(ptr, data, maxvls = 1000L, abs_eps = 0, rel_eps = 1e-2,
   # optimize
   logLik_no_rng <- -sum(start_fit$deviance) / 2
   n_scales <- length(data[[1L]]$scale_mats)
-  succes <- FALSE
-  for(i in 1:10){
-    # there seems to be a tendency to overstep. This __may__ solve it
-    sc <- rep(log(.1 * i^2), n_scales)
-    stopifnot(length(sc) > 0)
-    opt <- optim(sc, fn, gr, method = "BFGS")
+  stopifnot(n_scales > 0)
 
-    if(sum(exp(opt$par)) < 100){
-      # found a solution where the total variance is not -> infity
-      sc <- opt$par
-      beta_scaled <- beta * sqrt(1 + sum(exp(sc)))
-      succes <- TRUE
-      logLik_est <- -opt$value
+  for(sc_sqrt in seq(.1, sqrt(scale_max), length.out = 5)){
+    sc <- rep(2 * log(sc_sqrt), n_scales)
+    opt <- try(optim(sc, fn, gr, upper = rep(log(scale_max), n_scales),
+                     method = "L-BFGS-B",
+                     control = list(lmm = 10L, maxit = 1000L)),
+               silent = TRUE)
+    if(!inherits(opt, "try-error") && opt$convergence < 2)
+      # found a good solution
       break
-    }
   }
 
-  if(!succes){
-    # fall back to use low values for the scale parameters as the starting
-    # values
+  if(inherits(opt, "try-error") || opt$convergence > 1){
+    # fall to find a good solution
     sc <- rep(log(.01), n_scales)
     beta_scaled <- beta * sqrt(1 + sum(exp(sc)))
     logLik_est <- -fn(sc)
+
+  } else {
+    sc <- opt$par
+    beta_scaled <- beta * sqrt(1 + sum(exp(sc)))
+    logLik_est <- -opt$value
+
   }
 
   # return
   list(par = c(beta_scaled, sc), beta_no_rng = beta,
        logLik_no_rng = logLik_no_rng,
-       logLik_est = -opt$value)
+       logLik_est = logLik_est)
 }

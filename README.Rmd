@@ -222,7 +222,7 @@ print(-opt_out$value     , digits = 8)
 We can compute a profile likelihood curve like this:
 
 ```{r simple_ex_profile_likelihood, cache = 1}
-rg <- range(exp(tail(opt_out$par, 1) / 2) * c(.75, 1.33),
+rg <- range(exp(tail(opt_out$par, 1) / 2) * c(.5, 2),
             sqrt(attr(dat, "sig_sq")) * c(.9, 1.1))
 sigs <- seq(rg[1], rg[2], length.out = 10)
 sigs <- sort(c(sigs, exp(tail(opt_out$par, 1) / 2)))
@@ -255,15 +255,107 @@ pl_curve_res <- lapply(sigs, function(sig){
 })
 ```
 
+We can construct an approximate 95% confidence interval using an estimated 
+cubic smoothing spline for the profile likelihood (more `sigs` points may be 
+needed to get a good estimate of the cubic smoothing spline):
+
+```{r conf_int_simple_ex}
+# check the critical values
+alpha <- .05
+crit_val <- qchisq(1 - alpha, 1)
+
+# fit the cubic smoothing spline
+pls <- -sapply(pl_curve_res, function(x) x$opt_out$value)
+smooth_est <- smooth.spline(sigs, pls)
+
+# check that we have values within the bounds
+max_ml <- -opt_out$value
+ll_diffs <- 2 * (max_ml - pls)
+stopifnot(any(head(ll_diffs, length(ll_diffs) / 2) > crit_val), 
+          any(tail(ll_diffs, length(ll_diffs) / 2) > crit_val))
+
+# find the values
+max_par <- tail(opt_out$par, 1)
+lb <- uniroot(function(x) 2 * (max_ml - predict(smooth_est, x)$y) - crit_val, 
+              c(min(sigs)       , exp(max_par / 2)))$root
+ub <- uniroot(function(x) 2 * (max_ml - predict(smooth_est, x)$y) - crit_val, 
+              c(exp(max_par / 2), max(sigs)))$root
+
+# the confidence interval 
+c(lb, ub)
+c(lb, ub)^2 # on the variance scale
+```
+
+A caveat is that issues with the $\chi^2$ approximation may arise on the 
+boundary of the scale parameter ($\sigma = 0$; 
+see https://stats.stackexchange.com/a/4894/81865).
+Notice that the above may fail if the estimated profile likelihood is not 
+smooth e.g. because of convergence issues. We can plot the profile likelihood 
+and highlight the critical value as follows:
+
 ```{r plot_simple_ex_profile_likelihood}
 par(mar = c(5, 5, 1, 1))
-pls <- -sapply(pl_curve_res, function(x) x$opt_out$value)
 plot(sigs, pls, bty = "l",
      pch = 16, xlab = expression(sigma), ylab = "Profile likelihood")
 grid()
-lines(smooth.spline(sigs, pls))
+lines(predict(smooth_est, seq(min(sigs), max(sigs), length.out = 100)))
 abline(v = exp(tail(opt_out$par, 1) / 2), lty = 2) # the estimate
-abline(v = sqrt(attr(dat, "sig_sq")), lty = 3)     # the true value
+abline(v = sqrt(attr(dat, "sig_sq")), lty = 3) # the true value
+abline(v = lb, lty = 3) # mark the lower bound
+abline(v = ub, lty = 3) # mark the upper bound
+abline(h = max_ml - crit_val / 2, lty = 3) # mark the critical value
+```
+
+We only ran the above with one seed. We can draw the curve with using different
+seeds to check if this does not change the estimates.  We will likely need to 
+use more samples if the result depends on the seed.
+
+```{r simple_ex_more_profile_likelihood, cache = 1}
+seeds <- 1:4
+seeds_n_sigs <- expand.grid(seed = seeds, sig = sigs)
+
+ll_terms <- get_pedigree_ll_terms(dat, max_threads = 4L)
+pl_curve_res <- Map(function(sig, seed){
+  # set the parameters to pass
+  beta <- start$beta_no_rng
+  sig_sq_log <- 2 * log(sig)
+  beta_scaled <- beta * sqrt(1 + sig^2)
+  
+  # optimize like before but using the fix argument
+  opt_out_quick <- pedmod_opt(
+    ptr = ll_terms, par = c(beta_scaled, sig_sq_log), maxvls = 1000L, 
+    abs_eps = 0, rel_eps = 1e-2, minvls = 100L, use_aprx = TRUE, n_threads = 4L, 
+    fix = length(beta) + 1L, seed = seed)
+  opt_out <- pedmod_opt(
+    ptr = ll_terms, par = c(opt_out_quick$par, sig_sq_log), abs_eps = 0, 
+    use_aprx = TRUE, n_threads = 4L, fix = length(beta) + 1L, seed = seed,
+    # we changed the parameters
+    maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L)
+  
+  # report to console and return
+  message(sprintf("\nLog-likelihood %.5f (%.5f). Estimated parameters:", 
+                  -opt_out$value, -opt_out_quick$value))
+  message(paste0(capture.output(print(
+    c(opt_out$par, Scale = sig))), collapse = "\n"))
+  
+  list(opt_out_quick = opt_out_quick, opt_out = opt_out)
+}, sig = seeds_n_sigs$sig, seed = seeds_n_sigs$seed)
+```
+
+The different profile likelihood curves are drawn below:
+
+```{r draw_mult_pf_curves}
+# plot the profile likelihood values
+pls <- -sapply(pl_curve_res, function(x) x$opt_out$value)
+pls <- matrix(pls, length(seeds), dimnames = list(seeds, sigs))
+matplot(sigs, t(pls), pch = seq_along(seeds) + 15L, bty = "l", col = "black", 
+        xlab = expression(sigma), ylab = "Profile likelihood")
+grid()
+# plot the difference from the mean
+matplot(sigs, t(pls) - colMeans(pls), pch = seq_along(seeds) + 15L, bty = "l", 
+        col = "black", xlab = expression(sigma), 
+        ylab = "Diff. profile likelihood")
+grid()
 ```
 
 We make a small simulation study below where we are interested in the estimation 

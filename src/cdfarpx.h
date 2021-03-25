@@ -528,7 +528,8 @@ public:
   arma::mat const X;
   /// the number of fixed effects
   int const n_fix = X.n_rows,
-     n_integrands = 1 + n_fix + scale_mats.size();
+     n_integrands = 1 + n_fix + scale_mats.size(),
+         n_scales = scale_mats.size();
 
 private:
   /// working memory
@@ -545,6 +546,10 @@ private:
 
   /// working memory to be used by cdf
   double * cdf_mem;
+
+  /// array of pointer to the scale matrices' element which we will need.
+  std::unique_ptr<double const *[]> scale_mats_ptr =
+    std::unique_ptr<double const *[]>(new double const *[n_scales]);
 
 public:
   /// sets the scale matrices. There are no checks on the validity
@@ -565,7 +570,7 @@ public:
     rand_Korobov<cdf<pedigree_l_factor> >::alloc_mem(
         n_mem, get_n_integrands(), max_threads);
     dmem.set_n_mem(
-      2 * n_mem * n_mem + n_mem * (n_mem + 1) + get_n_integrands() + n_mem,
+      2 * n_mem * n_mem + n_mem * (n_mem + 1) + get_n_integrands() + 2 * n_mem,
       max_threads);
   }
 
@@ -632,9 +637,10 @@ public:
     (double const * __restrict__ draw, double * __restrict__ out,
      int const *indices, bool const is_permutated) {
       *out = 1;
-      double * __restrict__ const d_mu  = get_wk_mem() + get_n_integrands(),
-             * __restrict__ const d_fix = out + 1,
-             * __restrict__ const d_sc  = d_fix + n_fix;
+      double * __restrict__ const d_mu      = get_wk_mem() + get_n_integrands(),
+             * __restrict__ const d_mu_perm = d_mu + n_mem,
+             * __restrict__ const d_fix     = out + 1,
+             * __restrict__ const d_sc      = d_fix + n_fix;
 
       std::fill(d_mu   , d_mu + n_mem            , 0.);
       std::fill(out + 1, out + get_n_integrands(), 0.);
@@ -650,29 +656,36 @@ public:
         }
       }
 
+      // permute back
+      for(int i = 0; i < n_mem; ++i)
+        d_mu_perm[indices[i]] = d_mu[i];
+
       // derivatives w.r.t. the fixed effects
-      for(int i = 0; i < n_mem; ++i){
-        double const *x = X.colptr(indices[i]);
-        double *d_fixj =  d_fix;
-        for(int j = 0; j < n_fix; ++j)
-          *d_fixj++ += *x++ * d_mu[i];
+      {
+        double const *xij = X.begin();
+        for(int i = 0; i < n_mem; ++i){
+          double *d_fixj =  d_fix;
+          for(int j = 0; j < n_fix; ++j)
+            *d_fixj++ += *xij++ * d_mu_perm[i];
+        }
       }
 
       // handle the derivatives w.r.t. the scale parameters
-      int const n_scales = scale_mats.size();
-      double const *d_mu_c = d_mu;
+      double const *d_mu_c = d_mu_perm;
+      for(int s = 0; s < n_scales; ++s)
+        scale_mats_ptr[s] = scale_mats.at(s).begin();
+
       for(int c = 0; c < n_mem; ++c, ++d_mu_c){
-        double const *d_mu_r = d_mu;
-        arma::uword const ic = indices[c];
+        double const *d_mu_r = d_mu_perm;
 
-        for(int r = 0; r < c; ++r, ++d_mu_r){
-          arma::uword const ir = indices[r];
+        for(int r = 0; r < c; ++r, ++d_mu_r)
           for(int s = 0; s < n_scales; ++s)
-            d_sc[s] += *d_mu_c * *d_mu_r * scale_mats.at(s).at(ir, ic);
-        }
+            d_sc[s] += *d_mu_c * *d_mu_r * *scale_mats_ptr[s]++;
 
-        for(int s = 0; s < n_scales; ++s)
-          d_sc[s] += .5 * *d_mu_c * *d_mu_c * scale_mats.at(s).at(ic, ic);
+        for(int s = 0; s < n_scales; ++s){
+          d_sc[s] += .5 * *d_mu_c * *d_mu_c * *scale_mats_ptr[s];
+          scale_mats_ptr[s] += n_mem - c;
+        }
       }
     }
 
@@ -734,19 +747,23 @@ public:
     out.likelihood = likelihood;
 
     // add terms to the derivative w.r.t. the scale parameters
-    int const n_scales = scale_mats.size();
     if(n_mem > 1){
       double * __restrict__ const d_sc = res + n_fix + 1L;
       double * sig_inv_ele = sig_inv;
+      for(int s = 0; s < n_scales; ++s)
+        scale_mats_ptr[s] = scale_mats.at(s).begin();
+
       for(int c = 0; c < n_mem; ++c){
         for(int r = 0; r < c; ++r, ++sig_inv_ele)
           for(int s = 0; s < n_scales; ++s)
             d_sc[s] -=
-              likelihood * *sig_inv_ele * scale_mats.at(s).at(r, c);
+              likelihood * *sig_inv_ele * *scale_mats_ptr[s]++;
 
-        for(int s = 0; s < n_scales; ++s)
+        for(int s = 0; s < n_scales; ++s){
           d_sc[s] -=
-            .5 * likelihood * *sig_inv_ele * scale_mats.at(s).at(c, c);
+            .5 * likelihood * *sig_inv_ele * *scale_mats_ptr[s];
+          scale_mats_ptr[s] += n_mem - c;
+        }
         ++sig_inv_ele;
       }
     }

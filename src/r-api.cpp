@@ -365,6 +365,9 @@ Rcpp::NumericVector eval_pedigree_ll
           std::to_string(par.size()) + " elements but should have " +
           std::to_string(n_fix + n_scales) + ".");
 
+  if(maxvls < minvls or maxvls < 1)
+    throw std::invalid_argument("mvndst: invalid maxvls");
+
   // get potential weights
   arma::vec c_weights;
   if(cluster_weights.isNotNull()){

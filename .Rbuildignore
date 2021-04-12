@@ -4,5 +4,7 @@
 ^README\.md$
 ^README\.R$
 ^ref\.bib$
-^cache
+^vignettes/cache
+^vignettes/pedmod\.Rmd
 ^\.github$
+^create-vignette\.R

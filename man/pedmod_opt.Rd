@@ -89,7 +89,11 @@ optimization method tends to find large scale parameters and get stuck.
 Setting a maximum solves this.}
 }
 \value{
-\code{pedmod_opt}: The output from the \code{opt_func} argument.
+\code{pedmod_opt}: The output from the \code{opt_func} argument. Thus, if
+\code{fix} is supplied then this is optimal values of only \code{par[-fix]}
+with
+\code{par[fix]} being fixed to the inputs. Thus, the length is only the
+number of non-fixed parameters.
 
 \code{pedmod_start}: A \code{list} with:
 \itemize{

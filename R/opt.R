@@ -19,7 +19,11 @@
 #' @param ... Arguments passed to \code{opt_func}.
 #'
 #' @return
-#' \code{pedmod_opt}: The output from the \code{opt_func} argument.
+#' \code{pedmod_opt}: The output from the \code{opt_func} argument. Thus, if
+#' \code{fix} is supplied then this is optimal values of only \code{par[-fix]}
+#' with
+#' \code{par[fix]} being fixed to the inputs. Thus, the length is only the
+#' number of non-fixed parameters.
 #'
 #' @importFrom stats optim
 #' @export

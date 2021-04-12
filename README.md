@@ -238,7 +238,7 @@ library(pedmod)
 ll_terms <- get_pedigree_ll_terms(dat, max_threads = 4L)
 system.time(start <- pedmod_start(ptr = ll_terms, data = dat, n_threads = 4L))
 #>    user  system elapsed 
-#>   1.736   0.000   0.443
+#>   1.774   0.017   0.469
 
 # log-likelihood without the random effects and at the starting values
 start$logLik_no_rng
@@ -253,7 +253,7 @@ system.time(
     n_threads = 4L, 
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 #>    user  system elapsed 
-#> 102.621   0.004  25.751
+#> 102.270   0.024  25.647
 ```
 
 The results are shown below:
@@ -349,7 +349,7 @@ ub <- uniroot(function(x) 2 * (max_ml - predict(smooth_est, x)$y) - crit_val,
 c(lb, ub)
 #> [1] 1.259 2.528
 c(lb, ub)^2 # on the variance scale
-#> [1] 1.586 6.390
+#> [1] 1.586 6.391
 ```
 
 A caveat is that issues with the
@@ -635,17 +635,17 @@ system.time(ll_res <- eval_pedigree_ll(
   ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4))
 #>    user  system elapsed 
-#>   2.310   0.004   0.642
+#>   2.108   0.001   0.579
 system.time(grad_res <- eval_pedigree_grad(
   ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4))
 #>    user  system elapsed 
-#>   78.25    0.00   19.69
+#>  65.471   0.005  16.427
 
 # find the duplicated combinations of pedigrees, covariates, and outcomes. One 
 # likely needs to change this code if the pedigrees are not identical but are 
 # identical if they are permuted. In this case, the code below will miss 
-# identical terms
+# identical log marginal likelihood terms
 dat_unqiue <- dat[!duplicated(dat)]
 attributes(dat_unqiue) <- attributes(dat)
 length(dat_unqiue) # number of unique terms
@@ -663,13 +663,13 @@ system.time(ll_res_fast <- eval_pedigree_ll(
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4, 
   cluster_weights = c_weights))
 #>    user  system elapsed 
-#>   1.253   0.000   0.326
+#>   1.169   0.000   0.302
 system.time(grad_res_fast <- eval_pedigree_grad(
   ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4, 
   cluster_weights = c_weights))
 #>    user  system elapsed 
-#>   35.34    0.00    8.90
+#>  28.323   0.000   7.105
 
 # show that we get the same (up to a Monte Carlo error)
 print(c(redundant = ll_res, fast = ll_res_fast), digits = 6)
@@ -692,7 +692,7 @@ system.time(
     n_threads = 4L,  cluster_weights = c_weights,
     maxvls = 5000L, rel_eps = 1e-2, minvls = 500L))
 #>    user  system elapsed 
-#>  29.436   0.024   7.372
+#>  15.794   0.003   3.949
 system.time(
   opt_out <- pedmod_opt(
     ptr = ll_terms, par = opt_out_quick$par, abs_eps = 0, use_aprx = TRUE, 
@@ -700,7 +700,7 @@ system.time(
     # we changed the parameters
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 #>    user  system elapsed 
-#> 119.982   0.004  30.851
+#>  104.49    0.00   26.84
 ```
 
 The results are shown below:
@@ -711,22 +711,22 @@ rbind(opt_out       = head(opt_out$par, -2),
       opt_out_quick = head(start  $par, -2), 
       truth         = attr(dat_unqiue, "beta"))
 #>               (Intercept) Binary
-#> opt_out            -2.930  3.875
-#> opt_out_quick      -2.796  3.693
+#> opt_out            -2.931  3.876
+#> opt_out_quick      -2.777  3.669
 #> truth              -3.000  4.000
 rbind(opt_out       = exp(tail(opt_out$par, 2)), 
       opt_out_quick = exp(tail(start  $par, 2)), 
       truth         = attr(dat_unqiue, "sig_sq"))
 #>                           
-#> opt_out       1.858 0.9647
-#> opt_out_quick 1.614 0.8691
+#> opt_out       1.856 0.9667
+#> opt_out_quick 1.555 0.8821
 #> truth         2.000 1.0000
 
 # log marginal likelihoods
 print( start  $logLik_est, digits = 8)  # this is unreliably/imprecise
-#> [1] -2632.2005
+#> [1] -2632.1749
 print(-opt_out$value     , digits = 8)
-#> [1] -2631.9484
+#> [1] -2631.9478
 ```
 
 We can make a 2D profile likelihood curve as follows:
@@ -742,24 +742,49 @@ sig_vals2 <- seq(rg[[2]][1], rg[[2]][2], length.out = 5)
 sigs <- expand.grid(sigma1 = sig_vals1,
                     sigma2 = sig_vals2)
 
-# compute the profile likelihood
+# function to compute the profile likelihood. 
+# 
+# Args:
+#   fix: indices óf parameters to fix. 
+#   fix_val: values of the fixed parameters.
+#   sig_start: starting values for the scale parameters.
 ll_terms <- get_pedigree_ll_terms(dat_unqiue, max_threads = 4L)
-pl_curve_res <- Map(function(sig1, sig2){
+pl_curve_func <- function(fix, fix_val, 
+                          sig_start = exp(tail(opt_out$par, 2) / 2)){
+  # get the fixed indices of the fixed parameters
+  beta = start$beta_no_rng
+  is_fix_beta <- fix <= length(beta)
+  fix_beta <- fix[is_fix_beta]
+  is_fix_sigs <- fix >  length(beta)
+  fix_sigs <- fix[is_fix_sigs]
+  
   # set the parameters to pass
-  beta <- start$beta_no_rng
-  sig <- c(sig1, sig2)
+  sig <- sig_start
+  if(length(fix_sigs) > 0)
+    sig[fix_sigs - length(beta)] <- fix_val[is_fix_sigs]
+  
+  # re-scale beta and setup the sigma argument to pass
   sig_sq_log <- 2 * log(sig)
   beta_scaled <- beta * sqrt(1 + sum(sig^2))
   
+  # setup the parameter vector
+  fix_par <- c(beta_scaled, sig_sq_log)
+  if(length(fix_beta) > 0)
+    fix_par[fix_beta] <- fix_val[is_fix_beta]
+  
   # optimize like before but using the fix argument
   opt_out_quick <- pedmod_opt(
-    ptr = ll_terms, par = c(beta_scaled, sig_sq_log), maxvls = 5000L, abs_eps = 0, 
+    ptr = ll_terms, par = fix_par, maxvls = 5000L, abs_eps = 0, 
     rel_eps = 1e-2, minvls = 500L, use_aprx = TRUE, n_threads = 4L, 
-    fix = length(beta) + 1:2, cluster_weights = c_weights)
+    fix = fix, cluster_weights = c_weights)
   
+  # notice that pedmod_opt only returns a subset of the parameters. These are 
+  # the parameters that have been optimized over
+  par_new <- fix_par
+  par_new[-fix] <- opt_out_quick$par
   opt_out <- pedmod_opt(
-    ptr = ll_terms, par = c(opt_out_quick$par, sig_sq_log), abs_eps = 0, 
-    use_aprx = TRUE, n_threads = 4L, fix = length(beta) + 1:2,
+    ptr = ll_terms, par = par_new, abs_eps = 0, 
+    use_aprx = TRUE, n_threads = 4L, fix = fix,
     cluster_weights = c_weights,
     # we changed the parameters
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L)
@@ -768,10 +793,16 @@ pl_curve_res <- Map(function(sig1, sig2){
   message(sprintf("\nLog-likelihood %.5f (%.5f). Estimated parameters:", 
                   -opt_out$value, -opt_out_quick$value))
   message(paste0(capture.output(print(
-    c(opt_out$par, Scale = sig))), collapse = "\n"))
+    c(`non-fixed` = opt_out$par, fixed = fix_par[fix]))), collapse = "\n"))
   
   list(opt_out_quick = opt_out_quick, opt_out = opt_out)
-}, sig1 = sigs$sigma1, sig2 = sigs$sigma2)
+}
+
+# compute the profile likelihood
+pl_curve_res <- Map(
+  function(sig1, sig2) pl_curve_func(fix = 0:1 + length(opt_out$par) - 1L, 
+                                     fix_val = c(sig1, sig2)), 
+  sig1 = sigs$sigma1, sig2 = sigs$sigma2)
 ```
 
 ``` r
@@ -785,6 +816,66 @@ for(i in 1:3 - 1L)
 ```
 
 <img src="man/figures/README-draw_simple_w_ev_ex_profile_likelihood-1.png" width="100%" />
+
+We may just be interested creating two profile likelihood curves for
+each of the scale parameters. This can be done as follows:
+
+``` r
+# First we compute data for the two profile likelihood curves staring with the
+# curve for the additive genetic effect
+sigs_genetic <- exp(opt_out$par[3] / 2)
+sigs_genetic <- c(sigs_genetic,
+                  seq(sigs_genetic - .5, sigs_genetic + .7, length.out = 15))
+sigs_genetic <- sort(sigs_genetic)
+
+pl_genetic <- lapply(sigs_genetic, pl_curve_func, fix = 
+                       length(start$beta_no_rng) + 1L)
+
+# then we compute the curve for the environmental effect
+sigs_env <- exp(opt_out$par[4] / 2)
+sigs_env <- c(sigs_env, seq(sigs_env - .3, sigs_env + .5, length.out = 15))
+sigs_env <- sort(sigs_env)
+
+pl_env <- lapply(sigs_env, pl_curve_func, fix = 
+                       length(start$beta_no_rng) + 2L)
+```
+
+``` r
+# we create the plots starting with the additive genetic effect  
+par(mar = c(5, 5, 1, 1))
+pls <- -sapply(pl_genetic, function(x) x$opt_out$value)
+plot(sigs_genetic, pls, bty = "l",
+     pch = 16, xlab = bquote(paste(sigma['G'])), 
+     ylab = "Profile likelihood")
+grid()
+smooth_est <- smooth.spline(sigs_genetic, pls)
+lines(predict(smooth_est, seq(min(sigs_genetic), max(sigs_genetic), 
+                              length.out = 100)))
+abline(v = exp(opt_out$par[3] / 2), lty = 2) # the estimate
+abline(v = sqrt(attr(dat_unqiue, "sig_sq")[1]), lty = 3) # the true value
+alpha <- .05
+crit_val <- qchisq(1 - alpha, 1)
+abline(h = -opt_out$value - crit_val / 2, lty = 3) # mark the critical value
+```
+
+<img src="man/figures/README-plot_env_pl_curves-1.png" width="100%" />
+
+``` r
+# then we create the plot for the environmental effect 
+par(mar = c(5, 5, 1, 1))
+pls <- -sapply(pl_env, function(x) x$opt_out$value)
+plot(sigs_env, pls, bty = "l",
+     pch = 16, xlab = bquote(paste(sigma['E'])), 
+     ylab = "Profile likelihood")
+grid()
+smooth_est <- smooth.spline(sigs_env, pls)
+lines(predict(smooth_est, seq(min(sigs_env), max(sigs_env), length.out = 100)))
+abline(v = exp(opt_out$par[4] / 2), lty = 2) # the estimate
+abline(v = sqrt(attr(dat_unqiue, "sig_sq")[2]), lty = 3) # the true value
+abline(h = -opt_out$value - crit_val / 2, lty = 3) # mark the critical value
+```
+
+<img src="man/figures/README-plot_env_pl_curves-2.png" width="100%" />
 
 We make a small simulation study below where we are interested in the
 estimation time and bias.
@@ -1036,7 +1127,7 @@ fn <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE,
                n_threads = 4L, indices = NULL, maxvls = 25000L){
   set.seed(seed)
   -eval_pedigree_ll(
-    ll_terms, par = par, maxvls = maxvls, abs_eps = 0, rel_eps = rel_eps, 
+    ptr = ll_terms, par = par, maxvls = maxvls, abs_eps = 0, rel_eps = rel_eps, 
     minvls = 1000L, use_aprx = use_aprx, n_threads = n_threads, 
     indices = indices)
 }
@@ -1044,7 +1135,7 @@ gr <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE,
                n_threads = 4L, indices = NULL, maxvls = 25000L){
   set.seed(seed)
   out <- -eval_pedigree_grad(
-    ll_terms, par = par, maxvls = maxvls, abs_eps = 0, rel_eps = rel_eps, 
+    ptr = ll_terms, par = par, maxvls = maxvls, abs_eps = 0, rel_eps = rel_eps, 
     minvls = 1000L, use_aprx = use_aprx, n_threads = n_threads, 
     indices = indices)
   structure(c(out), value = -attr(out, "logLik"), 
@@ -1054,14 +1145,14 @@ gr <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE,
 # check output at the starting values
 system.time(ll <- -fn(c(beta, sc)))
 #>    user  system elapsed 
-#>   8.181   0.000   2.080
+#>   7.663   0.000   1.954
 ll # the log likelihood at the starting values
 #> [1] -26042
 #> attr(,"n_fails")
 #> [1] 0
 system.time(gr_val <- gr(c(beta, sc)))
 #>    user  system elapsed 
-#>  135.85    0.00   34.28
+#> 107.690   0.051  27.305
 gr_val # the gradient at the starting values
 #> [1] 1894.52 -549.92 -235.39   47.16  -47.96
 #> attr(,"value")
@@ -1089,8 +1180,8 @@ rbind(numDeriv = numDeriv::grad(fn, c(beta, sc), indices = 0:10),
 
 # optimize the log likelihood approximation
 system.time(opt <- optim(c(beta, sc), fn, gr, method = "BFGS"))
-#>     user   system  elapsed 
-#> 4272.701    0.064 1085.703
+#>    user  system elapsed 
+#> 4126.00    0.28 1050.03
 ```
 
 The output from the optimization is shown below:
@@ -1133,12 +1224,12 @@ microbenchmark(
   times = 1)
 #> Unit: seconds
 #>            expr     min      lq    mean  median      uq     max neval
-#>   fn (1 thread)   7.607   7.607   7.607   7.607   7.607   7.607     1
-#>  fn (2 threads)   3.836   3.836   3.836   3.836   3.836   3.836     1
-#>  fn (4 threads)   2.007   2.007   2.007   2.007   2.007   2.007     1
-#>   gr (1 thread) 111.891 111.891 111.891 111.891 111.891 111.891     1
-#>  gr (2 threads)  60.306  60.306  60.306  60.306  60.306  60.306     1
-#>  gr (4 threads)  32.044  32.044  32.044  32.044  32.044  32.044     1
+#>   fn (1 thread)   7.792   7.792   7.792   7.792   7.792   7.792     1
+#>  fn (2 threads)   3.788   3.788   3.788   3.788   3.788   3.788     1
+#>  fn (4 threads)   2.086   2.086   2.086   2.086   2.086   2.086     1
+#>   gr (1 thread) 101.631 101.631 101.631 101.631 101.631 101.631     1
+#>  gr (2 threads)  53.374  53.374  53.374  53.374  53.374  53.374     1
+#>  gr (4 threads)  27.365  27.365  27.365  27.365  27.365  27.365     1
 ```
 
 ### Using ADAM
@@ -1240,7 +1331,7 @@ system.time(
                    verbose = FALSE, maxvls = maxpts_use, 
                    minvls = minvls))
 #>     user   system  elapsed 
-#> 4406.003    0.128 1130.589
+#> 3916.527    0.447 1003.786
 ```
 
 The result is shown below.
@@ -1361,7 +1452,7 @@ The new implementation is faster when the approximation is used:
 ``` r
 rowMeans(sim_res[, "time", ])
 #>          mvtnorm mvndst (no aprx) mvndst (w/ aprx) 
-#>          0.01711          0.01642          0.01109
+#>          0.01833          0.01700          0.01139
 par(mar = c(5, 4, 1, 1))
 boxplot(t(sim_res[, "time", ]))
 ```

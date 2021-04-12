@@ -34,6 +34,10 @@ LinkingTo:
 Imports: 
     Rcpp
 Suggests: 
-    testthat, 
-    mvtnorm, 
-    xml2
+    testthat,
+    mvtnorm,
+    xml2,
+    knitr,
+    rmarkdown,
+    R.rsp
+VignetteBuilder: R.rsp

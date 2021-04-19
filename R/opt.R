@@ -138,6 +138,8 @@ pedmod_start <- function(ptr, data, maxvls = 1000L, abs_eps = 0, rel_eps = 1e-2,
   # optimize the model where beta is proportional to estimates without the
   # random effects
   fn <- function(sc){
+    if(any(!is.finite(sc) | sc > log(scale_max)))
+      return(NA_real_)
     if(!is.null(seed))
       set.seed(seed)
     beta_scaled <- beta * sqrt(1 + sum(exp(sc)))
@@ -154,6 +156,8 @@ pedmod_start <- function(ptr, data, maxvls = 1000L, abs_eps = 0, rel_eps = 1e-2,
     out
   }
   gr <- function(sc){
+    if(any(!is.finite(sc) | sc > log(scale_max)))
+      return(rep(NA_real_, length(sc)))
     if(!is.null(seed))
       set.seed(seed)
     fac <- sqrt(1 + sum(exp(sc)))
@@ -176,9 +180,8 @@ pedmod_start <- function(ptr, data, maxvls = 1000L, abs_eps = 0, rel_eps = 1e-2,
 
   for(sc_sqrt in seq(.1, sqrt(scale_max), length.out = 5)){
     sc <- rep(2 * log(sc_sqrt), n_scales)
-    opt <- try(optim(sc, fn, gr, upper = rep(log(scale_max), n_scales),
-                     method = "L-BFGS-B",
-                     control = list(lmm = 10L, maxit = 1000L)),
+    opt <- try(optim(sc, fn, gr, method = "BFGS",
+                     control = list(maxit = 1000L)),
                silent = TRUE)
     if(!inherits(opt, "try-error") && opt$convergence < 2)
       # found a good solution

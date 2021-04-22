@@ -238,7 +238,7 @@ library(pedmod)
 ll_terms <- get_pedigree_ll_terms(dat, max_threads = 4L)
 system.time(start <- pedmod_start(ptr = ll_terms, data = dat, n_threads = 4L))
 #>    user  system elapsed 
-#>   1.774   0.017   0.469
+#>   2.641   0.038   0.707
 
 # log-likelihood without the random effects and at the starting values
 start$logLik_no_rng
@@ -253,7 +253,7 @@ system.time(
     n_threads = 4L, 
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 #>    user  system elapsed 
-#> 102.270   0.024  25.647
+#>   81.98    0.01   20.59
 ```
 
 The results are shown below:
@@ -264,20 +264,20 @@ rbind(opt_out       = head(opt_out$par, -1),
       opt_out_quick = head(start  $par, -1), 
       truth         = attr(dat, "beta"))
 #>               (Intercept) Continuous Binary
-#> opt_out            -2.880     0.9714  1.883
-#> opt_out_quick      -2.868     0.9944  1.873
-#> truth              -3.000     1.0000  2.000
+#> opt_out             -2.88     0.9718  1.884
+#> opt_out_quick       -2.86     0.9914  1.867
+#> truth               -3.00     1.0000  2.000
 c(opt_out       = exp(tail(opt_out$par, 1)), 
   opt_out_quick = exp(tail(start  $par, 1)), 
   truth         = attr(dat, "sig_sq"))
 #>       opt_out opt_out_quick         truth 
-#>         2.929         2.877         3.000
+#>         2.931         2.853         3.000
 
 # log marginal likelihoods
 print(start   $logLik_est, digits = 8) # this is unreliably/imprecise
-#> [1] -1618.5072
+#> [1] -1618.5044
 print(-opt_out$value     , digits = 8)
-#> [1] -1618.4042
+#> [1] -1618.4062
 ```
 
 We can compute a profile likelihood curve like this:
@@ -347,9 +347,9 @@ ub <- uniroot(function(x) 2 * (max_ml - predict(smooth_est, x)$y) - crit_val,
 
 # the confidence interval 
 c(lb, ub)
-#> [1] 1.259 2.528
+#> [1] 1.259 2.529
 c(lb, ub)^2 # on the variance scale
-#> [1] 1.586 6.391
+#> [1] 1.586 6.393
 ```
 
 A caveat is that issues with the
@@ -495,8 +495,8 @@ err <- rbind(beta_est, sigma = sigma_est) -
 rbind(Bias = rowMeans(err), 
       SE   = apply(err, 1, sd) / sqrt(NCOL(err)))
 #>      (Intercept) Continuous  Binary   sigma
-#> Bias    -0.06431    0.02768 0.03635 0.05534
-#> SE       0.04956    0.01684 0.03289 0.03803
+#> Bias    -0.06526    0.02802 0.03702 0.05601
+#> SE       0.04990    0.01692 0.03308 0.03836
 
 # make a box plot
 par(mar = c(5, 5, 1, 1))
@@ -516,12 +516,12 @@ time_vals <- sapply(sim_study, function(x) {
 })
 summary(t(time_vals))
 #>     opt_out         start           total     
-#>  Min.   :16.0   Min.   : 1.15   Min.   :17.8  
-#>  1st Qu.:20.6   1st Qu.: 1.77   1st Qu.:22.6  
-#>  Median :22.6   Median : 2.23   Median :26.1  
-#>  Mean   :23.1   Mean   : 3.21   Mean   :26.3  
-#>  3rd Qu.:25.8   3rd Qu.: 4.00   3rd Qu.:28.9  
-#>  Max.   :32.8   Max.   :10.28   Max.   :36.3
+#>  Min.   :16.1   Min.   :0.472   Min.   :17.6  
+#>  1st Qu.:20.4   1st Qu.:0.903   1st Qu.:21.9  
+#>  Median :23.1   Median :1.289   Median :24.0  
+#>  Mean   :23.1   Mean   :1.239   Mean   :24.4  
+#>  3rd Qu.:24.5   3rd Qu.:1.442   3rd Qu.:25.9  
+#>  Max.   :36.2   Max.   :2.457   Max.   :37.0
 ```
 
 ### Adding Environmental Effects
@@ -635,12 +635,12 @@ system.time(ll_res <- eval_pedigree_ll(
   ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4))
 #>    user  system elapsed 
-#>   2.108   0.001   0.579
+#>   2.245   0.000   0.616
 system.time(grad_res <- eval_pedigree_grad(
   ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4))
 #>    user  system elapsed 
-#>  65.471   0.005  16.427
+#>   74.07    0.00   18.59
 
 # find the duplicated combinations of pedigrees, covariates, and outcomes. One 
 # likely needs to change this code if the pedigrees are not identical but are 
@@ -663,13 +663,13 @@ system.time(ll_res_fast <- eval_pedigree_ll(
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4, 
   cluster_weights = c_weights))
 #>    user  system elapsed 
-#>   1.169   0.000   0.302
+#>   1.237   0.000   0.319
 system.time(grad_res_fast <- eval_pedigree_grad(
   ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4, 
   cluster_weights = c_weights))
 #>    user  system elapsed 
-#>  28.323   0.000   7.105
+#>  32.443   0.000   8.129
 
 # show that we get the same (up to a Monte Carlo error)
 print(c(redundant = ll_res, fast = ll_res_fast), digits = 6)
@@ -692,7 +692,7 @@ system.time(
     n_threads = 4L,  cluster_weights = c_weights,
     maxvls = 5000L, rel_eps = 1e-2, minvls = 500L))
 #>    user  system elapsed 
-#>  15.794   0.003   3.949
+#>  54.730   0.032  13.697
 system.time(
   opt_out <- pedmod_opt(
     ptr = ll_terms, par = opt_out_quick$par, abs_eps = 0, use_aprx = TRUE, 
@@ -700,7 +700,7 @@ system.time(
     # we changed the parameters
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 #>    user  system elapsed 
-#>  104.49    0.00   26.84
+#> 119.223   0.104  30.565
 ```
 
 The results are shown below:
@@ -712,21 +712,21 @@ rbind(opt_out       = head(opt_out$par, -2),
       truth         = attr(dat_unqiue, "beta"))
 #>               (Intercept) Binary
 #> opt_out            -2.931  3.876
-#> opt_out_quick      -2.777  3.669
+#> opt_out_quick      -2.003  2.646
 #> truth              -3.000  4.000
 rbind(opt_out       = exp(tail(opt_out$par, 2)), 
       opt_out_quick = exp(tail(start  $par, 2)), 
       truth         = attr(dat_unqiue, "sig_sq"))
-#>                           
-#> opt_out       1.856 0.9667
-#> opt_out_quick 1.555 0.8821
-#> truth         2.000 1.0000
+#>                             
+#> opt_out       1.85812 0.9657
+#> opt_out_quick 0.02893 0.7588
+#> truth         2.00000 1.0000
 
 # log marginal likelihoods
 print( start  $logLik_est, digits = 8)  # this is unreliably/imprecise
-#> [1] -2632.1749
+#> [1] -2647.6359
 print(-opt_out$value     , digits = 8)
-#> [1] -2631.9478
+#> [1] -2631.9483
 ```
 
 We can make a 2D profile likelihood curve as follows:
@@ -1145,14 +1145,14 @@ gr <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE,
 # check output at the starting values
 system.time(ll <- -fn(c(beta, sc)))
 #>    user  system elapsed 
-#>   7.663   0.000   1.954
+#>   8.278   0.004   2.110
 ll # the log likelihood at the starting values
 #> [1] -26042
 #> attr(,"n_fails")
 #> [1] 0
 system.time(gr_val <- gr(c(beta, sc)))
 #>    user  system elapsed 
-#> 107.690   0.051  27.305
+#> 120.338   0.008  30.410
 gr_val # the gradient at the starting values
 #> [1] 1894.52 -549.92 -235.39   47.16  -47.96
 #> attr(,"value")
@@ -1180,8 +1180,8 @@ rbind(numDeriv = numDeriv::grad(fn, c(beta, sc), indices = 0:10),
 
 # optimize the log likelihood approximation
 system.time(opt <- optim(c(beta, sc), fn, gr, method = "BFGS"))
-#>    user  system elapsed 
-#> 4126.00    0.28 1050.03
+#>     user   system  elapsed 
+#> 3983.377    0.084 1013.579
 ```
 
 The output from the optimization is shown below:
@@ -1223,13 +1223,13 @@ microbenchmark(
   `gr (4 threads)` = gr(c(beta, sc), n_threads = 4),
   times = 1)
 #> Unit: seconds
-#>            expr     min      lq    mean  median      uq     max neval
-#>   fn (1 thread)   7.792   7.792   7.792   7.792   7.792   7.792     1
-#>  fn (2 threads)   3.788   3.788   3.788   3.788   3.788   3.788     1
-#>  fn (4 threads)   2.086   2.086   2.086   2.086   2.086   2.086     1
-#>   gr (1 thread) 101.631 101.631 101.631 101.631 101.631 101.631     1
-#>  gr (2 threads)  53.374  53.374  53.374  53.374  53.374  53.374     1
-#>  gr (4 threads)  27.365  27.365  27.365  27.365  27.365  27.365     1
+#>            expr    min     lq   mean median     uq    max neval
+#>   fn (1 thread)  7.428  7.428  7.428  7.428  7.428  7.428     1
+#>  fn (2 threads)  4.013  4.013  4.013  4.013  4.013  4.013     1
+#>  fn (4 threads)  2.001  2.001  2.001  2.001  2.001  2.001     1
+#>   gr (1 thread) 99.032 99.032 99.032 99.032 99.032 99.032     1
+#>  gr (2 threads) 55.311 55.311 55.311 55.311 55.311 55.311     1
+#>  gr (4 threads) 28.216 28.216 28.216 28.216 28.216 28.216     1
 ```
 
 ### Using ADAM
@@ -1331,7 +1331,7 @@ system.time(
                    verbose = FALSE, maxvls = maxpts_use, 
                    minvls = minvls))
 #>     user   system  elapsed 
-#> 3916.527    0.447 1003.786
+#> 3956.271    0.453 1012.975
 ```
 
 The result is shown below.
@@ -1452,7 +1452,7 @@ The new implementation is faster when the approximation is used:
 ``` r
 rowMeans(sim_res[, "time", ])
 #>          mvtnorm mvndst (no aprx) mvndst (w/ aprx) 
-#>          0.01833          0.01700          0.01139
+#>          0.01815          0.01683          0.01107
 par(mar = c(5, 4, 1, 1))
 boxplot(t(sim_res[, "time", ]))
 ```

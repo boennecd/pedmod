@@ -1087,6 +1087,14 @@ to estimate the model.
 ```{r re_create_ptr, echo = FALSE}
 library(pedmod)
 ll_terms <- get_pedigree_ll_terms(dat_arg, max_threads = 4L)
+fn <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE, 
+               n_threads = 4L, indices = NULL, maxvls = 25000L){
+  set.seed(seed)
+  -eval_pedigree_ll(
+    ptr = ll_terms, par = par, maxvls = maxvls, abs_eps = 0, rel_eps = rel_eps, 
+    minvls = 1000L, use_aprx = use_aprx, n_threads = n_threads, 
+    indices = indices)
+}
 ```
 
 ```{r use_adam, cache = 1}

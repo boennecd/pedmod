@@ -35,7 +35,7 @@ $\Phi$ is the standard normal distribution's CDF, and
 $\text{Bin}$ implies a binomial distribution such if 
 $z\sim \text{Bin}(p, n)$ then the density of $z$ is:
 
-$$f(z) = \begin{pmatrix} n \\ z \end{pmatrix}p^zp^{n-z}$$
+$$f(z) = \begin{pmatrix} n \\ z \end{pmatrix}p^z(1 - p)^{n-z}$$
 
 A different and equivalent way of writing the model is as:
 
@@ -56,26 +56,72 @@ unshared/individual specific random effect. This effect is always included.
 The $C_{il}$s are known scale/correlation matrices where each of the $l$'th 
 types correspond to a type of effect. An arbitrary number of such matrices can 
 be passed to include e.g. a genetic effect, a maternal effect, a paternal, an 
-effect of a shared adult environment etc. A 
+effect of a shared adult environment etc. Usually, these matrices are 
+correlation matrices as this simplifies later interpretation and we will assume 
+that all the matrices are correlation matrices. A 
 typical example is that $C_{il}$ is two times the kinship matrix in which 
 case we call:
 
 $$\frac{\sigma_l^2}{1 + \sum_{k = 1}^K\sigma_k^2}$$
 
-the heritability (the proportion of the variance attributable to the direct 
-genetic effect). 
+the heritability. That is, the proportion of the variance attributable to the 
+the $l$'th effect which in this case is the direct genetic effect. 
 The scale parameters, the $\sigma_k^2$s, may be the 
-primary interest in an analysis. We fix the unshared random effect' 
-variance to be one which gives the one in the denominator. Other authors prefer that
-the denominator is restricted to be one. Both restriction can be applied to 
-ensure identification and they do not have any implications as the scale 
-is arbitrary. 
+primary interest in an analysis. The scale in the model cannot be identfied. 
+That is, an equivalent model is:
+
+$$\begin{align*}
+Y_{ij} \mid \epsilon_{ij} = e 
+  &= \begin{cases}
+    1 & \sqrt\phi\vec\beta^\top\vec x_{ij} + e > 0 \\
+    0 & \text{otherwise}
+    \end{cases} \\
+\vec\epsilon_i = (\epsilon_{i1}, \dots, \epsilon_{in_i})^\top &\sim
+  N^{(n_i)}\left(\vec 0, 
+  \phi\left(I_{n_i} + \sum_{l = 1}^K\sigma_l^2 C_{il}\right)
+  \right)
+\end{align*}$$
+
+for any $\phi > 0$. A common option other than $\phi = 1$ is to set 
+$\phi = (1 + \sum_{l = 1}^K \sigma_l^2)^{-1}$. This has the effect that  
+
+$$\frac{\sigma_l^2}{1 + \sum_{k = 1}^K\sigma_k^2} = \phi\sigma_l^2$$
+
+is the proportion of variance attributable to the $l$'th effect (assuming all 
+$C_{il}$ matrices are correlation matrices). Moreover, $\phi$ is the proportion 
+of variance attributable the individual specific effect. 
+
+The parameterizations used in the package are $\phi = 1$
+which we call the direct parameterizations and 
+$(1 + \sum_{l = 1}^K \sigma_l^2)^{-1}$ which we call the standardized 
+parameterizations. 
+The latter have the advantage that it is easier to interpret as the scale 
+parameters are the proportion of variance attributable to each effect 
+(assuming that only correlation matrices are used) and 
+the $\sqrt\phi\vec\beta$ are often very close the estimate from a GLM 
+(that is, the model without the other random effects) 
+when the covariates are unrelated to random effects that are added to the model.
+The latter makes it easy to find starting values. 
+
+For the above reason, two parameterization are used. For
+the direct parameterization where $\phi = 1$, we work directly with $\vec\beta$, 
+and we use $\theta_l = \log\sigma_l^2$. For the
+standardized parameterization
+where $\phi = (1 + \sum_{l = 1}^K \sigma_l^2)^{-1}$, we work with
+$\phi = (1 + \sum_{l = 1}^K \sigma_l^2)^{-1}$,
+$\vec\gamma = \sqrt\phi\vec\beta$, and 
+
+$$
+\phi\sigma_l^2 = \frac{\exp(\psi_l)}{1 +\sum_{l = 1}^k\exp(\psi_l)}\Leftrightarrow\sigma_l^2 = \exp(\psi_l).
+$$
 
 This package provides randomized quasi-Monte Carlo methods to approximate 
 the log marginal likelihood for these types of 
 models with an arbitrary number scale matrices, $K$, and the derivatives 
 with respect to $(\vec\beta^\top, 2\log\sigma_1,\dots, 2\log\sigma_K)^\top$
-(that is, we work with $\theta_k = 2\log\sigma_k$).
+(that is, we work with $\psi_k = 2\log\sigma_k$) or 
+$(\vec\gamma^\top, \psi_1, \dots, \psi_K)$.
+
 We have re-written the Fortran code by @Genz02 in C++, made it easy to 
 extend from a log marginal likelihood approximation to other approximations 
 such as the derivatives, and added less precise but faster approximations 
@@ -98,20 +144,21 @@ Since the implementation is easy to extend, possible extensions are:
  2. Generalized linear mixed model with binary, binomial, ordinal, or 
     multinomial outcomes with a probit link. The method we use here may be
     beneficial if the number of random effects per cluster is not much 
-    smaller then the number observations in each cluster.
+    smaller then the number observations in each cluster. This is used for 
+    imputation in the mdgc package.
     
 ## Installation
 The package can be installed from Github by calling:
 
 ```{r how_to_install, eval = FALSE}
-remotes::install_github("boennecd/pedmod")
+remotes::install_github("boennecd/pedmod", build_vignettes = TRUE)
 ```
 
 ## Example
 
 We start with a simple example only with a direct genetic effect. We have one 
 type of family which consists of two couples which are related through one 
-of the parents being cousins. The family is shown below.
+of the parents being siblings. The family is shown below.
 
 ```{r setup_simple}
 # create the family we will use
@@ -199,7 +246,7 @@ system.time(
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 ```
 
-The results are shown below:
+The results of the estimation are shown below:
 
 ```{r est_simple_res}
 # parameter estimates versus the truth
@@ -214,6 +261,85 @@ c(opt_out       = exp(tail(opt_out$par, 1)),
 print(start   $logLik_est, digits = 8) # this is unreliably/imprecise
 print(-opt_out$value     , digits = 8)
 ```
+
+As an alternative to the direct parameterization we use above, we can also use
+the standardized parameterization. Below are some illustrations which you may 
+skip. 
+
+```{r std_est_simple, cache = 1}
+#####
+# transform the parameters and check that we get the same likelihood
+std_par <- direct_to_standardized(opt_out$par, n_scales = 1L)
+std_par # the standardized parameterization
+opt_out$par # the direct parameterization 
+
+# we can map back as follows
+par_back <- standardized_to_direct(std_par, n_scales = 1L)
+all.equal(opt_out$par, par_back, check.attributes = FALSE)
+# the proportion of variance of each effect
+attr(par_back, "variance proportions") 
+
+# the proportion match
+exp(tail(opt_out$par, 1)) / (exp(tail(opt_out$par, 1)) + 1)
+
+# compute the likelihood with either parameterization
+set.seed(1L)
+eval_pedigree_ll(ptr = ll_terms, par = opt_out$par, maxvls = 10000L, 
+                 minvls = 1000L, rel_eps = 1e-3, use_aprx = TRUE, abs_eps = 0)
+set.seed(1L)
+eval_pedigree_ll(ptr = ll_terms, par = std_par    , maxvls = 10000L, 
+                 minvls = 1000L, rel_eps = 1e-3, use_aprx = TRUE, abs_eps = 0, 
+                 standardized = TRUE)
+
+# we can also get the same gradient with an application of the chain rule
+jac <- attr(
+  standardized_to_direct(std_par, n_scales = 1L, jacobian = TRUE), 
+  "jacobian")
+
+set.seed(1L)
+g1 <- eval_pedigree_grad(ptr = ll_terms, par = opt_out$par, maxvls = 10000L, 
+                         minvls = 1000L, rel_eps = 1e-3, use_aprx = TRUE, 
+                         abs_eps = 0)
+set.seed(1L)
+g2 <- eval_pedigree_grad(ptr = ll_terms, par = std_par, maxvls = 10000L, 
+                         minvls = 1000L, rel_eps = 1e-3, use_aprx = TRUE, 
+                         abs_eps = 0, standardized = TRUE)
+all.equal(drop(g1 %*% jac), g2, check.attributes = FALSE)
+
+```
+
+The model can also be estimated with the the standardized parameterization:
+
+```{r continued_std_est_simple, cache = 1}
+# perform the optimization. We start with finding the starting values
+system.time(start_std <- pedmod_start(
+  ptr = ll_terms, data = dat, n_threads = 4L, standardized = TRUE))
+
+# the starting values are close
+standardized_to_direct(start_std$par, n_scales = 1L)
+start$par
+
+# this may have required different number of gradient and function evaluations
+start_std$opt$counts
+start    $opt$counts
+
+# estimate the model
+system.time(
+  opt_out_std <- pedmod_opt(
+    ptr = ll_terms, par = start_std$par, abs_eps = 0, use_aprx = TRUE, 
+    n_threads = 4L, standardized = TRUE,
+    maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
+
+# we get the same
+standardized_to_direct(opt_out_std$par, n_scales = 1L)
+opt_out$par
+
+# this may have required different number of gradient and function evaluations
+opt_out_std$counts
+opt_out    $counts
+```
+
+### Profile Likelihood Curve
 
 We can compute a profile likelihood curve like this:
 
@@ -258,7 +384,7 @@ cubic smoothing spline for the profile likelihood (more `sigs` points may be
 needed to get a good estimate of the cubic smoothing spline):
 
 ```{r conf_int_simple_ex}
-# check the critical values
+# get the critical values
 alpha <- .05
 crit_val <- qchisq(1 - alpha, 1)
 
@@ -358,6 +484,8 @@ matplot(sigs, t(pls) - colMeans(pls), pch = seq_along(seeds) + 15L, bty = "l",
 grid()
 ```
 
+### Simulation Study
+
 We make a small simulation study below where we are interested in the estimation 
 time and bias.
 
@@ -382,58 +510,101 @@ sim_study <- lapply(seeds, function(s){
     
     # get the starting values
     library(pedmod)
-    ll_terms <- get_pedigree_ll_terms(dat, max_threads = 4L)
-    ti_start <- system.time(start <- pedmod_start(
-      ptr = ll_terms, data = dat, n_threads = 4L))
-    start$time <- ti_start
+    do_fit <- function(standardized){
+      ll_terms <- get_pedigree_ll_terms(dat, max_threads = 4L)
+      ti_start <- system.time(start <- pedmod_start(
+        ptr = ll_terms, data = dat, n_threads = 4L, 
+        standardized = standardized))
+      start$time <- ti_start
+      
+      ti_fit <- system.time(
+        opt_out <- pedmod_opt(
+          ptr = ll_terms, par = start$par, abs_eps = 0, use_aprx = TRUE, 
+          n_threads = 4L, 
+          maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L, 
+          standardized = standardized))
+      opt_out$time <- ti_fit
+      
+      if(standardized){
+        start$par   <- standardized_to_direct(start$par, 1L)
+        opt_out$par <- standardized_to_direct(opt_out$par, 1L)
+      }
+      
+      list(start = start, opt_out = opt_out, 
+           ll_no_rng = start$logLik_no_rng)
+    }
     
-    ti_fit <- system.time(
-      opt_out <- pedmod_opt(
-        ptr = ll_terms, par = start$par, abs_eps = 0, use_aprx = TRUE, 
-        n_threads = 4L, 
-        maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
-    opt_out$time <- ti_fit
-    
-    out <- list(start = start, opt_out = opt_out, 
-                ll_no_rng = start$logLik_no_rng)
-    saveRDS(out, f)
+    fit_direct <- do_fit(standardized = FALSE)
+    fit_std    <- do_fit(standardized = TRUE)
+    saveRDS(list(fit_direct = fit_direct, fit_std = fit_std), f)
   }
   
   # report to console and return 
   out <- readRDS(f)
-  message(paste0(capture.output(out$opt_out$par), collapse = "\n"))
+  message(paste0(capture.output(out$fit_direct$opt_out$par), collapse = "\n"))
+  message(paste0(capture.output(out$fit_std   $opt_out$par), collapse = "\n"))
+  message(sprintf(
+    "Time %12.1f, %12.1f. Max ll: %12.4f, %12.4f\n",
+    with(out$fit_direct, start$time["elapsed"] + opt_out$time["elapsed"]),
+    with(out$fit_std   , start$time["elapsed"] + opt_out$time["elapsed"]),
+    -out$fit_direct$opt_out$value,
+    -out$fit_std   $opt_out$value))
   
   out
 })
 
 # gather the estimates
-beta_est <- sapply(sim_study, function(x) head(x$opt_out$par, 3))
-sigma_est <- sapply(sim_study, function(x) exp(tail(x$opt_out$par, 1) / 2))
+beta_est <- sapply(sim_study, function(x) 
+  cbind(Direct       = head(x$fit_direct$opt_out$par, 3), 
+        Standardized = head(x$fit_std   $opt_out$par, 3)), 
+  simplify = "array")
+sigma_est <- sapply(sim_study, function(x) 
+  cbind(Direct       = exp(tail(x$fit_direct$opt_out$par, 1) / 2), 
+        Standardized = exp(tail(x$fit_std   $opt_out$par, 1) / 2)), 
+  simplify = "array")
 
 # compute the errors
 tmp <- sim_dat(2L)
-err <- rbind(beta_est, sigma = sigma_est) - 
-  c(attr(tmp, "beta"), sqrt(attr(tmp, "sig_sq")))
+err_beta  <- beta_est  - attr(tmp, "beta")
+err_sigma <- sigma_est - sqrt(attr(tmp, "sig_sq"))
+dimnames(err_sigma)[[1L]] <- "std genetic"
+err <- abind::abind(err_beta, err_sigma, along = 1)
 
 # get the bias estimates and the standard errors
-rbind(Bias = rowMeans(err), 
-      SE   = apply(err, 1, sd) / sqrt(NCOL(err)))
+bias <- apply(err, 1:2, mean)
+n_sims <- dim(err)[[3]]
+SE <- apply(err , 1:2, sd) / sqrt(n_sims)
+bias
+SE
 
 # make a box plot
-par(mar = c(5, 5, 1, 1))
-boxplot(t(err), ylab = "Error")
+b_vals <- expand.grid(rownames(err), strtrim(colnames(err), 1))
+box_dat <- data.frame(Error = c(err), 
+                      Parameter = rep(b_vals$Var1, n_sims), 
+                      Method = rep(b_vals$Var2, dim(err)[[3]]))
+par(mar = c(7, 5, 1, 1))
+# S is for the standardized and D is for the direct parameterization
+boxplot(Error ~ Method + Parameter, box_dat, ylab = "Error", las = 2, 
+        xlab = "")
 abline(h = 0, lty = 2)
 grid()
 # get the average computation times
 time_vals <- sapply(sim_study, function(x) {
-  keep <- c("opt_out", "start")
-  out <- setNames(sapply(x[keep], function(z) z$time["elapsed"]), keep)
-  c(out, total = sum(out))
-})
-summary(t(time_vals))
+  . <- function(z){
+    keep <- c("opt_out", "start")
+    out <- setNames(sapply(z[keep], function(z) z$time["elapsed"]), keep)
+    c(out, total = sum(out))
+  }
+  
+  rbind(Direct       = .(x$fit_direct), 
+        Standardized = .(x$fit_std))
+}, simplify = "array")
+apply(time_vals, 1:2, mean)
+apply(time_vals, 1:2, sd)
+apply(time_vals, 1:2, quantile)
 ```
 
-### Adding Environmental Effects 
+## Example: Adding Environmental Effects 
 
 ```{r clean_pre_simple_w_ev, echo = FALSE}
 rm(list = setdiff(ls(), c("ped", "fam")))
@@ -504,7 +675,7 @@ $B_{ij}$ is an observed covariate.
 In this case, we exploit that some of log marginal likelihood terms are 
 identical. That is, some of the combinations of pedigrees, covariates, and 
 outcomes match. Therefor, we can use the `cluster_weights` arguments to reduce 
-the computation time:
+the computation time as shown below:
 
 ```{r simple_w_ev_sim, cache = 1}
 # simulate a data set
@@ -555,8 +726,9 @@ rbind(redundant = grad_res, fast = grad_res_fast)
 rm(dat) # will not need this anymore
 
 # find the starting values
-start <- pedmod_start(ptr = ll_terms, data = dat_unqiue, 
-                      cluster_weights = c_weights)
+system.time(
+  start <- pedmod_start(ptr = ll_terms, data = dat_unqiue, 
+                        cluster_weights = c_weights))
 
 # optimize
 system.time(
@@ -587,6 +759,93 @@ rbind(opt_out       = exp(tail(opt_out$par, 2)),
 print( start  $logLik_est, digits = 8)  # this is unreliably/imprecise
 print(-opt_out$value     , digits = 8)
 ```
+
+As before, we can also work with the standardized parameterization. 
+
+```{r std_simple_w_ev_sim, cache = 1}
+#####
+# transform the parameters and check that we get the same likelihood
+std_par <- direct_to_standardized(opt_out$par, n_scales = 2L)
+std_par # the standardized parameterization
+opt_out$par # the direct parameterization 
+
+# we can map back as follows
+par_back <- standardized_to_direct(std_par, n_scales = 2L)
+all.equal(opt_out$par, par_back, check.attributes = FALSE)
+# the proportion of variance of each effect
+attr(par_back, "variance proportions") 
+
+# the proportions match
+total_var <- sum(exp(tail(opt_out$par, 2))) + 1
+exp(tail(opt_out$par, 2)) / total_var
+
+# compute the likelihood with either parameterization
+set.seed(1L)
+eval_pedigree_ll(ptr = ll_terms, par = opt_out$par, maxvls = 10000L, 
+                 minvls = 1000L, rel_eps = 1e-3, use_aprx = TRUE, abs_eps = 0)
+set.seed(1L)
+eval_pedigree_ll(ptr = ll_terms, par = std_par    , maxvls = 10000L, 
+                 minvls = 1000L, rel_eps = 1e-3, use_aprx = TRUE, abs_eps = 0, 
+                 standardized = TRUE)
+
+# we can also get the same gradient with an application of the chain rule
+jac <- attr(
+  standardized_to_direct(std_par, n_scales = 2L, jacobian = TRUE), 
+  "jacobian")
+
+set.seed(1L)
+g1 <- eval_pedigree_grad(ptr = ll_terms, par = opt_out$par, maxvls = 10000L, 
+                         minvls = 1000L, rel_eps = 1e-3, use_aprx = TRUE, 
+                         abs_eps = 0)
+set.seed(1L)
+g2 <- eval_pedigree_grad(ptr = ll_terms, par = std_par, maxvls = 10000L, 
+                         minvls = 1000L, rel_eps = 1e-3, use_aprx = TRUE, 
+                         abs_eps = 0, standardized = TRUE)
+all.equal(drop(g1 %*% jac), g2, check.attributes = FALSE)
+```
+
+The model can also be estimated with the the standardized parameterization:
+
+```{r continued_std_simple_w_ev_sim, cache = 1}
+# perform the optimization. We start with finding the starting values
+system.time(start_std <- pedmod_start(
+  ptr = ll_terms, data = dat_unqiue, cluster_weights = c_weights, 
+  standardized = TRUE))
+
+# are the starting values similar?
+standardized_to_direct(start_std$par, n_scales = 2L)
+start$par
+
+# this may have required different number of gradient and function evaluations
+start_std$opt$counts
+start    $opt$counts
+
+# estimate the model
+system.time(
+  opt_out_quick_std <- pedmod_opt(
+    ptr = ll_terms, par = start_std$par, abs_eps = 0, use_aprx = TRUE, 
+    n_threads = 4L,  cluster_weights = c_weights, standardized = TRUE,
+    maxvls = 5000L, rel_eps = 1e-2, minvls = 500L))
+system.time(
+  opt_out_std <- pedmod_opt(
+    ptr = ll_terms, par = opt_out_quick_std$par, abs_eps = 0, use_aprx = TRUE, 
+    n_threads = 4L,  cluster_weights = c_weights, standardized = TRUE,
+    # we changed the parameters
+    maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
+
+# we get the same
+standardized_to_direct(opt_out_std$par, n_scales = 2L)
+opt_out$par
+
+# this may have required different number of gradient and function evaluations
+opt_out_quick_std$counts
+opt_out_quick    $counts
+
+opt_out_std$counts
+opt_out    $counts
+```
+
+### Profile Likelihood Curve
 
 We can make a 2D profile likelihood curve as follows:
 
@@ -731,6 +990,8 @@ abline(v = sqrt(attr(dat_unqiue, "sig_sq")[2]), lty = 3) # the true value
 abline(h = -opt_out$value - crit_val / 2, lty = 3) # mark the critical value
 ```
 
+### Simulation Study
+
 We make a small simulation study below where we are interested in the estimation 
 time and bias.
 
@@ -749,7 +1010,7 @@ sim_study <- lapply(seeds, function(s){
   
   # only run the result if it has not been computed
   f <- file.path("cache", "sim_study_simple_w_env", 
-                 paste0("simple-", s, ".RDS"))
+                 paste0("simple-w-env-", s, ".RDS"))
   if(!file.exists(f)){
     # simulate the data
     dat <- sim_dat(n_fams = 1000L)
@@ -763,69 +1024,114 @@ sim_study <- lapply(seeds, function(s){
     
     # get the starting values
     library(pedmod)
-    ll_terms <- get_pedigree_ll_terms(dat_unqiue, max_threads = 4L)
-    ti_start <- system.time(start <- pedmod_start(
-      ptr = ll_terms, data = dat_unqiue, n_threads = 4L, 
-      cluster_weights = c_weights))
-    start$time <- ti_start
+    do_fit <- function(standardized){
+      ll_terms <- get_pedigree_ll_terms(dat_unqiue, max_threads = 4L)
+      ti_start <- system.time(start <- pedmod_start(
+        ptr = ll_terms, data = dat_unqiue, n_threads = 4L, 
+        cluster_weights = c_weights, standardized = standardized))
+      start$time <- ti_start
+      
+      # fit the model
+      ti_quick <- system.time(
+        opt_out_quick <- pedmod_opt(
+          ptr = ll_terms, par = start$par, maxvls = 5000L, abs_eps = 0, 
+          rel_eps = 1e-2, minvls = 500L, use_aprx = TRUE, n_threads = 4L, 
+          cluster_weights = c_weights, standardized = standardized))
+      opt_out_quick$time <- ti_quick
+      
+      ti_slow <- system.time(
+        opt_out <- pedmod_opt(
+          ptr = ll_terms, par = opt_out_quick$par, abs_eps = 0, use_aprx = TRUE, 
+          n_threads = 4L, cluster_weights = c_weights,
+           standardized = standardized,
+          # we changed the parameters
+          maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
+      opt_out$time <- ti_slow
+      
+      if(standardized){
+        start$par     <- standardized_to_direct(start$par        , 2L)
+        opt_out$par   <- standardized_to_direct(opt_out$par      , 2L)
+        opt_out_quick$par <- standardized_to_direct(opt_out_quick$par, 2L)
+      }
+      
+      list(start = start, opt_out = opt_out, opt_out_quick = opt_out_quick, 
+           ll_no_rng = start$logLik_no_rng)
+    }
     
-    # fit the model
-    ti_quick <- system.time(
-      opt_out_quick <- pedmod_opt(
-        ptr = ll_terms, par = start$par, maxvls = 5000L, abs_eps = 0, 
-        rel_eps = 1e-2, minvls = 500L, use_aprx = TRUE, n_threads = 4L, 
-        cluster_weights = c_weights))
-    opt_out_quick$time <- ti_quick
+    fit_direct <- do_fit(standardized = FALSE)
+    fit_std    <- do_fit(standardized = TRUE)
     
-    ti_slow <- system.time(
-      opt_out <- pedmod_opt(
-        ptr = ll_terms, par = opt_out_quick$par, abs_eps = 0, use_aprx = TRUE, 
-        n_threads = 4L, cluster_weights = c_weights,
-        # we changed the parameters
-        maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
-    opt_out$time <- ti_slow
-    
-    out <- list(start = start, opt_out = opt_out, opt_out_quick = opt_out_quick, 
-                opt_out = opt_out, ll_no_rng = start$logLik_no_rng)
-    saveRDS(out, f)
+    saveRDS(list(fit_direct = fit_direct, fit_std = fit_std), f)
   }
   
   # report to console and return 
   out <- readRDS(f)
-  message(paste0(capture.output(out$opt_out$par), collapse = "\n"))
+  message(paste0(capture.output(out$fit_direct$opt_out$par), collapse = "\n"))
+  message(paste0(capture.output(out$fit_std   $opt_out$par), collapse = "\n"))
+  message(sprintf(
+    "Time %12.1f, %12.1f. Max ll: %12.4f, %12.4f\n",
+    with(out$fit_direct, start$time["elapsed"] + opt_out$time["elapsed"] +
+           opt_out_quick$time["elapsed"]),
+    with(out$fit_std   , start$time["elapsed"] + opt_out$time["elapsed"]  +
+           opt_out_quick$time["elapsed"]),
+    -out$fit_direct$opt_out$value,
+    -out$fit_std   $opt_out$value))
   
   out
 })
 
 # gather the estimates
-tmp <- sim_dat(2L)
-beta_est <- sapply(sim_study, function(x) head(x$opt_out$par, 2))
-sigma_est <- sapply(sim_study, function(x) exp(tail(x$opt_out$par, 2) / 2))
-rownames(sigma_est) <- names(tmp[[1L]]$scale_mats)
+beta_est <- sapply(sim_study, function(x) 
+  cbind(Direct       = head(x$fit_direct$opt_out$par, 2), 
+        Standardized = head(x$fit_std   $opt_out$par, 2)), 
+  simplify = "array")
+sigma_est <- sapply(sim_study, function(x) 
+  cbind(Direct       = exp(tail(x$fit_direct$opt_out$par, 2) / 2), 
+        Standardized = exp(tail(x$fit_std   $opt_out$par, 2) / 2)), 
+  simplify = "array")
 
 # compute the errors
-err <- rbind(beta_est, sigma_est) - 
-  c(attr(tmp, "beta"), sqrt(attr(tmp, "sig_sq")))
+tmp <- sim_dat(2L)
+err_beta  <- beta_est  - attr(tmp, "beta")
+err_sigma <- sigma_est - sqrt(attr(tmp, "sig_sq"))
+dimnames(err_sigma)[[1L]] <- c("std genetic", "std env.")
+err <- abind::abind(err_beta, err_sigma, along = 1)
 
 # get the bias estimates and the standard errors
-rbind(Bias = rowMeans(err), 
-      SE   = apply(err, 1, sd) / sqrt(NCOL(err)))
+bias <- apply(err, 1:2, mean)
+n_sims <- dim(err)[[3]]
+SE <- apply(err , 1:2, sd) / sqrt(n_sims)
+bias
+SE
 
 # make a box plot
-par(mar = c(5, 5, 1, 1))
-boxplot(t(err), ylab = "Error")
+b_vals <- expand.grid(rownames(err), strtrim(colnames(err), 1))
+box_dat <- data.frame(Error = c(err), 
+                      Parameter = rep(b_vals$Var1, n_sims), 
+                      Method = rep(b_vals$Var2, dim(err)[[3]]))
+par(mar = c(7, 5, 1, 1))
+# S is for the standardized and D is for the direct parameterization
+boxplot(Error ~ Method + Parameter, box_dat, ylab = "Error", las = 2, 
+        xlab = "")
 abline(h = 0, lty = 2)
 grid()
 # get the average computation times
 time_vals <- sapply(sim_study, function(x) {
-  keep <- c("opt_out", "opt_out_quick", "start")
-  out <- setNames(sapply(x[keep], function(z) z$time["elapsed"]), keep)
-  c(out, total = sum(out))
-})
-summary(t(time_vals))
+  . <- function(z){
+    keep <- c("opt_out", "start")
+    out <- setNames(sapply(z[keep], function(z) z$time["elapsed"]), keep)
+    c(out, total = sum(out))
+  }
+  
+  rbind(Direct       = .(x$fit_direct), 
+        Standardized = .(x$fit_std))
+}, simplify = "array")
+apply(time_vals, 1:2, mean)
+apply(time_vals, 1:2, sd)
+apply(time_vals, 1:2, quantile)
 ```
 
-### More Complicated Example
+## More Complicated Example
 
 ```{r clean_up_complicated, echo = FALSE}
 rm(list = ls())
@@ -1179,6 +1485,14 @@ The result is shown below.
 ```{r adam_re_create_ptr, echo = FALSE}
 library(pedmod)
 ll_terms <- get_pedigree_ll_terms(dat_arg, max_threads = 4L)
+fn <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE, 
+               n_threads = 4L, indices = NULL, maxvls = 25000L){
+  set.seed(seed)
+  -eval_pedigree_ll(
+    ptr = ll_terms, par = par, maxvls = maxvls, abs_eps = 0, rel_eps = rel_eps, 
+    minvls = 1000L, use_aprx = use_aprx, n_threads = n_threads, 
+    indices = indices)
+}
 ```
 
 ```{r res_adam}

@@ -30,7 +30,8 @@
 pedmod_opt <- function(ptr, par, maxvls, abs_eps, rel_eps,
                        opt_func = NULL, seed = 1L, indices = NULL, minvls = -1L,
                        do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L,
-                       cluster_weights = NULL, fix = NULL, ...){
+                       cluster_weights = NULL, fix = NULL, standardized = FALSE,
+                       ...){
   # handle defaults
   if(is.null(opt_func)){
     opt_func <- optim
@@ -58,10 +59,11 @@ pedmod_opt <- function(ptr, par, maxvls, abs_eps, rel_eps,
     if(!is.null(seed))
       set.seed(seed)
     out <- try(-eval_pedigree_ll(
-      ptr = ptr, par = get_par(x), maxvls = maxvls, rel_eps = rel_eps,
-      indices = indices, minvls = minvls, abs_eps = abs_eps,
-      do_reorder = do_reorder, use_aprx = use_aprx, n_threads = n_threads,
-      cluster_weights = cluster_weights), silent = TRUE)
+        ptr = ptr, par = get_par(x), maxvls = maxvls, rel_eps = rel_eps,
+        indices = indices, minvls = minvls, abs_eps = abs_eps,
+        do_reorder = do_reorder, use_aprx = use_aprx, n_threads = n_threads,
+        cluster_weights = cluster_weights, standardized = standardized),
+      silent = TRUE)
     if(inherits(out, "try-error"))
       return(NA_real_)
     out
@@ -74,7 +76,8 @@ pedmod_opt <- function(ptr, par, maxvls, abs_eps, rel_eps,
                           rel_eps = rel_eps, indices = indices, minvls = minvls,
                           abs_eps = abs_eps, do_reorder = do_reorder,
                           use_aprx = use_aprx, n_threads = n_threads,
-                          cluster_weights = cluster_weights)
+                          cluster_weights = cluster_weights,
+                          standardized = standardized)
     if(length(fix) > 0)
       out <- out[-fix]
     out
@@ -90,6 +93,7 @@ pedmod_opt <- function(ptr, par, maxvls, abs_eps, rel_eps,
 #' @param scale_max the maximum value for the scale parameters. Sometimes, the
 #' optimization method tends to find large scale parameters and get stuck.
 #' Setting a maximum solves this.
+#'
 #' @return
 #' \code{pedmod_start}: A \code{list} with:
 #' \itemize{
@@ -104,7 +108,8 @@ pedmod_opt <- function(ptr, par, maxvls, abs_eps, rel_eps,
 pedmod_start <- function(ptr, data, maxvls = 1000L, abs_eps = 0, rel_eps = 1e-2,
                          seed = 1L, indices = NULL, scale_max = 9,
                          minvls = 100L, do_reorder = TRUE, use_aprx = TRUE,
-                         n_threads = 1L, cluster_weights = NULL){
+                         n_threads = 1L, cluster_weights = NULL,
+                         standardized = FALSE){
   # checks
   stopifnot(is.numeric(scale_max), length(scale_max) == 1L,
             scale_max > 0,
@@ -133,6 +138,72 @@ pedmod_start <- function(ptr, data, maxvls = 1000L, abs_eps = 0, rel_eps = 1e-2,
   # fit the model without random effects
   start_fit <-  glm.fit(X, y, weights = w, family = binomial("probit"))
   beta <- start_fit$coefficients
+  logLik_no_rng <- -sum(start_fit$deviance) / 2
+
+  if(standardized){
+    fn <- function(sc){
+      if(!is.null(seed))
+        set.seed(seed)
+
+      sc_direct <- standardized_to_direct(sc, length(sc))
+      if(any(sc_direct > scale_max))
+        return(NA_real_)
+
+      out <- try(-eval_pedigree_ll(
+        ptr = ptr, par = c(beta, sc), maxvls = maxvls, abs_eps = abs_eps,
+        rel_eps = rel_eps, minvls = minvls, use_aprx = use_aprx,
+        n_threads = n_threads, cluster_weights = cluster_weights,
+        indices = indices, do_reorder = do_reorder,
+        standardized = standardized),
+        silent = TRUE)
+      if(inherits(out, "try-error"))
+        return(NA_real_)
+
+      out
+    }
+    gr <- function(sc){
+      if(!is.null(seed))
+        set.seed(seed)
+
+      out <- -eval_pedigree_grad(
+        ptr = ptr, par = c(beta, sc), maxvls = maxvls, abs_eps = abs_eps,
+        rel_eps = rel_eps, minvls = minvls, use_aprx = use_aprx,
+        n_threads = n_threads, cluster_weights = cluster_weights,
+        indices = indices, do_reorder = do_reorder,
+        standardized = standardized)
+
+      tail(out, -length(beta))
+    }
+
+    # optimize
+    n_scales <- get_n_scales(ptr)
+    stopifnot(n_scales > 0)
+
+    for(sc_sqrt in seq(.1, sqrt(scale_max), length.out = 5)){
+      sc <- rep(log(sc_sqrt) * 2, n_scales)
+      opt <- try(optim(sc, fn, gr, method = "BFGS",
+                       control = list(maxit = 1000L)),
+                 silent = TRUE)
+      if(!inherits(opt, "try-error") && opt$convergence < 2)
+        # found a good solution
+        break
+    }
+
+    if(inherits(opt, "try-error") || opt$convergence > 1){
+      # fall to find a good solution
+      sc <- rep(log(.01), n_scales)
+      logLik_est <- -fn(sc)
+
+    } else {
+      sc <- opt$par
+      logLik_est <- -opt$value
+
+    }
+
+    return(list(par = c(beta, sc), beta_no_rng = beta,
+                logLik_no_rng = logLik_no_rng,
+                logLik_est = logLik_est, opt = opt))
+  }
 
   #####
   # optimize the model where beta is proportional to estimates without the
@@ -170,8 +241,7 @@ pedmod_start <- function(ptr, data, maxvls = 1000L, abs_eps = 0, rel_eps = 1e-2,
   }
 
   # optimize
-  logLik_no_rng <- -sum(start_fit$deviance) / 2
-  n_scales <- length(data[[1L]]$scale_mats)
+  n_scales <- get_n_scales(ptr)
   stopifnot(n_scales > 0)
 
   for(sc_sqrt in seq(.1, sqrt(scale_max), length.out = 5)){
@@ -201,5 +271,5 @@ pedmod_start <- function(ptr, data, maxvls = 1000L, abs_eps = 0, rel_eps = 1e-2,
   # return
   list(par = c(beta_scaled, sc), beta_no_rng = beta,
        logLik_no_rng = logLik_no_rng,
-       logLik_est = logLik_est)
+       logLik_est = logLik_est, opt = opt)
 }

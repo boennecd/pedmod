@@ -39,5 +39,6 @@ Suggests:
     xml2,
     knitr,
     rmarkdown,
-    R.rsp
+    R.rsp, 
+    abind
 VignetteBuilder: R.rsp

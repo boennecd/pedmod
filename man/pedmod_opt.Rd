@@ -20,6 +20,7 @@ pedmod_opt(
   n_threads = 1L,
   cluster_weights = NULL,
   fix = NULL,
+  standardized = FALSE,
   ...
 )
 
@@ -36,7 +37,8 @@ pedmod_start(
   do_reorder = TRUE,
   use_aprx = TRUE,
   n_threads = 1L,
-  cluster_weights = NULL
+  cluster_weights = NULL,
+  standardized = FALSE
 )
 }
 \arguments{
@@ -78,6 +80,10 @@ reduce the computation time while not affecting the result much.}
 
 \item{fix}{integer vector with indices of \code{par} to fix. This is useful
 for computing profile likelihoods. \code{NULL} yield all parameters.}
+
+\item{standardized}{logical for whether to use the standardized or direct
+parameterization. See \code{\link{standardized_to_direct}} and the vignette
+at \code{vignette("pedmod", package = "pedmod")}.}
 
 \item{...}{Arguments passed to \code{opt_func}.}
 

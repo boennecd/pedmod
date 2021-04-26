@@ -48,9 +48,11 @@ pedmod_start(
 
 \item{maxvls}{maximum number of samples in the approximation.}
 
-\item{abs_eps}{absolute convergence threshold.}
+\item{abs_eps}{absolute convergence threshold for
+\code{\link{eval_pedigree_ll}} and \code{\link{eval_pedigree_grad}}.}
 
-\item{rel_eps}{relative convergence threshold.}
+\item{rel_eps}{rel_eps convergence threshold for
+\code{\link{eval_pedigree_ll}} and \code{\link{eval_pedigree_grad}}.}
 
 \item{opt_func}{function to perform minimization with arguments like
 \code{\link{optim}}. BFGS is used with \code{\link{optim}} if this argument
@@ -79,7 +81,7 @@ reduce the computation time while not affecting the result much.}
 \code{NULL} if all clusters have weight one.}
 
 \item{fix}{integer vector with indices of \code{par} to fix. This is useful
-for computing profile likelihoods. \code{NULL} yield all parameters.}
+for computing profile likelihoods. \code{NULL} yields all parameters.}
 
 \item{standardized}{logical for whether to use the standardized or direct
 parameterization. See \code{\link{standardized_to_direct}} and the vignette
@@ -117,4 +119,7 @@ using a passed optimization function.
 \code{pedmod_start} yield starting values which can be used for
 \code{pedmod_opt}. The method is based on a heuristic where we make the
 assumption that the fixed effects are unrelated to the random effects.
+}
+\seealso{
+\code{\link{pedmod_sqn}} and \code{\link{pedmod_start}}.
 }

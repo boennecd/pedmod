@@ -15,8 +15,15 @@
 #' @param seed seed to pass to \code{\link{set.seed}} before each gradient and
 #' function evaluation. Use \code{NULL} if the seed should not be fixed.
 #' @param fix integer vector with indices of \code{par} to fix. This is useful
-#' for computing profile likelihoods. \code{NULL} yield all parameters.
+#' for computing profile likelihoods. \code{NULL} yields all parameters.
 #' @param ... Arguments passed to \code{opt_func}.
+#' @param abs_eps absolute convergence threshold for
+#' \code{\link{eval_pedigree_ll}} and \code{\link{eval_pedigree_grad}}.
+#' @param rel_eps rel_eps convergence threshold for
+#' \code{\link{eval_pedigree_ll}} and \code{\link{eval_pedigree_grad}}.
+#'
+#' @seealso
+#' \code{\link{pedmod_sqn}} and \code{\link{pedmod_start}}.
 #'
 #' @return
 #' \code{pedmod_opt}: The output from the \code{opt_func} argument. Thus, if
@@ -272,4 +279,203 @@ pedmod_start <- function(ptr, data, maxvls = 1000L, abs_eps = 0, rel_eps = 1e-2,
   list(par = c(beta_scaled, sc), beta_no_rng = beta,
        logLik_no_rng = logLik_no_rng,
        logLik_est = logLik_est, opt = opt)
+}
+
+#' Optimize the Log Marginal Likelihood Using a Stochastic Quasi-Newton Method
+#'
+#' Optimizes \code{\link{eval_pedigree_ll}} and \code{\link{eval_pedigree_grad}}
+#' using a stochastic quasi-Newton method.
+#'
+#' @inheritParams pedmod_opt
+#' @param par starting values.
+#' @param step_factor factor used for the step size. The step size is
+#' \code{step_factor} divided by the iteration number.
+#' @param n_it number of stochastic gradient steps to make.
+#' @param n_grad_steps number of stochastic gradient steps to make between each
+#' Hessian approximation update.
+#' @param n_grad number of log marginal likelihood terms to include in the
+#' stochastic gradient step.
+#' @param n_hess number of log marginal likelihood terms to include in the
+#' gradients used for the Hessian approximation update. This is set to the
+#' entire sample (or \code{indices}) if this is greater than or equal to half
+#' the number of log marginal likelihood terms.
+#' @param minvls_hess \code{minvls} argument to use when updating the Hessian
+#' approximation.
+#' @param maxvls_hess \code{maxvls} argument to use when updating the Hessian
+#' approximation.
+#' @param abs_eps_hess \code{abs_eps} argument to use when updating the Hessian
+#' approximation.
+#' @param rel_eps_hess \code{rel_eps} argument to use when updating the Hessian
+#' approximation.
+#' @param verbose logical for whether to print output during the estimation.
+#'
+#' @details
+#' The function uses a stochastic quasi-Newton method like suggested by
+#' Byrd et al. (2016) with a few differences: Differences in gradients are
+#' used rather than Hessian-vector products, BFGS rather than L-BFGS is used
+#' because the problem is typically low dimensional, and damped BFGS updates
+#' are used (see e.g. chapter 18 of Nocedal and Wright, 2006).
+#'
+#' Separate arguments for the gradient approximation in the Hessian update are
+#' provided as one may want a more precise approximation for these gradients.
+#' \code{step_factor} likely depends on the other parameters and the data set
+#' and should be altered.
+#'
+#' @references
+#'
+#' Byrd, R. H., Hansen, S. L., Nocedal, J., & Singer, Y. (2016).
+#' \emph{A stochastic quasi-Newton method for large-scale optimization}.
+#' SIAM Journal on Optimization, 26(2), 1008-1031.
+#'
+#' Nocedal, J., & Wright, S. (2006). \emph{Numerical optimization}.
+#' Springer Science & Business Media.
+#'
+#' @seealso
+#' \code{\link{pedmod_opt}} and \code{\link{pedmod_start}}.
+#'
+#' @export
+pedmod_sqn <- function(ptr, par, maxvls, abs_eps, rel_eps, step_factor,
+                       n_it, n_grad_steps, indices = NULL, minvls = -1L,
+                       n_grad = 50L, n_hess = 500L, do_reorder = TRUE,
+                       use_aprx = FALSE, n_threads = 1L, cluster_weights = NULL,
+                       fix = NULL, standardized = FALSE, minvls_hess = minvls,
+                       maxvls_hess = maxvls, abs_eps_hess = abs_eps,
+                       rel_eps_hess = rel_eps, verbose = FALSE){
+  #####
+  # setup before the estimation
+  n_pars <- length(par) - length(fix)
+  omegas <- matrix(NA_real_, n_pars, floor(n_it / n_grad_steps) + 1L)
+  H <- diag(n_pars)
+  any_fixed <- length(fix) > 0
+  w_old <- if(any_fixed) par[-fix] else par
+  omegas[, 1L] <- w_old
+
+  n_terms <- get_n_terms(ptr)
+  if(is.null(indices))
+    indices <- 0:(n_terms - 1L)
+  n_terms <- min(n_terms, length(indices))
+  n_grad <- min(n_grad, n_terms)
+  n_hess <- min(n_hess, n_terms)
+
+  # we alter n_hess if it is greater than or equal to the number of observations
+  if(n_hess >= n_terms / 2)
+    n_hess <- n_terms
+  hess_use_all <- n_hess == n_terms
+
+  # assign the function and the gradient functions
+  get_par <- function(x){
+    if(!any_fixed)
+      return(x)
+    out <- par
+    out[-fix] <- x
+    out
+  }
+  fn <- function(x, abs_eps, rel_eps, minvls, maxvls, indices){
+    out <- try(-eval_pedigree_ll(
+      ptr = ptr, par = get_par(x), maxvls = maxvls, rel_eps = rel_eps,
+      indices = indices, minvls = minvls, abs_eps = abs_eps,
+      do_reorder = do_reorder, use_aprx = use_aprx, n_threads = n_threads,
+      cluster_weights = cluster_weights, standardized = standardized),
+      silent = TRUE)
+    if(inherits(out, "try-error"))
+      return(NA_real_)
+    if(!is.null(out))
+      out / length(indices) else out / n_terms
+  }
+  gr <- function(x, abs_eps, rel_eps, minvls, maxvls, indices){
+    out <-
+      -eval_pedigree_grad(ptr = ptr, par = get_par(x), maxvls = maxvls,
+                          rel_eps = rel_eps, indices = indices, minvls = minvls,
+                          abs_eps = abs_eps, do_reorder = do_reorder,
+                          use_aprx = use_aprx, n_threads = n_threads,
+                          cluster_weights = cluster_weights,
+                          standardized = standardized)
+    if(any_fixed)
+      out <- out[-fix]
+    if(!is.null(indices))
+      out / length(indices) else out / n_terms
+  }
+
+  if(hess_use_all)
+    # we will need this later
+    g_new <- gr(omegas[, 1], abs_eps = abs_eps_hess, rel_eps = rel_eps_hess,
+                minvls = minvls_hess, maxvls = maxvls_hess,
+                indices = indices)
+
+  #####
+  # perform the optimization
+  k <- 0L
+  stopifnot(n_it > 0, n_grad_steps > 0)
+  w_vals <- matrix(NA_real_, n_pars, n_grad_steps)
+  w_new <- w_old
+  t <- 1L
+  while(k < n_it){
+    w_vals[] <- NA_real_
+    for(i in 1:n_grad_steps){
+      if((k <- k + 1L) > n_it)
+        break
+
+      # perform the gradient step
+      w_old <- w_new
+      S <- sample(indices, n_grad)
+      gr_val <- gr(w_old, abs_eps = abs_eps, rel_eps = rel_eps,
+                   minvls = minvls, maxvls = maxvls, indices = S)
+      w_new <- w_old - step_factor / k * drop(H %*% gr_val)
+      w_vals[, i] <- w_new
+    }
+
+    if(i < n_grad_steps)
+      # no need for an update of the Hessian approximation
+      break
+
+    t <- t + 1L
+    omegas[, t] <- rowMeans(w_vals)
+    s <- omegas[, t] - omegas[, t - 1L]
+    S <- if(hess_use_all) indices else sample(indices, n_hess)
+
+    . <- function(x)
+      gr(x, abs_eps = abs_eps_hess, rel_eps = rel_eps_hess,
+         minvls = minvls_hess, maxvls = maxvls_hess, indices = S)
+    if(hess_use_all){
+      g_old <- g_new
+      g_new <- .(omegas[, t     ])
+
+    } else {
+      g_old <- .(omegas[, t - 1L])
+      g_new <- .(omegas[, t     ])
+    }
+
+    if(verbose){
+      cat(sprintf(
+        "\nHessian update %5d\nLog marignal likelihood at previous and new average parameter vector on the same sample is:\n  %14.3f\n  %14.3f\n",
+        t, attr(g_old, "logLik"), attr(g_new, "logLik")))
+      cat("New average parameter vector is\n")
+      print(omegas[, t])
+    }
+
+    y <- g_new - g_old
+    s_y <- sum(s  * y)
+    if(t <= 2L){
+      # the first iteration
+      rho <- s_y / sum(y * y)
+      if(is.finite(rho) && rho > 0)
+        H <- diag(rho, n_pars)
+    }
+
+    # damped BFGS update
+    B_s <- solve(H, s)
+    s_B_s <- drop(s %*% B_s)
+    theta <- if(s_y >= .2 * s_B_s)
+      1 else .8 * s_B_s / (s_B_s - s_y)
+    r <- theta * y + (1 - theta) * B_s
+
+    # TODO: can be done smarter
+    r_s <- sum(r * s)
+    D <- -outer(r, s) / r_s
+    diag(D) <- diag(D) + 1
+
+    H <- crossprod(D, H %*% D) + outer(s, s) / r_s
+  }
+
+  list(par = w_new, omegas = omegas, H = H)
 }

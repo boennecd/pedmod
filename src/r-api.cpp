@@ -244,6 +244,11 @@ int get_n_scales(SEXP ptr){
   return Rcpp::XPtr<pedigree_terms>(ptr)->terms[0].l_factor.scale_mats.size();
 }
 
+// [[Rcpp::export]]
+int get_n_terms(SEXP ptr){
+  return Rcpp::XPtr<pedigree_terms>(ptr)->terms.size();
+}
+
 // [[Rcpp::export("eval_pedigree_ll_cpp")]]
 Rcpp::NumericVector eval_pedigree_ll
   (SEXP ptr, arma::vec par, int const maxvls,

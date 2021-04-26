@@ -97,7 +97,7 @@ to the the ![l](https://render.githubusercontent.com/render/math?math=l
 scale parameters, the
 ![\\sigma\_k^2](https://render.githubusercontent.com/render/math?math=%5Csigma_k%5E2
 "\\sigma_k^2")s, may be the primary interest in an analysis. The scale
-in the model cannot be identfied. That is, an equivalent model is:
+in the model cannot be identified. That is, an equivalent model is:
 
   
 ![\\begin{align\*}&#10;Y\_{ij} \\mid \\epsilon\_{ij} = e &#10; &=
@@ -489,6 +489,90 @@ opt_out_std$counts
 opt_out    $counts
 #> function gradient 
 #>       28        7
+```
+
+### Stochastic Quasi-Newton Method
+
+The package includes a stochastic quasi-Newton method which can be used
+to estimate the model. This may be useful for larger data sets or in
+situations where `pedmod_opt` “get stuck” near a maximum. The reason for
+the latter is presumably that `pedmod_opt` (by default) uses the BFGS
+method which does not assume any noise in the gradient or the function.
+We give an example below of how to use the stochastic quasi-Newton
+method provided through the `pedmod_sqn` function.
+
+``` r
+# fit the model with the stochastic quasi-Newton method
+set.seed(46712994)
+system.time(
+  sqn_out <- pedmod_sqn(
+    ptr = ll_terms, par = start$par, abs_eps = 0, use_aprx = TRUE, 
+    n_threads = 4L, rel_eps = 1e-3, step_factor = .02, maxvls = 25000L, 
+    minvls = 1000L, n_it = 400L, n_grad_steps = 20L, n_grad = 50L, 
+    n_hess = 200L))
+#>    user  system elapsed 
+#> 351.674   0.079  88.152
+
+# show the log marginal likelihood
+ll_wrapper <- function(x)
+  eval_pedigree_ll(
+    ptr = ll_terms, x, maxvls = 50000L, minvls = 1000L, abs_eps = 0, 
+    rel_eps = 1e-4, n_threads = 4L)
+print(ll_wrapper(sqn_out$par), digits = 8)
+#> [1] -1618.5015
+#> attr(,"n_fails")
+#> [1] 159
+print(ll_wrapper(opt_out$par), digits = 8)
+#> [1] -1618.4089
+#> attr(,"n_fails")
+#> [1] 163
+
+# compare the parameters
+rbind(optim = opt_out$par, 
+      sqn   = sqn_out$par)
+#>       (Intercept) Continuous Binary      
+#> optim      -2.881     0.9719  1.884 1.076
+#> sqn        -2.869     0.9888  1.874 1.063
+
+# plot the marginal log likelihood versus the iteration number
+lls <- apply(sqn_out$omegas, 2L, ll_wrapper)
+par(mar = c(5, 5, 1, 1))
+plot(lls, ylab = "Log marginal likelihood", bty = "l", pch = 16,
+     xlab = "Hessian updates")
+lines(smooth.spline(seq_along(lls), lls))
+grid()
+```
+
+<img src="man/figures/README-use_pedmod_sqn-1.png" width="100%" />
+
+``` r
+# perhaps we could have used fewer samples in each iteration
+set.seed(46712994)
+system.time(
+  sqn_out_few <- pedmod_sqn(
+    ptr = ll_terms, par = start$par, abs_eps = 0, use_aprx = TRUE, 
+    n_threads = 4L, rel_eps = 1e-3, step_factor = .02, maxvls = 25000L, 
+    minvls = 1000L, n_grad_steps = 20L,
+    # we take more iterations
+    n_it = 600L, 
+    # but use fewer samples in each iteration
+    n_grad = 20L, n_hess = 100L))
+#>    user  system elapsed 
+#> 232.789   0.004  58.210
+
+# compute the marginal log likelihood and compare the parameter estimates
+print(ll_wrapper(sqn_out_few$par), digits = 8)
+#> [1] -1618.4879
+#> attr(,"n_fails")
+#> [1] 156
+
+rbind(optim       = opt_out    $par, 
+      sqn         = sqn_out    $par, 
+      `sqn (few)` = sqn_out_few$par)
+#>           (Intercept) Continuous Binary      
+#> optim          -2.881     0.9719  1.884 1.076
+#> sqn            -2.869     0.9888  1.874 1.063
+#> sqn (few)      -2.867     0.9862  1.874 1.059
 ```
 
 ### Profile Likelihood Curve
@@ -1897,7 +1981,7 @@ library(mvtnorm)
 library(pedmod)
 library(microbenchmark)
 set.seed(78459126)
-n <- 5L         # number of variables to interate out
+n <- 5L         # number of variables to integrate out
 rel_eps <- 1e-4 # the relative error to use
 
 #####
@@ -1961,7 +2045,7 @@ The new implementation is faster when the approximation is used:
 ``` r
 rowMeans(sim_res[, "time", ])
 #>          mvtnorm mvndst (no aprx) mvndst (w/ aprx) 
-#>          0.01712          0.01617          0.01088
+#>          0.01766          0.01623          0.01097
 par(mar = c(5, 4, 1, 1))
 boxplot(t(sim_res[, "time", ]))
 ```

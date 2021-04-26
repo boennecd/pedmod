@@ -67,7 +67,7 @@ $$\frac{\sigma_l^2}{1 + \sum_{k = 1}^K\sigma_k^2}$$
 the heritability. That is, the proportion of the variance attributable to the 
 the $l$'th effect which in this case is the direct genetic effect. 
 The scale parameters, the $\sigma_k^2$s, may be the 
-primary interest in an analysis. The scale in the model cannot be identfied. 
+primary interest in an analysis. The scale in the model cannot be identified. 
 That is, an equivalent model is:
 
 $$\begin{align*}
@@ -337,6 +337,69 @@ opt_out$par
 # this may have required different number of gradient and function evaluations
 opt_out_std$counts
 opt_out    $counts
+```
+
+### Stochastic Quasi-Newton Method
+
+The package includes a stochastic quasi-Newton method which can be used to 
+estimate the model. This may be useful for larger data sets or in situations 
+where `pedmod_opt` "get stuck" near a maximum. The reason for the latter is
+presumably that `pedmod_opt` (by default) uses the BFGS method which does 
+not assume any noise in the gradient or the function. We give an example below 
+of how to use the stochastic quasi-Newton method provided through the 
+`pedmod_sqn` function.
+
+```{r pre_use_pedmod_psqn, echo=FALSE}
+ll_terms <- get_pedigree_ll_terms(dat, max_threads = 4L)
+```
+
+```{r use_pedmod_sqn, cache = 1, fig.keep = "last"}
+# fit the model with the stochastic quasi-Newton method
+set.seed(46712994)
+system.time(
+  sqn_out <- pedmod_sqn(
+    ptr = ll_terms, par = start$par, abs_eps = 0, use_aprx = TRUE, 
+    n_threads = 4L, rel_eps = 1e-3, step_factor = .02, maxvls = 25000L, 
+    minvls = 1000L, n_it = 400L, n_grad_steps = 20L, n_grad = 50L, 
+    n_hess = 200L))
+
+# show the log marginal likelihood
+ll_wrapper <- function(x)
+  eval_pedigree_ll(
+    ptr = ll_terms, x, maxvls = 50000L, minvls = 1000L, abs_eps = 0, 
+    rel_eps = 1e-4, n_threads = 4L)
+print(ll_wrapper(sqn_out$par), digits = 8)
+print(ll_wrapper(opt_out$par), digits = 8)
+
+# compare the parameters
+rbind(optim = opt_out$par, 
+      sqn   = sqn_out$par)
+
+# plot the marginal log likelihood versus the iteration number
+lls <- apply(sqn_out$omegas, 2L, ll_wrapper)
+par(mar = c(5, 5, 1, 1))
+plot(lls, ylab = "Log marginal likelihood", bty = "l", pch = 16,
+     xlab = "Hessian updates")
+lines(smooth.spline(seq_along(lls), lls))
+grid()
+# perhaps we could have used fewer samples in each iteration
+set.seed(46712994)
+system.time(
+  sqn_out_few <- pedmod_sqn(
+    ptr = ll_terms, par = start$par, abs_eps = 0, use_aprx = TRUE, 
+    n_threads = 4L, rel_eps = 1e-3, step_factor = .02, maxvls = 25000L, 
+    minvls = 1000L, n_grad_steps = 20L,
+    # we take more iterations
+    n_it = 600L, 
+    # but use fewer samples in each iteration
+    n_grad = 20L, n_hess = 100L))
+
+# compute the marginal log likelihood and compare the parameter estimates
+print(ll_wrapper(sqn_out_few$par), digits = 8)
+
+rbind(optim       = opt_out    $par, 
+      sqn         = sqn_out    $par, 
+      `sqn (few)` = sqn_out_few$par)
 ```
 
 ### Profile Likelihood Curve
@@ -1291,7 +1354,7 @@ rbind(truth     = dat$sc,
 #
 # Args:
 #   par: starting value.
-#   gr: gradient function which return the function value as an attributate
+#   gr: gradient function which return the function value as an attribute
 #       called value.
 #   n_clust: number of clusters.
 #   batch_size: number of observations in each batch.
@@ -1533,7 +1596,7 @@ library(mvtnorm)
 library(pedmod)
 library(microbenchmark)
 set.seed(78459126)
-n <- 5L         # number of variables to interate out
+n <- 5L         # number of variables to integrate out
 rel_eps <- 1e-4 # the relative error to use
 
 #####

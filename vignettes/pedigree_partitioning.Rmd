@@ -1,0 +1,458 @@
+---
+title: Partitioning Families
+bibliography: ../ref.bib
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "figures/partitioning-",
+  cache.path = "cache/partitioning-",
+  out.width = "100%", fig.width = 7, fig.height = 4,
+  message = FALSE, warning = FALSE, error = FALSE)
+options(digits = 4)
+```
+
+In many cases, the connected families that we have to integrate over may be 
+large but sparsely connected. As an example, consider the following three 
+generation family:
+
+```{r pedigree_example}
+# the data set we use
+dat <- data.frame(
+  id = 1:48, 
+  mom = c(NA, NA, 2L, 2L, 2L, NA, NA, 7L, 7L, 7L, 3L, 3L, 3L, 3L, NA, 15L, 15L, 43L, 18L, NA, NA, 21L, 21L, 9L, 9L, 9L, 9L, NA, NA, 29L, 29L, 29L, 30L, 30L, NA, NA, 36L, 36L, 36L, 38L, 38L, NA, NA, 43L, 43L, 43L, 32L, 32L), 
+  dad = c(NA, NA, 1L, 1L, 1L, NA, NA, 6L, 6L, 6L, 8L, 8L, 8L, 8L, NA, 4L, 4L, 42L, 5L, NA, NA, 20L, 20L, 22L, 22L, 22L, 22L, NA, NA, 28L, 28L, 28L, 23L, 23L, NA, NA, 35L, 35L, 35L, 31L, 31L, NA, NA, 42L, 42L, 42L, 45L, 45L), 
+  sex = c(1L, 2L, 2L, 1L, 1L, 1L, 2L, 1L, 2L, 2L, 2L, 1L, 1L, 1L, 2L, 2L, 2L, 2L, 1L, 1L, 2L, 1L, 1L, 2L, 1L, 1L, 2L, 1L, 2L, 2L, 1L, 2L, 2L, 2L, 1L, 2L, 1L, 2L, 1L, 2L, 1L, 1L, 2L, 2L, 1L, 1L, 2L, 2L))
+
+# plot the pedigree
+library(kinship2, quietly = TRUE)
+ped <- with(dat, pedigree(id = id, dadid = dad, momid = mom, sex = sex))
+par(mar = c(1, 1, 1, 1))
+plot(ped)
+```
+
+In the plot, circles are females and squares are males. An individual may be 
+repeated in which case duplicate entries are illustrated by a dashed line. 
+If we observe outcomes for all 48 members of the family then we have to 
+do 48 dimensional as everybody is connected
+under the assumption that the random effects that we 
+specify are such that if individuals are assumed to be independent 
+genetically then they are also independent with respect to any other random 
+effect we may include (e.g. maternal effect or environmental effect). We assume 
+that this is true in the rest of this vignette. Though it is possible also 
+use the same method we describe here in other cases if one specifies a suitable 
+graph, like the one we will get to soon, for the random effect structure.
+
+To see that everybody is connected, notice that 
+
+ - Child 16 is cousins with child 19 through her father. 
+ - Child 19 is cousins with child 47 through his mom. 
+ - Child 47 is cousins with child 33 through her mother. 
+ - Child 33 is cousins with child 25 through her father. 
+ - Child 25 is cousins with child 11 through his mother. At this point, we can 
+   realize that we are able to get to every individual in the pedigree starting 
+   at any point.
+ - Child 11 is cousins with child 16 through her mother and this leads us back 
+   to where we started and we have circle.
+   
+The relationship can also be represented as graph. For this purposes, we assign 
+the functions below to create a list of edges between parents 
+and their children. You can likely skip the functions. 
+
+```{r assign_create_igraph_input}
+# returns the mothers id.
+# 
+# Args:
+#   pedigree: the pedigree object.
+get_momid <- function(peddat)
+  with(peddat, 
+       vapply(mindex, function(x) if(x > 0L) id[x] else NA_integer_, 1L))
+
+# returns the fathers id.
+# 
+# Args:
+#   pedigree: the pedigree object.
+get_dadid <- function(peddat)
+  with(peddat, 
+       vapply(findex, function(x) if(x > 0L) id[x] else NA_integer_, 1L))
+
+# creates an edge list to pass to igraph. An edge is included between children 
+# and parents.
+# 
+# Args:
+#   pedigree: the pedigree object.
+create_igraph_input <- function(peddat){
+  id <- peddat$id
+  father <- get_dadid(peddat)
+  mother <- get_momid(peddat)
+  
+  # TODO: this is O(n^2)
+  stopifnot(anyDuplicated(id) < 1)
+  out <- lapply(id, function(x){
+    # find the children
+    children_idx <- which(x == father | x == mother)
+    children <- if(length(children_idx) > 0)
+      id[children_idx] else NULL
+    
+    # get the correct order (smallest first) and return
+    is_larger <- x > children
+    
+    cbind(
+      ifelse(is_larger, children, x        ), 
+      ifelse(is_larger, x       , children))
+  })
+  
+  out <- do.call(rbind, out)
+  as.data.frame(out[!duplicated(out), ])
+}
+```
+
+The graph version of the family looks like this:
+
+```{r show_family_as_graph, message = FALSE}
+# For some reason, kinship2::pedigree requires that we provide both a father 
+# and mother or none. Therefore, we create a mock object. You can skip this
+get_pedigree_mock <- function(id, dadid, momid, sex){
+  if(is.factor(sex))
+    sex <- as.integer(sex)
+  
+  # checks
+  n <- length(id)
+  stopifnot(n > 0, length(dadid) == n, length(momid) == n, length(sex) == n, 
+            all(is.finite(sex)), all(sex %in% 1:2), 
+            all(is.na(dadid) | dadid %in% id), 
+            all(is.na(momid) | momid %in% id), 
+            all(is.finite(id)))
+  
+  # create objects to return
+  findex <- match(dadid, id, nomatch = 0L)
+  mindex <- match(momid, id, nomatch = 0L)
+  
+  structure(
+    list(famid = rep(1L, n), id = id, findex = findex, mindex = mindex,
+         sex = factor(sex, levels = 1:2, labels = c("male", "famle"))), 
+    class = "pedigree")
+}
+
+# assign function to plot the pedigree as a graph
+do_graph_plot <- function(dat){
+  ped <- with(dat, get_pedigree_mock(
+    id = id, dadid = dad, momid = mom, sex = sex))
+  library(igraph, quietly = TRUE)
+  g_dat <- create_igraph_input(ped)
+  graph_fam <-  graph.data.frame(g_dat, directed = FALSE)
+  par(mar = c(1, 1, 1, 1))
+  plot(graph_fam, vertex.size = 12, vertex.color = "gray",
+       vertex.label.cex = .75, layout = layout_with_kk)
+}
+do_graph_plot(dat)
+```
+
+A node/vertex in the graph represents an individual and an edge indicates
+a parent-child relation. The graph have the property that if we split 
+(find a connected partition) 
+the above into two sub-families (subgraphs) by removing child-parent relations
+(removing edges) then we only have to do two smaller integrals rather than 
+one large. Having said that, the 48 dimensional integral that we show here is 
+not a problem but higher dimensional integrals may be.
+
+## Implemented Methods
+
+The above suggests the following procedure for simplifying the computational 
+problem:
+
+ 1. Find a split (connected partition) such that the two sub-families 
+    (subgraphs) are roughly the same size (an approximately balanced partition). 
+ 2. Of the sets that satisfies 1., find the one that removes the least amount
+    of relationships (cuts the least amount of edges).
+
+We have implemented procedures to do just this. We will return later to what 
+we have implemented but first provide an example. We start by splitting the 
+above family in way that only satisfies 1.:
+
+```{r only_balanced}
+# get the partition 
+library(pedmod)
+only_balanced <- get_max_balanced_partition_pedigree(
+  id = dat$id, father.id = dat$dad, mother.id = dat$mom, trace = 2L)
+only_balanced$balance_criterion # the smallest of the two sets
+removed_edges <- t(apply(only_balanced$removed_edges, 1L, sort))
+removed_edges # the relationships we have removed
+
+# assign function to get the new data. You can likely skip this
+get_reduced_data <- function(dat, removed_edges){
+  for(i in 1:nrow(removed_edges)){
+    . <- function(child, parent){
+      idx   <- which(dat$id       == removed_edges[i, child])
+      idx_m <- which(dat$mom[idx] == removed_edges[i, parent])
+      if(length(idx_m > 0)){
+        dat[idx[idx_m], "mom"] <<- NA_integer_
+        return(TRUE)
+      }
+      idx_d <- which(dat$dad[idx] == removed_edges[i, parent])
+      if(length(idx_d > 0)){
+        dat[idx[idx_d], "dad"] <<- NA_integer_
+        return(TRUE)
+      }
+      FALSE
+    }
+    if(.(1L, 2L))
+      next
+    .(2L, 1L)
+  }
+  
+  dat
+}
+new_dat <- get_reduced_data(dat, removed_edges)
+
+# redo the plot
+do_graph_plot(new_dat)
+```
+
+The above shows the family after we remove the `r NROW(removed_edges)` 
+relationships (edges) that our algorithm finds.
+To illustrate where the cut is in the original graph,
+we can color the vertices near the cut in the original graph:
+
+```{r more_clear_only_balanced}
+# assign function to show the split in the original graph
+show_split <- function(dat, partition_obj){
+  ped <- with(dat, pedigree(id = id, dadid = dad, momid = mom, sex = sex))
+  g_dat <- create_igraph_input(ped)
+  graph_fam <-  graph.data.frame(g_dat, directed = FALSE)
+  par(mar = c(1, 1, 1, 1))
+  V(graph_fam)$color <- "white"
+  nam <- vertex_attr(graph_fam)$name
+  V(graph_fam)$color[nam %in% partition_obj$set_1] <- "lightblue" 
+  V(graph_fam)$color[nam %in% partition_obj$set_2] <- "lightgray" 
+  par(mar = c(1, 1, 1, 1))
+  plot(graph_fam, vertex.size = 12, vertex.label.cex = .75, 
+       layout = layout_with_kk)
+}
+show_split(dat, only_balanced)
+```
+
+### Reducing the Cut Cost
+
+Next, we use the `slack` argument to reduce the number of relationships we 
+remove (the number of edges we cut):
+
+```{r also_reduce_cost}
+also_cut <- get_max_balanced_partition_pedigree(
+  id = dat$id, father.id = dat$dad, mother.id = dat$mom, trace = 2L, 
+  slack = .1)
+also_cut$balance_criterion # the smallest of the two sets
+removed_edges <- t(apply(also_cut$removed_edges, 1L, sort))
+removed_edges # the relationships we have removed
+
+# redo the plot
+do_graph_plot(new_dat)
+# color the vertices in the original graph instead
+show_split(dat, also_cut)
+```
+
+We only removed  `r NROW(removed_edges)` relationships (edges) this time.
+
+### Using Indviduals Weight (Vertex Weights)
+In many applications, we only observe some individuals. Therefore, we want the 
+to split the family into equal sizes in terms of the individuals that we 
+actually observe. We can do by providing individual weights (vertex weights). 
+
+As an example, we will take the family we have been working with and assume 
+that we only observe individuals in the final generation. Thus, we will set the
+weight of these individuals to a one and the remianing to some small positive 
+number (say $\epsilon = 10^{-5}$):
+
+```{r use_weights}
+# add the weights
+is_final <- c(16:17, 11:14, 24:27, 33:34, 40:41, 47:48, 19L)
+dat$id_weight <- ifelse(dat$id %in% is_final, 1., 1e-5)
+
+weighted_partition <- get_max_balanced_partition_pedigree(
+  id = dat$id, father.id = dat$dad, mother.id = dat$mom, trace = 2L, 
+  slack = .1, id_weight = dat$id_weight)
+weighted_partition$balance_criterion # the smallest of the two sets
+removed_edges <- t(apply(weighted_partition$removed_edges, 1L, sort))
+removed_edges # the relationships we have removed
+
+# plot the new graph
+new_dat <- get_reduced_data(dat, removed_edges)
+ped <- with(new_dat, get_pedigree_mock(
+  id = id, dadid = dad, momid = mom, sex = sex))
+g_dat <- create_igraph_input(ped)
+graph_fam <- graph.data.frame(g_dat, directed = FALSE)
+V(graph_fam)$color <- ifelse(vertex_attr(graph_fam)$name %in% is_final, 
+                             "gray", "white")
+par(mar = c(1, 1, 1, 1))
+plot(graph_fam, vertex.size = 12, vertex.label.cex = .75, 
+     layout = layout_with_kk)
+```
+
+We have colored the vertices which we observe in the above graph to make it easy 
+to see that there is a as close as possible to an equal number in 
+each sub-family.
+
+## Details
+
+We will go through the details of the implemented methods in this section. 
+All method we have implemented are for general graphs so we will will cast the 
+problem for a general graph $G = (V, E)$ with vertices $V$ and edges $E$ 
+with some vertex weight function $w$.
+The first problem we need to solve is to implement a method to approximately 
+solve the maximally balanced connected partition problem. That is, we want
+to find a partition ($V_1$, $V_2$) of the graph such that $V_1$ is connected 
+and $V_2$ is connected. The partition we find needs to maximize 
+$\min (w(V_1), w(V_2))$. 
+
+We have implemented the method suggested by 
+@Chlebíková96. This methods requires that one can find the cut vertices 
+(articulation points) and can construct the block-cut tree. 
+Thus, we have implemented the method suggested by @Hopcroft73. The method 
+suggested by @Hopcroft73 can be accesed through the 
+`get_biconnected_components` and `get_block_cut_tree` function. 
+We illustrate this below on a simulated graph:
+
+```{r assign_sim_graph}
+# simulates a connected graph of a given size
+sim_graph <- function(size){
+  stopifnot(size > 2)
+  w_all <- (500:1)^(-2)
+  out <- lapply(3:size, function(n){
+    n_links <- sample.int(4L, 1L, prob = c(.5, .4, .05, .05))
+    n_links <- min(n - 1L, n_links)
+    idx_start <- max(1L, n - 500L)
+    idx_end <- n - 1L
+    prob <- if(n > 502L) w_all else (idx_end:idx_start)^(-2)
+    cbind(from = n, to = sample(idx_start:idx_end, n_links, prob = prob))
+  })
+  out <- c(list(cbind(1L, 2L)), out)
+  out <- do.call(rbind, out)
+  ids <- sample.int(2L * size, size)
+  out[] <- ids[out]
+  out <- t(apply(out, 1L, sort))
+  setNames(as.data.frame(out), c("from", "to"))
+}
+```
+
+```{r simulate_small_graph}
+# simulates a data set and illustrate it
+set.seed(45L)
+sim_dat <- sim_graph(50L)
+par(mar = c(1, 1, 1, 1))
+plot(graph.data.frame(sim_dat, directed = FALSE), layout = layout_with_kk,
+     vertex.size = 12, vertex.color = "gray", vertex.label.cex = .75)
+# number of biconnected components
+cut_pts <- get_biconnected_components(from = sim_dat$from, to = sim_dat$to)
+length(cut_pts) # number of biconnected components
+```
+
+The algorithm suggested by @Chlebíková96 can be used through the 
+`get_max_balanced_partition` function with `slack <= 0`:
+
+```{r find_partition_simulate_small_graph}
+# find the approximately balanced connected partition
+max_part <- get_max_balanced_partition(from = sim_dat$from, to = sim_dat$to, 
+                                       trace = 2L)
+max_part$balance_criterion # the balance criterion 
+
+# the removed edges
+removed_edges <- max_part$removed_edges
+removed_edges <- t(apply(removed_edges, 1L, sort))
+removed_edges
+
+# assign function to plot the partition
+do_plot <- function(dat, partition_obj){
+  removed_edges <- partition_obj$removed_edges
+  removed_edges <- t(apply(removed_edges, 1L, sort))
+  removed_edges
+  
+  to_remove <- apply(removed_edges, 1L, function(x)
+    which(dat$from == x[1] & dat$to == x[2]))
+  new_dat <- dat[-to_remove, ]
+  par(mar = c(1, 1, 1, 1))
+  plot(graph.data.frame(new_dat, directed = FALSE), layout = layout_with_kk,
+       vertex.size = 12, vertex.color = "gray", vertex.label.cex = .75)
+}
+do_plot(sim_dat, max_part)
+# assign function to show the split in the original graph
+show_split <- function(dat, partition_obj){
+  graph_fam <-  graph.data.frame(dat, directed = FALSE)
+  par(mar = c(1, 1, 1, 1))
+  V(graph_fam)$color <- "white"
+  nam <- vertex_attr(graph_fam)$name
+  V(graph_fam)$color[nam %in% partition_obj$set_1] <- "lightblue" 
+  V(graph_fam)$color[nam %in% partition_obj$set_2] <- "lightgray" 
+  par(mar = c(1, 1, 1, 1))
+  plot(graph_fam, vertex.size = 12, vertex.label.cex = .75, 
+       layout = layout_with_kk)
+}
+show_split(sim_dat, max_part)
+```
+
+Our implementation of the method by @Chlebíková96 is outlined at
+[cstheory.stackexchange.com/q/48864/62145](https://cstheory.stackexchange.com/q/48864/62145). 
+Currently, we re-compute the cut vertices (articulation points) at every 
+iteration but it may be possible to update these which presumably will be faster
+and reduce the overall computation time. We do find a perfectly balanced 
+partition 
+above where each is of size 25. However, we cut `r NROW(removed_edges)` edges
+to this. Thus, we implemented a greedy method to reduce the number of cut edges
+while maintaining a roughly balanced connected partition which we outline next.
+
+Given an approximately balanced connected partition $(V_1, V_2)$ and vertex 
+weight function $w_H$ as defined by @Chlebíková96, let 
+$B$ be the block in which the partition is split,
+$\tilde V_1 = V_1 \cap B$ and $\tilde V_2 = V_2 \cap B$, and let 
+$I_1 \subseteq \tilde V_2$ be the vertices that are connected with any vertex 
+in $\tilde V_1$ and define $I_2$ similarly. Then
+
+ 0. Compute $D$ as in the Kernighan–Lin algorithm [@Kernighan70].
+ 1. Clear the set of used vertices.
+ 2. For $i = 1,\dots,\min(\text{max moves},\text{vertices in }B)$:
+    * Find the cut vertices $C_1$ of $\tilde V_1$ and $C_2$ of $\tilde V_2$.
+    * Consider all the vertices in $I_1 \setminus C_2$ and $I_2 \setminus C_1$
+      such that the balance criteria
+      $w(V) / 2 - \epsilon w(V) \leq w(V_1)$ and $w(V_1)\leq w(V) / 2 + \epsilon w(V)$ are 
+      satisfied for some user defined $\epsilon \in [0, .5)$ and that the vertex has 
+      not yet been used.
+    * If there are no vertex then exit.
+    * Select the vertex $v$ with the largest $D_v$. Break ties by 
+      taking the $v$ with the largest balance criteria, 
+      $\min (w_H(\lvert \tilde V_1\rvert), w_H(\lvert \tilde V_2\rvert))$. 
+    * Let $g_i = D_v$ be the gain in this iteration, 
+      move the vertex $v$, update $I_1$, $I_2$, and $D$. Add 
+      $v$ to the used vertices.
+ 3. If no vertex were moved then exit. Otherwise find the 
+    $l = \text{argmax}_{k = 1,\dots},\sum_{i = 1}^k g_i$. 
+ 4. If $\sum_{i = 1}^l g_i \leq 0$ then undo all moves. Otherwise, undo moves 
+    after move $l$ and repeat 1.
+    
+The method is very similar to the original Kernighan–Lin algorithm. 
+It differs by the constraint that the two sets in the partition should be 
+connected, that we only move one vertex in every move [like @Fiduccia82], 
+and that the partition is only approximately balanced [like @Fiduccia82]. 
+We also limit the number of moves we make as @Karypis98.
+
+$\epsilon$ is set with the `slack` argument of 
+`get_max_balanced_partition` and the maximum number of moves to 
+make in each iteration is set by the `max_kl_it_inner` argument of
+`get_max_balanced_partition`. We illustrate the method below:
+
+```{r partion_w_cut_simulate_small_graph}
+# do the same but with also with the refinement step 
+max_part <- get_max_balanced_partition(
+  from = sim_dat$from, to = sim_dat$to, slack = .1, max_kl_it_inner = 50L, 
+  max_kl_it = 1000L, trace = 1L)
+max_part$balance_criterion # the balance criterion 
+removed_edges <- max_part$removed_edges
+removed_edges <- t(apply(removed_edges, 1L, sort))
+removed_edges
+
+# redo the plot
+do_plot(sim_dat, max_part)
+show_split(sim_dat, max_part)
+```
+
+## References

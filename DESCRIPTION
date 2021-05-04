@@ -40,5 +40,8 @@ Suggests:
     knitr,
     rmarkdown,
     R.rsp, 
-    abind
+    abind, 
+    kinship2,
+    igraph
 VignetteBuilder: R.rsp
+SystemRequirements: C++11

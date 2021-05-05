@@ -1,5 +1,10 @@
-.prep_edge_list <- function(from, to, weight_data){
-  stopifnot(length(from) == length(to))
+.prep_edge_list <- function(from, to, weight_data, edge_weights){
+  if(is.null(edge_weights))
+    edge_weights <- rep(1, length(from))
+
+  stopifnot(length(from) == length(to), length(from) == length(edge_weights),
+            all(is.finite(from)), all(is.finite(to)),
+            all(is.finite(edge_weights)))
   id <- unique(c(from, to))
   n <- length(id)
   from <- match(from, id, nomatch = n + 1L) - 1L
@@ -22,7 +27,7 @@
   }
 
   list(from = from, to = to, id = id, weights_ids = weights_ids,
-       weights = weights)
+       weights = weights, edge_weights = edge_weights)
 }
 
 #' Finds the Biconnected Components
@@ -45,17 +50,19 @@
 #'
 #' @export
 get_biconnected_components <- function(from, to){
-  dat <- .prep_edge_list(from = from, to = to, weight_data = NULL)
+  dat <- .prep_edge_list(from = from, to = to, weight_data = NULL,
+                         edge_weights = NULL)
   id <- dat$id
 
   out <- with(dat, .get_biconnected_components(from, to, weights_ids,
-                                               weights))
+                                               weights, edge_weights))
   lapply(out, function(x)
     structure(sort(id[x]),
               cut_verices = sort(id[attr(x, "cut_verices")])))
 }
 
-.pedigree_to_from_to <- function(id, father.id, mother.id, id_weight = NULL){
+.pedigree_to_from_to <- function(id, father.id, mother.id, id_weight = NULL,
+                                 father_weight = NULL, mother_weight = NULL){
   n <- length(id)
   stopifnot(length(father.id) == n, length(mother.id) == n)
   to <- c(id, id)
@@ -66,12 +73,22 @@ get_biconnected_components <- function(from, to){
     weights_ids = integer()
     weights = numeric()
   } else {
-    stopifnot(length(id_weight) == n)
+    stopifnot(length(id_weight) == n, all(is.finite(id_weight)))
     weights_ids <- id
     weights <- id_weight
   }
 
-  list(to = to[keep], from = from[keep],
+  if(is.null(father_weight))
+    father_weight <- rep(1, n)
+  else
+    stopifnot(length(father_weight) == n, all(is.finite(father_weight)))
+  if(is.null(mother_weight))
+    mother_weight <- rep(1, n)
+  else
+    stopifnot(length(mother_weight) == n, all(is.finite(mother_weight)))
+  edge_weights <- c(father_weight, mother_weight)
+
+  list(to = to[keep], from = from[keep], edge_weights = edge_weights[keep],
        weight_data = list(id = weights_ids, weight = weights))
 }
 
@@ -110,11 +127,12 @@ get_biconnected_components_pedigree <- function(id, father.id, mother.id){
 #'
 #' @export
 get_block_cut_tree <- function(from, to){
-  dat <- .prep_edge_list(from = from, to = to, weight_data = NULL)
+  dat <- .prep_edge_list(from = from, to = to, weight_data = NULL,
+                         edge_weights = NULL)
   id <- dat$id
 
   out <- with(dat, .get_block_cut_tree(from, to, weights_ids,
-                                       weights))
+                                       weights, edge_weights))
   . <- function(x)
     list(vertices     = sort(id[x$vertices]),
          cut_vertices = sort(id[x$cut_vertices]),
@@ -153,6 +171,9 @@ get_block_cut_tree_pedigree <- function(id, father.id, mother.id){
 #' argument is not needed.
 #' @param trace integer where larger values yields more information printed to
 #' the console during the procedure.
+#' @param edge_weights numeric vector with weights for each edge. Needs to have
+#' the same length as \code{from} and \code{to}. Use \code{NULL} if all edges
+#' should have a weight of one.
 #'
 #' @seealso
 #' \code{\link{get_biconnected_components}} and
@@ -169,13 +190,15 @@ get_block_cut_tree_pedigree <- function(id, father.id, mother.id){
 #'
 #' @export
 get_max_balanced_partition <- function(from, to, weight_data = NULL,
+                                       edge_weights = NULL,
                                        slack = 0., max_kl_it_inner = 50L,
                                        max_kl_it = 10000L, trace = 0L){
-  dat <- .prep_edge_list(from = from, to = to, weight_data = weight_data)
+  dat <- .prep_edge_list(from = from, to = to, weight_data = weight_data,
+                         edge_weights = edge_weights)
   id <- dat$id
 
   out <- with(dat, .get_max_balanced_partition(
-    from, to, weights_ids,  weights, slack = slack,
+    from, to, weights_ids,  weights, slack = slack, edge_weights = edge_weights,
     max_kl_it_inner = max_kl_it_inner, max_kl_it = max_kl_it, trace = trace))
   out$removed_edges[] <- id[out$removed_edges]
   out$set_1 <- sort(id[out$set_1])
@@ -187,17 +210,23 @@ get_max_balanced_partition <- function(from, to, weight_data = NULL,
 #'
 #' @param id_weight numeric vector with the weight to use for each vertex
 #' (individual). \code{NULL} yields a weight of one for all.
+#' @param father_weight weights of the edges created between the fathers
+#' and the children. Use \code{NULL} if all should have a weight of one.
+#' @param mother_weight weights of the edges created between the mothers
+#' and the children. Use \code{NULL} if all should have a weight of one.
 #'
 #' @export
-get_max_balanced_partition_pedigree <- function(id, father.id, mother.id,
-                                                id_weight = NULL, slack = 0.,
-                                                max_kl_it_inner = 50L,
-                                                max_kl_it = 10000L,
-                                                trace = 0L){
+get_max_balanced_partition_pedigree <- function(
+  id, father.id, mother.id, id_weight = NULL, father_weight = NULL,
+  mother_weight = NULL, slack = 0., max_kl_it_inner = 50L, max_kl_it = 10000L,
+  trace = 0L){
   dat <- .pedigree_to_from_to(id = id, father.id = father.id,
-                              mother.id = mother.id, id_weight = id_weight)
+                              mother.id = mother.id, id_weight = id_weight,
+                              father_weight = father_weight,
+                              mother_weight = mother_weight)
 
   with(dat, get_max_balanced_partition(
     from = from, to = to, weight_data = weight_data, slack = slack,
-    max_kl_it_inner = max_kl_it_inner, max_kl_it = max_kl_it, trace = trace))
+    max_kl_it_inner = max_kl_it_inner, max_kl_it = max_kl_it, trace = trace,
+    edge_weights = edge_weights))
 }

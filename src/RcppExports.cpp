@@ -7,45 +7,48 @@
 using namespace Rcpp;
 
 // get_biconnected_components
-Rcpp::List get_biconnected_components(Rcpp::IntegerVector const from, Rcpp::IntegerVector const to, Rcpp::IntegerVector const weights_ids, Rcpp::NumericVector const weights);
-RcppExport SEXP _pedmod_get_biconnected_components(SEXP fromSEXP, SEXP toSEXP, SEXP weights_idsSEXP, SEXP weightsSEXP) {
+Rcpp::List get_biconnected_components(Rcpp::IntegerVector const from, Rcpp::IntegerVector const to, Rcpp::IntegerVector const weights_ids, Rcpp::NumericVector const weights, Rcpp::NumericVector const edge_weights);
+RcppExport SEXP _pedmod_get_biconnected_components(SEXP fromSEXP, SEXP toSEXP, SEXP weights_idsSEXP, SEXP weightsSEXP, SEXP edge_weightsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< Rcpp::IntegerVector const >::type from(fromSEXP);
     Rcpp::traits::input_parameter< Rcpp::IntegerVector const >::type to(toSEXP);
     Rcpp::traits::input_parameter< Rcpp::IntegerVector const >::type weights_ids(weights_idsSEXP);
     Rcpp::traits::input_parameter< Rcpp::NumericVector const >::type weights(weightsSEXP);
-    rcpp_result_gen = Rcpp::wrap(get_biconnected_components(from, to, weights_ids, weights));
+    Rcpp::traits::input_parameter< Rcpp::NumericVector const >::type edge_weights(edge_weightsSEXP);
+    rcpp_result_gen = Rcpp::wrap(get_biconnected_components(from, to, weights_ids, weights, edge_weights));
     return rcpp_result_gen;
 END_RCPP
 }
 // get_block_cut_tree
-Rcpp::List get_block_cut_tree(Rcpp::IntegerVector const from, Rcpp::IntegerVector const to, Rcpp::IntegerVector const weights_ids, Rcpp::NumericVector const weights);
-RcppExport SEXP _pedmod_get_block_cut_tree(SEXP fromSEXP, SEXP toSEXP, SEXP weights_idsSEXP, SEXP weightsSEXP) {
+Rcpp::List get_block_cut_tree(Rcpp::IntegerVector const from, Rcpp::IntegerVector const to, Rcpp::IntegerVector const weights_ids, Rcpp::NumericVector const weights, Rcpp::NumericVector const edge_weights);
+RcppExport SEXP _pedmod_get_block_cut_tree(SEXP fromSEXP, SEXP toSEXP, SEXP weights_idsSEXP, SEXP weightsSEXP, SEXP edge_weightsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< Rcpp::IntegerVector const >::type from(fromSEXP);
     Rcpp::traits::input_parameter< Rcpp::IntegerVector const >::type to(toSEXP);
     Rcpp::traits::input_parameter< Rcpp::IntegerVector const >::type weights_ids(weights_idsSEXP);
     Rcpp::traits::input_parameter< Rcpp::NumericVector const >::type weights(weightsSEXP);
-    rcpp_result_gen = Rcpp::wrap(get_block_cut_tree(from, to, weights_ids, weights));
+    Rcpp::traits::input_parameter< Rcpp::NumericVector const >::type edge_weights(edge_weightsSEXP);
+    rcpp_result_gen = Rcpp::wrap(get_block_cut_tree(from, to, weights_ids, weights, edge_weights));
     return rcpp_result_gen;
 END_RCPP
 }
 // get_max_balanced_partition
-Rcpp::List get_max_balanced_partition(Rcpp::IntegerVector const from, Rcpp::IntegerVector const to, Rcpp::IntegerVector const weights_ids, Rcpp::NumericVector const weights, double const slack, unsigned const max_kl_it_inner, unsigned const max_kl_it, unsigned const trace);
-RcppExport SEXP _pedmod_get_max_balanced_partition(SEXP fromSEXP, SEXP toSEXP, SEXP weights_idsSEXP, SEXP weightsSEXP, SEXP slackSEXP, SEXP max_kl_it_innerSEXP, SEXP max_kl_itSEXP, SEXP traceSEXP) {
+Rcpp::List get_max_balanced_partition(Rcpp::IntegerVector const from, Rcpp::IntegerVector const to, Rcpp::IntegerVector const weights_ids, Rcpp::NumericVector const weights, Rcpp::NumericVector const edge_weights, double const slack, unsigned const max_kl_it_inner, unsigned const max_kl_it, unsigned const trace);
+RcppExport SEXP _pedmod_get_max_balanced_partition(SEXP fromSEXP, SEXP toSEXP, SEXP weights_idsSEXP, SEXP weightsSEXP, SEXP edge_weightsSEXP, SEXP slackSEXP, SEXP max_kl_it_innerSEXP, SEXP max_kl_itSEXP, SEXP traceSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< Rcpp::IntegerVector const >::type from(fromSEXP);
     Rcpp::traits::input_parameter< Rcpp::IntegerVector const >::type to(toSEXP);
     Rcpp::traits::input_parameter< Rcpp::IntegerVector const >::type weights_ids(weights_idsSEXP);
     Rcpp::traits::input_parameter< Rcpp::NumericVector const >::type weights(weightsSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector const >::type edge_weights(edge_weightsSEXP);
     Rcpp::traits::input_parameter< double const >::type slack(slackSEXP);
     Rcpp::traits::input_parameter< unsigned const >::type max_kl_it_inner(max_kl_it_innerSEXP);
     Rcpp::traits::input_parameter< unsigned const >::type max_kl_it(max_kl_itSEXP);
     Rcpp::traits::input_parameter< unsigned const >::type trace(traceSEXP);
-    rcpp_result_gen = Rcpp::wrap(get_max_balanced_partition(from, to, weights_ids, weights, slack, max_kl_it_inner, max_kl_it, trace));
+    rcpp_result_gen = Rcpp::wrap(get_max_balanced_partition(from, to, weights_ids, weights, edge_weights, slack, max_kl_it_inner, max_kl_it, trace));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -149,9 +152,9 @@ END_RCPP
 RcppExport SEXP run_testthat_tests(SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_pedmod_get_biconnected_components", (DL_FUNC) &_pedmod_get_biconnected_components, 4},
-    {"_pedmod_get_block_cut_tree", (DL_FUNC) &_pedmod_get_block_cut_tree, 4},
-    {"_pedmod_get_max_balanced_partition", (DL_FUNC) &_pedmod_get_max_balanced_partition, 8},
+    {"_pedmod_get_biconnected_components", (DL_FUNC) &_pedmod_get_biconnected_components, 5},
+    {"_pedmod_get_block_cut_tree", (DL_FUNC) &_pedmod_get_block_cut_tree, 5},
+    {"_pedmod_get_max_balanced_partition", (DL_FUNC) &_pedmod_get_max_balanced_partition, 9},
     {"_pedmod_mvndst", (DL_FUNC) &_pedmod_mvndst, 10},
     {"_pedmod_get_pedigree_ll_terms", (DL_FUNC) &_pedmod_get_pedigree_ll_terms, 2},
     {"_pedmod_get_n_scales", (DL_FUNC) &_pedmod_get_n_scales, 1},

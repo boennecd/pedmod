@@ -8,6 +8,7 @@ dat <- data.frame(
 
 is_final <- c(16:17, 11:14, 24:27, 33:34, 40:41, 47:48, 19L)
 dat$id_weight <- ifelse(dat$id %in% is_final, 1., 1e-5)
+dat$father_weight <- dat$mother_weight <- ifelse(dat$id %in% is_final, 10., 1.)
 
 test_that("the _pedigree methods give the same", {
   cuts <- with(
@@ -37,6 +38,14 @@ test_that("the _pedigree methods give the same", {
       id = id, father.id = dad, mother.id = mom, slack = .1, max_kl_it = 50L,
       max_kl_it_inner = 1000L, id_weight = id_weight))
   expect_known_value(partition, "get_max_balanced_partition_pedigree-w_cut-n-weights.RDS")
+
+  # w/ cut and weights for both vertices and edges
+  partition <- with(
+    dat, get_max_balanced_partition_pedigree(
+      id = id, father.id = dad, mother.id = mom, slack = .1, max_kl_it = 50L,
+      max_kl_it_inner = 1000L, id_weight = id_weight,
+      father_weight = father_weight, mother_weight = mother_weight))
+  expect_known_value(partition, "get_max_balanced_partition_pedigree-w_cut-n-2xweights.RDS")
 })
 
 # # simulates a connected graph of a given size

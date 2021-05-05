@@ -12,12 +12,27 @@
 
 namespace {
 
+class vertex;
+
+/// a weighted directed edge used to keep track of neighbors
+struct weighted_edge {
+  vertex const *v;
+  double weight;
+
+  weighted_edge(vertex const *v, double weight): v(v), weight(weight) { }
+
+  inline operator vertex const*() const noexcept {
+    return v;
+  }
+};
+
 /// simple vertex class
 class vertex {
-  using const_iterator = std::vector<vertex*>::const_iterator;
+private:
+  using const_iterator = std::vector<weighted_edge>::const_iterator;
 
   /// vector of edges
-  std::vector<vertex*> edges;
+  std::vector<weighted_edge> edges;
 
 public:
   unsigned const id;
@@ -37,10 +52,10 @@ public:
     return edges.size();
   }
 
-  inline void add_edge(vertex *other){
+  inline void add_edge(vertex *other, double const weight){
     if(other != this and other){
-      edges       .push_back(other);
-      other->edges.push_back(this);
+      edges       .emplace_back(other, weight);
+      other->edges.emplace_back(this , weight);
     }
   }
 };
@@ -69,7 +84,8 @@ inline bool is_almost_equal(double const x, double const y){
  */
 std::vector<vertex> create_vertices
   (int const *from, int const *to, int const n_edges,
-   int const *id, double const *vertex_weight, int const n_weights){
+   int const *id, double const *vertex_weight, int const n_weights,
+   double const *edge_weight){
   // find the number greatest id
   int const * f_max = std::max_element(from, from + n_edges),
             * t_max = std::max_element(to  , to   + n_edges);
@@ -98,7 +114,7 @@ std::vector<vertex> create_vertices
   }
 
   // add the edges
-  for(int i = 0; i < n_edges; ++i, ++from, ++to){
+  for(int i = 0; i < n_edges; ++i, ++from, ++to, ++edge_weight){
     // checks
     if(!from or *from > n_obs or *from < 0)
       throw std::invalid_argument("invalid from");
@@ -106,7 +122,7 @@ std::vector<vertex> create_vertices
       throw std::invalid_argument("invalid to");
 
     if(*from < n_obs and *to < n_obs)
-      out[*from].add_edge(&out[*to]);
+      out[*from].add_edge(&out[*to], *edge_weight);
   }
 
   return out;
@@ -310,8 +326,8 @@ public:
     unsigned id(0L);
     auto vi = vertex_info.begin();
     for(vertex const *xi : x){
-      for(vertex const * neighbor : *xi){
-        if(!do_add_edge(*neighbor, *xi))
+      for(weighted_edge const &neighbor : *xi){
+        if(!do_add_edge(*neighbor.v, *xi))
           continue;
 
         unsigned const id_neighbor = id_map.at(neighbor);
@@ -553,7 +569,7 @@ class max_balanced_partition {
       }
 
       // update the connected vertices
-      for(vertex const * v : *new_vertex)
+      for(weighted_edge const &v : *new_vertex)
         if(!set.count(v) and b->vertices.count(v))
           connected_vertices.insert(v);
     }
@@ -697,9 +713,9 @@ class max_balanced_partition {
 
     // used to report if trace is high enough
     auto report =
-      [this](std::string const &prefix, double const criterion) -> void {
-        Tout << prefix << ". Balance criterion is " << criterion
-             << '\n';
+      [this](std::string const &prefix, double const set_size) -> void {
+        Tout << prefix << ". Balance criterion is "
+             << std::min(total_weight - set_size, set_size) << '\n';
     };
 
     // find the best solution
@@ -721,7 +737,7 @@ class max_balanced_partition {
         if(v1_set.weight >= total_weight / 2 or cur_block.vertices.size() < 3){
           add_solution_if_better(v1_set, &b.second);
           if(trace > 1)
-            report("Exited early", total_weight - v1_set.weight);
+            report("Exited early", v1_set.weight);
           continue;
         }
 
@@ -777,7 +793,7 @@ class max_balanced_partition {
       if(is_almost_equal(2 * res.criterion, total_weight)){
         if(trace > 0)
           report("Found perfect balanced connected partition early",
-                 res.criterion);
+                 v1_set.weight);
         break;
       }
     }
@@ -854,7 +870,7 @@ public:
           }
           out.s2.emplace_back(v);
 
-          for(vertex const * e : *v)
+          for(weighted_edge const &e : *v)
             if(res.v1.count(e))
               out.removed_edges.emplace_back(v, e);
         }
@@ -885,7 +901,7 @@ public:
     v1_set.reset(&b, v2_set.set);
 
     // create a map with from vertices to the gain of moving them
-    std::unordered_map<vertex const *, int> edge_gain;
+    std::unordered_map<vertex const *, double> edge_gain;
     // updates the cost of a given vertex. The update_adjacent treats the
     // vertex as if it has just been moved and updates its neighbors
     // accordingly
@@ -897,21 +913,21 @@ public:
           &current_set = is_in_v1 ? v1_set.set : v2_set.set,
           &other_set   = is_in_v1 ? v2_set.set : v1_set.set;
 
-        int out(0);
-        for(vertex const * v : *x)
+        double out(0);
+        for(weighted_edge const &v : *x)
           if       (current_set.count(v)){
             // they are in the same set so moving the vertex is going to cost
-            --out;
+            out -= v.weight;
             if(update_adjacent)
               // have to switch from plus to minus
-              edge_gain[v] -= 2;
+              edge_gain[v.v] -= 2 * v.weight;
           } else if(other_set.count(v)){
             // they are not in the same set so moving the vertex is going to
             // yield a plus
-            ++out;
+            out += v.weight;
             if(update_adjacent)
               // have to switch from minus to plus
-              edge_gain[v] += 2;
+              edge_gain[v.v] += 2 * v.weight;
           }
 
         edge_gain[x] = out;
@@ -925,13 +941,13 @@ public:
     // and to, and the balance criterion
     struct gain_score {
       vertex const *x = nullptr;
-      int gain = 0;
+      double gain = 0;
       double balance_criterion = 0;
       working_set * moved_from = nullptr,
                   * moved_to   = nullptr;
 
       gain_score() = default;
-      gain_score(vertex const *x, int const gain,
+      gain_score(vertex const *x, double const gain,
                  double const balance_criterion,
                  working_set * moved_from,
                  working_set * moved_to):
@@ -989,7 +1005,7 @@ public:
               if(balance_crit < min_balance_criterion)
                 continue;
 
-              int const gain_v = edge_gain.at(v);
+              double const gain_v = edge_gain.at(v);
               if(
                 // there was no solution before
                 !best_gain.x or
@@ -997,11 +1013,11 @@ public:
                 best_gain.gain < gain_v or
                 // the solution is not better but the balance criterion is
                 // better
-                (best_gain.gain == gain_v and
+                (is_almost_equal(best_gain.gain, gain_v) and
                       best_gain.balance_criterion < balance_crit) or
                 // everything is the same except the id which is smaller. This
                 // yields reproducible results despite using unordered_set
-                (best_gain.gain == gain_v and
+                (is_almost_equal(best_gain.gain, gain_v) and
                    is_almost_equal(best_gain.balance_criterion,
                                    balance_crit) and
                    v->id < best_gain.x->id))
@@ -1034,8 +1050,8 @@ public:
 
       // find best number of moves to keep
       unsigned max_idx(0);
-      int max_gain(0),
-          gain_sum(0.);
+      double  max_gain(0),
+              gain_sum(0.);
       unsigned idx(0);
       for(gain_score const &s : scores){
         ++idx;
@@ -1114,15 +1130,19 @@ Rcpp::List biconnected_components_to_rcpp_list
 // [[Rcpp::export(.get_biconnected_components, rng = false)]]
 Rcpp::List get_biconnected_components(
     Rcpp::IntegerVector const from, Rcpp::IntegerVector const to,
-    Rcpp::IntegerVector const weights_ids, Rcpp::NumericVector const weights){
+    Rcpp::IntegerVector const weights_ids, Rcpp::NumericVector const weights,
+    Rcpp::NumericVector const edge_weights){
   if(from.size() != to.size())
     throw std::invalid_argument("size of from does not match size of to");
+  if(edge_weights.size() != to.size())
+    throw std::invalid_argument("size of edge_weights does not match size of to");
   if(weights_ids.size() != weights.size())
     throw std::invalid_argument("size of weights_ids does not match size of weights");
 
+
   std::vector<vertex> vertices = create_vertices(
     &from[0], &to[0], to.size(), &weights_ids[0], &weights[0],
-    weights_ids.size());
+    weights_ids.size(), &edge_weights[0]);
   auto bicon_comps = biconnected_components(vertices).get();
   return biconnected_components_to_rcpp_list(bicon_comps);
 }
@@ -1168,15 +1188,18 @@ Rcpp::List block_cut_tree_to_rcpp_list
 // [[Rcpp::export(.get_block_cut_tree, rng = false)]]
 Rcpp::List get_block_cut_tree(
     Rcpp::IntegerVector const from, Rcpp::IntegerVector const to,
-    Rcpp::IntegerVector const weights_ids, Rcpp::NumericVector const weights){
+    Rcpp::IntegerVector const weights_ids, Rcpp::NumericVector const weights,
+    Rcpp::NumericVector const edge_weights){
   if(from.size() != to.size())
     throw std::invalid_argument("size of from does not match size of to");
+  if(edge_weights.size() != to.size())
+    throw std::invalid_argument("size of edge_weights does not match size of to");
   if(weights_ids.size() != weights.size())
     throw std::invalid_argument("size of weights_ids does not match size of weights");
 
   std::vector<vertex> vertices = create_vertices(
     &from[0], &to[0], to.size(), &weights_ids[0], &weights[0],
-    weights_ids.size());
+    weights_ids.size(), &edge_weights[0]);
   auto bicon_comps = biconnected_components(vertices).get();
   block_cut_tree bct(bicon_comps);
 
@@ -1216,10 +1239,13 @@ Rcpp::List mbcp_result_to_rcpp_list
 Rcpp::List get_max_balanced_partition(
     Rcpp::IntegerVector const from, Rcpp::IntegerVector const to,
     Rcpp::IntegerVector const weights_ids, Rcpp::NumericVector const weights,
+    Rcpp::NumericVector const edge_weights,
     double const slack, unsigned const max_kl_it_inner,
     unsigned const max_kl_it, unsigned const trace){
   if(from.size() != to.size())
     throw std::invalid_argument("size of from does not match size of to");
+  if(edge_weights.size() != to.size())
+    throw std::invalid_argument("size of edge_weights does not match size of to");
   if(weights_ids.size() != weights.size())
     throw std::invalid_argument("size of weights_ids does not match size of weights");
   if(slack >= .5)
@@ -1227,7 +1253,7 @@ Rcpp::List get_max_balanced_partition(
 
   std::vector<vertex> vertices = create_vertices(
     &from[0], &to[0], to.size(), &weights_ids[0], &weights[0],
-    weights_ids.size());
+    weights_ids.size(), &edge_weights[0]);
   auto bicon_comps = biconnected_components(vertices).get();
   block_cut_tree bct(bicon_comps);
   max_balanced_partition_rcpp max_part(bct, trace, Rcpp::Rcout);

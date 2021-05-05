@@ -262,7 +262,7 @@ actually observe. We can do this by providing individual weights (vertex weights
 As an example, we will take the family we have been working with and assume 
 that we only observe individuals in the final generation. Thus, we will set the
 weight of these individuals to a one and the remianing to some small positive 
-number (say $\epsilon = 10^{-5}$):
+number (say $10^{-5}$):
 
 ```{r use_weights}
 # add the weights
@@ -287,11 +287,51 @@ V(graph_fam)$color <- ifelse(vertex_attr(graph_fam)$name %in% is_final,
 par(mar = c(1, 1, 1, 1))
 plot(graph_fam, vertex.size = 12, vertex.label.cex = .75, 
      layout = layout_with_kk)
+show_split(dat, weighted_partition)
 ```
 
-We have colored the vertices which we observe in the above graph to make it easy 
+We have colored vertices which we observe in the first graph to make it easy 
 to see that there is a as close as possible to an equal number in 
-each sub-family.
+each sub-family. 
+
+### Using Relationship Weights (Edge Weights)
+We can notice that the previous solution removes relations between the 
+individuals we observe and their immediate ancestors. We can add a larger weight
+to these relationships to avoid or discourage this. To do so, we need to use the
+`father_weight` and `mother_weight` arguments as shown below:
+
+```{r use_edge_weights_too}
+# add the weights
+is_final <- c(16:17, 11:14, 24:27, 33:34, 40:41, 47:48, 19L)
+dat$id_weight <- ifelse(dat$id %in% is_final, 1., 1e-5)
+
+# add the edge weights
+dat$father_weight <- dat$mother_weight <- ifelse(dat$id %in% is_final, 10., 1.)
+
+# find the partition
+weighted_partition <- get_max_balanced_partition_pedigree(
+  id = dat$id, father.id = dat$dad, mother.id = dat$mom, trace = 2L, 
+  slack = .1, id_weight = dat$id_weight, father_weight = dat$father_weight, 
+  mother_weight = dat$mother_weight)
+weighted_partition$balance_criterion # the smallest of the two sets
+removed_edges <- t(apply(weighted_partition$removed_edges, 1L, sort))
+removed_edges # the relationships we have removed
+
+# plot the new graph
+new_dat <- get_reduced_data(dat, removed_edges)
+ped <- with(new_dat, get_pedigree_mock(
+  id = id, dadid = dad, momid = mom, sex = sex))
+g_dat <- create_igraph_input(ped)
+graph_fam <- graph.data.frame(g_dat, directed = FALSE)
+V(graph_fam)$color <- ifelse(vertex_attr(graph_fam)$name %in% is_final, 
+                             "gray", "white")
+par(mar = c(1, 1, 1, 1))
+plot(graph_fam, vertex.size = 12, vertex.label.cex = .75, 
+     layout = layout_with_kk)
+show_split(dat, weighted_partition)
+```
+
+We end up cutting the link to the grandparents instead.
 
 ## Details
 
@@ -309,7 +349,7 @@ We have implemented the method suggested by
 @Chlebíková96. This methods requires that one can find the cut vertices 
 (articulation points) and can construct the block-cut tree. 
 Thus, we have implemented the method suggested by @Hopcroft73. The method 
-suggested by @Hopcroft73 can be accesed through the 
+suggested by @Hopcroft73 can be accessed through the 
 `get_biconnected_components` and `get_block_cut_tree` function. 
 We illustrate this below on a simulated graph:
 

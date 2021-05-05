@@ -9,6 +9,7 @@ get_max_balanced_partition(
   from,
   to,
   weight_data = NULL,
+  edge_weights = NULL,
   slack = 0,
   max_kl_it_inner = 50L,
   max_kl_it = 10000L,
@@ -20,6 +21,8 @@ get_max_balanced_partition_pedigree(
   father.id,
   mother.id,
   id_weight = NULL,
+  father_weight = NULL,
+  mother_weight = NULL,
   slack = 0,
   max_kl_it_inner = 50L,
   max_kl_it = 10000L,
@@ -34,6 +37,10 @@ get_max_balanced_partition_pedigree(
 \item{weight_data}{list with two elements called \code{"id"} for the id and
 \code{"weight"} for the vertex weight. All vertices that are not in this list
 have a weight of one. Use \code{NULL} if all vertices have a weight of one.}
+
+\item{edge_weights}{numeric vector with weights for each edge. Needs to have
+the same length as \code{from} and \code{to}. Use \code{NULL} if all edges
+should have a weight of one.}
 
 \item{slack}{fraction between zero and 0.5 for the allowed amount of
 deviation from the balance criterion that is allowed to reduce the cost of
@@ -59,6 +66,12 @@ it is missing.}
 
 \item{id_weight}{numeric vector with the weight to use for each vertex
 (individual). \code{NULL} yields a weight of one for all.}
+
+\item{father_weight}{weights of the edges created between the fathers
+and the children. Use \code{NULL} if all should have a weight of one.}
+
+\item{mother_weight}{weights of the edges created between the mothers
+and the children. Use \code{NULL} if all should have a weight of one.}
 }
 \description{
 Uses the method suggested by Chlebíková (1996) to construct an approximate

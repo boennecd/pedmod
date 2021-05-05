@@ -200,9 +200,18 @@ get_max_balanced_partition <- function(from, to, weight_data = NULL,
   out <- with(dat, .get_max_balanced_partition(
     from, to, weights_ids,  weights, slack = slack, edge_weights = edge_weights,
     max_kl_it_inner = max_kl_it_inner, max_kl_it = max_kl_it, trace = trace))
-  out$removed_edges[] <- id[out$removed_edges]
+
+  # set and sort the removed edges
+  removed_edges <- out$removed_edges
+  removed_edges[] <- id[removed_edges]
+  removed_edges[] <- t(apply(removed_edges, 1L, sort))
+  removed_edges <- removed_edges[
+    order(removed_edges[, 1], removed_edges[, 2]), ]
+  out$removed_edges <- removed_edges
+
   out$set_1 <- sort(id[out$set_1])
   out$set_2 <- sort(id[out$set_2])
+
   out
 }
 

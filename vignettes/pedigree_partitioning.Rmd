@@ -178,7 +178,7 @@ library(pedmod)
 only_balanced <- get_max_balanced_partition_pedigree(
   id = dat$id, father.id = dat$dad, mother.id = dat$mom, trace = 2L)
 only_balanced$balance_criterion # the smallest of the two sets
-removed_edges <- t(apply(only_balanced$removed_edges, 1L, sort))
+removed_edges <- only_balanced$removed_edges
 removed_edges # the relationships we have removed
 
 # assign function to get the new data. You can likely skip this
@@ -243,7 +243,7 @@ also_cut <- get_max_balanced_partition_pedigree(
   id = dat$id, father.id = dat$dad, mother.id = dat$mom, trace = 2L, 
   slack = .1)
 also_cut$balance_criterion # the smallest of the two sets
-removed_edges <- t(apply(also_cut$removed_edges, 1L, sort))
+removed_edges <- also_cut$removed_edges
 removed_edges # the relationships we have removed
 
 # redo the plot
@@ -273,7 +273,7 @@ weighted_partition <- get_max_balanced_partition_pedigree(
   id = dat$id, father.id = dat$dad, mother.id = dat$mom, trace = 2L, 
   slack = .1, id_weight = dat$id_weight)
 weighted_partition$balance_criterion # the smallest of the two sets
-removed_edges <- t(apply(weighted_partition$removed_edges, 1L, sort))
+removed_edges <- weighted_partition$removed_edges
 removed_edges # the relationships we have removed
 
 # plot the new graph
@@ -314,7 +314,7 @@ weighted_partition <- get_max_balanced_partition_pedigree(
   slack = .1, id_weight = dat$id_weight, father_weight = dat$father_weight, 
   mother_weight = dat$mother_weight)
 weighted_partition$balance_criterion # the smallest of the two sets
-removed_edges <- t(apply(weighted_partition$removed_edges, 1L, sort))
+removed_edges <- weighted_partition$removed_edges
 removed_edges # the relationships we have removed
 
 # plot the new graph
@@ -398,14 +398,11 @@ max_part$balance_criterion # the balance criterion
 
 # the removed edges
 removed_edges <- max_part$removed_edges
-removed_edges <- t(apply(removed_edges, 1L, sort))
 removed_edges
 
 # assign function to plot the partition
 do_plot <- function(dat, partition_obj){
   removed_edges <- partition_obj$removed_edges
-  removed_edges <- t(apply(removed_edges, 1L, sort))
-  removed_edges
   
   to_remove <- apply(removed_edges, 1L, function(x)
     which(dat$from == x[1] & dat$to == x[2]))
@@ -488,7 +485,6 @@ max_part <- get_max_balanced_partition(
   max_kl_it = 1000L, trace = 1L)
 max_part$balance_criterion # the balance criterion 
 removed_edges <- max_part$removed_edges
-removed_edges <- t(apply(removed_edges, 1L, sort))
 removed_edges
 
 # redo the plot

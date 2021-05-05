@@ -505,14 +505,14 @@ only_balanced &lt;- get_max_balanced_partition_pedigree(
 #&gt; Found approximately balanced connected partition. Balance criterion is 24
 only_balanced$balance_criterion # the smallest of the two sets
 #&gt; [1] 24
-removed_edges &lt;- t(apply(only_balanced$removed_edges, 1L, sort))
+removed_edges &lt;- only_balanced$removed_edges
 removed_edges # the relationships we have removed
 #&gt;      [,1] [,2]
-#&gt; [1,]   32   48
+#&gt; [1,]    6    8
 #&gt; [2,]    6   10
 #&gt; [3,]    7    9
 #&gt; [4,]   32   47
-#&gt; [5,]    6    8
+#&gt; [5,]   32   48
 
 # assign function to get the new data. You can likely skip this
 get_reduced_data &lt;- function(dat, removed_edges){
@@ -580,13 +580,13 @@ show_split(dat, only_balanced)</code></pre>
 #&gt; Keept 0 moves
 also_cut$balance_criterion # the smallest of the two sets
 #&gt; [1] 24
-removed_edges &lt;- t(apply(also_cut$removed_edges, 1L, sort))
+removed_edges &lt;- also_cut$removed_edges
 removed_edges # the relationships we have removed
 #&gt;      [,1] [,2]
-#&gt; [1,]   32   48
+#&gt; [1,]    6    9
 #&gt; [2,]    7    9
-#&gt; [3,]   45   47
-#&gt; [4,]    6    9
+#&gt; [3,]   32   48
+#&gt; [4,]   45   47
 
 # redo the plot
 do_graph_plot(new_dat)</code></pre>
@@ -622,13 +622,13 @@ weighted_partition &lt;- get_max_balanced_partition_pedigree(
 #&gt; Keept 0 moves
 weighted_partition$balance_criterion # the smallest of the two sets
 #&gt; [1] 8
-removed_edges &lt;- t(apply(weighted_partition$removed_edges, 1L, sort))
+removed_edges &lt;- weighted_partition$removed_edges
 removed_edges # the relationships we have removed
 #&gt;      [,1] [,2]
-#&gt; [1,]   32   48
-#&gt; [2,]   32   47
-#&gt; [3,]    6    8
-#&gt; [4,]    7    8
+#&gt; [1,]    6    8
+#&gt; [2,]    7    8
+#&gt; [3,]   32   47
+#&gt; [4,]   32   48
 
 # plot the new graph
 new_dat &lt;- get_reduced_data(dat, removed_edges)
@@ -676,13 +676,13 @@ weighted_partition &lt;- get_max_balanced_partition_pedigree(
 #&gt; Keept 0 moves
 weighted_partition$balance_criterion # the smallest of the two sets
 #&gt; [1] 8
-removed_edges &lt;- t(apply(weighted_partition$removed_edges, 1L, sort))
+removed_edges &lt;- weighted_partition$removed_edges
 removed_edges # the relationships we have removed
 #&gt;      [,1] [,2]
-#&gt; [1,]   28   32
-#&gt; [2,]   29   32
-#&gt; [3,]    6    8
-#&gt; [4,]    7    8
+#&gt; [1,]    6    8
+#&gt; [2,]    7    8
+#&gt; [3,]   28   32
+#&gt; [4,]   29   32
 
 # plot the new graph
 new_dat &lt;- get_reduced_data(dat, removed_edges)
@@ -750,38 +750,35 @@ max_part$balance_criterion # the balance criterion
 
 # the removed edges
 removed_edges &lt;- max_part$removed_edges
-removed_edges &lt;- t(apply(removed_edges, 1L, sort))
 removed_edges
 #&gt;       [,1] [,2]
-#&gt;  [1,]    5   77
-#&gt;  [2,]   11   77
-#&gt;  [3,]   11   47
-#&gt;  [4,]   11   73
-#&gt;  [5,]    9   44
-#&gt;  [6,]   29   32
-#&gt;  [7,]   28   29
-#&gt;  [8,]   32   78
-#&gt;  [9,]   32   85
-#&gt; [10,]   32   37
-#&gt; [11,]   33   69
-#&gt; [12,]   33   96
-#&gt; [13,]   34   96
-#&gt; [14,]   34   56
-#&gt; [15,]   62   68
-#&gt; [16,]    3   68
-#&gt; [17,]   11   68
-#&gt; [18,]    5   68
-#&gt; [19,]   34   68
-#&gt; [20,]    3    6
-#&gt; [21,]    6   51
+#&gt;  [1,]    3    6
+#&gt;  [2,]    3   64
+#&gt;  [3,]    3   68
+#&gt;  [4,]    5   68
+#&gt;  [5,]    5   77
+#&gt;  [6,]    6   51
+#&gt;  [7,]    9   44
+#&gt;  [8,]   11   47
+#&gt;  [9,]   11   68
+#&gt; [10,]   11   73
+#&gt; [11,]   11   77
+#&gt; [12,]   28   29
+#&gt; [13,]   29   32
+#&gt; [14,]   32   37
+#&gt; [15,]   32   78
+#&gt; [16,]   32   85
+#&gt; [17,]   33   69
+#&gt; [18,]   33   96
+#&gt; [19,]   34   56
+#&gt; [20,]   34   68
+#&gt; [21,]   34   96
 #&gt; [22,]   51   64
-#&gt; [23,]    3   64
+#&gt; [23,]   62   68
 
 # assign function to plot the partition
 do_plot &lt;- function(dat, partition_obj){
   removed_edges &lt;- partition_obj$removed_edges
-  removed_edges &lt;- t(apply(removed_edges, 1L, sort))
-  removed_edges
   
   to_remove &lt;- apply(removed_edges, 1L, function(x)
     which(dat$from == x[1] &amp; dat$to == x[2]))
@@ -845,14 +842,13 @@ max_part &lt;- get_max_balanced_partition(
 max_part$balance_criterion # the balance criterion 
 #&gt; [1] 25
 removed_edges &lt;- max_part$removed_edges
-removed_edges &lt;- t(apply(removed_edges, 1L, sort))
 removed_edges
 #&gt;      [,1] [,2]
-#&gt; [1,]   30   35
+#&gt; [1,]    3   68
 #&gt; [2,]    4   86
-#&gt; [3,]   34   68
-#&gt; [4,]    3   68
-#&gt; [5,]    6   68
+#&gt; [3,]    6   68
+#&gt; [4,]   30   35
+#&gt; [5,]   34   68
 
 # redo the plot
 do_plot(sim_dat, max_part)</code></pre>
@@ -878,7 +874,7 @@ system.time(
 #&gt; Found perfect balanced connected partition early. Balance criterion is 500
 #&gt; Found approximately balanced connected partition. Balance criterion is 500
 #&gt;    user  system elapsed 
-#&gt;   0.094   0.000   0.094
+#&gt;   0.104   0.014   0.118
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 500
 NROW(max_part$removed_edges) # number of removed edges
@@ -905,7 +901,7 @@ system.time(
 #&gt; Found 845 vertices to move
 #&gt; Keept 0 moves
 #&gt;    user  system elapsed 
-#&gt;   1.074   0.000   1.074
+#&gt;   1.076   0.000   1.076
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 500
 NROW(max_part$removed_edges) # number of removed edges
@@ -939,7 +935,7 @@ system.time(
 #&gt; Found perfect balanced connected partition early. Balance criterion is 50000
 #&gt; Found approximately balanced connected partition. Balance criterion is 50000
 #&gt;    user  system elapsed 
-#&gt;   5.874   0.004   5.877
+#&gt;   5.906   0.004   5.908
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 50000
 NROW(max_part$removed_edges) # number of removed edges
@@ -981,7 +977,7 @@ system.time(
 #&gt; Found 1000 vertices to move
 #&gt; Keept 0 moves
 #&gt;    user  system elapsed 
-#&gt;  29.293   0.017  29.307
+#&gt;  29.373   0.003  29.374
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 50000
 NROW(max_part$removed_edges) # number of removed edges

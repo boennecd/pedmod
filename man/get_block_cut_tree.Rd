@@ -3,12 +3,35 @@
 \name{get_block_cut_tree}
 \alias{get_block_cut_tree}
 \alias{get_block_cut_tree_pedigree}
-\title{Creates a Block Cut Tree Like Object}
+\title{Creates a Block-cut Tree Like Object}
 \usage{
 get_block_cut_tree(from, to)
 
 get_block_cut_tree_pedigree(id, father.id, mother.id)
 }
+\arguments{
+\item{from}{integer vector with one of the vertex ids.}
+
+\item{to}{integer vector with one of the vertex ids.}
+
+\item{id}{integer vector with the child id.}
+
+\item{father.id}{integer vector with the father id. May be \code{NA} if
+it is missing.}
+
+\item{mother.id}{integer vector with the mother id. May be \code{NA} if
+it is missing.}
+}
 \description{
-Creates a Block Cut Tree Like Object
+Creates a block-cut tree like structure computed using the method suggested
+by Hopcroft et al. (1973).
+}
+\references{
+Hopcroft, J., & Tarjan, R. (1973).
+\emph{Algorithm 447: efficient algorithms for graph manipulation}.
+Communications of the ACM, 16(6), 372-378.
+}
+\seealso{
+\code{\link{get_biconnected_components}} and
+\code{\link{get_max_balanced_partition}}.
 }

@@ -26,8 +26,57 @@ get_max_balanced_partition_pedigree(
   trace = 0L
 )
 }
+\arguments{
+\item{from}{integer vector with one of the vertex ids.}
+
+\item{to}{integer vector with one of the vertex ids.}
+
+\item{weight_data}{list with two elements called \code{"id"} for the id and
+\code{"weight"} for the vertex weight. All vertices that are not in this list
+have a weight of one. Use \code{NULL} if all vertices have a weight of one.}
+
+\item{slack}{fraction between zero and 0.5 for the allowed amount of
+deviation from the balance criterion that is allowed to reduce the cost of
+the cut edges.}
+
+\item{max_kl_it_inner}{maximum number of moves to consider in each
+iteration when \code{slack > 0}.}
+
+\item{max_kl_it}{maximum number of iterations to use when reducing the
+cost of the cut edges. Typically the method converges quickly and this
+argument is not needed.}
+
+\item{trace}{integer where larger values yields more information printed to
+the console during the procedure.}
+
+\item{id}{integer vector with the child id.}
+
+\item{father.id}{integer vector with the father id. May be \code{NA} if
+it is missing.}
+
+\item{mother.id}{integer vector with the mother id. May be \code{NA} if
+it is missing.}
+
+\item{id_weight}{numeric vector with the weight to use for each vertex
+(individual). \code{NULL} yields a weight of one for all.}
+}
 \description{
 Uses the method suggested by Chlebíková (1996) to construct an approximate
-maximally balanced connected partition. A furhter refinement step can be made
-to reduce the cost of the cut edges.
+maximally balanced connected partition. A further refinement step can be made
+to reduce the cost of the cut edges. See
+\code{vignette("pedigree_partitioning", package = "pedmod")} for further
+details.
+}
+\references{
+Chlebíková, J. (1996).
+\emph{Approximating the maximally balanced connected partition problem in
+graphs}. Information Processing Letters, 60(5), 225-230.
+
+Hopcroft, J., & Tarjan, R. (1973).
+\emph{Algorithm 447: efficient algorithms for graph manipulation}.
+Communications of the ACM, 16(6), 372-378.
+}
+\seealso{
+\code{\link{get_biconnected_components}} and
+\code{\link{get_block_cut_tree}}.
 }

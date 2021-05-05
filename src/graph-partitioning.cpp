@@ -953,7 +953,7 @@ public:
     // the balance criterion of the current solution
     double max_balance_crit = res.criterion;
 
-    if(trace > 1)
+    if(trace > 0)
       Tout << "Starting to reduce the cost of the cut in a block of size "
            << b.vertices.size() << ". The partition in the block consists of two sets of size "
            << v1_set.set.size() << ' ' << v2_set.set.size() << '\n';

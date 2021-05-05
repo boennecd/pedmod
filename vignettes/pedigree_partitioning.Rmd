@@ -57,7 +57,7 @@ To see that everybody is connected, notice that
  - Child 11 is cousins with child 16 through her mother and this leads us back 
    to where we started and we have circle.
    
-The relationship can also be represented as graph. For this purposes, we assign 
+The relationships can also be represented as graph. For this purposes, we assign 
 the functions below to create a list of edges between parents 
 and their children. You can likely skip the functions. 
 
@@ -255,10 +255,10 @@ show_split(dat, also_cut)
 
 We only removed  `r NROW(removed_edges)` relationships (edges) this time.
 
-### Using Indviduals Weight (Vertex Weights)
+### Using Individual Weights (Vertex Weights)
 In many applications, we only observe some individuals. Therefore, we want the 
 to split the family into equal sizes in terms of the individuals that we 
-actually observe. We can do by providing individual weights (vertex weights). 
+actually observe. We can do this by providing individual weights (vertex weights). 
 
 As an example, we will take the family we have been working with and assume 
 that we only observe individuals in the final generation. Thus, we will set the
@@ -343,7 +343,7 @@ sim_dat <- sim_graph(50L)
 par(mar = c(1, 1, 1, 1))
 plot(graph.data.frame(sim_dat, directed = FALSE), layout = layout_with_kk,
      vertex.size = 12, vertex.color = "gray", vertex.label.cex = .75)
-# number of biconnected components
+# get the biconnected components
 cut_pts <- get_biconnected_components(from = sim_dat$from, to = sim_dat$to)
 length(cut_pts) # number of biconnected components
 ```
@@ -414,8 +414,10 @@ in $\tilde V_1$ and define $I_2$ similarly. Then
     * Find the cut vertices $C_1$ of $\tilde V_1$ and $C_2$ of $\tilde V_2$.
     * Consider all the vertices in $I_1 \setminus C_2$ and $I_2 \setminus C_1$
       such that the balance criteria
-      $w(V) / 2 - \epsilon w(V) \leq w(V_1)$ and $w(V_1)\leq w(V) / 2 + \epsilon w(V)$ are 
-      satisfied for some user defined $\epsilon \in [0, .5)$ and that the vertex has 
+      $w_H(V) / 2 - \epsilon w_H(V) \leq w_H(\tilde V_1)$ and 
+      $w_H(\tilde V_1)\leq w_H(V) / 2 + \epsilon w_H(V)$ are 
+      satisfied for some user defined $\epsilon \in [0, .5)$ is satisfied 
+      after the vertex is moved and that the vertex has 
       not yet been used.
     * If there are no vertex then exit.
     * Select the vertex $v$ with the largest $D_v$. Break ties by 
@@ -425,7 +427,8 @@ in $\tilde V_1$ and define $I_2$ similarly. Then
       move the vertex $v$, update $I_1$, $I_2$, and $D$. Add 
       $v$ to the used vertices.
  3. If no vertex were moved then exit. Otherwise find the 
-    $l = \text{argmax}_{k = 1,\dots},\sum_{i = 1}^k g_i$. 
+    $l = \text{argmax}_{k = 1,\dots},\sum_{i = 1}^k g_i$. In case of ties, 
+    take the one with the highest balance criterion.
  4. If $\sum_{i = 1}^l g_i \leq 0$ then undo all moves. Otherwise, undo moves 
     after move $l$ and repeat 1.
     
@@ -453,6 +456,33 @@ removed_edges
 # redo the plot
 do_plot(sim_dat, max_part)
 show_split(sim_dat, max_part)
+```
+
+### Larger Example
+We will take a larger example where we also focus on the computation time. 
+The example is shown below:
+
+```{r larger_ex}
+# simulate a data set with 100000 observations
+set.seed(45L)
+sim_dat <- sim_graph(100000L)
+
+# get the biconnected components
+cut_pts <- get_biconnected_components(from = sim_dat$from, to = sim_dat$to)
+length(cut_pts) # number of biconnected components
+
+# find the approximately balanced connected partition
+system.time(
+  max_part <- get_max_balanced_partition(from = sim_dat$from, to = sim_dat$to, 
+                                         trace = 1L))
+NROW(max_part$removed_edges) # number of removed edges
+
+# improve on the number of cut vertices
+system.time(
+  max_part <- get_max_balanced_partition(from = sim_dat$from, to = sim_dat$to, 
+                                         trace = 1L, slack = .1, 
+                                         max_kl_it_inner = 1000L))
+NROW(max_part$removed_edges) # number of removed edges
 ```
 
 ## References

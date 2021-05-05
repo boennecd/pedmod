@@ -3,12 +3,35 @@
 \name{get_biconnected_components}
 \alias{get_biconnected_components}
 \alias{get_biconnected_components_pedigree}
-\title{Finds the Biconnected Components Given}
+\title{Finds the Biconnected Components}
 \usage{
 get_biconnected_components(from, to)
 
 get_biconnected_components_pedigree(id, father.id, mother.id)
 }
+\arguments{
+\item{from}{integer vector with one of the vertex ids.}
+
+\item{to}{integer vector with one of the vertex ids.}
+
+\item{id}{integer vector with the child id.}
+
+\item{father.id}{integer vector with the father id. May be \code{NA} if
+it is missing.}
+
+\item{mother.id}{integer vector with the mother id. May be \code{NA} if
+it is missing.}
+}
 \description{
-Finds the Biconnected Components Given
+Finds the biconnected components and the cut vertices (articulation points)
+using the methods suggested by Hopcroft et al. (1973).
+}
+\references{
+Hopcroft, J., & Tarjan, R. (1973).
+\emph{Algorithm 447: efficient algorithms for graph manipulation}.
+Communications of the ACM, 16(6), 372-378.
+}
+\seealso{
+\code{\link{get_block_cut_tree}} and
+\code{\link{get_max_balanced_partition}}.
 }

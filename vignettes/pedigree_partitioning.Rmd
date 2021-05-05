@@ -5,7 +5,7 @@ bibliography: ../ref.bib
 
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
-  collapse = TRUE,
+  collapse = TRUE, dpi = 45,
   comment = "#>",
   fig.path = "figures/partitioning-",
   cache.path = "cache/partitioning-",
@@ -222,7 +222,6 @@ show_split <- function(dat, partition_obj){
   ped <- with(dat, pedigree(id = id, dadid = dad, momid = mom, sex = sex))
   g_dat <- create_igraph_input(ped)
   graph_fam <-  graph.data.frame(g_dat, directed = FALSE)
-  par(mar = c(1, 1, 1, 1))
   V(graph_fam)$color <- "white"
   nam <- vertex_attr(graph_fam)$name
   V(graph_fam)$color[nam %in% partition_obj$set_1] <- "lightblue" 
@@ -379,7 +378,6 @@ do_plot(sim_dat, max_part)
 # assign function to show the split in the original graph
 show_split <- function(dat, partition_obj){
   graph_fam <-  graph.data.frame(dat, directed = FALSE)
-  par(mar = c(1, 1, 1, 1))
   V(graph_fam)$color <- "white"
   nam <- vertex_attr(graph_fam)$name
   V(graph_fam)$color[nam %in% partition_obj$set_1] <- "lightblue" 
@@ -462,7 +460,45 @@ show_split(sim_dat, max_part)
 We will take a larger example where we also focus on the computation time. 
 The example is shown below:
 
-```{r larger_ex}
+```{r larger_ex, fig.width=7, fig.height=7}
+# simulate a data set with 500 observations
+set.seed(45L)
+sim_dat <- sim_graph(1000L)
+
+# get the biconnected components
+cut_pts <- get_biconnected_components(from = sim_dat$from, to = sim_dat$to)
+length(cut_pts) # number of biconnected components
+
+# find the approximately balanced connected partition
+system.time(
+  max_part <- get_max_balanced_partition(from = sim_dat$from, to = sim_dat$to, 
+                                         trace = 1L))
+max_part$balance_criterion # the balance criterion
+NROW(max_part$removed_edges) # number of removed edges
+
+# improve on the number of cut vertices
+system.time(
+  max_part <- get_max_balanced_partition(from = sim_dat$from, to = sim_dat$to, 
+                                         trace = 1L, slack = .1, 
+                                         max_kl_it_inner = 1000L))
+max_part$balance_criterion # the balance criterion
+NROW(max_part$removed_edges) # number of removed edges
+
+# show the split
+graph_fam <-  graph.data.frame(sim_dat, directed = FALSE)
+V(graph_fam)$color <- "white"
+nam <- vertex_attr(graph_fam)$name
+V(graph_fam)$color[nam %in% max_part$set_1] <- "lightblue" 
+V(graph_fam)$color[nam %in% max_part$set_2] <- "lightgray" 
+par(mar = c(1, 1, 1, 1))
+set.seed(1)
+plot(graph_fam, layout = layout_with_kk, vertex.label = NA, 
+     vertex.size = 3)
+```
+
+Here is an even larger example:
+
+```{r largest_ex}
 # simulate a data set with 100000 observations
 set.seed(45L)
 sim_dat <- sim_graph(100000L)
@@ -475,6 +511,7 @@ length(cut_pts) # number of biconnected components
 system.time(
   max_part <- get_max_balanced_partition(from = sim_dat$from, to = sim_dat$to, 
                                          trace = 1L))
+max_part$balance_criterion # the balance criterion
 NROW(max_part$removed_edges) # number of removed edges
 
 # improve on the number of cut vertices
@@ -482,6 +519,7 @@ system.time(
   max_part <- get_max_balanced_partition(from = sim_dat$from, to = sim_dat$to, 
                                          trace = 1L, slack = .1, 
                                          max_kl_it_inner = 1000L))
+max_part$balance_criterion # the balance criterion
 NROW(max_part$removed_edges) # number of removed edges
 ```
 

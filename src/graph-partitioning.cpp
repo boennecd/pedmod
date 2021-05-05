@@ -146,7 +146,7 @@ public:
     // add the edges
     for(size_t i = 0; i < blocks.size(); ++i)
       for(size_t j = i + 1; j < blocks.size(); ++j){
-        for(auto vi : blocks[i].cut_verices){
+        for(vertex const *vi : blocks[i].cut_verices){
           if(blocks[j].cut_verices.count(vi)){
             // we have a matching cut vertex
             block_edges.push_back(block_edge { &blocks[i], &blocks[j] } );
@@ -301,7 +301,7 @@ public:
     vertex_info.reserve(x.size());
     {
       unsigned id(0L);
-      for(auto const &xi : x){
+      for(vertex const *xi : x){
         id_map.emplace(std::make_pair(xi, id++));
         vertex_info.emplace_back(xi);
       }
@@ -309,8 +309,8 @@ public:
 
     unsigned id(0L);
     auto vi = vertex_info.begin();
-    for(auto const &xi : x){
-      for(auto const neighbor : *xi){
+    for(vertex const *xi : x){
+      for(vertex const * neighbor : *xi){
         if(!do_add_edge(*neighbor, *xi))
           continue;
 
@@ -332,7 +332,7 @@ public:
   biconnected_components(std::vector<vertex> const &x){
     std::vector<vertex const *> tmp;
     tmp.reserve(x.size());
-    for(auto const &xi : x)
+    for(vertex const &xi : x)
       tmp.emplace_back(&xi);
     set_vertices(tmp);
   }
@@ -360,7 +360,7 @@ public:
     // to one of the blocks
     for(size_t i = 0; i < out.size(); ++i)
       for(size_t j = i + 1; j < out.size(); ++j){
-        for(auto v : out[i].cut_verices)
+        for(vertex const * v : out[i].cut_verices)
           if(out[j].has_vertex(v))
             out[j].cut_verices.insert(v);
       }
@@ -412,7 +412,7 @@ class max_balanced_partition {
     b(b),
     inner_weight(([&]() -> double {
       double out(0.);
-      for(auto v : b.vertices)
+      for(vertex const * v : b.vertices)
         out += v->weight;
       return out;
     })()) { }
@@ -498,7 +498,7 @@ class max_balanced_partition {
       return;
 
     // add connected blocks
-    for(auto v : b.cut_verices){
+    for(vertex const * v : b.cut_verices){
       std::vector<size_t> const &edges = tree.cut_point_edges.at(v);
       for(size_t edge_idx : edges){
         block_cut_tree::block_edge const &b_edge = tree.block_edges[edge_idx];
@@ -990,10 +990,21 @@ public:
                 continue;
 
               int const gain_v = edge_gain.at(v);
-              if(!best_gain.x or
-                   best_gain.gain < gain_v or
-                   (best_gain.gain == gain_v and
-                      best_gain.balance_criterion < balance_crit))
+              if(
+                // there was no solution before
+                !best_gain.x or
+                // the solution is better
+                best_gain.gain < gain_v or
+                // the solution is not better but the balance criterion is
+                // better
+                (best_gain.gain == gain_v and
+                      best_gain.balance_criterion < balance_crit) or
+                // everything is the same except the id which is smaller. This
+                // yields reproducible results despite using unordered_set
+                (best_gain.gain == gain_v and
+                   is_almost_equal(best_gain.balance_criterion,
+                                   balance_crit) and
+                   v->id < best_gain.x->id))
                 best_gain = { v, gain_v, balance_crit, &from, &to };
             }
           };
@@ -1082,14 +1093,14 @@ Rcpp::List biconnected_components_to_rcpp_list
     Rcpp::IntegerVector ele(comp_i.vertices.size());
     {
       size_t j(0);
-      for(auto comp_ele : comp_i.vertices)
+      for(vertex const *comp_ele : comp_i.vertices)
         ele[j++] = comp_ele->id + 1L;
     }
 
     Rcpp::IntegerVector cut_verices(comp_i.cut_verices.size());
     {
       size_t j(0);
-      for(auto comp_ele : comp_i.cut_verices)
+      for(vertex const *comp_ele : comp_i.cut_verices)
         cut_verices[j++] = comp_ele->id + 1L;
     }
 
@@ -1122,24 +1133,24 @@ Rcpp::List block_cut_tree_to_rcpp_list
   Rcpp::IntegerVector ele(b.vertices.size());
   {
     size_t j(0);
-    for(auto comp_ele : b.vertices)
+    for(vertex const *comp_ele : b.vertices)
       ele[j++] = comp_ele->id + 1L;
   }
 
   Rcpp::IntegerVector cut_verices(b.cut_verices.size());
   {
     size_t j(0);
-    for(auto comp_ele : b.cut_verices)
+    for(vertex const *comp_ele : b.cut_verices)
       cut_verices[j++] = comp_ele->id + 1L;
   }
 
   Rcpp::List leafs;
   {
-    for(auto comp_ele : b.cut_verices)
+    for(vertex const *comp_ele : b.cut_verices)
       if(!used_cut_points.count(comp_ele)){
         used_cut_points.insert(comp_ele);
         auto &edges = bct.cut_point_edges.at(comp_ele);
-        for(auto edge_idx : edges){
+        for(size_t edge_idx : edges){
           auto &edge = bct.block_edges[edge_idx];
           auto other = edge.v1 != &b ? edge.v1 : edge.v2;
           leafs.push_back(block_cut_tree_to_rcpp_list(

@@ -43,5 +43,7 @@ Suggests:
     abind, 
     kinship2,
     igraph
+Depends: 
+    R (>= 3.5.0)
 VignetteBuilder: R.rsp
 SystemRequirements: C++11

@@ -159,22 +159,31 @@ public:
 
   block_cut_tree(std::vector<block> const &blocks):
     blocks(blocks) {
-    // add the edges
-    for(size_t i = 0; i < blocks.size(); ++i)
-      for(size_t j = i + 1; j < blocks.size(); ++j){
-        for(vertex const *vi : blocks[i].cut_verices){
-          if(blocks[j].cut_verices.count(vi)){
-            // we have a matching cut vertex
-            block_edges.push_back(block_edge { &blocks[i], &blocks[j] } );
-            auto new_cut_point_edges = cut_point_edges.insert({ vi, { } });
-            new_cut_point_edges.first->second.emplace_back(
-                block_edges.size() - 1L);
-
-            // there can only be one so we can break
-            break;
-          }
-        }
+    //
+    // create a map from cut vertices to the blocks and create a map from the
+    // blocks to their indices
+    std::unordered_map<vertex const *, std::deque<block const *> >
+      cut_vertex_to_blocks;
+    for(block const &b : blocks){
+      for(vertex const *v : b.cut_verices){
+        auto ele = cut_vertex_to_blocks.insert({ v, { } });
+        ele.first->second.emplace_back(&b);
       }
+    }
+
+    // add the edges
+    for(auto &ele : cut_vertex_to_blocks){
+      std::deque<block const *> &bs = ele.second;
+      size_t const n_blocks = bs.size();
+
+      for(size_t i = 0; i < n_blocks; ++i)
+        for(size_t j = i + 1; j < n_blocks; ++j){
+          block_edges.push_back(block_edge { bs[i], bs[j] } );
+          auto new_cut_point_edges = cut_point_edges.insert({ ele.first, { } });
+          new_cut_point_edges.first->second.emplace_back(
+              block_edges.size() - 1L);
+        }
+    }
   }
 };
 
@@ -374,12 +383,13 @@ public:
 
     // have to add cut_vertices from other blocks. The algorithm only adds them
     // to one of the blocks
-    for(size_t i = 0; i < out.size(); ++i)
-      for(size_t j = i + 1; j < out.size(); ++j){
-        for(vertex const * v : out[i].cut_verices)
-          if(out[j].has_vertex(v))
-            out[j].cut_verices.insert(v);
-      }
+    std::unordered_set<vertex const *> cut_vertices;
+    for(block const &b : out)
+      cut_vertices.insert(b.cut_verices.begin(), b.cut_verices.end());
+    for(block &b : out)
+      for(vertex const * v : b.vertices)
+        if(cut_vertices.count(v))
+          b.cut_verices.insert(v);
 
     return out;
   }
@@ -1148,7 +1158,6 @@ Rcpp::List get_biconnected_components(
     throw std::invalid_argument("size of edge_weights does not match size of to");
   if(weights_ids.size() != weights.size())
     throw std::invalid_argument("size of weights_ids does not match size of weights");
-
 
   std::vector<vertex> vertices = create_vertices(
     &from[0], &to[0], to.size(), &weights_ids[0], &weights[0],

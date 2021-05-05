@@ -206,7 +206,7 @@ get_max_balanced_partition <- function(from, to, weight_data = NULL,
   removed_edges[] <- id[removed_edges]
   removed_edges[] <- t(apply(removed_edges, 1L, sort))
   removed_edges <- removed_edges[
-    order(removed_edges[, 1], removed_edges[, 2]), ]
+    order(removed_edges[, 1], removed_edges[, 2]), , drop = FALSE]
   out$removed_edges <- removed_edges
 
   out$set_1 <- sort(id[out$set_1])

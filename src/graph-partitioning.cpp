@@ -761,7 +761,17 @@ class max_balanced_partition {
         for(vertex const * v : v1_set.connected_vertices)
           if(!cut_points.count(v)){
             double const w_weight = vertex_weight.at(v);
-            if(!min_weight_vertex or w_weight < min_weight){
+            if(
+              // no vertex was set before
+              !min_weight_vertex or
+              // this one has a smaller weight
+              w_weight < min_weight or
+              // the weight is the same but to make sure that we get the same
+              // on all platforms, then we take the one with the smallest id.
+              // We are not guaranteed to get this otherwise because of the
+              // arbitrary order of unordered_set
+              (is_almost_equal(w_weight, min_weight) and
+                 v->id < min_weight_vertex->id)){
               min_weight_vertex = v;
               min_weight = w_weight;
             }

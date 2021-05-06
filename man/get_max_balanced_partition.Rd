@@ -13,7 +13,9 @@ get_max_balanced_partition(
   slack = 0,
   max_kl_it_inner = 50L,
   max_kl_it = 10000L,
-  trace = 0L
+  trace = 0L,
+  check_weights = TRUE,
+  do_reorder = FALSE
 )
 
 get_max_balanced_partition_pedigree(
@@ -26,7 +28,9 @@ get_max_balanced_partition_pedigree(
   slack = 0,
   max_kl_it_inner = 50L,
   max_kl_it = 10000L,
-  trace = 0L
+  trace = 0L,
+  check_weights = TRUE,
+  do_reorder = FALSE
 )
 }
 \arguments{
@@ -55,6 +59,15 @@ argument is not needed.}
 
 \item{trace}{integer where larger values yields more information printed to
 the console during the procedure.}
+
+\item{check_weights}{logical for whether to check the weights in each
+biconnected component. This may fail if the graph is not connected in which
+case the results will likely be wrong. It may also fail for large graphs
+because of floating-point arithmetic. The latter is not an error and the
+reason for this argument.}
+
+\item{do_reorder}{logical for whether the implementation should reorder the
+vertices. This may reduce the computation time for some data sets.}
 
 \item{id}{integer vector with the child id.}
 

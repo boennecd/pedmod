@@ -599,7 +599,7 @@ show_split(dat, also_cut)</code></pre>
 <div id="using-individual-weights-vertex-weights" class="section level3">
 <h3>Using Individual Weights (Vertex Weights)</h3>
 <p>In many applications, we only observe some individuals. Therefore, we want the to split the family into equal sizes in terms of the individuals that we actually observe. We can do this by providing individual weights (vertex weights).</p>
-<p>As an example, we will take the family we have been working with and assume that we only observe individuals in the final generation. Thus, we will set the weight of these individuals to a one and the remianing to some small positive number (say <span class="math inline">\(10^{-5}\)</span>):</p>
+<p>As an example, we will take the family we have been working with and assume that we only observe individuals in the final generation. Thus, we will set the weight of these individuals to a one and the remaining to some small positive number (say <span class="math inline">\(10^{-5}\)</span>):</p>
 <pre class="r"><code># add the weights
 is_final &lt;- c(16:17, 11:14, 24:27, 33:34, 40:41, 47:48, 19L)
 dat$id_weight &lt;- ifelse(dat$id %in% is_final, 1., 1e-5)
@@ -874,7 +874,7 @@ system.time(
 #&gt; Found perfect balanced connected partition early. Balance criterion is 500
 #&gt; Found approximately balanced connected partition. Balance criterion is 500
 #&gt;    user  system elapsed 
-#&gt;   0.105   0.012   0.115
+#&gt;   0.100   0.000   0.099
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 500
 NROW(max_part$removed_edges) # number of removed edges
@@ -901,7 +901,7 @@ system.time(
 #&gt; Found 845 vertices to move
 #&gt; Keept 0 moves
 #&gt;    user  system elapsed 
-#&gt;   1.097   0.000   1.097
+#&gt;   1.081   0.000   1.082
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 500
 NROW(max_part$removed_edges) # number of removed edges
@@ -935,7 +935,7 @@ system.time(
 #&gt; Found perfect balanced connected partition early. Balance criterion is 50000
 #&gt; Found approximately balanced connected partition. Balance criterion is 50000
 #&gt;    user  system elapsed 
-#&gt;   5.568   0.004   5.571
+#&gt;   5.355   0.000   5.364
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 50000
 NROW(max_part$removed_edges) # number of removed edges
@@ -977,11 +977,79 @@ system.time(
 #&gt; Found 1000 vertices to move
 #&gt; Keept 0 moves
 #&gt;    user  system elapsed 
-#&gt;  30.889   0.003  30.889
+#&gt;   29.63    0.00   29.63
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 50000
 NROW(max_part$removed_edges) # number of removed edges
 #&gt; [1] 317</code></pre>
+<p>The computation time may depend on the ordering of the data set. It may be advantageous to allow our implementation to re-order the vertices e.g. when they are completely randomly ordered. We can see this my shuffling the data:</p>
+<pre class="r"><code># shuffle the data
+set.seed(1L)
+sim_dat &lt;- sim_dat[sample.int(NROW(sim_dat)), ]
+
+# re-compute the partition without re-ordering the vertices
+system.time(
+  max_part_shuffled &lt;- get_max_balanced_partition(
+    from = sim_dat$from, to = sim_dat$to, trace = 1L, slack = .1, 
+    max_kl_it_inner = 1000L, do_reorder = FALSE))
+#&gt; Found perfect balanced connected partition early. Balance criterion is 50000
+#&gt; Found approximately balanced connected partition. Balance criterion is 50000
+#&gt; Starting to reduce the cost of the cut in a block of size 7270. The partition in the block consists of two sets of size 2491 4779
+#&gt; Starting iteration 1
+#&gt; Found 1000 vertices to move
+#&gt; Keept 604 moves with a gain of 463 and a balance criterion of 49934
+#&gt; Starting iteration 2
+#&gt; Found 1000 vertices to move
+#&gt; Keept 395 moves with a gain of 94 and a balance criterion of 49999
+#&gt; Starting iteration 3
+#&gt; Found 1000 vertices to move
+#&gt; Keept 199 moves with a gain of 47 and a balance criterion of 49994
+#&gt; Starting iteration 4
+#&gt; Found 1000 vertices to move
+#&gt; Keept 24 moves with a gain of 7 and a balance criterion of 50000
+#&gt; Starting iteration 5
+#&gt; Found 1000 vertices to move
+#&gt; Keept 0 moves
+#&gt;    user  system elapsed 
+#&gt;  27.727   0.004  27.728
+
+# re-compute the partition with re-ordering the vertices
+system.time(
+  max_part_shuffled_and_ordered &lt;- get_max_balanced_partition(
+    from = sim_dat$from, to = sim_dat$to, trace = 1L, slack = .1, 
+    max_kl_it_inner = 1000L, do_reorder = TRUE))
+#&gt; Found perfect balanced connected partition early. Balance criterion is 50000
+#&gt; Found approximately balanced connected partition. Balance criterion is 50000
+#&gt; Starting to reduce the cost of the cut in a block of size 7270. The partition in the block consists of two sets of size 2491 4779
+#&gt; Starting iteration 1
+#&gt; Found 1000 vertices to move
+#&gt; Keept 604 moves with a gain of 463 and a balance criterion of 49934
+#&gt; Starting iteration 2
+#&gt; Found 1000 vertices to move
+#&gt; Keept 395 moves with a gain of 94 and a balance criterion of 49999
+#&gt; Starting iteration 3
+#&gt; Found 1000 vertices to move
+#&gt; Keept 199 moves with a gain of 47 and a balance criterion of 49994
+#&gt; Starting iteration 4
+#&gt; Found 1000 vertices to move
+#&gt; Keept 24 moves with a gain of 7 and a balance criterion of 50000
+#&gt; Starting iteration 5
+#&gt; Found 1000 vertices to move
+#&gt; Keept 0 moves
+#&gt;    user  system elapsed 
+#&gt;   24.41    0.00   24.41
+
+# we got the same 
+all.equal(max_part_shuffled_and_ordered, max_part_shuffled)
+#&gt; [1] TRUE
+
+# may not match! 
+all.equal(max_part, max_part_shuffled)
+#&gt; [1] &quot;Component \&quot;removed_edges\&quot;: Attributes: &lt; Component \&quot;dim\&quot;: Mean relative difference: 0.123 &gt;&quot;
+#&gt; [2] &quot;Component \&quot;removed_edges\&quot;: Numeric: lengths (634, 712) differ&quot;                                
+#&gt; [3] &quot;Component \&quot;set_1\&quot;: Numeric: lengths (2412, 2405) differ&quot;                                      
+#&gt; [4] &quot;Component \&quot;set_2\&quot;: Numeric: lengths (4858, 4865) differ&quot;</code></pre>
+<p>The solution will possibly not match when you reorder the data you pass to <code>get_max_balanced_partition</code>.</p>
 </div>
 </div>
 <div id="references" class="section level2 unnumbered">

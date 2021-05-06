@@ -261,7 +261,7 @@ actually observe. We can do this by providing individual weights (vertex weights
 
 As an example, we will take the family we have been working with and assume 
 that we only observe individuals in the final generation. Thus, we will set the
-weight of these individuals to a one and the remianing to some small positive 
+weight of these individuals to a one and the remaining to some small positive 
 number (say $10^{-5}$):
 
 ```{r use_weights}
@@ -558,5 +558,36 @@ system.time(
 max_part$balance_criterion # the balance criterion
 NROW(max_part$removed_edges) # number of removed edges
 ```
+
+The computation time may depend on the ordering of the data set. It may be 
+advantageous to allow our implementation to re-order the vertices e.g. when 
+they are completely randomly ordered. We can see this my shuffling the data:
+
+```{r shuffle_big_ex}
+# shuffle the data
+set.seed(1L)
+sim_dat <- sim_dat[sample.int(NROW(sim_dat)), ]
+
+# re-compute the partition without re-ordering the vertices
+system.time(
+  max_part_shuffled <- get_max_balanced_partition(
+    from = sim_dat$from, to = sim_dat$to, trace = 1L, slack = .1, 
+    max_kl_it_inner = 1000L, do_reorder = FALSE))
+
+# re-compute the partition with re-ordering the vertices
+system.time(
+  max_part_shuffled_and_ordered <- get_max_balanced_partition(
+    from = sim_dat$from, to = sim_dat$to, trace = 1L, slack = .1, 
+    max_kl_it_inner = 1000L, do_reorder = TRUE))
+
+# we got the same 
+all.equal(max_part_shuffled_and_ordered, max_part_shuffled)
+
+# may not match! 
+all.equal(max_part, max_part_shuffled)
+```
+
+The solution will possibly not match when you reorder the data you pass to 
+`get_max_balanced_partition`.
 
 ## References

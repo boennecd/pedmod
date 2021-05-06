@@ -9,8 +9,8 @@
     .Call(`_pedmod_get_block_cut_tree`, from, to, weights_ids, weights, edge_weights)
 }
 
-.get_max_balanced_partition <- function(from, to, weights_ids, weights, edge_weights, slack, max_kl_it_inner, max_kl_it, trace) {
-    .Call(`_pedmod_get_max_balanced_partition`, from, to, weights_ids, weights, edge_weights, slack, max_kl_it_inner, max_kl_it, trace)
+.get_max_balanced_partition <- function(from, to, weights_ids, weights, edge_weights, slack, max_kl_it_inner, max_kl_it, trace, check_weights, do_reorder) {
+    .Call(`_pedmod_get_max_balanced_partition`, from, to, weights_ids, weights, edge_weights, slack, max_kl_it_inner, max_kl_it, trace, check_weights, do_reorder)
 }
 
 #' Multivariate Normal Distribution CDF

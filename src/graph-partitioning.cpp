@@ -48,6 +48,10 @@ public:
     return edges.end();
   }
 
+  inline void reserve_edges(size_t const size){
+    edges.reserve(size);
+  }
+
   inline size_t n_edges() const noexcept {
     return edges.size();
   }
@@ -98,7 +102,7 @@ std::vector<vertex> create_vertices
   // create map with the weights
   std::unordered_map<int, double> vertex_weight_map;
   for(int i = 0; i < n_weights; ++i, ++id, ++vertex_weight)
-    vertex_weight_map.insert({ *id, *vertex_weight });
+    vertex_weight_map.emplace(*id, *vertex_weight);
 
   // it is important first to create the vertices and then the edges as the
   // edges use pointers and thus will not be valid if the std::vector for what
@@ -134,10 +138,27 @@ struct block {
   /// the vertices in the block
   std::unordered_set<vertex const*> vertices;
   /// the cut vertices in the block
-  std::unordered_set<vertex const*> cut_verices;
+  std::unordered_set<vertex const*> cut_vertices;
 
   inline bool has_vertex(vertex const *vertex){
     return vertices.count(vertex);
+  }
+
+  // sets pointers to point to new objects
+  void reset_pointers
+    (std::unordered_map<vertex const *, size_t> &ptr_map,
+     std::vector<vertex> const &new_vec){
+    {
+      std::unordered_set<vertex const*> new_vertices;
+      for(vertex const * v : vertices)
+        new_vertices.emplace(&new_vec[ptr_map.find(v)->second]);
+      std::swap(vertices, new_vertices);
+    }
+
+    std::unordered_set<vertex const*> new_cut_vertices;
+    for(vertex const * v : cut_vertices)
+      new_cut_vertices.emplace(&new_vec[ptr_map.find(v)->second]);
+    std::swap(cut_vertices, new_cut_vertices);
   }
 };
 
@@ -154,8 +175,21 @@ public:
   /// the edges between the blocks
   std::vector<block_edge> block_edges;
   /// the map from a cut point to the block_edges
-  std::unordered_map<vertex const *, std::vector<size_t> >
-    cut_point_edges;
+  std::unordered_map<vertex const *, std::vector<size_t> > cut_point_edges;
+
+  // sets pointers to point to new objects
+  void reset_pointers
+    (std::unordered_map<vertex const *, size_t> &ptr_map,
+     std::vector<vertex> const &new_vec){
+    std::unordered_map<vertex const *, std::vector<size_t> >
+      new_cut_point_edges;
+    for(auto &pair : cut_point_edges)
+      new_cut_point_edges.emplace(
+        &new_vec[ptr_map.find(pair.first)->second],
+        std::move(pair.second));
+
+    std::swap(cut_point_edges, new_cut_point_edges);
+  }
 
   block_cut_tree(std::vector<block> const &blocks):
     blocks(blocks) {
@@ -165,10 +199,8 @@ public:
     std::unordered_map<vertex const *, std::deque<block const *> >
       cut_vertex_to_blocks;
     for(block const &b : blocks){
-      for(vertex const *v : b.cut_verices){
-        auto ele = cut_vertex_to_blocks.insert({ v, { } });
-        ele.first->second.emplace_back(&b);
-      }
+      for(vertex const *v : b.cut_vertices)
+        cut_vertex_to_blocks[v].emplace_back(&b);
     }
 
     // add the edges
@@ -179,9 +211,7 @@ public:
       for(size_t i = 0; i < n_blocks; ++i)
         for(size_t j = i + 1; j < n_blocks; ++j){
           block_edges.push_back(block_edge { bs[i], bs[j] } );
-          auto new_cut_point_edges = cut_point_edges.insert({ ele.first, { } });
-          new_cut_point_edges.first->second.emplace_back(
-              block_edges.size() - 1L);
+          cut_point_edges[ele.first].emplace_back(block_edges.size() - 1L);
         }
     }
   }
@@ -278,7 +308,7 @@ class biconnected_components {
         auto &last_edge = edges.back();
         new_component.vertices.insert(last_edge.x);
         new_component.vertices.insert(last_edge.y);
-        new_component.cut_verices.insert(x.org_vertex);
+        new_component.cut_vertices.insert(x.org_vertex);
         edges.pop_back();
 
       } else if(neighbor != x.parent){
@@ -339,7 +369,7 @@ public:
         if(!do_add_edge(*neighbor.v, *xi))
           continue;
 
-        unsigned const id_neighbor = id_map.at(neighbor);
+        unsigned const id_neighbor = id_map.find(neighbor)->second;
         if(id_neighbor > id)
           vi->add_edge(&vertex_info[id_neighbor]);
       }
@@ -385,11 +415,11 @@ public:
     // to one of the blocks
     std::unordered_set<vertex const *> cut_vertices;
     for(block const &b : out)
-      cut_vertices.insert(b.cut_verices.begin(), b.cut_verices.end());
+      cut_vertices.insert(b.cut_vertices.begin(), b.cut_vertices.end());
     for(block &b : out)
       for(vertex const * v : b.vertices)
         if(cut_vertices.count(v))
-          b.cut_verices.insert(v);
+          b.cut_vertices.insert(v);
 
     return out;
   }
@@ -404,6 +434,105 @@ public:
         check_if_cut_point_only_points(v, 0, cut_points);
   }
 };
+
+/***
+ * reorder vertices such that those that are in the same block lie close to
+ * each other in memory. It is assumed that all the ids are unique and in the
+ * range 0,...,org.size() - 1
+ */
+std::vector<vertex> re_order_vertices(std::vector<vertex> const &org,
+                                      block_cut_tree &tree,
+                                      std::vector<block> &blocks){
+  // maps to the new index of the vertices
+  std::unordered_map<vertex const *, size_t> new_idx;
+  // the result
+  std::vector<vertex> res;
+  res.reserve(org.size());
+
+  // adds the vertices block by block
+  struct add_vertex_worker {
+  private:
+    inline void do_work(block const &b, size_t &idx, vertex const *new_vertex){
+      if(is_added[new_vertex->id])
+        // already added
+        return;
+
+      is_added[new_vertex->id] = true;
+      new_idx[new_vertex] = idx++;
+      res.emplace_back(new_vertex->id, new_vertex->weight);
+      res.back().reserve_edges(new_vertex->n_edges());
+      for(vertex const *v : *new_vertex)
+        if(b.vertices.count(v))
+          do_work(b, idx, v);
+    }
+
+    inline void do_work(block_cut_tree const &tree, size_t &idx,
+                        block const &b){
+      if(!used_blocks.insert(&b).second)
+        // already added
+        return;
+
+      // have to find the first vertex that is not yet added to get started
+      for(vertex const * v : b.vertices){
+        if(new_idx.count(v))
+          continue;
+        do_work(b, idx, v);
+        break;
+      }
+
+      // add connected blocks
+      for(vertex const * v: b.cut_vertices){
+        auto block_edge_indices = tree.cut_point_edges.find(v);
+        for(size_t edge_ix : block_edge_indices->second){
+          auto &edge = tree.block_edges[edge_ix];
+          block const *other = edge.v1 != &b ? edge.v1 : edge.v2;
+          do_work(tree, idx, *other);
+        }
+      }
+    }
+
+  public:
+    // keeps track of whether we handled a vertex
+    std::vector<bool> is_added;
+    // maps from a vertex to its new index
+    std::unordered_map<vertex const *, size_t> &new_idx;
+    // the result
+    std::vector<vertex> &res;
+    // used blocks
+    std::unordered_set<block const *> used_blocks;
+
+    add_vertex_worker(std::unordered_map<vertex const *, size_t> &new_idx,
+                      std::vector<vertex> &res):
+      new_idx(new_idx), res(res) { }
+
+    void operator()(block_cut_tree const &tree,
+                    std::vector<vertex> const &org){
+      size_t idx(0);
+      used_blocks.clear();
+      is_added = std::vector<bool>(org.size(), false);
+      for(block const &b : tree.blocks)
+        do_work(tree, idx, b);
+    }
+  } add_vertices(new_idx, res);
+
+  // add the vertices
+  add_vertices(tree, org);
+
+  // add the edges
+  for(vertex const &original_v1 : org){
+    for(weighted_edge const &edge : original_v1)
+      if(original_v1.id < edge.v->id)
+        res[new_idx.find(&original_v1)->second].add_edge(
+          &res[new_idx.find(edge.v)->second], edge.weight);
+  }
+
+  // reset the pointers in the other objects
+  tree.reset_pointers(new_idx, res);
+  for(block &b : blocks)
+    b.reset_pointers(new_idx, res);
+
+  return res;
+}
 
 /**
  * constructs an approximate maximally balanced connected partition using the
@@ -451,11 +580,10 @@ class max_balanced_partition {
         block_cut_tree const &bct,
         std::unordered_map<block const *, block_info> &b_info,
         std::unordered_set<vertex const *> &visited_cut_points){
-      for(vertex const *v : b.cut_verices){
+      for(vertex const *v : b.cut_vertices){
         // get or create the vector of directed edges with weights
-        auto vec_of_w_edges_pair = edges_to_other_blocks.insert( { v, { } } );
-        std::vector<directed_edge_w_weight> &vec_of_w_edges =
-          vec_of_w_edges_pair.first->second;
+        std::vector<directed_edge_w_weight> &vec_w_edges =
+          edges_to_other_blocks[v];
 
         if(!visited_cut_points.insert(v).second)
           // the cut point is already being processed
@@ -472,11 +600,11 @@ class max_balanced_partition {
           {
             // TODO: possibly done many times. Perhaps use a set instead?
             auto ptr_match = std::find_if(
-              vec_of_w_edges.begin(), vec_of_w_edges.end(),
+              vec_w_edges.begin(), vec_w_edges.end(),
               [&](directed_edge_w_weight const &x) -> bool {
                 return &x.other_block->b == other;
               });
-            if(ptr_match != vec_of_w_edges.end())
+            if(ptr_match != vec_w_edges.end())
               continue;
           }
 
@@ -493,7 +621,7 @@ class max_balanced_partition {
           }
 
           // add the new edge
-          vec_of_w_edges.push_back({ &other_info, weight });
+          vec_w_edges.push_back({ &other_info, weight });
         }
       }
     }
@@ -511,6 +639,8 @@ class max_balanced_partition {
   unsigned const trace;
   /// the stream used for tracing
   Tstream &Tout;
+  /// true if the weights should be checked within each block
+  bool const check_weights;
 
   /**
    * recursively add all the block_infos from the tree if everything is
@@ -518,13 +648,13 @@ class max_balanced_partition {
    */
   static void add_block(block const &b, block_cut_tree const &tree,
                         std::unordered_map<block const *, block_info> &out){
-    auto res = out.insert({ &b, block_info(b) });
+    auto res = out.emplace(&b, block_info(b));
     if(!res.second)
       // the element was already there
       return;
 
     // add connected blocks
-    for(vertex const * v : b.cut_verices){
+    for(vertex const * v : b.cut_vertices){
       std::vector<size_t> const &edges = tree.cut_point_edges.at(v);
       for(size_t edge_idx : edges){
         block_cut_tree::block_edge const &b_edge = tree.block_edges[edge_idx];
@@ -666,9 +796,9 @@ class max_balanced_partition {
 
     double weight_sum(0.); // we compute the sum as a sanity check
     for(vertex const * v : cur_block.vertices){
-      if(!cur_block.cut_verices.count(v)){
+      if(!cur_block.cut_vertices.count(v)){
         // not a cut point. Simply use the weight of the vertex
-        vertex_weight.insert({ v, v->weight });
+        vertex_weight.emplace(v, v->weight);
         weight_sum += v->weight;
         update_max_weight_vertex(v, v->weight);
         continue;
@@ -680,13 +810,14 @@ class max_balanced_partition {
         &edges_out = b_info.edges_to_other_blocks.at(v);
       for(auto const &e : edges_out)
         new_weight += e.weight;
-      vertex_weight.insert({ v, new_weight });
+      vertex_weight.emplace(v, new_weight);
       update_max_weight_vertex(v, new_weight);
-      weight_sum += new_weight;
+      if(check_weights)
+        weight_sum += new_weight;
     }
 
     // perform a sanity check on the the sum of the weights
-    if(!is_almost_equal(weight_sum, total_weight))
+    if(check_weights and !is_almost_equal(weight_sum, total_weight))
       throw std::runtime_error(
           "sum of weights in block is not equal to the total weight (" +
             std::to_string(weight_sum) + " and " +
@@ -826,7 +957,8 @@ class max_balanced_partition {
 
 public:
   max_balanced_partition(block_cut_tree const &bct,
-                         unsigned const trace, Tstream &Tout):
+                         unsigned const trace, Tstream &Tout,
+                         bool const check_weights):
   bct(bct),
   b_info(([&]() -> std::unordered_map<block const *, block_info> {
     std::unordered_map<block const *, block_info> out;
@@ -845,7 +977,7 @@ public:
 
     return out;
   })()),
-  trace(trace), Tout(Tout) {
+  trace(trace), Tout(Tout), check_weights(check_weights) {
     std::unordered_set<vertex const *> visited_cut_points;
     for(auto &b_i : b_info){
       visited_cut_points.clear();
@@ -1133,14 +1265,15 @@ Rcpp::List biconnected_components_to_rcpp_list
         ele[j++] = comp_ele->id + 1L;
     }
 
-    Rcpp::IntegerVector cut_verices(comp_i.cut_verices.size());
+    Rcpp::IntegerVector cut_vertices(comp_i.cut_vertices.size());
     {
       size_t j(0);
-      for(vertex const *comp_ele : comp_i.cut_verices)
-        cut_verices[j++] = comp_ele->id + 1L;
+      for(vertex const *comp_ele : comp_i.cut_vertices)
+        cut_vertices[j++] = comp_ele->id + 1L;
     }
 
-    ele.attr("cut_verices") = cut_verices;
+    // TODO: fix this typo
+    ele.attr("cut_verices") = cut_vertices;
     out[i] = ele;
   }
 
@@ -1176,16 +1309,16 @@ Rcpp::List block_cut_tree_to_rcpp_list
       ele[j++] = comp_ele->id + 1L;
   }
 
-  Rcpp::IntegerVector cut_verices(b.cut_verices.size());
+  Rcpp::IntegerVector cut_vertices(b.cut_vertices.size());
   {
     size_t j(0);
-    for(vertex const *comp_ele : b.cut_verices)
-      cut_verices[j++] = comp_ele->id + 1L;
+    for(vertex const *comp_ele : b.cut_vertices)
+      cut_vertices[j++] = comp_ele->id + 1L;
   }
 
   Rcpp::List leafs;
   {
-    for(vertex const *comp_ele : b.cut_verices)
+    for(vertex const *comp_ele : b.cut_vertices)
       if(!used_cut_points.count(comp_ele)){
         used_cut_points.insert(comp_ele);
         auto &edges = bct.cut_point_edges.at(comp_ele);
@@ -1200,7 +1333,7 @@ Rcpp::List block_cut_tree_to_rcpp_list
 
   return Rcpp::List::create(
     Rcpp::Named("vertices") = ele,
-    Rcpp::Named("cut_vertices") = cut_verices,
+    Rcpp::Named("cut_vertices") = cut_vertices,
     Rcpp::Named("leafs") = leafs);
 }
 
@@ -1260,7 +1393,8 @@ Rcpp::List get_max_balanced_partition(
     Rcpp::IntegerVector const weights_ids, Rcpp::NumericVector const weights,
     Rcpp::NumericVector const edge_weights,
     double const slack, unsigned const max_kl_it_inner,
-    unsigned const max_kl_it, unsigned const trace){
+    unsigned const max_kl_it, unsigned const trace, bool const check_weights,
+    bool const do_reorder){
   if(from.size() != to.size())
     throw std::invalid_argument("size of from does not match size of to");
   if(edge_weights.size() != to.size())
@@ -1275,7 +1409,14 @@ Rcpp::List get_max_balanced_partition(
     weights_ids.size(), &edge_weights[0]);
   auto bicon_comps = biconnected_components(vertices).get();
   block_cut_tree bct(bicon_comps);
-  max_balanced_partition_rcpp max_part(bct, trace, Rcpp::Rcout);
+
+  if(do_reorder){
+    std::vector<vertex> vertices_ordered =
+      re_order_vertices(vertices, bct, bicon_comps);
+    std::swap(vertices, vertices_ordered);
+  }
+
+  max_balanced_partition_rcpp max_part(bct, trace, Rcpp::Rcout, check_weights);
   max_balanced_partition_rcpp::mbcp_result const res =
     max_part.get(slack, max_kl_it_inner, max_kl_it);
 

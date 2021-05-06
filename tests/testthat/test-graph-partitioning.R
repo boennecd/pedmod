@@ -22,30 +22,54 @@ test_that("the _pedigree methods give the same", {
 
   partition <- with(
     dat, get_max_balanced_partition_pedigree(
-      id = id, father.id = dad, mother.id = mom))
+      id = id, father.id = dad, mother.id = mom, do_reorder = FALSE))
   expect_known_value(partition, "get_max_balanced_partition_pedigree.RDS")
+
+  partition_reordered <- with(
+    dat, get_max_balanced_partition_pedigree(
+      id = id, father.id = dad, mother.id = mom, do_reorder = TRUE))
+  expect_equal(partition, partition_reordered)
 
   # w/ cut
   partition <- with(
     dat, get_max_balanced_partition_pedigree(
       id = id, father.id = dad, mother.id = mom, slack = .1, max_kl_it = 50L,
-      max_kl_it_inner = 1000L))
+      max_kl_it_inner = 1000L, do_reorder = FALSE))
   expect_known_value(partition, "get_max_balanced_partition_pedigree-w_cut.RDS")
+
+  partition_reordered <- with(
+    dat, get_max_balanced_partition_pedigree(
+      id = id, father.id = dad, mother.id = mom, slack = .1, max_kl_it = 50L,
+      max_kl_it_inner = 1000L, do_reorder = TRUE))
+  expect_equal(partition, partition_reordered)
 
   # w/ cut and weights
   partition <- with(
     dat, get_max_balanced_partition_pedigree(
       id = id, father.id = dad, mother.id = mom, slack = .1, max_kl_it = 50L,
-      max_kl_it_inner = 1000L, id_weight = id_weight))
+      max_kl_it_inner = 1000L, id_weight = id_weight, do_reorder = FALSE))
   expect_known_value(partition, "get_max_balanced_partition_pedigree-w_cut-n-weights.RDS")
+
+  partition_reordered <- with(
+    dat, get_max_balanced_partition_pedigree(
+      id = id, father.id = dad, mother.id = mom, slack = .1, max_kl_it = 50L,
+      max_kl_it_inner = 1000L, id_weight = id_weight, do_reorder = TRUE))
+  expect_equal(partition, partition_reordered)
 
   # w/ cut and weights for both vertices and edges
   partition <- with(
     dat, get_max_balanced_partition_pedigree(
       id = id, father.id = dad, mother.id = mom, slack = .1, max_kl_it = 50L,
-      max_kl_it_inner = 1000L, id_weight = id_weight,
+      max_kl_it_inner = 1000L, id_weight = id_weight, do_reorder = FALSE,
       father_weight = father_weight, mother_weight = mother_weight))
   expect_known_value(partition, "get_max_balanced_partition_pedigree-w_cut-n-2xweights.RDS")
+
+  partition_reordered <- with(
+    dat, get_max_balanced_partition_pedigree(
+      id = id, father.id = dad, mother.id = mom, slack = .1, max_kl_it = 50L,
+      max_kl_it_inner = 1000L, id_weight = id_weight, do_reorder = FALSE,
+      father_weight = father_weight, mother_weight = mother_weight))
+  expect_equal(partition, partition_reordered)
 })
 
 # # simulates a connected graph of a given size
@@ -82,21 +106,38 @@ test_that("the partitioning functions for graphs give the same", {
   expect_known_value(cuts, "get_block_cut_tree.RDS")
 
   partition <- with(
-    dat, get_max_balanced_partition(from = from, to = to))
+    dat, get_max_balanced_partition(from = from, to = to, do_reorder = FALSE))
   expect_known_value(partition, "get_max_balanced_partition.RDS")
+
+  partition_reordered <- with(
+    dat, get_max_balanced_partition(from = from, to = to, do_reorder = TRUE))
+  expect_equal(partition, partition_reordered)
 
   # w/ cut
   partition <- with(
     dat, get_max_balanced_partition(
       from = from, to = to, slack = .1, max_kl_it = 50L,
-      max_kl_it_inner = 1000L))
+      max_kl_it_inner = 1000L, do_reorder = FALSE))
   expect_known_value(partition, "get_max_balanced_partition-w_cut.RDS")
+
+  partition_reordered <- with(
+    dat, get_max_balanced_partition(
+      from = from, to = to, slack = .1, max_kl_it = 50L,
+      max_kl_it_inner = 1000L, do_reorder = FALSE))
+  expect_equal(partition, partition_reordered)
 
   # w/ cut and weights
   partition <- with(
     dat, get_max_balanced_partition(
-      from = from, to = to, slack = .1, max_kl_it = 50L,
+      from = from, to = to, slack = .1, max_kl_it = 50L, do_reorder = FALSE,
       max_kl_it_inner = 1000L, weight_data = list(id = dat$from[3],
                                                   weight = 100)))
   expect_known_value(partition, "get_max_balanced_partition-w_cut-n-weights.RDS")
+
+  partition_reordered <- with(
+    dat, get_max_balanced_partition(
+      from = from, to = to, slack = .1, max_kl_it = 50L, do_reorder = TRUE,
+      max_kl_it_inner = 1000L, weight_data = list(id = dat$from[3],
+                                                  weight = 100)))
+  expect_equal(partition, partition_reordered)
 })

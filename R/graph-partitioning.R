@@ -174,6 +174,13 @@ get_block_cut_tree_pedigree <- function(id, father.id, mother.id){
 #' @param edge_weights numeric vector with weights for each edge. Needs to have
 #' the same length as \code{from} and \code{to}. Use \code{NULL} if all edges
 #' should have a weight of one.
+#' @param check_weights logical for whether to check the weights in each
+#' biconnected component. This may fail if the graph is not connected in which
+#' case the results will likely be wrong. It may also fail for large graphs
+#' because of floating-point arithmetic. The latter is not an error and the
+#' reason for this argument.
+#' @param do_reorder logical for whether the implementation should reorder the
+#' vertices. This may reduce the computation time for some data sets.
 #'
 #' @seealso
 #' \code{\link{get_biconnected_components}} and
@@ -192,14 +199,17 @@ get_block_cut_tree_pedigree <- function(id, father.id, mother.id){
 get_max_balanced_partition <- function(from, to, weight_data = NULL,
                                        edge_weights = NULL,
                                        slack = 0., max_kl_it_inner = 50L,
-                                       max_kl_it = 10000L, trace = 0L){
+                                       max_kl_it = 10000L, trace = 0L,
+                                       check_weights = TRUE,
+                                       do_reorder = FALSE){
   dat <- .prep_edge_list(from = from, to = to, weight_data = weight_data,
                          edge_weights = edge_weights)
   id <- dat$id
 
   out <- with(dat, .get_max_balanced_partition(
     from, to, weights_ids,  weights, slack = slack, edge_weights = edge_weights,
-    max_kl_it_inner = max_kl_it_inner, max_kl_it = max_kl_it, trace = trace))
+    max_kl_it_inner = max_kl_it_inner, max_kl_it = max_kl_it, trace = trace,
+    check_weights = check_weights, do_reorder = do_reorder))
 
   # set and sort the removed edges
   removed_edges <- out$removed_edges
@@ -228,7 +238,7 @@ get_max_balanced_partition <- function(from, to, weight_data = NULL,
 get_max_balanced_partition_pedigree <- function(
   id, father.id, mother.id, id_weight = NULL, father_weight = NULL,
   mother_weight = NULL, slack = 0., max_kl_it_inner = 50L, max_kl_it = 10000L,
-  trace = 0L){
+  trace = 0L, check_weights = TRUE, do_reorder = FALSE){
   dat <- .pedigree_to_from_to(id = id, father.id = father.id,
                               mother.id = mother.id, id_weight = id_weight,
                               father_weight = father_weight,
@@ -237,5 +247,5 @@ get_max_balanced_partition_pedigree <- function(
   with(dat, get_max_balanced_partition(
     from = from, to = to, weight_data = weight_data, slack = slack,
     max_kl_it_inner = max_kl_it_inner, max_kl_it = max_kl_it, trace = trace,
-    edge_weights = edge_weights))
+    edge_weights = edge_weights, do_reorder = do_reorder))
 }

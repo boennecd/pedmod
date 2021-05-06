@@ -366,7 +366,7 @@ public:
     auto vi = vertex_info.begin();
     for(vertex const *xi : x){
       for(weighted_edge const &neighbor : *xi){
-        if(!do_add_edge(*neighbor.v, *xi))
+        if(!do_add_edge(neighbor.v))
           continue;
 
         unsigned const id_neighbor = id_map.find(neighbor)->second;
@@ -380,7 +380,7 @@ public:
 
   template<typename Tcontainer>
   void set_vertices(Tcontainer const &x){
-    set_vertices_if(x, [](vertex const&,vertex const&) { return true; });
+    set_vertices_if(x, [](vertex const*) { return true; });
   }
 
   biconnected_components() = default;
@@ -890,8 +890,8 @@ class max_balanced_partition {
       for(unsigned i = 0; i < cur_block.vertices.size() - 2L; ++i){
         // find the cut points. For this, we should only include "internal"
         // edges in the set where we remove edges from
-        auto is_internal_edge = [&](vertex const &x, vertex const &y) -> bool {
-          return other_set.count(&x) and other_set.count(&y);
+        auto is_internal_edge = [&other_set](vertex const *x) -> bool {
+          return other_set.count(x);
         };
         bicon_comp.set_vertices_if(other_set, is_internal_edge);
         bicon_comp.get_cut_points(cut_points);
@@ -1138,9 +1138,8 @@ public:
 
         auto find_best_move =
           [&](working_set &from, working_set &to) -> void {
-            auto is_internal_edge =
-              [&](vertex const &x, vertex const &y) -> bool {
-                return from.set.count(&x) and from.set.count(&y);
+            auto is_internal_edge = [&from](vertex const *x) -> bool {
+                return from.set.count(x);
             };
             bicon_comp.set_vertices_if(from.set, is_internal_edge);
             bicon_comp.get_cut_points(cut_points);

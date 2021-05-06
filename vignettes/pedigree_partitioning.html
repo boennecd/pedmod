@@ -874,7 +874,7 @@ system.time(
 #&gt; Found perfect balanced connected partition early. Balance criterion is 500
 #&gt; Found approximately balanced connected partition. Balance criterion is 500
 #&gt;    user  system elapsed 
-#&gt;   0.100   0.000   0.099
+#&gt;   0.085   0.000   0.086
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 500
 NROW(max_part$removed_edges) # number of removed edges
@@ -901,7 +901,7 @@ system.time(
 #&gt; Found 845 vertices to move
 #&gt; Keept 0 moves
 #&gt;    user  system elapsed 
-#&gt;   1.081   0.000   1.082
+#&gt;   0.929   0.000   0.929
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 500
 NROW(max_part$removed_edges) # number of removed edges
@@ -935,7 +935,7 @@ system.time(
 #&gt; Found perfect balanced connected partition early. Balance criterion is 50000
 #&gt; Found approximately balanced connected partition. Balance criterion is 50000
 #&gt;    user  system elapsed 
-#&gt;   5.355   0.000   5.364
+#&gt;   5.171   0.000   5.170
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 50000
 NROW(max_part$removed_edges) # number of removed edges
@@ -977,7 +977,7 @@ system.time(
 #&gt; Found 1000 vertices to move
 #&gt; Keept 0 moves
 #&gt;    user  system elapsed 
-#&gt;   29.63    0.00   29.63
+#&gt;  25.278   0.004  25.278
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 50000
 NROW(max_part$removed_edges) # number of removed edges
@@ -1011,7 +1011,7 @@ system.time(
 #&gt; Found 1000 vertices to move
 #&gt; Keept 0 moves
 #&gt;    user  system elapsed 
-#&gt;  27.727   0.004  27.728
+#&gt;  22.049   0.004  22.050
 
 # re-compute the partition with re-ordering the vertices
 system.time(
@@ -1037,7 +1037,7 @@ system.time(
 #&gt; Found 1000 vertices to move
 #&gt; Keept 0 moves
 #&gt;    user  system elapsed 
-#&gt;   24.41    0.00   24.41
+#&gt;   21.06    0.00   21.06
 
 # we got the same 
 all.equal(max_part_shuffled_and_ordered, max_part_shuffled)

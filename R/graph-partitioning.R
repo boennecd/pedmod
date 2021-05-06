@@ -247,5 +247,6 @@ get_max_balanced_partition_pedigree <- function(
   with(dat, get_max_balanced_partition(
     from = from, to = to, weight_data = weight_data, slack = slack,
     max_kl_it_inner = max_kl_it_inner, max_kl_it = max_kl_it, trace = trace,
-    edge_weights = edge_weights, do_reorder = do_reorder))
+    edge_weights = edge_weights, do_reorder = do_reorder,
+    check_weights = check_weights))
 }

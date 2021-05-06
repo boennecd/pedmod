@@ -474,7 +474,7 @@ std::vector<vertex> re_order_vertices(std::vector<vertex> const &org,
 
       // have to find the first vertex that is not yet added to get started
       for(vertex const * v : b.vertices){
-        if(new_idx.count(v))
+        if(is_added[v->id])
           continue;
         do_work(b, idx, v);
         break;

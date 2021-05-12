@@ -1253,59 +1253,65 @@ public:
  * finds a minimal cost partition which needs not to be connected. An amount
  * of slack in the balance criterion can be provided. It is assumed that
  * vertices have ids in the range of 0,...,vertices.size() - 1.
+ *
+ * init is one of the two partition which can be used as a starting point.
  */
 template<typename Tstream>
 mbcp_result unconnected_partition
   (std::vector<vertex> const &vertices, double const slack,
    unsigned const max_kl_it_inner, unsigned const max_kl_it,
-   Tstream &Tout, unsigned const trace){
-  // stores whether an object is in the second set and gain from moving the
-  // vertex to the other set
-  struct gain_n_set_flag {
-    bool is_in_set_2 = false;
-    double gain = 0.;
-  };
-  std::vector<gain_n_set_flag> vertex_info(vertices.size());
-
-  // updates the gains for a vertex and potentially the neighbors as if the
-  // vertex was just moved
-  auto update_gain =
-    [&vertex_info]
-    (vertex const *x, bool const update_adjacent) -> void {
-      gain_n_set_flag &info = vertex_info[x->id];
-
-      double out(0);
-      for(weighted_edge const &v : *x){
-        gain_n_set_flag &other_info = vertex_info[v.v->id];
-        if(other_info.is_in_set_2 == info.is_in_set_2){
-          // they are in the same set so moving the vertex is going to cost
-          out -= v.weight;
-          if(update_adjacent)
-            // have to switch from plus to minus
-            other_info.gain -= 2 * v.weight;
-        } else {
-          // they are not in the same set so moving the vertex is going to
-          // yield a plus
-          out += v.weight;
-          if(update_adjacent)
-            // have to switch from minus to plus
-            other_info.gain += 2 * v.weight;
-        }
-
-        // set the gain and flip the set flag
-        info.gain = out;
-      }
-    };
-
-  // setup the gains
-  for(vertex const &v : vertices)
-    update_gain(&v, false);
-
+   Tstream &Tout, unsigned const trace,
+   std::unordered_set<vertex const *> &init){
   // compute the sum of the weights
   double const weight_sum = std::accumulate(
     vertices.begin(), vertices.end(), 0.,
     [](double const su, vertex const &v){ return su + v.weight; }),
               min_balance = weight_sum / 2  - weight_sum * slack;
+
+  // sum the weights in init
+  double const init_weight = std::accumulate(
+    init.begin(), init.end(), 0.,
+    [](double const su, vertex const *v){ return su + v->weight; });
+  bool const is_s2_init = weight_sum > 2 * init_weight;
+
+  // stores the weight of the s2 set
+  double weight_s2(is_s2_init ? init_weight : weight_sum - init_weight);
+
+  // computes the balance criterion as if delta mass is moved to or from the
+  // second set
+  auto comp_balance =
+    [&weight_s2, &weight_sum]
+    (double const delta = 0, bool const is_v2 = false) -> double {
+      double w(weight_s2);
+      if(is_v2)
+        w -= delta;
+      else
+        w += delta;
+
+      return std::min(w, weight_sum - w);
+    };
+
+  // keeps track of the gains of moving a vertex. Useful as we can place it into
+  // a sorted container
+  struct score {
+    double gain;
+    vertex const * v;
+    bool is_in_set_2,
+         is_used;
+
+    score(double const gain, vertex const * v, bool const is_in_set_2,
+          bool const is_used = false):
+      gain(gain), v(v), is_in_set_2(is_in_set_2), is_used(is_used) { }
+
+    inline bool operator<(score const &other) const noexcept {
+      // we want the gains in descending order
+      if(!is_used and other.is_used)
+        return true;
+      if(is_used == other.is_used and gain > other.gain)
+        return true;
+      return false;
+    }
+  };
 
   /// keeps track of the next vertex to move
   struct to_move {
@@ -1316,7 +1322,7 @@ mbcp_result unconnected_partition
          b_crit = 0;
 
     inline void update(vertex const *new_v, double const balance_crit,
-                       gain_n_set_flag const &info){
+                       score const &info){
       if(!v or
            info.gain > gain or
            (is_almost_equal(info.gain, gain) and balance_crit > b_crit)){
@@ -1327,20 +1333,6 @@ mbcp_result unconnected_partition
     }
   };
 
-  // keeps track of the gains of moving a vertex. Useful as we can place it into
-  // a sorted container
-  struct score {
-    double gain;
-    vertex const * v;
-
-    score(double const gain, vertex const * v): gain(gain), v(v) { }
-
-    inline bool operator<(score const &other) const noexcept {
-      // we want the gains in descending order
-      return gain > other.gain;
-    }
-  };
-
   // used to keep track of which vertex to move next
   std::multiset<score> scores;
 
@@ -1348,63 +1340,79 @@ mbcp_result unconnected_partition
   std::vector<typename std::multiset<score>::iterator> scores_ptrs;
   scores_ptrs.reserve(vertices.size());
 
-  // fill the scores
-  for(size_t i = 0; i < vertices.size(); ++i)
-    scores_ptrs.emplace_back(
-      scores.emplace(vertex_info[i].gain, &vertices[i]));
+  // fill the scores. For this, we create a vector with flags for which set each
+  // vertex is in
+  {
+    std::vector<bool> s2_flag;
+    s2_flag.reserve(vertices.size());
+    for(vertex const &v : vertices)
+      s2_flag.emplace_back(init.count(&v) ? is_s2_init : !is_s2_init);
+
+    for(size_t i = 0; i < vertices.size(); ++i){
+      // compute the gain
+      double gain(0.);
+      vertex const &v = vertices[i];
+      for(weighted_edge const &e : v){
+        if(s2_flag[v.id] == s2_flag[e.v->id])
+          // they are in the same set so moving the vertex is going to cost
+          gain -= e.weight;
+        else
+          // they are not in the same set so moving the vertex is going to
+          // yield a plus
+          gain += e.weight;
+      }
+
+      scores_ptrs.emplace_back(scores.emplace(gain, &v, s2_flag[i]));
+    }
+  }
 
   // update the scores for a given vertex
-  auto update_scores = [&](vertex const *v) -> void {
-    size_t const idx = v->id;
-    gain_n_set_flag const &info = vertex_info[idx];
-    typename std::multiset<score>::iterator hint = scores_ptrs[idx];
-    if(info.gain > hint->gain){
-      // new gain is >. Want a larger hint
-      if(hint != scores.end())
-        ++hint;
-      else
-        --hint;
-    } else {
-      // new gain is <=. Want a lower hint
-      if(hint != scores.begin())
-        --hint;
-      else
-        ++hint;
-    }
-
-    scores.erase(scores_ptrs[idx]);
-    scores_ptrs[idx] = scores.emplace_hint(hint, info.gain, v);
+  auto update_score_entry =
+    [&scores, &scores_ptrs]
+    (vertex const *v, double const new_gain, bool const is_in_set_2,
+     bool const is_used) -> void {
+       size_t const idx = v->id;
+       scores.erase(scores_ptrs[idx]);
+       scores_ptrs[idx] = scores.emplace(new_gain, v, is_in_set_2, is_used);
   };
 
-  // stores the weight of the s2 set
-  double weight_s2(0.);
+  // updates the gains for a vertex and the neighbors as if the vertex was
+  // just moved. The passed vertex is moved and marked as used
+  auto update_gain =
+    [&scores, &scores_ptrs, &update_score_entry]
+    (vertex const *x) -> void {
+      score const &score_x = *scores_ptrs[x->id];
+      bool const new_set_2_flag = !score_x.is_in_set_2;
 
-  // computes the balance criterion as if delta mass is moved to or from the
-  // second set
-  auto comp_balance =
-    [&weight_s2, &weight_sum]
-    (double const delta = 0, bool const is_v2 = false) -> double {
-    double w(weight_s2);
-    if(is_v2)
-      w -= delta;
-    else
-      w += delta;
+      double out(0);
+      for(weighted_edge const &e : *x){
+        score const &score_other = *scores_ptrs[e.v->id];
 
-    return std::min(w, weight_sum - w);
-  };
+        if(new_set_2_flag == score_other.is_in_set_2){
+          // they are in the same set so moving the vertex is going to cost
+          out -= e.weight;
+          // have to switch from plus to minus
+          update_score_entry(e.v, score_other.gain - 2 * e.weight,
+                             score_other.is_in_set_2, score_other.is_used);
+        } else {
+          // they are not in the same set so moving the vertex is going to
+          // yield a plus
+          out += e.weight;
+          // have to switch from minus to plus
+          update_score_entry(e.v, score_other.gain + 2 * e.weight,
+                             score_other.is_in_set_2, score_other.is_used);
+        }
+
+        // set the gain and flip the set flag
+        update_score_entry(x, out, new_set_2_flag, true);
+      }
+    };
 
   // moves a vertex from one set to the other
   auto move_vertex = [&](vertex const *v){
-    // find the info object and switch the flag
-    gain_n_set_flag &info = vertex_info[v->id];
-    bool const moved_from_s2 = info.is_in_set_2;
-    info.is_in_set_2 = !info.is_in_set_2;
-
     // update the gains and scores
-    update_gain(v, true);
-    update_scores(v);
-    for(vertex const *o : *v)
-      update_scores(o);
+    bool const moved_from_s2 = scores_ptrs[v->id]->is_in_set_2;
+    update_gain(v);
 
     // update the vertex weight of the set
     if(moved_from_s2)
@@ -1423,12 +1431,11 @@ mbcp_result unconnected_partition
       // loop over vertices with the same score
       double const current_gain = s->gain;
       for(; s != scores.end() and is_almost_equal(s->gain, current_gain); ++s){
-        gain_n_set_flag const &info = vertex_info[s->v->id];
-        if(info.is_in_set_2)
+        if(s->is_in_set_2)
           continue;
 
         vertex const &vj = *s->v;
-        next_move.update(&vj, comp_balance(vj.weight, info.is_in_set_2), info);
+        next_move.update(&vj, comp_balance(vj.weight, s->is_in_set_2), *s);
       }
 
       if(next_move.v)
@@ -1448,7 +1455,6 @@ mbcp_result unconnected_partition
 
   // stores the moves make
   std::deque<to_move> moves;
-  std::vector<bool> is_used(vertices.size());
 
   // refine the partition
   unsigned const max_kl_it_inner_use = std::min<unsigned>(max_kl_it_inner,
@@ -1460,8 +1466,14 @@ mbcp_result unconnected_partition
 
     // prepare for a new iteration
     moves.clear();
-    for(unsigned j = 0; j < vertices.size(); ++j)
-      is_used[j] = false;
+    {
+      std::multiset<score> new_scores;
+      for(score const &s : scores)
+        scores_ptrs[s.v->id] = new_scores.emplace_hint(
+            new_scores.cend(), s.gain, s.v, s.is_in_set_2);
+
+      std::swap(scores, new_scores);
+    }
 
     // find the moves to make
     for(unsigned k = 0; k < max_kl_it_inner_use; ++k){
@@ -1472,17 +1484,16 @@ mbcp_result unconnected_partition
         double const current_gain = s->gain;
         for(; s != scores.end() and is_almost_equal(s->gain, current_gain); ++s){
           vertex const &vj = *s->v;
-          if(is_used[vj.id])
+          if(s->is_used)
             // already used
             continue;
 
-          gain_n_set_flag const &info = vertex_info[vj.id];
-          double const b_crit = comp_balance(vj.weight, info.is_in_set_2);
+          double const b_crit = comp_balance(vj.weight, s->is_in_set_2);
           if(b_crit < min_balance)
             // the balance criterion is no satisfied
             continue;
 
-          next_move.update(&vj, b_crit, info);
+          next_move.update(&vj, b_crit, *s);
         }
 
         if(next_move.v)
@@ -1497,7 +1508,6 @@ mbcp_result unconnected_partition
       // perform the move and check if we reached the size we want
       move_vertex(next_move.v);
       moves.push_back(next_move);
-      is_used[next_move.v->id] = true;
     }
 
     if(trace > 0)
@@ -1550,9 +1560,10 @@ mbcp_result unconnected_partition
   res.s1.reserve(vertices.size());
   res.s2.reserve(vertices.size());
 
-  for(vertex const &v : vertices){
-    gain_n_set_flag const &info = vertex_info[v.id];
-    if(info.is_in_set_2)
+  for(size_t i = 0; i < vertices.size(); ++i){
+    vertex const &v = vertices[i];
+    score const &score_v = *scores_ptrs[v.id];
+    if(score_v.is_in_set_2)
       res.s2.push_back(&v);
     else
       res.s1.push_back(&v);
@@ -1560,8 +1571,7 @@ mbcp_result unconnected_partition
     for(vertex const * o : v){
       if(o->id < v.id)
         continue;
-      gain_n_set_flag const &other_info = vertex_info[o->id];
-      if(other_info.is_in_set_2 != info.is_in_set_2)
+      if(scores_ptrs[o->id]->is_in_set_2 != score_v.is_in_set_2)
         res.removed_edges.emplace_back(o, &v);
     }
   }
@@ -1764,9 +1774,10 @@ Rcpp::List unconnected_partition_rcpp(
     &from[0], &to[0], to.size(), &weights_ids[0], &weights[0],
     weights_ids.size(), &edge_weights[0]);
 
+  std::unordered_set<vertex const *> dummy_set;
   mbcp_result const res =
     unconnected_partition(vertices, slack, max_kl_it_inner, max_kl_it,
-                          Rcpp::Rcout, trace);
+                          Rcpp::Rcout, trace, dummy_set);
 
   return mbcp_result_to_rcpp_list(res);
 }

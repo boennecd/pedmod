@@ -936,7 +936,7 @@ system.time(
 #&gt; Found perfect balanced connected partition early. Balance criterion is 500
 #&gt; Found approximately balanced connected partition. Balance criterion is 500
 #&gt;    user  system elapsed 
-#&gt;   0.093   0.012   0.104
+#&gt;   0.086   0.000   0.085
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 500
 NROW(max_part$removed_edges) # number of removed edges
@@ -963,7 +963,7 @@ system.time(
 #&gt; Found 845 vertices to move
 #&gt; Keept 0 moves
 #&gt;    user  system elapsed 
-#&gt;   0.912   0.000   0.912
+#&gt;   0.929   0.000   0.928
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 500
 NROW(max_part$removed_edges) # number of removed edges
@@ -992,15 +992,21 @@ system.time(
 #&gt; Keept 56 moves with a gain of 34 and a balance criterion of 446
 #&gt; Starting iteration 2
 #&gt; Found 1000 vertices to move
-#&gt; Keept 971 moves with a gain of 7 and a balance criterion of 475
+#&gt; Keept 996 moves with a gain of 2 and a balance criterion of 450
 #&gt; Starting iteration 3
 #&gt; Found 1000 vertices to move
-#&gt; Keept 9 moves with a gain of 9 and a balance criterion of 484
+#&gt; Keept 9 moves with a gain of 3 and a balance criterion of 459
 #&gt; Starting iteration 4
+#&gt; Found 1000 vertices to move
+#&gt; Keept 959 moves with a gain of 5 and a balance criterion of 500
+#&gt; Starting iteration 5
+#&gt; Found 1000 vertices to move
+#&gt; Keept 984 moves with a gain of 6 and a balance criterion of 484
+#&gt; Starting iteration 6
 #&gt; Found 1000 vertices to move
 #&gt; Keept 0 moves
 #&gt;    user  system elapsed 
-#&gt;   0.012   0.013   0.025
+#&gt;   0.014   0.013   0.026
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 484
 NROW(max_part$removed_edges) # number of removed edges
@@ -1034,7 +1040,7 @@ system.time(
 #&gt; Found perfect balanced connected partition early. Balance criterion is 50000
 #&gt; Found approximately balanced connected partition. Balance criterion is 50000
 #&gt;    user  system elapsed 
-#&gt;   4.546   0.000   4.546
+#&gt;   5.034   0.003   5.038
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 50000
 NROW(max_part$removed_edges) # number of removed edges
@@ -1076,7 +1082,7 @@ system.time(
 #&gt; Found 1000 vertices to move
 #&gt; Keept 0 moves
 #&gt;    user  system elapsed 
-#&gt;  24.101   0.004  24.103
+#&gt;  24.955   0.004  24.956
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 50000
 NROW(max_part$removed_edges) # number of removed edges
@@ -1110,7 +1116,7 @@ system.time(
 #&gt; Found 1000 vertices to move
 #&gt; Keept 0 moves
 #&gt;    user  system elapsed 
-#&gt;   21.16    0.00   21.16
+#&gt;  22.838   0.016  22.851
 max_part_shuffled$balance_criterion # the balance criterion
 #&gt; [1] 50000
 NROW(max_part_shuffled$removed_edges) # number of removed edges
@@ -1140,7 +1146,7 @@ system.time(
 #&gt; Found 1000 vertices to move
 #&gt; Keept 0 moves
 #&gt;    user  system elapsed 
-#&gt;   20.41    0.00   20.41
+#&gt;  21.824   0.012  21.834
 
 # we got the same 
 all.equal(max_part_shuffled_and_ordered, max_part_shuffled)
@@ -1167,88 +1173,52 @@ all.equal(max_part, max_part_shuffled)
 #&gt; Keept 1000 moves with a gain of 1018 and a balance criterion of 48008
 #&gt; Starting iteration 3
 #&gt; Found 1000 vertices to move
-#&gt; Keept 1000 moves with a gain of 644 and a balance criterion of 47008
+#&gt; Keept 1000 moves with a gain of 608 and a balance criterion of 47008
 #&gt; Starting iteration 4
 #&gt; Found 1000 vertices to move
-#&gt; Keept 989 moves with a gain of 217 and a balance criterion of 46379
+#&gt; Keept 997 moves with a gain of 215 and a balance criterion of 46395
 #&gt; Starting iteration 5
 #&gt; Found 1000 vertices to move
-#&gt; Keept 999 moves with a gain of 120 and a balance criterion of 46242
+#&gt; Keept 1000 moves with a gain of 214 and a balance criterion of 46275
 #&gt; Starting iteration 6
 #&gt; Found 1000 vertices to move
-#&gt; Keept 1000 moves with a gain of 68 and a balance criterion of 45990
+#&gt; Keept 921 moves with a gain of 135 and a balance criterion of 45854
 #&gt; Starting iteration 7
 #&gt; Found 1000 vertices to move
-#&gt; Keept 999 moves with a gain of 32 and a balance criterion of 46015
+#&gt; Keept 753 moves with a gain of 15 and a balance criterion of 45995
 #&gt; Starting iteration 8
 #&gt; Found 1000 vertices to move
-#&gt; Keept 1000 moves with a gain of 15 and a balance criterion of 45889
+#&gt; Keept 992 moves with a gain of 10 and a balance criterion of 45573
 #&gt; Starting iteration 9
 #&gt; Found 1000 vertices to move
-#&gt; Keept 998 moves with a gain of 8 and a balance criterion of 45961
+#&gt; Keept 758 moves with a gain of 1 and a balance criterion of 46193
 #&gt; Starting iteration 10
 #&gt; Found 1000 vertices to move
-#&gt; Keept 1000 moves with a gain of 8 and a balance criterion of 45855
+#&gt; Keept 999 moves with a gain of 6 and a balance criterion of 45328
 #&gt; Starting iteration 11
 #&gt; Found 1000 vertices to move
-#&gt; Keept 999 moves with a gain of 5 and a balance criterion of 45940
+#&gt; Keept 922 moves with a gain of 0 and a balance criterion of 46250
 #&gt; Starting iteration 12
 #&gt; Found 1000 vertices to move
-#&gt; Keept 999 moves with a gain of 3 and a balance criterion of 45843
+#&gt; Keept 972 moves with a gain of 2 and a balance criterion of 45278
 #&gt; Starting iteration 13
 #&gt; Found 1000 vertices to move
-#&gt; Keept 999 moves with a gain of 3 and a balance criterion of 45928
+#&gt; Keept 966 moves with a gain of 0 and a balance criterion of 46244
 #&gt; Starting iteration 14
 #&gt; Found 1000 vertices to move
-#&gt; Keept 999 moves with a gain of 3 and a balance criterion of 45833
+#&gt; Keept 17 moves with a gain of 3 and a balance criterion of 46227
 #&gt; Starting iteration 15
 #&gt; Found 1000 vertices to move
-#&gt; Keept 996 moves with a gain of 2 and a balance criterion of 45921
+#&gt; Keept 13 moves with a gain of 0 and a balance criterion of 46240
 #&gt; Starting iteration 16
-#&gt; Found 1000 vertices to move
-#&gt; Keept 999 moves with a gain of 3 and a balance criterion of 45824
-#&gt; Starting iteration 17
-#&gt; Found 1000 vertices to move
-#&gt; Keept 1000 moves with a gain of 2 and a balance criterion of 45912
-#&gt; Starting iteration 18
-#&gt; Found 1000 vertices to move
-#&gt; Keept 1000 moves with a gain of 2 and a balance criterion of 45818
-#&gt; Starting iteration 19
-#&gt; Found 1000 vertices to move
-#&gt; Keept 544 moves with a gain of 0 and a balance criterion of 46362
-#&gt; Starting iteration 20
-#&gt; Found 1000 vertices to move
-#&gt; Keept 993 moves with a gain of 16 and a balance criterion of 45369
-#&gt; Starting iteration 21
-#&gt; Found 1000 vertices to move
-#&gt; Keept 999 moves with a gain of 10 and a balance criterion of 46290
-#&gt; Starting iteration 22
-#&gt; Found 1000 vertices to move
-#&gt; Keept 997 moves with a gain of 7 and a balance criterion of 45341
-#&gt; Starting iteration 23
-#&gt; Found 1000 vertices to move
-#&gt; Keept 1000 moves with a gain of 2 and a balance criterion of 46263
-#&gt; Starting iteration 24
-#&gt; Found 1000 vertices to move
-#&gt; Keept 1000 moves with a gain of 3 and a balance criterion of 45333
-#&gt; Starting iteration 25
-#&gt; Found 1000 vertices to move
-#&gt; Keept 1000 moves with a gain of 2 and a balance criterion of 46255
-#&gt; Starting iteration 26
-#&gt; Found 1000 vertices to move
-#&gt; Keept 999 moves with a gain of 1 and a balance criterion of 45328
-#&gt; Starting iteration 27
-#&gt; Found 1000 vertices to move
-#&gt; Keept 961 moves with a gain of 0 and a balance criterion of 46289
-#&gt; Starting iteration 28
 #&gt; Found 1000 vertices to move
 #&gt; Keept 0 moves
 #&gt;    user  system elapsed 
-#&gt;   7.426   0.000   7.425
+#&gt;   1.223   0.000   1.223
 max_part$balance_criterion # the balance criterion
-#&gt; [1] 46289
+#&gt; [1] 46240
 NROW(max_part$removed_edges) # number of removed edges
-#&gt; [1] 4488</code></pre>
+#&gt; [1] 4455</code></pre>
 </div>
 </div>
 <div id="references" class="section level2 unnumbered">

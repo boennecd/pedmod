@@ -149,6 +149,20 @@ get_block_cut_tree_pedigree <- function(id, father.id, mother.id){
   with(dat, get_block_cut_tree(from = from, to = to))
 }
 
+.sort_partition_result <- function(out, id){
+  removed_edges <- out$removed_edges
+  removed_edges[] <- id[removed_edges]
+  removed_edges[] <- t(apply(removed_edges, 1L, sort))
+  removed_edges <- removed_edges[
+    order(removed_edges[, 1], removed_edges[, 2]), , drop = FALSE]
+  out$removed_edges <- removed_edges
+
+  out$set_1 <- sort(id[out$set_1])
+  out$set_2 <- sort(id[out$set_2])
+
+  out
+}
+
 #' Finds an Approximately Balanced Connected Partition
 #' @description
 #' Uses the method suggested by Chlebíková (1996) to construct an approximate
@@ -212,17 +226,7 @@ get_max_balanced_partition <- function(from, to, weight_data = NULL,
     check_weights = check_weights, do_reorder = do_reorder))
 
   # set and sort the removed edges
-  removed_edges <- out$removed_edges
-  removed_edges[] <- id[removed_edges]
-  removed_edges[] <- t(apply(removed_edges, 1L, sort))
-  removed_edges <- removed_edges[
-    order(removed_edges[, 1], removed_edges[, 2]), , drop = FALSE]
-  out$removed_edges <- removed_edges
-
-  out$set_1 <- sort(id[out$set_1])
-  out$set_2 <- sort(id[out$set_2])
-
-  out
+  .sort_partition_result(out, id)
 }
 
 #' @rdname get_max_balanced_partition
@@ -249,4 +253,40 @@ get_max_balanced_partition_pedigree <- function(
     max_kl_it_inner = max_kl_it_inner, max_kl_it = max_kl_it, trace = trace,
     edge_weights = edge_weights, do_reorder = do_reorder,
     check_weights = check_weights))
+}
+
+#' Finds an Approximately Balanced Partition
+#' @inheritParams get_max_balanced_partition
+#' @export
+get_unconnected_partition <- function(from, to, weight_data = NULL,
+                                      edge_weights = NULL,
+                                      slack = 0., max_kl_it_inner = 50L,
+                                      max_kl_it = 10000L, trace = 0L){
+  dat <- .prep_edge_list(from = from, to = to, weight_data = weight_data,
+                         edge_weights = edge_weights)
+  id <- dat$id
+
+  out <- with(dat, .get_unconnected_partition(
+    from, to, weights_ids,  weights, slack = slack, edge_weights = edge_weights,
+    max_kl_it_inner = max_kl_it_inner, max_kl_it = max_kl_it, trace = trace))
+
+  # set and sort the removed edges
+  .sort_partition_result(out, id)
+}
+
+#' @rdname get_unconnected_partition
+#' @export
+get_unconnected_partition_pedigree <- function(
+  id, father.id, mother.id, id_weight = NULL, father_weight = NULL,
+  mother_weight = NULL, slack = 0., max_kl_it_inner = 50L, max_kl_it = 10000L,
+  trace = 0L){
+  dat <- .pedigree_to_from_to(id = id, father.id = father.id,
+                              mother.id = mother.id, id_weight = id_weight,
+                              father_weight = father_weight,
+                              mother_weight = mother_weight)
+
+  with(dat, get_unconnected_partition(
+    from = from, to = to, weight_data = weight_data, slack = slack,
+    max_kl_it_inner = max_kl_it_inner, max_kl_it = max_kl_it, trace = trace,
+    edge_weights = edge_weights))
 }

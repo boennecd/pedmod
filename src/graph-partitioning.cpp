@@ -9,6 +9,7 @@
 #include <limits>
 #include <string>
 #include <iostream>
+#include <numeric>
 
 namespace {
 
@@ -535,6 +536,19 @@ std::vector<vertex> re_order_vertices(std::vector<vertex> const &org,
 }
 
 /**
+ * holds information of the solution of maximally balanced connected partition
+ * problem.
+ */
+struct mbcp_result {
+  /// the criterion value
+  double balance_criterion;
+  /// vector with the removed edges
+  std::vector<edge> removed_edges;
+  /// vertices in the two sets in the block where the partition is
+  std::vector<vertex const *> s1, s2;
+};
+
+/**
  * constructs an approximate maximally balanced connected partition using the
  * method suggested by Chlebíková (1996). All member functions assume that the
  * graph is connected to start with.
@@ -986,19 +1000,6 @@ public:
   }
 
   /**
-   * holds information of the solution of maximally balanced connected partition
-   * problem.
-   */
-  struct mbcp_result {
-    /// the criterion value
-    double balance_criterion;
-    /// vector with the removed edges
-    std::vector<edge> removed_edges;
-    /// vertices in the two sets in the block where the partition is
-    std::vector<vertex const *> s1, s2;
-  };
-
-  /**
    * runs the approximate maximally balanced connected partition algorithm.
    * See
    *    https://cstheory.stackexchange.com/q/48864/62145
@@ -1208,7 +1209,7 @@ public:
         ++idx;
         gain_sum += s.gain;
         if(gain_sum > max_gain or
-             (gain_sum == max_gain and
+             (is_almost_equal(gain_sum, max_gain) and
                 s.balance_criterion > max_balance_crit)){
           max_gain = gain_sum;
           max_idx = idx;
@@ -1246,6 +1247,253 @@ public:
     return get_return_object(res);
   }
 };
+
+/**
+ * finds a minimal cost partition which needs not to be connected. An amount
+ * of slack in the balance criterion can be provided. It is assumed that
+ * vertices have ids in the range of 0,...,vertices.size() - 1.
+ */
+template<typename Tstream>
+mbcp_result unconnected_partition
+  (std::vector<vertex> const &vertices, double const slack,
+   unsigned const max_kl_it_inner, unsigned const max_kl_it,
+   Tstream &Tout, unsigned const trace){
+  // stores whether an object is in the second set and gain from moving the
+  // vertex to the other set
+  struct gain_n_set_flag {
+    bool is_in_set_2 = false;
+    double gain = 0.;
+  };
+  std::vector<gain_n_set_flag> vertex_info(vertices.size());
+
+  // updates the gains for a vertex and potentially the neighbors as if the
+  // vertex was just moved
+  auto update_gain =
+    [&vertex_info]
+    (vertex const *x, bool const update_adjacent) -> void {
+      gain_n_set_flag &info = vertex_info[x->id];
+
+      double out(0);
+      for(weighted_edge const &v : *x){
+        gain_n_set_flag &other_info = vertex_info[v.v->id];
+        if(other_info.is_in_set_2 == info.is_in_set_2){
+          // they are in the same set so moving the vertex is going to cost
+          out -= v.weight;
+          if(update_adjacent)
+            // have to switch from plus to minus
+            other_info.gain -= 2 * v.weight;
+        } else {
+          // they are not in the same set so moving the vertex is going to
+          // yield a plus
+          out += v.weight;
+          if(update_adjacent)
+            // have to switch from minus to plus
+            other_info.gain += 2 * v.weight;
+        }
+
+        // set the gain and flip the set flag
+        info.gain = out;
+      }
+    };
+
+  // setup the gains
+  for(vertex const &v : vertices)
+    update_gain(&v, false);
+
+  // compute the sum of the weights
+  double const weight_sum = std::accumulate(
+    vertices.begin(), vertices.end(), 0.,
+    [](double const su, vertex const &v){ return su + v.weight; }),
+              min_balance = weight_sum / 2  - weight_sum * slack;
+
+  /// keeps track of the next vertex to move
+  struct to_move {
+    /// the vertex we move
+    vertex const *v = nullptr;
+    /// the gain and balance criterion
+    double gain = -std::numeric_limits<double>::max(),
+         b_crit = 0;
+
+    inline void update(vertex const *new_v, double const balance_crit,
+                       gain_n_set_flag const &info){
+      if(!v or
+           info.gain > gain or
+           (is_almost_equal(info.gain, gain) and balance_crit > b_crit)){
+        v = new_v;
+        gain = info.gain;
+        b_crit = balance_crit;
+      }
+    }
+  };
+
+  // stores the weight of the s2 set
+  double weight_s2(0.);
+
+  // computes the balance criterion as if delta mass is moved to or from the
+  // second set
+  auto comp_balance =
+    [&weight_s2, &weight_sum]
+    (double const delta = 0, bool const is_v2 = false) -> double {
+    double w(weight_s2);
+    if(is_v2)
+      w -= delta;
+    else
+      w += delta;
+
+    return std::min(w, weight_sum - w);
+  };
+
+  // moves a vertex
+  auto move_vertex = [&](vertex const *v){
+    gain_n_set_flag &info = vertex_info[v->id];
+    bool const moved_from_s2 = info.is_in_set_2;
+    info.is_in_set_2 = !info.is_in_set_2;
+    update_gain(v, true);
+    if(moved_from_s2)
+      weight_s2 -= v->weight;
+    else
+      weight_s2 += v->weight;
+  };
+
+  // build the first set to start with
+  if(trace > 0)
+    Tout << "Starting to build the first partition that satisfy the balance criterion\n";
+
+  for(size_t i = 0; i < vertices.size(); ++i){
+    to_move next_move;
+    for(size_t j = 0; j < vertices.size(); ++j){
+      gain_n_set_flag const &info = vertex_info[j];
+      if(info.is_in_set_2)
+        continue;
+
+      vertex const &vj = vertices[j];
+      next_move.update(&vj, comp_balance(vj.weight, info.is_in_set_2), info);
+    }
+
+    if(!next_move.v)
+      // found nothing to move
+      break;
+
+    // perform the move and check if we reached the size we wanted
+    move_vertex(next_move.v);
+    if(next_move.b_crit >= min_balance)
+      break;
+  }
+
+  // stores the moves make
+  std::deque<to_move> moves;
+  std::vector<bool> is_used(vertices.size());
+
+  // refine the partition
+  unsigned const max_kl_it_inner_use = std::min<unsigned>(max_kl_it_inner,
+                                                          vertices.size());
+  double current_balance_crit(0);
+  for(unsigned i = 0; i < max_kl_it; ++i){
+    if(trace > 0)
+      Tout << "Starting iteration " << i + 1 << '\n';
+
+    // prepare for a new iteration
+    moves.clear();
+    for(unsigned j = 0; j < vertices.size(); ++j)
+      is_used[j] = false;
+
+    // find the moves to make
+    for(unsigned k = 0; k < max_kl_it_inner_use; ++k){
+      to_move next_move;
+
+      for(unsigned j = 0; j < vertices.size(); ++j){
+        if(is_used[j])
+          // already used
+          continue;
+
+        gain_n_set_flag const &info = vertex_info[j];
+        vertex const &vj = vertices[j];
+        double const b_crit = comp_balance(vj.weight, info.is_in_set_2);
+        if(b_crit < min_balance)
+          // the balance criterion is no satisfied
+          continue;
+
+        next_move.update(&vj, b_crit, info);
+      }
+
+      if(!next_move.v)
+        // found nothing to move
+        break;
+
+      // perform the move and check if we reached the size we want
+      move_vertex(next_move.v);
+      moves.push_back(next_move);
+      is_used[next_move.v->id] = true;
+    }
+
+    if(trace > 0)
+      Tout << "Found " << moves.size() << " vertices to move\n";
+
+    // find the number of moves to keep
+    unsigned max_idx(0);
+    double  max_gain(0),
+            gain_sum(0.),
+          max_b_crit = current_balance_crit;
+    unsigned idx(0);
+    for(to_move const &s : moves){
+      ++idx;
+      gain_sum += s.gain;
+      if(gain_sum > max_gain or
+           (is_almost_equal(gain_sum, max_gain) and s.b_crit > max_b_crit)){
+        max_gain = gain_sum;
+        max_idx = idx;
+        max_b_crit = s.b_crit;
+      }
+    }
+
+    if(trace > 0){
+      if(max_idx > 0){
+        Tout << "Keept " << max_idx << " moves with a gain of "
+             << max_gain << " and a balance criterion of "
+             << max_b_crit << '\n';
+      } else
+        Tout << "Keept " << max_idx << " moves\n";
+    }
+
+    // undo moves
+    unsigned const n_moves = moves.size();
+    for(unsigned idx = max_idx; idx < n_moves; ++idx){
+      to_move const &s = moves.back();
+      move_vertex(s.v);
+      moves.pop_back();
+    }
+
+    current_balance_crit = comp_balance();
+
+    if(max_idx < 1L)
+      // no solution found
+      break;
+  }
+
+  // prepare the output
+  mbcp_result res;
+  res.balance_criterion = comp_balance();
+  res.s1.reserve(vertices.size());
+  res.s2.reserve(vertices.size());
+
+  for(vertex const &v : vertices){
+    gain_n_set_flag const &info = vertex_info[v.id];
+    if(info.is_in_set_2)
+      res.s2.push_back(&v);
+    else
+      res.s1.push_back(&v);
+
+    for(vertex const * o : v){
+      if(o->id < v.id)
+        continue;
+      gain_n_set_flag const &other_info = vertex_info[o->id];
+      if(other_info.is_in_set_2 != info.is_in_set_2)
+        res.removed_edges.emplace_back(o, &v);
+    }
+  }
+
+  return res;
+}
 
 } // namespace
 
@@ -1361,8 +1609,7 @@ Rcpp::List get_block_cut_tree(
 using max_balanced_partition_rcpp =
   max_balanced_partition<decltype(Rcpp::Rcout)>;
 
-Rcpp::List mbcp_result_to_rcpp_list
-  (max_balanced_partition_rcpp::mbcp_result const &res){
+Rcpp::List mbcp_result_to_rcpp_list(mbcp_result const &res){
   Rcpp::NumericVector balance_criterion = { res.balance_criterion };
   Rcpp::IntegerMatrix removed_edges(res.removed_edges.size(), 2L);
   for(unsigned i = 0; i < res.removed_edges.size(); ++i){
@@ -1400,7 +1647,7 @@ Rcpp::List get_max_balanced_partition(
     throw std::invalid_argument("size of edge_weights does not match size of to");
   if(weights_ids.size() != weights.size())
     throw std::invalid_argument("size of weights_ids does not match size of weights");
-  if(slack >= .5)
+  if(slack >= .5 or slack < 0)
     throw std::invalid_argument("invalid slack value");
 
   std::vector<vertex> vertices = create_vertices(
@@ -1416,8 +1663,36 @@ Rcpp::List get_max_balanced_partition(
   }
 
   max_balanced_partition_rcpp max_part(bct, trace, Rcpp::Rcout, check_weights);
-  max_balanced_partition_rcpp::mbcp_result const res =
+  mbcp_result const res =
     max_part.get(slack, max_kl_it_inner, max_kl_it);
+
+  return mbcp_result_to_rcpp_list(res);
+}
+
+// [[Rcpp::export(.get_unconnected_partition, rng = false)]]
+Rcpp::List unconnected_partition_rcpp(
+    Rcpp::IntegerVector const from, Rcpp::IntegerVector const to,
+    Rcpp::IntegerVector const weights_ids, Rcpp::NumericVector const weights,
+    Rcpp::NumericVector const edge_weights,
+    double const slack, unsigned const max_kl_it_inner,
+    unsigned const max_kl_it, unsigned const trace){
+
+  if(from.size() != to.size())
+    throw std::invalid_argument("size of from does not match size of to");
+  if(edge_weights.size() != to.size())
+    throw std::invalid_argument("size of edge_weights does not match size of to");
+  if(weights_ids.size() != weights.size())
+    throw std::invalid_argument("size of weights_ids does not match size of weights");
+  if(slack >= .5 or slack < 0)
+    throw std::invalid_argument("invalid slack value");
+
+  std::vector<vertex> vertices = create_vertices(
+    &from[0], &to[0], to.size(), &weights_ids[0], &weights[0],
+    weights_ids.size(), &edge_weights[0]);
+
+  mbcp_result const res =
+    unconnected_partition(vertices, slack, max_kl_it_inner, max_kl_it,
+                          Rcpp::Rcout, trace);
 
   return mbcp_result_to_rcpp_list(res);
 }

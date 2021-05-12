@@ -333,6 +333,38 @@ show_split(dat, weighted_partition)
 
 We end up cutting the link to the grandparents instead.
 
+### Potentialy Unconnected Partition
+
+```{r pedigree_unconnected}
+# without weights
+partition <- get_unconnected_partition_pedigree(
+  id = dat$id, father.id = dat$dad, mother.id = dat$mom, trace = 2L, 
+  slack = .1)
+partition$removed_edges # the relationships we have removed
+
+# show the partition
+show_split(dat, partition)
+# with weights
+weighted_partition <- get_unconnected_partition_pedigree(
+  id = dat$id, father.id = dat$dad, mother.id = dat$mom, trace = 2L, 
+  slack = .1, id_weight = dat$id_weight, father_weight = dat$father_weight, 
+  mother_weight = dat$mother_weight)
+weighted_partition$removed_edges # the relationships we have removed
+
+# show the partition
+new_dat <- get_reduced_data(dat, weighted_partition$removed_edges)
+ped <- with(new_dat, get_pedigree_mock(
+  id = id, dadid = dad, momid = mom, sex = sex))
+g_dat <- create_igraph_input(ped)
+graph_fam <- graph.data.frame(g_dat, directed = FALSE)
+V(graph_fam)$color <- ifelse(vertex_attr(graph_fam)$name %in% is_final, 
+                             "gray", "white")
+par(mar = c(1, 1, 1, 1))
+plot(graph_fam, vertex.size = 12, vertex.label.cex = .75, 
+     layout = layout_with_kk)
+show_split(dat, weighted_partition)
+```
+
 ## Details
 
 We will go through the details of the implemented methods in this section. 
@@ -532,6 +564,29 @@ plot(graph_fam, layout = layout_with_kk, vertex.label = NA,
      vertex.size = 3)
 ```
 
+We can also use the method for the potentially unconnected partition:
+
+```{r unconnected_larger_ex, fig.width=7, fig.height=7}
+# get the partition
+system.time(
+  max_part <- get_unconnected_partition(from = sim_dat$from, to = sim_dat$to, 
+                                        trace = 1L, slack = .1, 
+                                        max_kl_it_inner = 1000L))
+max_part$balance_criterion # the balance criterion
+NROW(max_part$removed_edges) # number of removed edges
+
+# show the split
+graph_fam <-  graph.data.frame(sim_dat, directed = FALSE)
+V(graph_fam)$color <- "white"
+nam <- vertex_attr(graph_fam)$name
+V(graph_fam)$color[nam %in% max_part$set_1] <- "lightblue" 
+V(graph_fam)$color[nam %in% max_part$set_2] <- "lightgray" 
+par(mar = c(1, 1, 1, 1))
+set.seed(1)
+plot(graph_fam, layout = layout_with_kk, vertex.label = NA, 
+     vertex.size = 3)
+```
+
 Here is an even larger example:
 
 ```{r largest_ex}
@@ -573,6 +628,8 @@ system.time(
   max_part_shuffled <- get_max_balanced_partition(
     from = sim_dat$from, to = sim_dat$to, trace = 1L, slack = .1, 
     max_kl_it_inner = 1000L, do_reorder = FALSE))
+max_part_shuffled$balance_criterion # the balance criterion
+NROW(max_part_shuffled$removed_edges) # number of removed edges
 
 # re-compute the partition with re-ordering the vertices
 system.time(
@@ -589,5 +646,18 @@ all.equal(max_part, max_part_shuffled)
 
 The solution will possibly not match when you reorder the data you pass to 
 `get_max_balanced_partition`.
+
+We can also compare the above with what we would have gotten if we had not 
+required that the partition is connected.
+
+```{r unconnected_largest_ex}
+system.time(
+  max_part <- get_unconnected_partition(from = sim_dat$from, to = sim_dat$to, 
+                                        trace = 1L, slack = .1, 
+                                        max_kl_it_inner = 1000L))
+max_part$balance_criterion # the balance criterion
+NROW(max_part$removed_edges) # number of removed edges
+```
+
 
 ## References

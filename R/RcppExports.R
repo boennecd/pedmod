@@ -13,6 +13,10 @@
     .Call(`_pedmod_get_max_balanced_partition`, from, to, weights_ids, weights, edge_weights, slack, max_kl_it_inner, max_kl_it, trace, check_weights, do_reorder)
 }
 
+.get_unconnected_partition <- function(from, to, weights_ids, weights, edge_weights, slack, max_kl_it_inner, max_kl_it, trace) {
+    .Call(`_pedmod_unconnected_partition_rcpp`, from, to, weights_ids, weights, edge_weights, slack, max_kl_it_inner, max_kl_it, trace)
+}
+
 #' Multivariate Normal Distribution CDF
 #' @description
 #' Provides an approximation of the multivariate normal distribution CDF

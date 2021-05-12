@@ -1,4 +1,5 @@
-.prep_edge_list <- function(from, to, weight_data, edge_weights){
+.prep_edge_list <- function(from, to, weight_data, edge_weights,
+                            init = integer()){
   if(is.null(edge_weights))
     edge_weights <- rep(1, length(from))
 
@@ -26,8 +27,11 @@
     weights <- weight_data$weight
   }
 
+  init <- match(init, id, nomatch = NA_integer_)
+  init <- init[!is.na(init)] - 1L
+
   list(from = from, to = to, id = id, weights_ids = weights_ids,
-       weights = weights, edge_weights = edge_weights)
+       weights = weights, edge_weights = edge_weights, init = init)
 }
 
 #' Finds the Biconnected Components
@@ -261,14 +265,16 @@ get_max_balanced_partition_pedigree <- function(
 get_unconnected_partition <- function(from, to, weight_data = NULL,
                                       edge_weights = NULL,
                                       slack = 0., max_kl_it_inner = 50L,
-                                      max_kl_it = 10000L, trace = 0L){
+                                      max_kl_it = 10000L, trace = 0L,
+                                      init = integer()){
   dat <- .prep_edge_list(from = from, to = to, weight_data = weight_data,
-                         edge_weights = edge_weights)
+                         edge_weights = edge_weights, init = init)
   id <- dat$id
 
   out <- with(dat, .get_unconnected_partition(
     from, to, weights_ids,  weights, slack = slack, edge_weights = edge_weights,
-    max_kl_it_inner = max_kl_it_inner, max_kl_it = max_kl_it, trace = trace))
+    max_kl_it_inner = max_kl_it_inner, max_kl_it = max_kl_it, trace = trace,
+    init = init))
 
   # set and sort the removed edges
   .sort_partition_result(out, id)

@@ -1277,6 +1277,10 @@ mbcp_result unconnected_partition
   // stores the weight of the s2 set
   double weight_s2(is_s2_init ? init_weight : weight_sum - init_weight);
 
+  if(trace > 0)
+    Tout << "Starting from an initial paratition with one set with a vertex weight of "
+         << init_weight << " out of " << weight_sum << '\n';
+
   // computes the balance criterion as if delta mass is moved to or from the
   // second set
   auto comp_balance =
@@ -1759,8 +1763,8 @@ Rcpp::List unconnected_partition_rcpp(
     Rcpp::IntegerVector const weights_ids, Rcpp::NumericVector const weights,
     Rcpp::NumericVector const edge_weights,
     double const slack, unsigned const max_kl_it_inner,
-    unsigned const max_kl_it, unsigned const trace){
-
+    unsigned const max_kl_it, unsigned const trace,
+    Rcpp::IntegerVector const init){
   if(from.size() != to.size())
     throw std::invalid_argument("size of from does not match size of to");
   if(edge_weights.size() != to.size())
@@ -1774,10 +1778,16 @@ Rcpp::List unconnected_partition_rcpp(
     &from[0], &to[0], to.size(), &weights_ids[0], &weights[0],
     weights_ids.size(), &edge_weights[0]);
 
-  std::unordered_set<vertex const *> dummy_set;
+  std::unordered_set<vertex const *> init_arg;
+  for(int const i : init){
+    if(static_cast<size_t>(i) >= vertices.size() or i < 0)
+      throw std::invalid_argument("invalid init argument");
+    init_arg.emplace(&vertices[i]);
+  }
+
   mbcp_result const res =
     unconnected_partition(vertices, slack, max_kl_it_inner, max_kl_it,
-                          Rcpp::Rcout, trace, dummy_set);
+                          Rcpp::Rcout, trace, init_arg);
 
   return mbcp_result_to_rcpp_list(res);
 }

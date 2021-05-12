@@ -55,8 +55,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // unconnected_partition_rcpp
-Rcpp::List unconnected_partition_rcpp(Rcpp::IntegerVector const from, Rcpp::IntegerVector const to, Rcpp::IntegerVector const weights_ids, Rcpp::NumericVector const weights, Rcpp::NumericVector const edge_weights, double const slack, unsigned const max_kl_it_inner, unsigned const max_kl_it, unsigned const trace);
-RcppExport SEXP _pedmod_unconnected_partition_rcpp(SEXP fromSEXP, SEXP toSEXP, SEXP weights_idsSEXP, SEXP weightsSEXP, SEXP edge_weightsSEXP, SEXP slackSEXP, SEXP max_kl_it_innerSEXP, SEXP max_kl_itSEXP, SEXP traceSEXP) {
+Rcpp::List unconnected_partition_rcpp(Rcpp::IntegerVector const from, Rcpp::IntegerVector const to, Rcpp::IntegerVector const weights_ids, Rcpp::NumericVector const weights, Rcpp::NumericVector const edge_weights, double const slack, unsigned const max_kl_it_inner, unsigned const max_kl_it, unsigned const trace, Rcpp::IntegerVector const init);
+RcppExport SEXP _pedmod_unconnected_partition_rcpp(SEXP fromSEXP, SEXP toSEXP, SEXP weights_idsSEXP, SEXP weightsSEXP, SEXP edge_weightsSEXP, SEXP slackSEXP, SEXP max_kl_it_innerSEXP, SEXP max_kl_itSEXP, SEXP traceSEXP, SEXP initSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< Rcpp::IntegerVector const >::type from(fromSEXP);
@@ -68,7 +68,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< unsigned const >::type max_kl_it_inner(max_kl_it_innerSEXP);
     Rcpp::traits::input_parameter< unsigned const >::type max_kl_it(max_kl_itSEXP);
     Rcpp::traits::input_parameter< unsigned const >::type trace(traceSEXP);
-    rcpp_result_gen = Rcpp::wrap(unconnected_partition_rcpp(from, to, weights_ids, weights, edge_weights, slack, max_kl_it_inner, max_kl_it, trace));
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector const >::type init(initSEXP);
+    rcpp_result_gen = Rcpp::wrap(unconnected_partition_rcpp(from, to, weights_ids, weights, edge_weights, slack, max_kl_it_inner, max_kl_it, trace, init));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -175,7 +176,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_pedmod_get_biconnected_components", (DL_FUNC) &_pedmod_get_biconnected_components, 5},
     {"_pedmod_get_block_cut_tree", (DL_FUNC) &_pedmod_get_block_cut_tree, 5},
     {"_pedmod_get_max_balanced_partition", (DL_FUNC) &_pedmod_get_max_balanced_partition, 11},
-    {"_pedmod_unconnected_partition_rcpp", (DL_FUNC) &_pedmod_unconnected_partition_rcpp, 9},
+    {"_pedmod_unconnected_partition_rcpp", (DL_FUNC) &_pedmod_unconnected_partition_rcpp, 10},
     {"_pedmod_mvndst", (DL_FUNC) &_pedmod_mvndst, 10},
     {"_pedmod_get_pedigree_ll_terms", (DL_FUNC) &_pedmod_get_pedigree_ll_terms, 2},
     {"_pedmod_get_n_scales", (DL_FUNC) &_pedmod_get_n_scales, 1},

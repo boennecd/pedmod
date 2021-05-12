@@ -585,6 +585,29 @@ par(mar = c(1, 1, 1, 1))
 set.seed(1)
 plot(graph_fam, layout = layout_with_kk, vertex.label = NA, 
      vertex.size = 3)
+
+# with random random initialization
+init <- unique(c(sim_dat$from, sim_dat$to))
+init <- sample(init, ceiling(length(init) / 2))
+
+system.time(
+  max_part <- get_unconnected_partition(from = sim_dat$from, to = sim_dat$to, 
+                                        trace = 1L, slack = .1, 
+                                        max_kl_it_inner = 1000L, 
+                                        init = init))
+max_part$balance_criterion # the balance criterion
+NROW(max_part$removed_edges) # number of removed edges
+
+# show the split
+graph_fam <-  graph.data.frame(sim_dat, directed = FALSE)
+V(graph_fam)$color <- "white"
+nam <- vertex_attr(graph_fam)$name
+V(graph_fam)$color[nam %in% max_part$set_1] <- "lightblue" 
+V(graph_fam)$color[nam %in% max_part$set_2] <- "lightgray" 
+par(mar = c(1, 1, 1, 1))
+set.seed(1)
+plot(graph_fam, layout = layout_with_kk, vertex.label = NA, 
+     vertex.size = 3)
 ```
 
 Here is an even larger example:

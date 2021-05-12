@@ -1442,7 +1442,7 @@ mbcp_result unconnected_partition
 
     // perform the move and check if we reached the size we wanted
     move_vertex(next_move.v);
-    if(next_move.b_crit >= min_balance)
+    if(weight_s2 >= weight_sum / 2)
       break;
   }
 

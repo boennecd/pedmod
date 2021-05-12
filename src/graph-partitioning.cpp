@@ -1,6 +1,7 @@
 #include <vector>
 #include <stdexcept>
 #include <algorithm>
+#include <set>
 #include <unordered_set>
 #include <unordered_map>
 #include <deque>
@@ -1326,6 +1327,55 @@ mbcp_result unconnected_partition
     }
   };
 
+  // keeps track of the gains of moving a vertex. Useful as we can place it into
+  // a sorted container
+  struct score {
+    double gain;
+    vertex const * v;
+
+    score(double const gain, vertex const * v): gain(gain), v(v) { }
+
+    inline bool operator<(score const &other) const noexcept {
+      // we want the gains in descending order
+      return gain > other.gain;
+    }
+  };
+
+  // used to keep track of which vertex to move next
+  std::multiset<score> scores;
+
+  // used to keep track of where the scores for each vertex is
+  std::vector<typename std::multiset<score>::iterator> scores_ptrs;
+  scores_ptrs.reserve(vertices.size());
+
+  // fill the scores
+  for(size_t i = 0; i < vertices.size(); ++i)
+    scores_ptrs.emplace_back(
+      scores.emplace(vertex_info[i].gain, &vertices[i]));
+
+  // update the scores for a given vertex
+  auto update_scores = [&](vertex const *v) -> void {
+    size_t const idx = v->id;
+    gain_n_set_flag const &info = vertex_info[idx];
+    typename std::multiset<score>::iterator hint = scores_ptrs[idx];
+    if(info.gain > hint->gain){
+      // new gain is >. Want a larger hint
+      if(hint != scores.end())
+        ++hint;
+      else
+        --hint;
+    } else {
+      // new gain is <=. Want a lower hint
+      if(hint != scores.begin())
+        --hint;
+      else
+        ++hint;
+    }
+
+    scores.erase(scores_ptrs[idx]);
+    scores_ptrs[idx] = scores.emplace_hint(hint, info.gain, v);
+  };
+
   // stores the weight of the s2 set
   double weight_s2(0.);
 
@@ -1343,12 +1393,20 @@ mbcp_result unconnected_partition
     return std::min(w, weight_sum - w);
   };
 
-  // moves a vertex
+  // moves a vertex from one set to the other
   auto move_vertex = [&](vertex const *v){
+    // find the info object and switch the flag
     gain_n_set_flag &info = vertex_info[v->id];
     bool const moved_from_s2 = info.is_in_set_2;
     info.is_in_set_2 = !info.is_in_set_2;
+
+    // update the gains and scores
     update_gain(v, true);
+    update_scores(v);
+    for(vertex const *o : *v)
+      update_scores(o);
+
+    // update the vertex weight of the set
     if(moved_from_s2)
       weight_s2 -= v->weight;
     else
@@ -1361,13 +1419,21 @@ mbcp_result unconnected_partition
 
   for(size_t i = 0; i < vertices.size(); ++i){
     to_move next_move;
-    for(size_t j = 0; j < vertices.size(); ++j){
-      gain_n_set_flag const &info = vertex_info[j];
-      if(info.is_in_set_2)
-        continue;
+    for(auto s = scores.begin(); s != scores.end(); ){
+      // loop over vertices with the same score
+      double const current_gain = s->gain;
+      for(; s != scores.end() and is_almost_equal(s->gain, current_gain); ++s){
+        gain_n_set_flag const &info = vertex_info[s->v->id];
+        if(info.is_in_set_2)
+          continue;
 
-      vertex const &vj = vertices[j];
-      next_move.update(&vj, comp_balance(vj.weight, info.is_in_set_2), info);
+        vertex const &vj = *s->v;
+        next_move.update(&vj, comp_balance(vj.weight, info.is_in_set_2), info);
+      }
+
+      if(next_move.v)
+        // found the best candidate
+        break;
     }
 
     if(!next_move.v)
@@ -1401,19 +1467,27 @@ mbcp_result unconnected_partition
     for(unsigned k = 0; k < max_kl_it_inner_use; ++k){
       to_move next_move;
 
-      for(unsigned j = 0; j < vertices.size(); ++j){
-        if(is_used[j])
-          // already used
-          continue;
+      for(auto s = scores.begin(); s != scores.end(); ){
+        // loop over vertices with the same score
+        double const current_gain = s->gain;
+        for(; s != scores.end() and is_almost_equal(s->gain, current_gain); ++s){
+          vertex const &vj = *s->v;
+          if(is_used[vj.id])
+            // already used
+            continue;
 
-        gain_n_set_flag const &info = vertex_info[j];
-        vertex const &vj = vertices[j];
-        double const b_crit = comp_balance(vj.weight, info.is_in_set_2);
-        if(b_crit < min_balance)
-          // the balance criterion is no satisfied
-          continue;
+          gain_n_set_flag const &info = vertex_info[vj.id];
+          double const b_crit = comp_balance(vj.weight, info.is_in_set_2);
+          if(b_crit < min_balance)
+            // the balance criterion is no satisfied
+            continue;
 
-        next_move.update(&vj, b_crit, info);
+          next_move.update(&vj, b_crit, info);
+        }
+
+        if(next_move.v)
+          // found the best candidate
+          break;
       }
 
       if(!next_move.v)

@@ -1400,8 +1400,11 @@ mbcp_result unconnected_partition
       // compute the gain
       double gain(0.);
       vertex const &v = vertices[i];
+      if(v.id != i)
+        throw std::invalid_argument("vertices are not ordered such that ids are equal to 0,...,vertices.size() - 1");
+
       for(weighted_edge const &e : v){
-        if(s2_flag[v.id] == s2_flag[e.v->id])
+        if(s2_flag[i] == s2_flag[e.v->id])
           // they are in the same set so moving the vertex is going to cost
           gain -= e.weight;
         else
@@ -1460,6 +1463,9 @@ mbcp_result unconnected_partition
   auto move_vertex = [&](vertex const *v){
     // update the gains and scores
     bool const moved_from_s2 = scores_ptrs[v->id]->is_in_set_2;
+    if(trace > 2)
+      Tout << "Moved vertex " << v->id << (moved_from_s2 ? " from " : " to ")
+           << "the second set to gain " << scores_ptrs[v->id]->gain << '\n';
     update_gain(v);
 
     // update the vertex weight of the set
@@ -1473,7 +1479,7 @@ mbcp_result unconnected_partition
   if(trace > 0)
     Tout << "Starting to build the first partition that satisfy the balance criterion\n";
 
-  for(size_t i = 0; i < vertices.size(); ++i){
+  for(size_t i = 0; i < vertices.size() and weight_s2 < min_balance; ++i){
     to_move next_move;
     for(auto s = scores.begin(); s != scores.end(); ){
       // loop over vertices with the same score
@@ -1495,10 +1501,8 @@ mbcp_result unconnected_partition
       // found nothing to move
       break;
 
-    // perform the move and check if we reached the size we wanted
+    // perform the move
     move_vertex(next_move.v);
-    if(weight_s2 >= weight_sum / 2)
-      break;
   }
 
   // stores the moves we make
@@ -1506,7 +1510,7 @@ mbcp_result unconnected_partition
 
   // refine the partition
   unsigned const max_kl_it_inner_use = std::min<unsigned>(max_kl_it_inner,
-                                                          vertices.size());
+                                                          vertices.size() - 1L);
   double current_balance_crit(comp_balance());
   for(unsigned i = 0; i < max_kl_it; ++i){
     if(trace > 0)

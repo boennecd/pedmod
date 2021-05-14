@@ -349,6 +349,25 @@ plot_weighted(dat, weighted_partition$removed_edges)
 show_split(dat, weighted_partition)
 ```
 
+We can also start from a connected partition like below:
+
+```{r connected_start_pedigree_unconnected}
+# get the connected partition
+connected_partition <- get_max_balanced_partition_pedigree(
+  id = dat$id, father.id = dat$dad, mother.id = dat$mom, trace = 2L, 
+  slack = .1, id_weight = dat$id_weight, father_weight = dat$father_weight, 
+  mother_weight = dat$mother_weight)
+
+# get the passably unconnected partition
+partition <- get_unconnected_partition_pedigree(
+  id = dat$id, father.id = dat$dad, mother.id = dat$mom, trace = 2L, 
+  slack = .1, id_weight = dat$id_weight, father_weight = dat$father_weight, 
+  mother_weight = dat$mother_weight, init = connected_partition$set_2)
+
+# show the partition
+show_split(dat, partition)
+```
+
 ## Details
 
 We will go through the details of the implemented methods in this section. 
@@ -543,7 +562,10 @@ show_split(sim_dat, max_part, vertex.size = 3, vertex.label = NA)
 We can also use the method for the potentially unconnected partition:
 
 ```{r unconnected_larger_ex, fig.width=7, fig.height=7}
-# get the partition
+# assign a variable with the connected partition
+connected_partition <- max_part
+
+# get the partition which may be unconnected
 system.time(
   max_part <- get_unconnected_partition(from = sim_dat$from, to = sim_dat$to, 
                                         trace = 1L, slack = .1, 
@@ -553,7 +575,7 @@ NROW(max_part$removed_edges) # number of removed edges
 
 # show the split
 show_split(sim_dat, max_part, vertex.size = 3, vertex.label = NA)
-# with random random initialization
+# we can start with random initialization
 init <- unique(c(sim_dat$from, sim_dat$to))
 init <- sample(init, ceiling(length(init) / 2))
 
@@ -566,6 +588,17 @@ max_part$balance_criterion # the balance criterion
 NROW(max_part$removed_edges) # number of removed edges
 
 # show the split
+show_split(sim_dat, max_part, vertex.size = 3, vertex.label = NA)
+# we can also start from the connected partition
+system.time(
+  max_part <- get_unconnected_partition(from = sim_dat$from, to = sim_dat$to, 
+                                        trace = 1L, slack = .1, 
+                                        max_kl_it_inner = 1000L, 
+                                        init = connected_partition$set_1))
+max_part$balance_criterion # the balance criterion
+NROW(max_part$removed_edges) # number of removed edges
+# compare with 
+NROW(connected_partition$removed_edges)
 show_split(sim_dat, max_part, vertex.size = 3, vertex.label = NA)
 ```
 
@@ -633,10 +666,23 @@ We can also compare the above with what we would have gotten if we had not
 required that the partition is connected.
 
 ```{r unconnected_largest_ex}
+# assign a variable with the connected partition
+connected_partition <- max_part_shuffled
+
+# get potentially unconnected partition
 system.time(
   max_part <- get_unconnected_partition(from = sim_dat$from, to = sim_dat$to, 
                                         trace = 1L, slack = .1, 
                                         max_kl_it_inner = 1000L))
+max_part$balance_criterion # the balance criterion
+NROW(max_part$removed_edges) # number of removed edges
+
+# improve on the connected partition 
+system.time(
+  max_part <- get_unconnected_partition(from = sim_dat$from, to = sim_dat$to, 
+                                        trace = 1L, slack = .1, 
+                                        max_kl_it_inner = 1000L, 
+                                        init = connected_partition$set_1))
 max_part$balance_criterion # the balance criterion
 NROW(max_part$removed_edges) # number of removed edges
 ```

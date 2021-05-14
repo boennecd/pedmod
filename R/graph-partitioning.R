@@ -66,7 +66,8 @@ get_biconnected_components <- function(from, to){
 }
 
 .pedigree_to_from_to <- function(id, father.id, mother.id, id_weight = NULL,
-                                 father_weight = NULL, mother_weight = NULL){
+                                 father_weight = NULL, mother_weight = NULL,
+                                 init = integer()){
   n <- length(id)
   stopifnot(length(father.id) == n, length(mother.id) == n)
   to <- c(id, id)
@@ -93,7 +94,8 @@ get_biconnected_components <- function(from, to){
   edge_weights <- c(father_weight, mother_weight)
 
   list(to = to[keep], from = from[keep], edge_weights = edge_weights[keep],
-       weight_data = list(id = weights_ids, weight = weights))
+       weight_data = list(id = weights_ids, weight = weights),
+       init = init)
 }
 
 #' @rdname get_biconnected_components
@@ -303,14 +305,14 @@ get_unconnected_partition <- function(from, to, weight_data = NULL,
 get_unconnected_partition_pedigree <- function(
   id, father.id, mother.id, id_weight = NULL, father_weight = NULL,
   mother_weight = NULL, slack = 0., max_kl_it_inner = 50L, max_kl_it = 10000L,
-  trace = 0L){
+  trace = 0L, init = integer()){
   dat <- .pedigree_to_from_to(id = id, father.id = father.id,
                               mother.id = mother.id, id_weight = id_weight,
                               father_weight = father_weight,
-                              mother_weight = mother_weight)
+                              mother_weight = mother_weight, init = init)
 
   with(dat, get_unconnected_partition(
     from = from, to = to, weight_data = weight_data, slack = slack,
     max_kl_it_inner = max_kl_it_inner, max_kl_it = max_kl_it, trace = trace,
-    edge_weights = edge_weights))
+    edge_weights = edge_weights, init = init))
 }

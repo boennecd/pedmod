@@ -1457,13 +1457,13 @@ mbcp_result unconnected_partition
       break;
   }
 
-  // stores the moves make
+  // stores the moves we make
   std::deque<to_move> moves;
 
   // refine the partition
   unsigned const max_kl_it_inner_use = std::min<unsigned>(max_kl_it_inner,
                                                           vertices.size());
-  double current_balance_crit(0);
+  double current_balance_crit(comp_balance());
   for(unsigned i = 0; i < max_kl_it; ++i){
     if(trace > 0)
       Tout << "Starting iteration " << i + 1 << '\n';
@@ -1486,12 +1486,13 @@ mbcp_result unconnected_partition
       for(auto s = scores.begin(); s != scores.end(); ){
         // loop over vertices with the same score
         double const current_gain = s->gain;
-        for(; s != scores.end() and is_almost_equal(s->gain, current_gain); ++s){
-          vertex const &vj = *s->v;
+        for(; s != scores.end() and is_almost_equal(s->gain, current_gain);
+            ++s){
           if(s->is_used)
             // already used
             continue;
 
+          vertex const &vj = *s->v;
           double const b_crit = comp_balance(vj.weight, s->is_in_set_2);
           if(b_crit < min_balance)
             // the balance criterion is no satisfied

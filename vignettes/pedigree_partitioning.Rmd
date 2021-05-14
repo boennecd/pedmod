@@ -559,7 +559,6 @@ nam <- vertex_attr(graph_fam)$name
 V(graph_fam)$color[nam %in% max_part$set_1] <- "lightblue" 
 V(graph_fam)$color[nam %in% max_part$set_2] <- "lightgray" 
 par(mar = c(1, 1, 1, 1))
-set.seed(1)
 plot(graph_fam, layout = layout_with_kk, vertex.label = NA, 
      vertex.size = 3)
 ```
@@ -582,7 +581,6 @@ nam <- vertex_attr(graph_fam)$name
 V(graph_fam)$color[nam %in% max_part$set_1] <- "lightblue" 
 V(graph_fam)$color[nam %in% max_part$set_2] <- "lightgray" 
 par(mar = c(1, 1, 1, 1))
-set.seed(1)
 plot(graph_fam, layout = layout_with_kk, vertex.label = NA, 
      vertex.size = 3)
 
@@ -605,7 +603,6 @@ nam <- vertex_attr(graph_fam)$name
 V(graph_fam)$color[nam %in% max_part$set_1] <- "lightblue" 
 V(graph_fam)$color[nam %in% max_part$set_2] <- "lightgray" 
 par(mar = c(1, 1, 1, 1))
-set.seed(1)
 plot(graph_fam, layout = layout_with_kk, vertex.label = NA, 
      vertex.size = 3)
 ```

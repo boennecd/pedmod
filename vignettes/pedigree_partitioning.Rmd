@@ -276,16 +276,19 @@ removed_edges <- weighted_partition$removed_edges
 removed_edges # the relationships we have removed
 
 # plot the new graph
-new_dat <- get_reduced_data(dat, removed_edges)
-ped <- with(new_dat, get_pedigree_mock(
-  id = id, dadid = dad, momid = mom, sex = sex))
-g_dat <- create_igraph_input(ped)
-graph_fam <- graph.data.frame(g_dat, directed = FALSE)
-V(graph_fam)$color <- ifelse(vertex_attr(graph_fam)$name %in% is_final, 
-                             "gray", "white")
-par(mar = c(1, 1, 1, 1))
-plot(graph_fam, vertex.size = 12, vertex.label.cex = .75, 
-     layout = layout_with_kk)
+plot_weighted <- function(dat, removed_edges){
+  new_dat <- get_reduced_data(dat, removed_edges)
+  ped <- with(new_dat, get_pedigree_mock(
+    id = id, dadid = dad, momid = mom, sex = sex))
+  g_dat <- create_igraph_input(ped)
+  graph_fam <- graph.data.frame(g_dat, directed = FALSE)
+  V(graph_fam)$color <- ifelse(vertex_attr(graph_fam)$name %in% is_final, 
+                               "gray", "white")
+  par(mar = c(1, 1, 1, 1))
+  plot(graph_fam, vertex.size = 12, vertex.label.cex = .75, 
+       layout = layout_with_kk)}
+
+plot_weighted(dat, removed_edges)
 show_split(dat, weighted_partition)
 ```
 
@@ -317,16 +320,7 @@ removed_edges <- weighted_partition$removed_edges
 removed_edges # the relationships we have removed
 
 # plot the new graph
-new_dat <- get_reduced_data(dat, removed_edges)
-ped <- with(new_dat, get_pedigree_mock(
-  id = id, dadid = dad, momid = mom, sex = sex))
-g_dat <- create_igraph_input(ped)
-graph_fam <- graph.data.frame(g_dat, directed = FALSE)
-V(graph_fam)$color <- ifelse(vertex_attr(graph_fam)$name %in% is_final, 
-                             "gray", "white")
-par(mar = c(1, 1, 1, 1))
-plot(graph_fam, vertex.size = 12, vertex.label.cex = .75, 
-     layout = layout_with_kk)
+plot_weighted(dat, removed_edges)
 show_split(dat, weighted_partition)
 ```
 
@@ -351,16 +345,7 @@ weighted_partition <- get_unconnected_partition_pedigree(
 weighted_partition$removed_edges # the relationships we have removed
 
 # show the partition
-new_dat <- get_reduced_data(dat, weighted_partition$removed_edges)
-ped <- with(new_dat, get_pedigree_mock(
-  id = id, dadid = dad, momid = mom, sex = sex))
-g_dat <- create_igraph_input(ped)
-graph_fam <- graph.data.frame(g_dat, directed = FALSE)
-V(graph_fam)$color <- ifelse(vertex_attr(graph_fam)$name %in% is_final, 
-                             "gray", "white")
-par(mar = c(1, 1, 1, 1))
-plot(graph_fam, vertex.size = 12, vertex.label.cex = .75, 
-     layout = layout_with_kk)
+plot_weighted(dat, weighted_partition$removed_edges)
 show_split(dat, weighted_partition)
 ```
 
@@ -444,15 +429,15 @@ do_plot <- function(dat, partition_obj){
 }
 do_plot(sim_dat, max_part)
 # assign function to show the split in the original graph
-show_split <- function(dat, partition_obj){
+show_split <- function(dat, partition_obj, vertex.size = 12, 
+                       vertex.label = NULL){
   graph_fam <-  graph.data.frame(dat, directed = FALSE)
-  V(graph_fam)$color <- "white"
   nam <- vertex_attr(graph_fam)$name
   V(graph_fam)$color[nam %in% partition_obj$set_1] <- "lightblue" 
   V(graph_fam)$color[nam %in% partition_obj$set_2] <- "lightgray" 
   par(mar = c(1, 1, 1, 1))
-  plot(graph_fam, vertex.size = 12, vertex.label.cex = .75, 
-       layout = layout_with_kk)
+  plot(graph_fam, vertex.size = vertex.size, vertex.label.cex = .75, 
+       layout = layout_with_kk, vertex.label = vertex.label)
 }
 show_split(sim_dat, max_part)
 ```
@@ -552,14 +537,7 @@ max_part$balance_criterion # the balance criterion
 NROW(max_part$removed_edges) # number of removed edges
 
 # show the split
-graph_fam <-  graph.data.frame(sim_dat, directed = FALSE)
-V(graph_fam)$color <- "white"
-nam <- vertex_attr(graph_fam)$name
-V(graph_fam)$color[nam %in% max_part$set_1] <- "lightblue" 
-V(graph_fam)$color[nam %in% max_part$set_2] <- "lightgray" 
-par(mar = c(1, 1, 1, 1))
-plot(graph_fam, layout = layout_with_kk, vertex.label = NA, 
-     vertex.size = 3)
+show_split(sim_dat, max_part, vertex.size = 3, vertex.label = NA)
 ```
 
 We can also use the method for the potentially unconnected partition:
@@ -574,15 +552,7 @@ max_part$balance_criterion # the balance criterion
 NROW(max_part$removed_edges) # number of removed edges
 
 # show the split
-graph_fam <-  graph.data.frame(sim_dat, directed = FALSE)
-V(graph_fam)$color <- "white"
-nam <- vertex_attr(graph_fam)$name
-V(graph_fam)$color[nam %in% max_part$set_1] <- "lightblue" 
-V(graph_fam)$color[nam %in% max_part$set_2] <- "lightgray" 
-par(mar = c(1, 1, 1, 1))
-plot(graph_fam, layout = layout_with_kk, vertex.label = NA, 
-     vertex.size = 3)
-
+show_split(sim_dat, max_part, vertex.size = 3, vertex.label = NA)
 # with random random initialization
 init <- unique(c(sim_dat$from, sim_dat$to))
 init <- sample(init, ceiling(length(init) / 2))
@@ -596,14 +566,7 @@ max_part$balance_criterion # the balance criterion
 NROW(max_part$removed_edges) # number of removed edges
 
 # show the split
-graph_fam <-  graph.data.frame(sim_dat, directed = FALSE)
-V(graph_fam)$color <- "white"
-nam <- vertex_attr(graph_fam)$name
-V(graph_fam)$color[nam %in% max_part$set_1] <- "lightblue" 
-V(graph_fam)$color[nam %in% max_part$set_2] <- "lightgray" 
-par(mar = c(1, 1, 1, 1))
-plot(graph_fam, layout = layout_with_kk, vertex.label = NA, 
-     vertex.size = 3)
+show_split(sim_dat, max_part, vertex.size = 3, vertex.label = NA)
 ```
 
 Here is an even larger example:
@@ -677,6 +640,5 @@ system.time(
 max_part$balance_criterion # the balance criterion
 NROW(max_part$removed_edges) # number of removed edges
 ```
-
 
 ## References

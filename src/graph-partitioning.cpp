@@ -168,12 +168,14 @@ struct block {
 class block_cut_tree {
 public:
   struct block_edge {
-    block const * v1,
-                * v2;
+    block * v1,
+          * v2;
+
+    block_edge(block *v1, block *v2): v1(v1), v2(v2) { }
   };
 
   /// the blocks that defines the tree
-  std::vector<block> const &blocks;
+  std::vector<block> &blocks;
   /// the edges between the blocks
   std::vector<block_edge> block_edges;
   /// the map from a cut point to the block_edges
@@ -193,28 +195,47 @@ public:
     std::swap(cut_point_edges, new_cut_point_edges);
   }
 
-  block_cut_tree(std::vector<block> const &blocks):
+  block_cut_tree(std::vector<block> &blocks):
     blocks(blocks) {
     //
     // create a map from cut vertices to the blocks and create a map from the
     // blocks to their indices
-    std::unordered_map<vertex const *, std::deque<block const *> >
+    std::unordered_map<vertex const *, std::deque<block *> >
       cut_vertex_to_blocks;
-    for(block const &b : blocks){
+    for(block &b : blocks){
       for(vertex const *v : b.cut_vertices)
         cut_vertex_to_blocks[v].emplace_back(&b);
     }
 
     // add the edges
     for(auto &ele : cut_vertex_to_blocks){
-      std::deque<block const *> &bs = ele.second;
+      std::deque<block *> &bs = ele.second;
       size_t const n_blocks = bs.size();
 
       for(size_t i = 0; i < n_blocks; ++i)
         for(size_t j = i + 1; j < n_blocks; ++j){
-          block_edges.push_back(block_edge { bs[i], bs[j] } );
+          block_edges.emplace_back(bs[i], bs[j]);
           cut_point_edges[ele.first].emplace_back(block_edges.size() - 1L);
         }
+    }
+  }
+
+  /**
+   * applies the functor on each neighbor block. The functor should take two
+   * arguments: one for the cut vertex and one for the neighbor block.
+   */
+  template<typename TFunc>
+  void for_each_neighbor(block const &b, TFunc func) const {
+    for(vertex const * v: b.cut_vertices){
+      auto block_edge_indices = cut_point_edges.find(v);
+      if(block_edge_indices == cut_point_edges.end())
+        continue;
+
+      for(size_t edge_ix : block_edge_indices->second){
+        auto &edge = block_edges[edge_ix];
+        block *other = edge.v1 != &b ? edge.v1 : edge.v2;
+        func(*v, *other);
+      }
     }
   }
 };
@@ -483,14 +504,9 @@ std::vector<vertex> re_order_vertices(std::vector<vertex> const &org,
       }
 
       // add connected blocks
-      for(vertex const * v: b.cut_vertices){
-        auto block_edge_indices = tree.cut_point_edges.find(v);
-        for(size_t edge_ix : block_edge_indices->second){
-          auto &edge = tree.block_edges[edge_ix];
-          block const *other = edge.v1 != &b ? edge.v1 : edge.v2;
-          do_work(tree, idx, *other);
-        }
-      }
+      tree.for_each_neighbor(b, [&](vertex const&, block &other){
+        do_work(tree, idx, other);
+      });
     }
 
   public:
@@ -669,14 +685,9 @@ class max_balanced_partition {
       return;
 
     // add connected blocks
-    for(vertex const * v : b.cut_vertices){
-      std::vector<size_t> const &edges = tree.cut_point_edges.at(v);
-      for(size_t edge_idx : edges){
-        block_cut_tree::block_edge const &b_edge = tree.block_edges[edge_idx];
-        block const * other_block = b_edge.v1 != &b ? b_edge.v1 : b_edge.v2;
-        add_block(*other_block, tree, out);
-      }
-    }
+    tree.for_each_neighbor(b, [&](vertex const&, block const &other){
+      add_block(other, tree, out);
+    });
   }
 
   /**
@@ -695,17 +706,10 @@ class max_balanced_partition {
       s.insert(v);
 
     // add the connected blocks
-    for(vertex const *v : b.cut_vertices){
-      auto &edges = bct.cut_point_edges.at(v);
-      for(size_t edge_idx : edges){
-        auto &edge = bct.block_edges[edge_idx];
-        block const * other = edge.v1 != &b ? edge.v1 : edge.v2;
-        if(!used_blocks.count(other))
-          add_block_to_set(s, *other, used_blocks);
-      }
-    }
+    bct.for_each_neighbor(b, [&](vertex const&, block const &other){
+      add_block_to_set(s, other, used_blocks);
+    });
   }
-
 
   biconnected_components bicon_comp;
 
@@ -1062,18 +1066,12 @@ public:
         std::unordered_set<block const *> used_blocks;
         used_blocks.emplace(&block_w_solution);
 
-        for(vertex const *v : block_w_solution.cut_vertices){
-          auto &edges = bct.cut_point_edges.at(v);
-          std::unordered_set<vertex const *> &add_to =
-            out.s1.count(v) ? out.s1 : out.s2;
-
-          for(size_t edge_idx : edges){
-            auto &edge = bct.block_edges[edge_idx];
-            block const * other =
-              edge.v1 != &block_w_solution ? edge.v1 : edge.v2;
-            add_block_to_set(add_to, *other, used_blocks);
-          }
-        }
+        bct.for_each_neighbor(
+          block_w_solution, [&](vertex const &cut_vertex, block const &other){
+            std::unordered_set<vertex const *> &add_to =
+              out.s1.count(&cut_vertex) ? out.s1 : out.s2;
+            add_block_to_set(add_to, other, used_blocks);
+          });
       }
 
       return out;
@@ -1701,8 +1699,7 @@ Rcpp::List block_cut_tree_to_rcpp_list
   Rcpp::List leafs;
   {
     for(vertex const *comp_ele : b.cut_vertices)
-      if(!used_cut_points.count(comp_ele)){
-        used_cut_points.insert(comp_ele);
+      if(used_cut_points.insert(comp_ele).second){
         auto &edges = bct.cut_point_edges.at(comp_ele);
         for(size_t edge_idx : edges){
           auto &edge = bct.block_edges[edge_idx];

@@ -222,7 +222,6 @@ show_split <- function(dat, partition_obj){
   ped <- with(dat, pedigree(id = id, dadid = dad, momid = mom, sex = sex))
   g_dat <- create_igraph_input(ped)
   graph_fam <-  graph.data.frame(g_dat, directed = FALSE)
-  V(graph_fam)$color <- "white"
   nam <- vertex_attr(graph_fam)$name
   V(graph_fam)$color[nam %in% partition_obj$set_1] <- "lightblue" 
   V(graph_fam)$color[nam %in% partition_obj$set_2] <- "lightgray" 

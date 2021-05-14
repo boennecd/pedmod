@@ -159,6 +159,7 @@ get_block_cut_tree_pedigree <- function(id, father.id, mother.id){
   removed_edges[] <- t(apply(removed_edges, 1L, sort))
   removed_edges <- removed_edges[
     order(removed_edges[, 1], removed_edges[, 2]), , drop = FALSE]
+  colnames(removed_edges) <- c("from", "to")
   out$removed_edges <- removed_edges
 
   out$set_1 <- sort(id[out$set_1])
@@ -201,8 +202,9 @@ get_block_cut_tree_pedigree <- function(id, father.id, mother.id){
 #' vertices. This may reduce the computation time for some data sets.
 #'
 #' @seealso
-#' \code{\link{get_biconnected_components}} and
-#' \code{\link{get_block_cut_tree}}.
+#' \code{\link{get_biconnected_components}},
+#' \code{\link{get_block_cut_tree}}, and
+#' \code{\link{get_unconnected_partition}}.
 #'
 #' @references
 #' Chlebíková, J. (1996).
@@ -212,6 +214,12 @@ get_block_cut_tree_pedigree <- function(id, father.id, mother.id){
 #' Hopcroft, J., & Tarjan, R. (1973).
 #' \emph{Algorithm 447: efficient algorithms for graph manipulation}.
 #' Communications of the ACM, 16(6), 372-378.
+#'
+#' @return
+#' A list with the following elements:
+#'  \item{balance_criterion}{value of the balance criterion.}
+#'  \item{removed_edges}{2D integer matrix with the removed edges.}
+#'  \item{set_1,set_2}{The two sets in the partition.}
 #'
 #' @export
 get_max_balanced_partition <- function(from, to, weight_data = NULL,
@@ -261,6 +269,16 @@ get_max_balanced_partition_pedigree <- function(
 
 #' Finds an Approximately Balanced Partition
 #' @inheritParams get_max_balanced_partition
+#'
+#' @return
+#' A list with the following elements:
+#'  \item{balance_criterion}{value of the balance criterion.}
+#'  \item{removed_edges}{2D integer matrix with the removed edges.}
+#'  \item{set_1,set_2}{The two sets in the partition.}
+#'
+#' @seealso
+#' \code{\link{get_max_balanced_partition}}.
+#'
 #' @export
 get_unconnected_partition <- function(from, to, weight_data = NULL,
                                       edge_weights = NULL,

@@ -86,6 +86,12 @@ and the children. Use \code{NULL} if all should have a weight of one.}
 \item{mother_weight}{weights of the edges created between the mothers
 and the children. Use \code{NULL} if all should have a weight of one.}
 }
+\value{
+A list with the following elements:
+ \item{balance_criterion}{value of the balance criterion.}
+ \item{removed_edges}{2D integer matrix with the removed edges.}
+ \item{set_1,set_2}{The two sets in the partition.}
+}
 \description{
 Uses the method suggested by Chlebíková (1996) to construct an approximate
 maximally balanced connected partition. A further refinement step can be made
@@ -103,6 +109,7 @@ Hopcroft, J., & Tarjan, R. (1973).
 Communications of the ACM, 16(6), 372-378.
 }
 \seealso{
-\code{\link{get_biconnected_components}} and
-\code{\link{get_block_cut_tree}}.
+\code{\link{get_biconnected_components}},
+\code{\link{get_block_cut_tree}}, and
+\code{\link{get_unconnected_partition}}.
 }

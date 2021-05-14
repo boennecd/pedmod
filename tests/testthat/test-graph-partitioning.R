@@ -24,6 +24,8 @@ test_that("the _pedigree methods give the same", {
     dat, get_max_balanced_partition_pedigree(
       id = id, father.id = dad, mother.id = mom, do_reorder = FALSE))
   expect_known_value(partition, "get_max_balanced_partition_pedigree.RDS")
+  expect_true(length(intersect(partition$set_1, partition$set_2)) < 1)
+  expect_true(all(dat$id %in% c(partition$set_1, partition$set_2)))
 
   partition_reordered <- with(
     dat, get_max_balanced_partition_pedigree(
@@ -36,6 +38,8 @@ test_that("the _pedigree methods give the same", {
       id = id, father.id = dad, mother.id = mom, slack = .1, max_kl_it = 50L,
       max_kl_it_inner = 1000L, do_reorder = FALSE))
   expect_known_value(partition, "get_max_balanced_partition_pedigree-w_cut.RDS")
+  expect_true(length(intersect(partition$set_1, partition$set_2)) < 1)
+  expect_true(all(dat$id %in% c(partition$set_1, partition$set_2)))
 
   partition_reordered <- with(
     dat, get_max_balanced_partition_pedigree(
@@ -49,6 +53,8 @@ test_that("the _pedigree methods give the same", {
       id = id, father.id = dad, mother.id = mom, slack = .1, max_kl_it = 50L,
       max_kl_it_inner = 1000L, id_weight = id_weight, do_reorder = FALSE))
   expect_known_value(partition, "get_max_balanced_partition_pedigree-w_cut-n-weights.RDS")
+  expect_true(length(intersect(partition$set_1, partition$set_2)) < 1)
+  expect_true(all(dat$id %in% c(partition$set_1, partition$set_2)))
 
   partition_reordered <- with(
     dat, get_max_balanced_partition_pedigree(
@@ -63,6 +69,8 @@ test_that("the _pedigree methods give the same", {
       max_kl_it_inner = 1000L, id_weight = id_weight, do_reorder = FALSE,
       father_weight = father_weight, mother_weight = mother_weight))
   expect_known_value(partition, "get_max_balanced_partition_pedigree-w_cut-n-2xweights.RDS")
+  expect_true(length(intersect(partition$set_1, partition$set_2)) < 1)
+  expect_true(all(dat$id %in% c(partition$set_1, partition$set_2)))
 
   partition_reordered <- with(
     dat, get_max_balanced_partition_pedigree(
@@ -108,6 +116,8 @@ test_that("the partitioning functions for graphs give the same", {
   partition <- with(
     dat, get_max_balanced_partition(from = from, to = to, do_reorder = FALSE))
   expect_known_value(partition, "get_max_balanced_partition.RDS")
+  expect_true(length(intersect(partition$set_1, partition$set_2)) < 1)
+  expect_true(all(c(dat$from, dat$to) %in% c(partition$set_1, partition$set_2)))
 
   partition_reordered <- with(
     dat, get_max_balanced_partition(from = from, to = to, do_reorder = TRUE))
@@ -119,6 +129,8 @@ test_that("the partitioning functions for graphs give the same", {
       from = from, to = to, slack = .1, max_kl_it = 50L,
       max_kl_it_inner = 1000L, do_reorder = FALSE))
   expect_known_value(partition, "get_max_balanced_partition-w_cut.RDS")
+  expect_true(length(intersect(partition$set_1, partition$set_2)) < 1)
+  expect_true(all(c(dat$from, dat$to) %in% c(partition$set_1, partition$set_2)))
 
   partition_reordered <- with(
     dat, get_max_balanced_partition(
@@ -133,6 +145,8 @@ test_that("the partitioning functions for graphs give the same", {
       max_kl_it_inner = 1000L, weight_data = list(id = dat$from[3],
                                                   weight = 100)))
   expect_known_value(partition, "get_max_balanced_partition-w_cut-n-weights.RDS")
+  expect_true(length(intersect(partition$set_1, partition$set_2)) < 1)
+  expect_true(all(c(dat$from, dat$to) %in% c(partition$set_1, partition$set_2)))
 
   partition_reordered <- with(
     dat, get_max_balanced_partition(

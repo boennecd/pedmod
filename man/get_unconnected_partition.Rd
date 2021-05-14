@@ -13,7 +13,8 @@ get_unconnected_partition(
   slack = 0,
   max_kl_it_inner = 50L,
   max_kl_it = 10000L,
-  trace = 0L
+  trace = 0L,
+  init = integer()
 )
 
 get_unconnected_partition_pedigree(
@@ -73,6 +74,15 @@ and the children. Use \code{NULL} if all should have a weight of one.}
 \item{mother_weight}{weights of the edges created between the mothers
 and the children. Use \code{NULL} if all should have a weight of one.}
 }
+\value{
+A list with the following elements:
+ \item{balance_criterion}{value of the balance criterion.}
+ \item{removed_edges}{2D integer matrix with the removed edges.}
+ \item{set_1,set_2}{The two sets in the partition.}
+}
 \description{
 Finds an Approximately Balanced Partition
+}
+\seealso{
+\code{\link{get_max_balanced_partition}}.
 }

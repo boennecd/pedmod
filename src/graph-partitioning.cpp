@@ -546,7 +546,7 @@ struct mbcp_result {
   /// vector with the removed edges
   std::vector<edge> removed_edges;
   /// vertices in the two sets in the block where the partition is
-  std::vector<vertex const *> s1, s2;
+  std::unordered_set<vertex const *> s1, s2;
 };
 
 /**
@@ -678,6 +678,34 @@ class max_balanced_partition {
       }
     }
   }
+
+  /**
+   * add vertices in a set to a block if it not used and then the blocks
+   * neighbors in term.
+   */
+  void add_block_to_set(std::unordered_set<vertex const *> &s,
+                        block const &b,
+                        std::unordered_set<block const *> &used_blocks){
+    if(!used_blocks.emplace(&b).second)
+      // already added
+      return;
+
+    // add the vertices
+    for(vertex const *v : b.vertices)
+      s.insert(v);
+
+    // add the connected blocks
+    for(vertex const *v : b.cut_vertices){
+      auto &edges = bct.cut_point_edges.at(v);
+      for(size_t edge_idx : edges){
+        auto &edge = bct.block_edges[edge_idx];
+        block const * other = edge.v1 != &b ? edge.v1 : edge.v2;
+        if(!used_blocks.count(other))
+          add_block_to_set(s, *other, used_blocks);
+      }
+    }
+  }
+
 
   biconnected_components bicon_comp;
 
@@ -1008,9 +1036,10 @@ public:
   mbcp_result get(double const slack, unsigned const max_kl_it_inner,
                   unsigned const max_kl_it){
     // computes the object to return
-    auto get_return_object = [](solution &res) -> mbcp_result {
+    auto get_return_object = [this](solution &res) -> mbcp_result {
       // we need to format the solution and return
       mbcp_result out;
+
       out.balance_criterion = res.criterion;
       if(res.v1.size() > 0){
         // we loop through the vertices in the block and add the edges in the cut
@@ -1019,14 +1048,31 @@ public:
           if(res.v1.count(v)){
             // the vertex is in the other set so we continue (do not add edges
             // twice)
-            out.s1.emplace_back(v);
+            out.s1.emplace(v);
             continue;
           }
-          out.s2.emplace_back(v);
+          out.s2.emplace(v);
 
           for(weighted_edge const &e : *v)
             if(res.v1.count(e))
               out.removed_edges.emplace_back(v, e);
+        }
+
+        // add the vertices from the other blocks
+        std::unordered_set<block const *> used_blocks;
+        used_blocks.emplace(&block_w_solution);
+
+        for(vertex const *v : block_w_solution.cut_vertices){
+          auto &edges = bct.cut_point_edges.at(v);
+          std::unordered_set<vertex const *> &add_to =
+            out.s1.count(v) ? out.s1 : out.s2;
+
+          for(size_t edge_idx : edges){
+            auto &edge = bct.block_edges[edge_idx];
+            block const * other =
+              edge.v1 != &block_w_solution ? edge.v1 : edge.v2;
+            add_block_to_set(add_to, *other, used_blocks);
+          }
         }
       }
 
@@ -1569,9 +1615,9 @@ mbcp_result unconnected_partition
     vertex const &v = vertices[i];
     score const &score_v = *scores_ptrs[v.id];
     if(score_v.is_in_set_2)
-      res.s2.push_back(&v);
+      res.s2.emplace(&v);
     else
-      res.s1.push_back(&v);
+      res.s1.emplace(&v);
 
     for(vertex const * o : v){
       if(o->id < v.id)
@@ -1708,10 +1754,11 @@ Rcpp::List mbcp_result_to_rcpp_list(mbcp_result const &res){
   }
 
   auto get_set =
-    [](std::vector<vertex const *> const &s) -> Rcpp::IntegerVector{
+    [](std::unordered_set<vertex const *> const &s) -> Rcpp::IntegerVector{
       Rcpp::IntegerVector out(s.size());
-      for(unsigned i = 0; i < s.size(); ++i)
-        out[i] = s[i]->id + 1L;
+      auto s_it = s.begin();
+      for(unsigned i = 0; i < s.size(); ++i, ++s_it)
+        out[i] = (*s_it)->id + 1L;
       return out;
   };
 

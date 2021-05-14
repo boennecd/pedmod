@@ -27,7 +27,8 @@ get_unconnected_partition_pedigree(
   slack = 0,
   max_kl_it_inner = 50L,
   max_kl_it = 10000L,
-  trace = 0L
+  trace = 0L,
+  init = integer()
 )
 }
 \arguments{
@@ -56,6 +57,9 @@ argument is not needed.}
 
 \item{trace}{integer where larger values yields more information printed to
 the console during the procedure.}
+
+\item{init}{integer vector with ids that one of the two sets in the partition
+should start out with.}
 
 \item{id}{integer vector with the child id.}
 

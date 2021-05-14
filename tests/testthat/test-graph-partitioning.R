@@ -75,9 +75,30 @@ test_that("the _pedigree methods give the same", {
   partition_reordered <- with(
     dat, get_max_balanced_partition_pedigree(
       id = id, father.id = dad, mother.id = mom, slack = .1, max_kl_it = 50L,
-      max_kl_it_inner = 1000L, id_weight = id_weight, do_reorder = FALSE,
+      max_kl_it_inner = 1000L, id_weight = id_weight, do_reorder = TRUE,
       father_weight = father_weight, mother_weight = mother_weight))
   expect_equal(partition, partition_reordered)
+
+  # unconnected
+  connected_partition <- partition
+  partition <- with(
+    dat, get_unconnected_partition_pedigree(
+      id = id, father.id = dad, mother.id = mom, slack = .1, max_kl_it = 50L,
+      max_kl_it_inner = 1000L, id_weight = id_weight,
+      father_weight = father_weight, mother_weight = mother_weight))
+  expect_known_value(partition, "get_unconnected_partition_pedigree-w_cut-n-2xweights.RDS")
+  expect_true(length(intersect(partition$set_1, partition$set_2)) < 1)
+  expect_true(all(dat$id %in% c(partition$set_1, partition$set_2)))
+
+  # unconnected and start from connected
+  partition <- with(
+    dat, get_unconnected_partition_pedigree(
+      id = id, father.id = dad, mother.id = mom, slack = .1, max_kl_it = 50L,
+      max_kl_it_inner = 1000L, id_weight = id_weight,
+      init = connected_partition$set_1))
+  expect_known_value(partition, "get_unconnected_partition_pedigree-start.RDS")
+  expect_true(length(intersect(partition$set_1, partition$set_2)) < 1)
+  expect_true(all(dat$id %in% c(partition$set_1, partition$set_2)))
 })
 
 # # simulates a connected graph of a given size
@@ -124,6 +145,7 @@ test_that("the partitioning functions for graphs give the same", {
   expect_equal(partition, partition_reordered)
 
   # w/ cut
+  connected_partition <- partition
   partition <- with(
     dat, get_max_balanced_partition(
       from = from, to = to, slack = .1, max_kl_it = 50L,
@@ -137,6 +159,24 @@ test_that("the partitioning functions for graphs give the same", {
       from = from, to = to, slack = .1, max_kl_it = 50L,
       max_kl_it_inner = 1000L, do_reorder = FALSE))
   expect_equal(partition, partition_reordered)
+
+  # unconnected
+  partition <- with(
+    dat, get_unconnected_partition(
+      from = from, to = to, slack = .1, max_kl_it = 50L,
+      max_kl_it_inner = 1000L))
+  expect_known_value(partition, "get_unconnected_partition-w_cut.RDS")
+  expect_true(length(intersect(partition$set_1, partition$set_2)) < 1)
+  expect_true(all(c(dat$from, dat$to) %in% c(partition$set_1, partition$set_2)))
+
+  # unconnected and start from connected
+  partition <- with(
+    dat, get_unconnected_partition(
+      from = from, to = to, slack = .1, max_kl_it = 50L,
+      max_kl_it_inner = 1000L, init = connected_partition$set_1))
+  expect_known_value(partition, "get_unconnected_partition-start-w_cut.RDS")
+  expect_true(length(intersect(partition$set_1, partition$set_2)) < 1)
+  expect_true(all(c(dat$from, dat$to) %in% c(partition$set_1, partition$set_2)))
 
   # w/ cut and weights
   partition <- with(

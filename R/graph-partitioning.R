@@ -271,6 +271,8 @@ get_max_balanced_partition_pedigree <- function(
 
 #' Finds an Approximately Balanced Partition
 #' @inheritParams get_max_balanced_partition
+#' @param init integer vector with ids that one of the two sets in the partition
+#' should start out with.
 #'
 #' @return
 #' A list with the following elements:

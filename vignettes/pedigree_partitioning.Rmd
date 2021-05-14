@@ -168,7 +168,9 @@ problem:
  2. Of the sets that satisfies 1., find the one that removes the least amount
     of relationships (cuts the least amount of edges).
 
-We have implemented procedures to do just this. We will return later to what 
+We have implemented procedures to do just this. It also turns out that it is 
+fine to not satisfy number 1. That is, to not get two connected sets in the 
+partition. We will return to this later and to what 
 we have implemented but first provide an example. We start by splitting the 
 above family in way that only satisfies 1.:
 
@@ -246,8 +248,6 @@ removed_edges <- also_cut$removed_edges
 removed_edges # the relationships we have removed
 
 # redo the plot
-do_graph_plot(new_dat)
-# color the vertices in the original graph instead
 show_split(dat, also_cut)
 ```
 
@@ -327,6 +327,10 @@ show_split(dat, weighted_partition)
 We end up cutting the link to the grandparents instead.
 
 ### Potentialy Unconnected Partition
+
+We may not require that the two sets in the partition is connected. The 
+`get_unconnected_partition_pedigree` function does not impose this constraint. 
+An example is given below:
 
 ```{r pedigree_unconnected}
 # without weights
@@ -423,7 +427,7 @@ length(cut_pts) # number of biconnected components
 ```
 
 The algorithm suggested by @Chlebíková96 can be used through the 
-`get_max_balanced_partition` function with `slack <= 0`:
+`get_max_balanced_partition` function with `slack == 0`:
 
 ```{r find_partition_simulate_small_graph}
 # find the approximately balanced connected partition
@@ -467,7 +471,7 @@ Currently, we re-compute the cut vertices (articulation points) at every
 iteration but it may be possible to update these which presumably will be faster
 and reduce the overall computation time. We do find a perfectly balanced 
 partition 
-above where each is of size 25. However, we cut `r NROW(removed_edges)` edges
+above where each set is of size 25. However, we cut `r NROW(removed_edges)` edges
 to this. Thus, we implemented a greedy method to reduce the number of cut edges
 while maintaining a roughly balanced connected partition which we outline next.
 
@@ -486,10 +490,10 @@ in $\tilde V_1$ and define $I_2$ similarly. Then
       such that the balance criteria
       $w_H(V) / 2 - \epsilon w_H(V) \leq w_H(\tilde V_1)$ and 
       $w_H(\tilde V_1)\leq w_H(V) / 2 + \epsilon w_H(V)$ are 
-      satisfied for some user defined $\epsilon \in [0, .5)$ is satisfied 
+      satisfied for some user defined $\epsilon \in [0, .5)$
       after the vertex is moved and that the vertex has 
       not yet been used.
-    * If there are no vertex then exit.
+    * If there are no vertices satisfying this then exit.
     * Select the vertex $v$ with the largest $D_v$. Break ties by 
       taking the $v$ with the largest balance criteria, 
       $\min (w_H(\lvert \tilde V_1\rvert), w_H(\lvert \tilde V_2\rvert))$. 
@@ -506,7 +510,11 @@ The method is very similar to the original Kernighan–Lin algorithm.
 It differs by the constraint that the two sets in the partition should be 
 connected, that we only move one vertex in every move [like @Fiduccia82], 
 and that the partition is only approximately balanced [like @Fiduccia82]. 
-We also limit the number of moves we make as @Karypis98.
+We also limit the number of moves we make as @Karypis98. Our implementations
+to find a potentially unconnected partition 
+(`get_unconnected_partition` and `get_unconnected_partition_pedigree`) 
+proceeds in a similar manner as above except that we do not require that the
+sets are connected. This substantially simplifies the algorithm.
 
 $\epsilon$ is set with the `slack` argument of 
 `get_max_balanced_partition` and the maximum number of moves to 
@@ -602,6 +610,10 @@ NROW(connected_partition$removed_edges)
 show_split(sim_dat, max_part, vertex.size = 3, vertex.label = NA)
 ```
 
+It is clear that the method is quite sensitive to the initialization.
+
+### Even Larger Example
+
 Here is an even larger example:
 
 ```{r largest_ex}
@@ -686,5 +698,8 @@ system.time(
 max_part$balance_criterion # the balance criterion
 NROW(max_part$removed_edges) # number of removed edges
 ```
+
+The method completely failed this time except when we started from the 
+balanced connected partition.
 
 ## References

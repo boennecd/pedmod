@@ -570,13 +570,15 @@ show_split(dat, only_balanced)</code></pre>
 #&gt; Found split. Balance criterion is 24
 #&gt; Found perfect balanced connected partition early. Balance criterion is 24
 #&gt; Found approximately balanced connected partition. Balance criterion is 24
-#&gt; Starting to reduce the cost of the cut in a block of size 38. The partition in the block consists of two sets of size 17 21
+#&gt; Starting to reduce the cost of the cut in a block of size 38. The partition in the block consists of two sets of size 17 and 21. The cut cost is 5
 #&gt; Starting iteration 1
 #&gt; Found 6 vertices to move
 #&gt; Keept 2 moves with a gain of 1 and a balance criterion of 24
+#&gt; The cut cost is 4
 #&gt; Starting iteration 2
 #&gt; Found 6 vertices to move
 #&gt; Keept 0 moves
+#&gt; The cut cost is 4
 also_cut$balance_criterion # the smallest of the two sets
 #&gt; [1] 24
 removed_edges &lt;- also_cut$removed_edges
@@ -609,13 +611,15 @@ weighted_partition &lt;- get_max_balanced_partition_pedigree(
 #&gt; Found split. Balance criterion is 8.00019
 #&gt; Exited early. Balance criterion is 2.00001
 #&gt; Found approximately balanced connected partition. Balance criterion is 8.00019
-#&gt; Starting to reduce the cost of the cut in a block of size 38. The partition in the block consists of two sets of size 20 18
+#&gt; Starting to reduce the cost of the cut in a block of size 38. The partition in the block consists of two sets of size 20 and 18. The cut cost is 6
 #&gt; Starting iteration 1
 #&gt; Found 8 vertices to move
 #&gt; Keept 1 moves with a gain of 2 and a balance criterion of 8.00018
+#&gt; The cut cost is 4
 #&gt; Starting iteration 2
 #&gt; Found 7 vertices to move
 #&gt; Keept 0 moves
+#&gt; The cut cost is 4
 weighted_partition$balance_criterion # the smallest of the two sets
 #&gt; [1] 8
 removed_edges &lt;- weighted_partition$removed_edges
@@ -666,13 +670,15 @@ weighted_partition &lt;- get_max_balanced_partition_pedigree(
 #&gt; Found split. Balance criterion is 8.00019
 #&gt; Exited early. Balance criterion is 2.00001
 #&gt; Found approximately balanced connected partition. Balance criterion is 8.00019
-#&gt; Starting to reduce the cost of the cut in a block of size 38. The partition in the block consists of two sets of size 20 18
+#&gt; Starting to reduce the cost of the cut in a block of size 38. The partition in the block consists of two sets of size 20 and 18. The cut cost is 60
 #&gt; Starting iteration 1
 #&gt; Found 8 vertices to move
 #&gt; Keept 2 moves with a gain of 56 and a balance criterion of 8.00017
+#&gt; The cut cost is 4
 #&gt; Starting iteration 2
 #&gt; Found 6 vertices to move
 #&gt; Keept 0 moves
+#&gt; The cut cost is 4
 weighted_partition$balance_criterion # the smallest of the two sets
 #&gt; [1] 8
 removed_edges &lt;- weighted_partition$removed_edges
@@ -697,20 +703,26 @@ plot_weighted(dat, removed_edges)</code></pre>
 partition &lt;- get_unconnected_partition_pedigree(
   id = dat$id, father.id = dat$dad, mother.id = dat$mom, trace = 2L, 
   slack = .1)
-#&gt; Starting from an initial paratition with one set with a vertex weight of 0 out of 48
+#&gt; Starting from an initial paratition with a balance criterion of 0 with a total vertex weight of 48
+#&gt; The cut cost is 0
 #&gt; Starting to build the first partition that satisfy the balance criterion
+#&gt; Starting from an initial paratition with a balance criterion of 20 and a cut cost of 10
 #&gt; Starting iteration 1
 #&gt; Found 47 vertices to move
 #&gt; Keept 14 moves with a gain of 3 and a balance criterion of 24
+#&gt; The cut cost is 7
 #&gt; Starting iteration 2
 #&gt; Found 47 vertices to move
 #&gt; Keept 15 moves with a gain of 1 and a balance criterion of 21
+#&gt; The cut cost is 6
 #&gt; Starting iteration 3
 #&gt; Found 47 vertices to move
 #&gt; Keept 3 moves with a gain of 0 and a balance criterion of 24
+#&gt; The cut cost is 6
 #&gt; Starting iteration 4
 #&gt; Found 47 vertices to move
 #&gt; Keept 0 moves
+#&gt; The cut cost is 6
 partition$removed_edges # the relationships we have removed
 #&gt;      from to
 #&gt; [1,]    1  3
@@ -728,14 +740,18 @@ weighted_partition &lt;- get_unconnected_partition_pedigree(
   id = dat$id, father.id = dat$dad, mother.id = dat$mom, trace = 2L, 
   slack = .1, id_weight = dat$id_weight, father_weight = dat$father_weight, 
   mother_weight = dat$mother_weight)
-#&gt; Starting from an initial paratition with one set with a vertex weight of 0 out of 17.0003
+#&gt; Starting from an initial paratition with a balance criterion of 0 with a total vertex weight of 17.0003
+#&gt; The cut cost is 0
 #&gt; Starting to build the first partition that satisfy the balance criterion
+#&gt; Starting from an initial paratition with a balance criterion of 7.00025 and a cut cost of 10
 #&gt; Starting iteration 1
 #&gt; Found 47 vertices to move
 #&gt; Keept 5 moves with a gain of 6 and a balance criterion of 7.0002
+#&gt; The cut cost is 4
 #&gt; Starting iteration 2
 #&gt; Found 47 vertices to move
 #&gt; Keept 0 moves
+#&gt; The cut cost is 4
 weighted_partition$removed_edges # the relationships we have removed
 #&gt;      from to
 #&gt; [1,]    1  5
@@ -760,24 +776,29 @@ connected_partition &lt;- get_max_balanced_partition_pedigree(
 #&gt; Found split. Balance criterion is 8.00019
 #&gt; Exited early. Balance criterion is 2.00001
 #&gt; Found approximately balanced connected partition. Balance criterion is 8.00019
-#&gt; Starting to reduce the cost of the cut in a block of size 38. The partition in the block consists of two sets of size 20 18
+#&gt; Starting to reduce the cost of the cut in a block of size 38. The partition in the block consists of two sets of size 20 and 18. The cut cost is 60
 #&gt; Starting iteration 1
 #&gt; Found 8 vertices to move
 #&gt; Keept 2 moves with a gain of 56 and a balance criterion of 8.00017
+#&gt; The cut cost is 4
 #&gt; Starting iteration 2
 #&gt; Found 6 vertices to move
 #&gt; Keept 0 moves
+#&gt; The cut cost is 4
 
 # get the passably unconnected partition
 partition &lt;- get_unconnected_partition_pedigree(
   id = dat$id, father.id = dat$dad, mother.id = dat$mom, trace = 2L, 
   slack = .1, id_weight = dat$id_weight, father_weight = dat$father_weight, 
   mother_weight = dat$mother_weight, init = connected_partition$set_2)
-#&gt; Starting from an initial paratition with one set with a vertex weight of 9.00014 out of 17.0003
+#&gt; Starting from an initial paratition with a balance criterion of 8.00017 with a total vertex weight of 17.0003
+#&gt; The cut cost is 4
 #&gt; Starting to build the first partition that satisfy the balance criterion
+#&gt; Starting from an initial paratition with a balance criterion of 8.00017 and a cut cost of 4
 #&gt; Starting iteration 1
 #&gt; Found 47 vertices to move
 #&gt; Keept 0 moves
+#&gt; The cut cost is 4
 
 # show the partition
 show_split(dat, partition)</code></pre>
@@ -909,19 +930,23 @@ max_part &lt;- get_max_balanced_partition(
   max_kl_it = 1000L, trace = 1L)
 #&gt; Found perfect balanced connected partition early. Balance criterion is 25
 #&gt; Found approximately balanced connected partition. Balance criterion is 25
-#&gt; Starting to reduce the cost of the cut in a block of size 46. The partition in the block consists of two sets of size 22 24
+#&gt; Starting to reduce the cost of the cut in a block of size 46. The partition in the block consists of two sets of size 22 and 24. The cut cost is 23
 #&gt; Starting iteration 1
 #&gt; Found 46 vertices to move
 #&gt; Keept 6 moves with a gain of 9 and a balance criterion of 25
+#&gt; The cut cost is 14
 #&gt; Starting iteration 2
 #&gt; Found 46 vertices to move
 #&gt; Keept 15 moves with a gain of 6 and a balance criterion of 21
+#&gt; The cut cost is 8
 #&gt; Starting iteration 3
 #&gt; Found 46 vertices to move
 #&gt; Keept 6 moves with a gain of 3 and a balance criterion of 25
+#&gt; The cut cost is 5
 #&gt; Starting iteration 4
 #&gt; Found 46 vertices to move
 #&gt; Keept 0 moves
+#&gt; The cut cost is 5
 max_part$balance_criterion # the balance criterion 
 #&gt; [1] 25
 removed_edges &lt;- max_part$removed_edges
@@ -957,7 +982,7 @@ system.time(
 #&gt; Found perfect balanced connected partition early. Balance criterion is 500
 #&gt; Found approximately balanced connected partition. Balance criterion is 500
 #&gt;    user  system elapsed 
-#&gt;   0.087   0.016   0.102
+#&gt;   0.086   0.000   0.086
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 500
 NROW(max_part$removed_edges) # number of removed edges
@@ -970,21 +995,25 @@ system.time(
                                          max_kl_it_inner = 1000L))
 #&gt; Found perfect balanced connected partition early. Balance criterion is 500
 #&gt; Found approximately balanced connected partition. Balance criterion is 500
-#&gt; Starting to reduce the cost of the cut in a block of size 940. The partition in the block consists of two sets of size 494 446
+#&gt; Starting to reduce the cost of the cut in a block of size 940. The partition in the block consists of two sets of size 494 and 446. The cut cost is 282
 #&gt; Starting iteration 1
 #&gt; Found 876 vertices to move
 #&gt; Keept 207 moves with a gain of 143 and a balance criterion of 496
+#&gt; The cut cost is 139
 #&gt; Starting iteration 2
 #&gt; Found 713 vertices to move
 #&gt; Keept 69 moves with a gain of 34 and a balance criterion of 500
+#&gt; The cut cost is 105
 #&gt; Starting iteration 3
 #&gt; Found 806 vertices to move
 #&gt; Keept 30 moves with a gain of 6 and a balance criterion of 500
+#&gt; The cut cost is 99
 #&gt; Starting iteration 4
 #&gt; Found 845 vertices to move
 #&gt; Keept 0 moves
+#&gt; The cut cost is 99
 #&gt;    user  system elapsed 
-#&gt;   0.923   0.000   0.922
+#&gt;   0.936   0.000   0.937
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 500
 NROW(max_part$removed_edges) # number of removed edges
@@ -1002,22 +1031,28 @@ system.time(
   max_part &lt;- get_unconnected_partition(from = sim_dat$from, to = sim_dat$to, 
                                         trace = 1L, slack = .1, 
                                         max_kl_it_inner = 1000L))
-#&gt; Starting from an initial paratition with one set with a vertex weight of 0 out of 1000
+#&gt; Starting from an initial paratition with a balance criterion of 0 with a total vertex weight of 1000
+#&gt; The cut cost is 0
 #&gt; Starting to build the first partition that satisfy the balance criterion
+#&gt; Starting from an initial paratition with a balance criterion of 400 and a cut cost of 75
 #&gt; Starting iteration 1
 #&gt; Found 999 vertices to move
 #&gt; Keept 135 moves with a gain of 40 and a balance criterion of 403
+#&gt; The cut cost is 35
 #&gt; Starting iteration 2
 #&gt; Found 999 vertices to move
 #&gt; Keept 10 moves with a gain of 5 and a balance criterion of 413
+#&gt; The cut cost is 30
 #&gt; Starting iteration 3
 #&gt; Found 999 vertices to move
 #&gt; Keept 975 moves with a gain of 11 and a balance criterion of 438
+#&gt; The cut cost is 19
 #&gt; Starting iteration 4
 #&gt; Found 999 vertices to move
 #&gt; Keept 0 moves
+#&gt; The cut cost is 19
 #&gt;    user  system elapsed 
-#&gt;   0.007   0.016   0.023
+#&gt;   0.007   0.000   0.006
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 438
 NROW(max_part$removed_edges) # number of removed edges
@@ -1035,40 +1070,52 @@ system.time(
                                         trace = 1L, slack = .1, 
                                         max_kl_it_inner = 1000L, 
                                         init = init))
-#&gt; Starting from an initial paratition with one set with a vertex weight of 500 out of 1000
+#&gt; Starting from an initial paratition with a balance criterion of 500 with a total vertex weight of 1000
+#&gt; The cut cost is 856
 #&gt; Starting to build the first partition that satisfy the balance criterion
+#&gt; Starting from an initial paratition with a balance criterion of 500 and a cut cost of 856
 #&gt; Starting iteration 1
 #&gt; Found 999 vertices to move
 #&gt; Keept 415 moves with a gain of 692 and a balance criterion of 491
+#&gt; The cut cost is 164
 #&gt; Starting iteration 2
 #&gt; Found 999 vertices to move
 #&gt; Keept 81 moves with a gain of 52 and a balance criterion of 500
+#&gt; The cut cost is 112
 #&gt; Starting iteration 3
 #&gt; Found 999 vertices to move
 #&gt; Keept 44 moves with a gain of 8 and a balance criterion of 492
+#&gt; The cut cost is 104
 #&gt; Starting iteration 4
 #&gt; Found 999 vertices to move
 #&gt; Keept 981 moves with a gain of 1 and a balance criterion of 473
+#&gt; The cut cost is 103
 #&gt; Starting iteration 5
 #&gt; Found 999 vertices to move
 #&gt; Keept 23 moves with a gain of 12 and a balance criterion of 480
+#&gt; The cut cost is 91
 #&gt; Starting iteration 6
 #&gt; Found 999 vertices to move
 #&gt; Keept 38 moves with a gain of 1 and a balance criterion of 442
+#&gt; The cut cost is 90
 #&gt; Starting iteration 7
 #&gt; Found 999 vertices to move
 #&gt; Keept 996 moves with a gain of 2 and a balance criterion of 438
+#&gt; The cut cost is 88
 #&gt; Starting iteration 8
 #&gt; Found 999 vertices to move
 #&gt; Keept 996 moves with a gain of 4 and a balance criterion of 434
+#&gt; The cut cost is 84
 #&gt; Starting iteration 9
 #&gt; Found 999 vertices to move
 #&gt; Keept 30 moves with a gain of 7 and a balance criterion of 452
+#&gt; The cut cost is 77
 #&gt; Starting iteration 10
 #&gt; Found 999 vertices to move
 #&gt; Keept 0 moves
+#&gt; The cut cost is 77
 #&gt;    user  system elapsed 
-#&gt;   0.014   0.000   0.015
+#&gt;   0.016   0.000   0.015
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 452
 NROW(max_part$removed_edges) # number of removed edges
@@ -1083,28 +1130,36 @@ system.time(
                                         trace = 1L, slack = .1, 
                                         max_kl_it_inner = 1000L, 
                                         init = connected_partition$set_1))
-#&gt; Starting from an initial paratition with one set with a vertex weight of 500 out of 1000
+#&gt; Starting from an initial paratition with a balance criterion of 500 with a total vertex weight of 1000
+#&gt; The cut cost is 99
 #&gt; Starting to build the first partition that satisfy the balance criterion
+#&gt; Starting from an initial paratition with a balance criterion of 500 and a cut cost of 99
 #&gt; Starting iteration 1
 #&gt; Found 999 vertices to move
 #&gt; Keept 79 moves with a gain of 30 and a balance criterion of 495
+#&gt; The cut cost is 69
 #&gt; Starting iteration 2
 #&gt; Found 999 vertices to move
 #&gt; Keept 990 moves with a gain of 4 and a balance criterion of 495
+#&gt; The cut cost is 65
 #&gt; Starting iteration 3
 #&gt; Found 999 vertices to move
 #&gt; Keept 17 moves with a gain of 2 and a balance criterion of 500
+#&gt; The cut cost is 63
 #&gt; Starting iteration 4
 #&gt; Found 999 vertices to move
 #&gt; Keept 52 moves with a gain of 6 and a balance criterion of 494
+#&gt; The cut cost is 57
 #&gt; Starting iteration 5
 #&gt; Found 999 vertices to move
 #&gt; Keept 8 moves with a gain of 9 and a balance criterion of 500
+#&gt; The cut cost is 48
 #&gt; Starting iteration 6
 #&gt; Found 999 vertices to move
 #&gt; Keept 0 moves
+#&gt; The cut cost is 48
 #&gt;    user  system elapsed 
-#&gt;   0.009   0.000   0.009
+#&gt;   0.010   0.000   0.009
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 500
 NROW(max_part$removed_edges) # number of removed edges
@@ -1135,7 +1190,7 @@ system.time(
 #&gt; Found perfect balanced connected partition early. Balance criterion is 50000
 #&gt; Found approximately balanced connected partition. Balance criterion is 50000
 #&gt;    user  system elapsed 
-#&gt;    4.69    0.00    4.69
+#&gt;   4.707   0.000   4.708
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 50000
 NROW(max_part$removed_edges) # number of removed edges
@@ -1148,36 +1203,45 @@ system.time(
                                          max_kl_it_inner = 1000L))
 #&gt; Found perfect balanced connected partition early. Balance criterion is 50000
 #&gt; Found approximately balanced connected partition. Balance criterion is 50000
-#&gt; Starting to reduce the cost of the cut in a block of size 7270. The partition in the block consists of two sets of size 2484 4786
+#&gt; Starting to reduce the cost of the cut in a block of size 7270. The partition in the block consists of two sets of size 2484 and 4786. The cut cost is 890
 #&gt; Starting iteration 1
 #&gt; Found 1000 vertices to move
 #&gt; Keept 530 moves with a gain of 414 and a balance criterion of 49895
+#&gt; The cut cost is 476
 #&gt; Starting iteration 2
 #&gt; Found 1000 vertices to move
 #&gt; Keept 223 moves with a gain of 95 and a balance criterion of 50000
+#&gt; The cut cost is 381
 #&gt; Starting iteration 3
 #&gt; Found 1000 vertices to move
 #&gt; Keept 121 moves with a gain of 5 and a balance criterion of 49983
+#&gt; The cut cost is 376
 #&gt; Starting iteration 4
 #&gt; Found 1000 vertices to move
 #&gt; Keept 19 moves with a gain of 1 and a balance criterion of 50000
+#&gt; The cut cost is 375
 #&gt; Starting iteration 5
 #&gt; Found 1000 vertices to move
 #&gt; Keept 315 moves with a gain of 6 and a balance criterion of 49998
+#&gt; The cut cost is 369
 #&gt; Starting iteration 6
 #&gt; Found 1000 vertices to move
 #&gt; Keept 204 moves with a gain of 45 and a balance criterion of 49996
+#&gt; The cut cost is 324
 #&gt; Starting iteration 7
 #&gt; Found 1000 vertices to move
 #&gt; Keept 91 moves with a gain of 7 and a balance criterion of 49975
+#&gt; The cut cost is 317
 #&gt; Starting iteration 8
 #&gt; Found 1000 vertices to move
 #&gt; Keept 21 moves with a gain of 0 and a balance criterion of 50000
+#&gt; The cut cost is 317
 #&gt; Starting iteration 9
 #&gt; Found 1000 vertices to move
 #&gt; Keept 0 moves
+#&gt; The cut cost is 317
 #&gt;    user  system elapsed 
-#&gt;  24.700   0.004  24.709
+#&gt;  24.886   0.003  24.890
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 50000
 NROW(max_part$removed_edges) # number of removed edges
@@ -1194,24 +1258,29 @@ system.time(
     max_kl_it_inner = 1000L, do_reorder = FALSE))
 #&gt; Found perfect balanced connected partition early. Balance criterion is 50000
 #&gt; Found approximately balanced connected partition. Balance criterion is 50000
-#&gt; Starting to reduce the cost of the cut in a block of size 7270. The partition in the block consists of two sets of size 2491 4779
+#&gt; Starting to reduce the cost of the cut in a block of size 7270. The partition in the block consists of two sets of size 2491 and 4779. The cut cost is 967
 #&gt; Starting iteration 1
 #&gt; Found 1000 vertices to move
 #&gt; Keept 604 moves with a gain of 463 and a balance criterion of 49934
+#&gt; The cut cost is 504
 #&gt; Starting iteration 2
 #&gt; Found 1000 vertices to move
 #&gt; Keept 395 moves with a gain of 94 and a balance criterion of 49999
+#&gt; The cut cost is 410
 #&gt; Starting iteration 3
 #&gt; Found 1000 vertices to move
 #&gt; Keept 199 moves with a gain of 47 and a balance criterion of 49994
+#&gt; The cut cost is 363
 #&gt; Starting iteration 4
 #&gt; Found 1000 vertices to move
 #&gt; Keept 24 moves with a gain of 7 and a balance criterion of 50000
+#&gt; The cut cost is 356
 #&gt; Starting iteration 5
 #&gt; Found 1000 vertices to move
 #&gt; Keept 0 moves
+#&gt; The cut cost is 356
 #&gt;    user  system elapsed 
-#&gt;  22.013   0.004  22.028
+#&gt;   21.81    0.00   21.81
 max_part_shuffled$balance_criterion # the balance criterion
 #&gt; [1] 50000
 NROW(max_part_shuffled$removed_edges) # number of removed edges
@@ -1224,24 +1293,29 @@ system.time(
     max_kl_it_inner = 1000L, do_reorder = TRUE))
 #&gt; Found perfect balanced connected partition early. Balance criterion is 50000
 #&gt; Found approximately balanced connected partition. Balance criterion is 50000
-#&gt; Starting to reduce the cost of the cut in a block of size 7270. The partition in the block consists of two sets of size 2491 4779
+#&gt; Starting to reduce the cost of the cut in a block of size 7270. The partition in the block consists of two sets of size 2491 and 4779. The cut cost is 967
 #&gt; Starting iteration 1
 #&gt; Found 1000 vertices to move
 #&gt; Keept 604 moves with a gain of 463 and a balance criterion of 49934
+#&gt; The cut cost is 504
 #&gt; Starting iteration 2
 #&gt; Found 1000 vertices to move
 #&gt; Keept 395 moves with a gain of 94 and a balance criterion of 49999
+#&gt; The cut cost is 410
 #&gt; Starting iteration 3
 #&gt; Found 1000 vertices to move
 #&gt; Keept 199 moves with a gain of 47 and a balance criterion of 49994
+#&gt; The cut cost is 363
 #&gt; Starting iteration 4
 #&gt; Found 1000 vertices to move
 #&gt; Keept 24 moves with a gain of 7 and a balance criterion of 50000
+#&gt; The cut cost is 356
 #&gt; Starting iteration 5
 #&gt; Found 1000 vertices to move
 #&gt; Keept 0 moves
+#&gt; The cut cost is 356
 #&gt;    user  system elapsed 
-#&gt;   20.89    0.00   20.88
+#&gt;    21.5     0.0    21.5
 
 # we got the same 
 all.equal(max_part_shuffled_and_ordered, max_part_shuffled)
@@ -1263,85 +1337,112 @@ system.time(
   max_part &lt;- get_unconnected_partition(from = sim_dat$from, to = sim_dat$to, 
                                         trace = 1L, slack = .1, 
                                         max_kl_it_inner = 1000L))
-#&gt; Starting from an initial paratition with one set with a vertex weight of 0 out of 100000
+#&gt; Starting from an initial paratition with a balance criterion of 0 with a total vertex weight of 100000
+#&gt; The cut cost is 0
 #&gt; Starting to build the first partition that satisfy the balance criterion
+#&gt; Starting from an initial paratition with a balance criterion of 40000 and a cut cost of 7565
 #&gt; Starting iteration 1
 #&gt; Found 1000 vertices to move
 #&gt; Keept 1000 moves with a gain of 516 and a balance criterion of 40000
+#&gt; The cut cost is 7049
 #&gt; Starting iteration 2
 #&gt; Found 1000 vertices to move
 #&gt; Keept 1000 moves with a gain of 41 and a balance criterion of 40000
+#&gt; The cut cost is 7008
 #&gt; Starting iteration 3
 #&gt; Found 1000 vertices to move
 #&gt; Keept 6 moves with a gain of 2 and a balance criterion of 40000
+#&gt; The cut cost is 7006
 #&gt; Starting iteration 4
 #&gt; Found 1000 vertices to move
 #&gt; Keept 12 moves with a gain of 4 and a balance criterion of 40000
+#&gt; The cut cost is 7002
 #&gt; Starting iteration 5
 #&gt; Found 1000 vertices to move
 #&gt; Keept 432 moves with a gain of 9 and a balance criterion of 40000
+#&gt; The cut cost is 6993
 #&gt; Starting iteration 6
 #&gt; Found 1000 vertices to move
 #&gt; Keept 30 moves with a gain of 4 and a balance criterion of 40000
+#&gt; The cut cost is 6989
 #&gt; Starting iteration 7
 #&gt; Found 1000 vertices to move
 #&gt; Keept 32 moves with a gain of 15 and a balance criterion of 40000
+#&gt; The cut cost is 6974
 #&gt; Starting iteration 8
 #&gt; Found 1000 vertices to move
 #&gt; Keept 474 moves with a gain of 16 and a balance criterion of 40000
+#&gt; The cut cost is 6958
 #&gt; Starting iteration 9
 #&gt; Found 1000 vertices to move
 #&gt; Keept 112 moves with a gain of 16 and a balance criterion of 40000
+#&gt; The cut cost is 6942
 #&gt; Starting iteration 10
 #&gt; Found 1000 vertices to move
 #&gt; Keept 160 moves with a gain of 22 and a balance criterion of 40000
+#&gt; The cut cost is 6920
 #&gt; Starting iteration 11
 #&gt; Found 1000 vertices to move
 #&gt; Keept 462 moves with a gain of 13 and a balance criterion of 40000
+#&gt; The cut cost is 6907
 #&gt; Starting iteration 12
 #&gt; Found 1000 vertices to move
 #&gt; Keept 246 moves with a gain of 29 and a balance criterion of 40000
+#&gt; The cut cost is 6878
 #&gt; Starting iteration 13
 #&gt; Found 1000 vertices to move
 #&gt; Keept 292 moves with a gain of 24 and a balance criterion of 40000
+#&gt; The cut cost is 6854
 #&gt; Starting iteration 14
 #&gt; Found 1000 vertices to move
 #&gt; Keept 350 moves with a gain of 41 and a balance criterion of 40000
+#&gt; The cut cost is 6813
 #&gt; Starting iteration 15
 #&gt; Found 1000 vertices to move
 #&gt; Keept 370 moves with a gain of 7 and a balance criterion of 40000
+#&gt; The cut cost is 6806
 #&gt; Starting iteration 16
 #&gt; Found 1000 vertices to move
 #&gt; Keept 390 moves with a gain of 6 and a balance criterion of 40000
+#&gt; The cut cost is 6800
 #&gt; Starting iteration 17
 #&gt; Found 1000 vertices to move
 #&gt; Keept 750 moves with a gain of 24 and a balance criterion of 40000
+#&gt; The cut cost is 6776
 #&gt; Starting iteration 18
 #&gt; Found 1000 vertices to move
 #&gt; Keept 456 moves with a gain of 19 and a balance criterion of 40000
+#&gt; The cut cost is 6757
 #&gt; Starting iteration 19
 #&gt; Found 1000 vertices to move
 #&gt; Keept 466 moves with a gain of 3 and a balance criterion of 40000
+#&gt; The cut cost is 6754
 #&gt; Starting iteration 20
 #&gt; Found 1000 vertices to move
 #&gt; Keept 484 moves with a gain of 13 and a balance criterion of 40000
+#&gt; The cut cost is 6741
 #&gt; Starting iteration 21
 #&gt; Found 1000 vertices to move
 #&gt; Keept 504 moves with a gain of 9 and a balance criterion of 40000
+#&gt; The cut cost is 6732
 #&gt; Starting iteration 22
 #&gt; Found 1000 vertices to move
 #&gt; Keept 518 moves with a gain of 5 and a balance criterion of 40000
+#&gt; The cut cost is 6727
 #&gt; Starting iteration 23
 #&gt; Found 1000 vertices to move
 #&gt; Keept 530 moves with a gain of 8 and a balance criterion of 40000
+#&gt; The cut cost is 6719
 #&gt; Starting iteration 24
 #&gt; Found 1000 vertices to move
 #&gt; Keept 538 moves with a gain of 2 and a balance criterion of 40000
+#&gt; The cut cost is 6717
 #&gt; Starting iteration 25
 #&gt; Found 1000 vertices to move
 #&gt; Keept 0 moves
+#&gt; The cut cost is 6717
 #&gt;    user  system elapsed 
-#&gt;   2.587   0.000   2.586
+#&gt;   2.672   0.000   2.671
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 40000
 NROW(max_part$removed_edges) # number of removed edges
@@ -1353,28 +1454,36 @@ system.time(
                                         trace = 1L, slack = .1, 
                                         max_kl_it_inner = 1000L, 
                                         init = connected_partition$set_1))
-#&gt; Starting from an initial paratition with one set with a vertex weight of 50000 out of 100000
+#&gt; Starting from an initial paratition with a balance criterion of 50000 with a total vertex weight of 100000
+#&gt; The cut cost is 356
 #&gt; Starting to build the first partition that satisfy the balance criterion
+#&gt; Starting from an initial paratition with a balance criterion of 50000 and a cut cost of 356
 #&gt; Starting iteration 1
 #&gt; Found 1000 vertices to move
 #&gt; Keept 162 moves with a gain of 73 and a balance criterion of 49910
+#&gt; The cut cost is 283
 #&gt; Starting iteration 2
 #&gt; Found 1000 vertices to move
 #&gt; Keept 90 moves with a gain of 11 and a balance criterion of 49926
+#&gt; The cut cost is 272
 #&gt; Starting iteration 3
 #&gt; Found 1000 vertices to move
 #&gt; Keept 27 moves with a gain of 0 and a balance criterion of 49953
+#&gt; The cut cost is 272
 #&gt; Starting iteration 4
 #&gt; Found 1000 vertices to move
 #&gt; Keept 92 moves with a gain of 3 and a balance criterion of 49861
+#&gt; The cut cost is 269
 #&gt; Starting iteration 5
 #&gt; Found 1000 vertices to move
 #&gt; Keept 82 moves with a gain of 0 and a balance criterion of 49943
+#&gt; The cut cost is 269
 #&gt; Starting iteration 6
 #&gt; Found 1000 vertices to move
 #&gt; Keept 0 moves
+#&gt; The cut cost is 269
 #&gt;    user  system elapsed 
-#&gt;   0.483   0.000   0.483
+#&gt;   0.578   0.000   0.579
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 49943
 NROW(max_part$removed_edges) # number of removed edges

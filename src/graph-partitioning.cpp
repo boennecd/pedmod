@@ -1103,9 +1103,10 @@ public:
     // updates the cost of a given vertex. The update_adjacent treats the
     // vertex as if it has just been moved and updates its neighbors
     // accordingly
+    double cut_cost(0.);
     auto update_egde_cost =
-      [&v1_set, &v2_set, &edge_gain]
-      (vertex const * x, bool const update_adjacent) -> void {
+      [&v1_set, &v2_set, &edge_gain, &cut_cost]
+      (vertex const * x, bool const update_adjacent, bool const do_init) -> void {
         bool const is_in_v1 = v1_set.set.count(x);
         std::unordered_set<vertex const *>
           &current_set = is_in_v1 ? v1_set.set : v2_set.set,
@@ -1116,9 +1117,11 @@ public:
           if       (current_set.count(v)){
             // they are in the same set so moving the vertex is going to cost
             out -= v.weight;
-            if(update_adjacent)
+            if(update_adjacent){
               // have to switch from plus to minus
               edge_gain[v.v] -= 2 * v.weight;
+              cut_cost -= v.weight;
+            }
           } else if(other_set.count(v)){
             // they are not in the same set so moving the vertex is going to
             // yield a plus
@@ -1126,6 +1129,8 @@ public:
             if(update_adjacent)
               // have to switch from minus to plus
               edge_gain[v.v] += 2 * v.weight;
+            if((do_init and v.v->id < x->id) or update_adjacent)
+              cut_cost += v.weight;
           }
 
         edge_gain[x] = out;
@@ -1133,7 +1138,7 @@ public:
 
     // insert the first values
     for(vertex const * v : b.vertices)
-      update_egde_cost(v, false);
+      update_egde_cost(v, false, true);
 
     // keeps track of the vertex, the gain, where the vertices is moved from
     // and to, and the balance criterion
@@ -1170,7 +1175,8 @@ public:
     if(trace > 0)
       Tout << "Starting to reduce the cost of the cut in a block of size "
            << b.vertices.size() << ". The partition in the block consists of two sets of size "
-           << v1_set.set.size() << ' ' << v2_set.set.size() << '\n';
+           << v1_set.set.size() << " and " << v2_set.set.size()
+           << ". The cut cost is " << cut_cost << '\n';
 
     // perform the main loop
     for(unsigned i = 0; i < max_kl_it; ++i){
@@ -1233,7 +1239,7 @@ public:
 
         best_gain.moved_to  ->add_vertex   (best_gain.x);
         best_gain.moved_from->remove_vertex(best_gain.x);
-        update_egde_cost(best_gain.x, true);
+        update_egde_cost(best_gain.x, true, false);
 
         used_vertices.insert(best_gain.x);
         scores.emplace_back(std::move(best_gain));
@@ -1277,9 +1283,12 @@ public:
         gain_score const &s = scores.back();
         s.moved_to  ->remove_vertex(s.x);
         s.moved_from->add_vertex   (s.x);
-        update_egde_cost(s.x, true);
+        update_egde_cost(s.x, true, false);
         scores.pop_back();
       }
+
+      if(trace > 0)
+        Tout << "The cut cost is " << cut_cost << '\n';
 
       if(max_idx < 1L)
         // no solution found
@@ -1320,10 +1329,6 @@ mbcp_result unconnected_partition
 
   // stores the weight of the s2 set
   double weight_s2(is_s2_init ? init_weight : weight_sum - init_weight);
-
-  if(trace > 0)
-    Tout << "Starting from an initial paratition with one set with a vertex weight of "
-         << init_weight << " out of " << weight_sum << '\n';
 
   // computes the balance criterion as if delta mass is moved to or from the
   // second set
@@ -1390,6 +1395,7 @@ mbcp_result unconnected_partition
 
   // fill the scores. For this, we create a vector with flags for which set each
   // vertex is in
+  double cut_cost(0.);
   {
     std::vector<bool> s2_flag;
     s2_flag.reserve(vertices.size());
@@ -1407,10 +1413,13 @@ mbcp_result unconnected_partition
         if(s2_flag[i] == s2_flag[e.v->id])
           // they are in the same set so moving the vertex is going to cost
           gain -= e.weight;
-        else
+        else {
           // they are not in the same set so moving the vertex is going to
           // yield a plus
           gain += e.weight;
+          if(e.v->id < v.id)
+            cut_cost += e.weight;
+        }
       }
 
       scores_ptrs.emplace_back(scores.emplace(gain, &v, s2_flag[i]));
@@ -1430,7 +1439,7 @@ mbcp_result unconnected_partition
   // updates the gains for a vertex and the neighbors as if the vertex was
   // just moved. The passed vertex is moved and marked as used
   auto update_gain =
-    [&scores, &scores_ptrs, &update_score_entry]
+    [&scores, &scores_ptrs, &update_score_entry, &cut_cost]
     (vertex const *x) -> void {
       score const &score_x = *scores_ptrs[x->id];
       bool const new_set_2_flag = !score_x.is_in_set_2;
@@ -1442,6 +1451,7 @@ mbcp_result unconnected_partition
         if(new_set_2_flag == score_other.is_in_set_2){
           // they are in the same set so moving the vertex is going to cost
           out -= e.weight;
+          cut_cost -= e.weight; // they we are now in the same set
           // have to switch from plus to minus
           update_score_entry(e.v, score_other.gain - 2 * e.weight,
                              score_other.is_in_set_2, score_other.is_used);
@@ -1449,6 +1459,7 @@ mbcp_result unconnected_partition
           // they are not in the same set so moving the vertex is going to
           // yield a plus
           out += e.weight;
+          cut_cost += e.weight; // they are now in different sets
           // have to switch from minus to plus
           update_score_entry(e.v, score_other.gain + 2 * e.weight,
                              score_other.is_in_set_2, score_other.is_used);
@@ -1477,7 +1488,10 @@ mbcp_result unconnected_partition
 
   // build the first set to start with
   if(trace > 0)
-    Tout << "Starting to build the first partition that satisfy the balance criterion\n";
+    Tout << "Starting from an initial paratition with a balance criterion of "
+         << comp_balance() << " with a total vertex weight of " << weight_sum << '\n'
+         << "The cut cost is " << cut_cost << '\n'
+         << "Starting to build the first partition that satisfy the balance criterion\n";
 
   for(size_t i = 0; i < vertices.size() and weight_s2 < min_balance; ++i){
     to_move next_move;
@@ -1504,6 +1518,10 @@ mbcp_result unconnected_partition
     // perform the move
     move_vertex(next_move.v);
   }
+
+  if(trace > 0)
+    Tout << "Starting from an initial paratition with a balance criterion of "
+         << comp_balance() << " and a cut cost of " << cut_cost << '\n';
 
   // stores the moves we make
   std::deque<to_move> moves;
@@ -1601,6 +1619,8 @@ mbcp_result unconnected_partition
     }
 
     current_balance_crit = comp_balance();
+    if(trace > 0)
+      Tout << "The cut cost is " << cut_cost << '\n';
 
     if(max_idx < 1L)
       // no solution found

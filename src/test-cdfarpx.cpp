@@ -180,7 +180,7 @@ context("restrictcdf unit tests") {
     double const eps = std::pow(std::numeric_limits<double>::epsilon(), .5);
     pedmod::cdf<pedmod::pedigree_l_factor>::alloc_mem(1, 1);
     for(int i = 0; i < 3; ++i){
-      func.setup(sig, par.begin() + 1);
+      func.setup(sig, par.begin() + 1, 1.);
       arma::vec lower(1), upper(1), mu(1);
       lower[0] = lbs[i];
       upper[0] = ubs[i];
@@ -246,7 +246,7 @@ context("restrictcdf unit tests") {
 
     arma::mat sig(3, 3);
     double const scalar = .5;
-    func.setup(sig, &scalar);
+    func.setup(sig, &scalar, 1.);
     double const eps =
       std::pow(std::numeric_limits<double>::epsilon(), .25);
     constexpr unsigned const n_deriv = 4;
@@ -336,7 +336,7 @@ context("restrictcdf unit tests") {
 
     arma::mat sig(3, 3);
     double const scs[2] = { .5, .67 };
-    func.setup(sig, scs);
+    func.setup(sig, scs, 1.);
     double const eps =
       std::pow(std::numeric_limits<double>::epsilon(), .25);
     constexpr unsigned const n_deriv = 5;

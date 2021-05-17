@@ -87,7 +87,7 @@ public:
       mu[i] = arma::dot(beta, X.row(i));
 
     arma::mat sig(upper.end(), n_members, n_members, false);
-    l_factor.setup(sig, par + n_fix_effect, true);
+    l_factor.setup(sig, par + n_fix_effect, 1., true);
 
     likelihood func;
     if(minvls < 0)
@@ -122,7 +122,7 @@ public:
       mu[i] = arma::dot(beta, X.row(i));
 
     arma::mat sig(upper.end(), n_members, n_members, false);
-    l_factor.setup(sig, par + n_fix_effect, false);
+    l_factor.setup(sig, par + n_fix_effect, 1., false);
 
     if(minvls < 0)
       minvls = std::min(1000, 100 * n_members);

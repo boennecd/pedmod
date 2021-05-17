@@ -386,6 +386,7 @@ public:
     /* evaluate the integrand and weight the result. */
     functor(dr, out, indices.begin(), is_permutated);
 
+    w /= functor.get_norm_constant();
     double * o = out;
     for(int i = 0; i < n_integrands; ++i, ++o)
       *o *= w;
@@ -477,6 +478,10 @@ public:
     return false;
   }
 
+  constexpr static double get_norm_constant() {
+    return 1;
+  }
+
   inline static void univariate(double * out,
                                 double const lw, double const ub) {
     double const p_ub = std::isinf(ub) ? 1 : pnorm_std(ub, 1L, 0L),
@@ -551,6 +556,9 @@ private:
   std::unique_ptr<double const *[]> scale_mats_ptr =
     std::unique_ptr<double const *[]>(new double const *[n_scales]);
 
+  /// the normalization constant
+  double norm_const = std::numeric_limits<double>::quiet_NaN();
+
 public:
   /// sets the scale matrices. There are no checks on the validity
   pedigree_l_factor(std::vector<arma::mat> const &scale_mats,
@@ -578,12 +586,16 @@ public:
     return n_integrands;
   }
 
-  double * get_wk_mem(){
+  inline double * get_wk_mem() PEDMOD_NOEXCEPT {
     return cdf_mem;
   }
 
-  constexpr static bool needs_last_unif() {
+  constexpr static bool needs_last_unif() PEDMOD_NOEXCEPT {
     return true;
+  }
+
+  inline double get_norm_constant() PEDMOD_NOEXCEPT {
+    return norm_const;
   }
 
   /**
@@ -593,9 +605,11 @@ public:
    * Args:
    *   sig: the covariance matrix.
    *   scales: scale parameters.
+   *   norm_constant_arg: the normalization constant.
    *   only_cov: true if only the covariance matrix should be computed
    */
   void setup(arma::mat &sig, double const *scales,
+             double const norm_constant_arg,
              bool const only_cov = false){
     sig.zeros(n_mem, n_mem);
     sig.diag() += 1;
@@ -603,6 +617,7 @@ public:
       sig += scales[i] * scale_mats[i];
     if(only_cov)
       return;
+    norm_const = norm_constant_arg;
 
     // create the objects we need
     arma::mat t1(dmem.get_mem(), n_mem, n_mem, false),
@@ -748,6 +763,8 @@ public:
 
     // add terms to the derivative w.r.t. the scale parameters
     if(n_mem > 1){
+      out.likelihood *= norm_const;
+
       double * __restrict__ const d_sc = res + n_fix + 1L;
       double * sig_inv_ele = sig_inv;
       for(int s = 0; s < n_scales; ++s)

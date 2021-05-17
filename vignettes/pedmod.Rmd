@@ -305,7 +305,6 @@ g2 <- eval_pedigree_grad(ptr = ll_terms, par = std_par, maxvls = 10000L,
                          minvls = 1000L, rel_eps = 1e-3, use_aprx = TRUE, 
                          abs_eps = 0, standardized = TRUE)
 all.equal(drop(g1 %*% jac), g2, check.attributes = FALSE)
-
 ```
 
 The model can also be estimated with the the standardized parameterization:
@@ -359,7 +358,7 @@ set.seed(46712994)
 system.time(
   sqn_out <- pedmod_sqn(
     ptr = ll_terms, par = start$par, abs_eps = 0, use_aprx = TRUE, 
-    n_threads = 4L, rel_eps = 1e-3, step_factor = .02, maxvls = 25000L, 
+    n_threads = 4L, rel_eps = 1e-3, step_factor = .1, maxvls = 25000L, 
     minvls = 1000L, n_it = 400L, n_grad_steps = 20L, n_grad = 50L, 
     n_hess = 200L))
 
@@ -387,7 +386,7 @@ set.seed(46712994)
 system.time(
   sqn_out_few <- pedmod_sqn(
     ptr = ll_terms, par = start$par, abs_eps = 0, use_aprx = TRUE, 
-    n_threads = 4L, rel_eps = 1e-3, step_factor = .02, maxvls = 25000L, 
+    n_threads = 4L, rel_eps = 1e-3, step_factor = .1, maxvls = 25000L, 
     minvls = 1000L, n_grad_steps = 20L,
     # we take more iterations
     n_it = 600L, 

@@ -122,7 +122,15 @@ public:
       mu[i] = arma::dot(beta, X.row(i));
 
     arma::mat sig(upper.end(), n_members, n_members, false);
-    l_factor.setup(sig, par + n_fix_effect, 1., false);
+    {
+      l_factor.setup(sig, par + n_fix_effect, 1., true);
+      pedmod::likelihood lfunc;
+      auto const norm_const = pedmod::cdf<pedmod::likelihood>(
+        lfunc, lower, upper, mu, sig, do_reorder, use_aprx).approximate(
+            maxvls, abs_eps, std::min(1., 10. * rel_eps), minvls);
+
+      l_factor.setup(sig, par + n_fix_effect, norm_const.likelihood, false);
+    }
 
     if(minvls < 0)
       minvls = std::min(1000, 100 * n_members);
@@ -132,14 +140,14 @@ public:
 
     // derivatives for the slopes
     for(int i = 0; i < n_fix_effect; ++i)
-      d_par[i] += weight * res.derivs[i] / res.likelihood;
+      d_par[i] += weight * res.derivs[i];
 
     // derivatives for the scale parameters
     double * rhs       = d_par              + n_fix_effect;
     double const * lhs = res.derivs.begin() + n_fix_effect;
     int const n_scales = l_factor.scale_mats.size();
     for(int i = 0; i < n_scales; ++i)
-      *rhs++ += weight * *lhs++ / res.likelihood;
+      *rhs++ += weight * *lhs++;
 
     did_fail = res.inform > 0;
 

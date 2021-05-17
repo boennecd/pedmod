@@ -246,10 +246,22 @@ context("restrictcdf unit tests") {
 
     arma::mat sig(3, 3);
     double const scalar = .5;
-    func.setup(sig, &scalar, 1.);
     double const eps =
       std::pow(std::numeric_limits<double>::epsilon(), .25);
     constexpr unsigned const n_deriv = 4;
+
+    {
+      // set the normalization constant
+      pedmod::cdf<pedmod::likelihood>::alloc_mem(3, 1);
+      pedmod::likelihood::alloc_mem(3, 1);
+      pedmod::likelihood lfunc;
+      func.setup(sig, &scalar, 1., true);
+
+      auto const norm_const = pedmod::cdf<pedmod::likelihood>(
+        lfunc, lbs, ubs, mu, sig, false, false).approximate(1000000L, eps, -1);
+
+      func.setup(sig, &scalar, norm_const.likelihood);
+    }
 
     pedmod::cdf<pedmod::pedigree_l_factor>::alloc_mem(3, 1);
     {
@@ -259,8 +271,9 @@ context("restrictcdf unit tests") {
 
       expect_true(std::abs(res.likelihood - expect[0]) <  eps);
       expect_true(res.derivs.n_elem == n_deriv);
+
       for(unsigned i = 0; i < n_deriv; ++i)
-        expect_true(std::abs(res.derivs[i] - expect[i + 1]) <  eps);
+        expect_true(std::abs(res.derivs[i] - expect[i + 1] / expect[0]) <  eps);
     }
 
     {
@@ -271,7 +284,7 @@ context("restrictcdf unit tests") {
       expect_true(std::abs(res.likelihood - expect[0]) <  eps);
       expect_true(res.derivs.n_elem == n_deriv);
       for(unsigned i = 0; i < n_deriv; ++i)
-        expect_true(std::abs(res.derivs[i] - expect[i + 1]) <  eps);
+        expect_true(std::abs(res.derivs[i] - expect[i + 1] / expect[0]) <  eps);
     }
 
     {
@@ -282,7 +295,7 @@ context("restrictcdf unit tests") {
       expect_true(std::abs(res.likelihood - expect[0]) <  eps);
       expect_true(res.derivs.n_elem == n_deriv);
       for(unsigned i = 0; i < n_deriv; ++i)
-        expect_true(std::abs(res.derivs[i] - expect[i + 1]) <  eps);
+        expect_true(std::abs(res.derivs[i] - expect[i + 1] / expect[0]) <  eps);
     }
   }
 
@@ -336,10 +349,21 @@ context("restrictcdf unit tests") {
 
     arma::mat sig(3, 3);
     double const scs[2] = { .5, .67 };
-    func.setup(sig, scs, 1.);
     double const eps =
       std::pow(std::numeric_limits<double>::epsilon(), .25);
     constexpr unsigned const n_deriv = 5;
+
+    {
+      pedmod::cdf<pedmod::likelihood>::alloc_mem(3, 1);
+      pedmod::likelihood::alloc_mem(3, 1);
+      pedmod::likelihood lfunc;
+      func.setup(sig, scs, 1., true);
+
+      auto const norm_const = pedmod::cdf<pedmod::likelihood>(
+        lfunc, lbs, ubs, mu, sig, false, false).approximate(1000000L, 1e-8, -1);
+
+      func.setup(sig, scs, norm_const.likelihood);
+    }
 
     pedmod::cdf<pedmod::pedigree_l_factor>::alloc_mem(3, 1);
     {
@@ -350,7 +374,7 @@ context("restrictcdf unit tests") {
       expect_true(std::abs(res.likelihood - expect[0]) <  eps);
       expect_true(res.derivs.n_elem == n_deriv);
       for(unsigned i = 0; i < n_deriv; ++i)
-        expect_true(std::abs(res.derivs[i] - expect[i + 1]) <  eps);
+        expect_true(std::abs(res.derivs[i] - expect[i + 1] / expect[0]) <  eps);
     }
 
     {
@@ -361,7 +385,7 @@ context("restrictcdf unit tests") {
       expect_true(std::abs(res.likelihood - expect[0]) <  eps);
       expect_true(res.derivs.n_elem == n_deriv);
       for(unsigned i = 0; i < n_deriv; ++i)
-        expect_true(std::abs(res.derivs[i] - expect[i + 1]) <  eps);
+        expect_true(std::abs(res.derivs[i] - expect[i + 1] / expect[0]) <  eps);
     }
 
     {
@@ -372,7 +396,7 @@ context("restrictcdf unit tests") {
       expect_true(std::abs(res.likelihood - expect[0]) <  eps);
       expect_true(res.derivs.n_elem == n_deriv);
       for(unsigned i = 0; i < n_deriv; ++i)
-        expect_true(std::abs(res.derivs[i] - expect[i + 1]) <  eps);
+        expect_true(std::abs(res.derivs[i] - expect[i + 1] / expect[0]) <  eps);
     }
   }
 }

@@ -693,9 +693,11 @@ public:
       for(int c = 0; c < n_mem; ++c, ++d_mu_c){
         double const *d_mu_r = d_mu_perm;
 
-        for(int r = 0; r < c; ++r, ++d_mu_r)
+        for(int r = 0; r < c; ++r, ++d_mu_r){
+          double const mu_prod = *d_mu_c * *d_mu_r;
           for(int s = 0; s < n_scales; ++s)
-            d_sc[s] += *d_mu_c * *d_mu_r * *scale_mats_ptr[s]++;
+            d_sc[s] += mu_prod * *scale_mats_ptr[s]++;
+        }
 
         for(int s = 0; s < n_scales; ++s){
           d_sc[s] += .5 * *d_mu_c * *d_mu_c * *scale_mats_ptr[s];

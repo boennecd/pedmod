@@ -4,6 +4,7 @@
 #include <algorithm>
 #include "threat-safe-random.h"
 #include "ped-mem.h"
+#include "kahan.h"
 
 namespace pedmod {
 template<class Func>
@@ -20,7 +21,7 @@ public:
 
   static void alloc_mem
     (int const max_ndim, int const max_nf, int const max_threads) {
-    dmem.set_n_mem(5 * max_nf + 3 * max_ndim, max_threads);
+    dmem.set_n_mem(6 * max_nf + 3 * max_ndim, max_threads);
     imem.set_n_mem(max_ndim                 , max_threads);
   }
 
@@ -70,7 +71,8 @@ public:
     double * const __restrict__ finval     = dmem.get_mem(),
            * const __restrict__ M          = finval + nf,
            * const __restrict__ finest_var = M + nf,
-           * const __restrict__ x          = finest_var + nf,
+           * const __restrict__ kahan_comp = finest_var + nf,
+           * const __restrict__ x          = kahan_comp + nf,
            * const __restrict__ r          = x + ndim,
            * const __restrict__ vk         = r + ndim,
            * const __restrict__ values     = vk + ndim,
@@ -128,6 +130,7 @@ public:
             int * __restrict__  const pr,
             double * __restrict__  const fs){
           std::fill(values, values + nf, 0.);
+          std::fill(kahan_comp, kahan_comp + nf, 0.);
 
           // random shift
           {
@@ -160,20 +163,23 @@ public:
             }
 
             f(&ndim, x, &nf, fs);
-            auto update_val = [&](double const denom){
+            auto update_val = [&](){
               double *vj = values,
-                    *fsj = fs;
-              for(int j = 0; j < nf; ++j, ++vj, ++fsj)
-                *vj += (*fsj - *vj) / denom;
+                    *fsj = fs,
+                    *cmp = kahan_comp;
+              for(int j = 0; j < nf; ++j, ++vj, ++fsj, ++cmp)
+                kahan(*vj, *cmp, *fsj);
             };
-            update_val(static_cast<double>(2 * (k + 1) - 1));
+            update_val();
 
             double *xj = x;
             for(int j = 0; j < ndim; ++j, ++xj)
               *xj = 1. - *xj;
             f(&ndim, x, &nf, fs);
-            update_val(static_cast<double>(2 * (k + 1)));
+            update_val();
           }
+          for(int j = 0; j < nf; ++j)
+            values[j] /= static_cast<double>(2 * prime);
         };
 
       for(int i = 0; i < sampls; ++i){

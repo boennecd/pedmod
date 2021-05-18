@@ -330,7 +330,7 @@ library(pedmod)
 ll_terms <- get_pedigree_ll_terms(dat, max_threads = 4L)
 system.time(start <- pedmod_start(ptr = ll_terms, data = dat, n_threads = 4L))
 #>    user  system elapsed 
-#>  15.244   0.065   3.873
+#>  13.794   0.043   3.499
 
 # log-likelihood without the random effects and at the starting values
 start$logLik_no_rng
@@ -345,7 +345,7 @@ system.time(
     n_threads = 4L, 
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 #>    user  system elapsed 
-#>  88.733   0.004  22.270
+#>  71.381   0.004  17.902
 ```
 
 The results of the estimation are shown below:
@@ -356,18 +356,18 @@ rbind(opt_out       = head(opt_out$par, -1),
       opt_out_quick = head(start  $par, -1), 
       truth         = attr(dat, "beta"))
 #>               (Intercept) Continuous Binary
-#> opt_out            -2.871     0.9687  1.878
-#> opt_out_quick      -2.768     0.9596  1.807
+#> opt_out            -2.872     0.9689  1.878
+#> opt_out_quick      -2.776     0.9625  1.813
 #> truth              -3.000     1.0000  2.000
 c(opt_out       = exp(tail(opt_out$par, 1)), 
   opt_out_quick = exp(tail(start  $par, 1)), 
   truth         = attr(dat, "sig_sq"))
 #>       opt_out opt_out_quick         truth 
-#>         2.904         2.610         3.000
+#>         2.906         2.632         3.000
 
 # log marginal likelihoods
 print(start   $logLik_est, digits = 8) # this is unreliably/imprecise
-#> [1] -1618.5394
+#> [1] -1618.5325
 print(-opt_out$value     , digits = 8)
 #> [1] -1618.4044
 ```
@@ -382,10 +382,10 @@ which you may skip.
 std_par <- direct_to_standardized(opt_out$par, n_scales = 1L)
 std_par # the standardized parameterization
 #> (Intercept)  Continuous      Binary             
-#>     -1.4531      0.4903      0.9502      1.0661
+#>     -1.4530      0.4902      0.9503      1.0668
 opt_out$par # the direct parameterization 
 #> (Intercept)  Continuous      Binary             
-#>     -2.8711      0.9687      1.8776      1.0661
+#>     -2.8717      0.9689      1.8780      1.0668
 
 # we can map back as follows
 par_back <- standardized_to_direct(std_par, n_scales = 1L)
@@ -394,12 +394,12 @@ all.equal(opt_out$par, par_back, check.attributes = FALSE)
 # the proportion of variance of each effect
 attr(par_back, "variance proportions") 
 #> Residual          
-#>   0.2561   0.7439
+#>    0.256    0.744
 
 # the proportion match
 exp(tail(opt_out$par, 1)) / (exp(tail(opt_out$par, 1)) + 1)
-#>        
-#> 0.7439
+#>       
+#> 0.744
 
 # compute the likelihood with either parameterization
 set.seed(1L)
@@ -441,26 +441,26 @@ parameterization:
 system.time(start_std <- pedmod_start(
   ptr = ll_terms, data = dat, n_threads = 4L, standardized = TRUE))
 #>    user  system elapsed 
-#>   5.307   0.016   1.342
+#>   5.075   0.004   1.284
 
 # the starting values are close
 standardized_to_direct(start_std$par, n_scales = 1L)
 #> (Intercept)  Continuous      Binary             
-#>     -2.7933      0.9684      1.8238      0.9846 
+#>     -2.7891      0.9669      1.8211      0.9805 
 #> attr(,"variance proportions")
 #> Residual          
-#>    0.272    0.728
+#>   0.2728   0.7272
 start$par
 #> (Intercept)  Continuous      Binary             
-#>     -2.7680      0.9596      1.8074      0.9595
+#>     -2.7763      0.9625      1.8128      0.9678
 
 # this may have required different number of gradient and function evaluations
 start_std$opt$counts
 #> function gradient 
-#>       43        4
+#>       42        4
 start    $opt$counts
 #> function gradient 
-#>       43       43
+#>       40       40
 
 # estimate the model
 system.time(
@@ -469,26 +469,26 @@ system.time(
     n_threads = 4L, standardized = TRUE,
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 #>    user  system elapsed 
-#>  182.66    0.08   45.96
+#>  112.22    0.00   28.23
 
 # we get the same
 standardized_to_direct(opt_out_std$par, n_scales = 1L)
 #> (Intercept)  Continuous      Binary             
-#>     -2.8702      0.9677      1.8772      1.0657 
+#>      -2.871       0.969       1.878       1.067 
 #> attr(,"variance proportions")
 #> Residual          
-#>   0.2562   0.7438
+#>   0.2561   0.7439
 opt_out$par
 #> (Intercept)  Continuous      Binary             
-#>     -2.8711      0.9687      1.8776      1.0661
+#>     -2.8717      0.9689      1.8780      1.0668
 
 # this may have required different number of gradient and function evaluations
 opt_out_std$counts
 #> function gradient 
-#>       82       11
+#>       46        8
 opt_out    $counts
 #> function gradient 
-#>       30        8
+#>       26        6
 ```
 
 ### Stochastic Quasi-Newton Method
@@ -511,7 +511,7 @@ system.time(
     minvls = 1000L, n_it = 400L, n_grad_steps = 20L, n_grad = 50L, 
     n_hess = 200L))
 #>    user  system elapsed 
-#> 389.785   0.248 100.754
+#> 377.175   0.021  94.421
 
 # show the log marginal likelihood
 ll_wrapper <- function(x)
@@ -519,11 +519,11 @@ ll_wrapper <- function(x)
     ptr = ll_terms, x, maxvls = 50000L, minvls = 1000L, abs_eps = 0, 
     rel_eps = 1e-4, n_threads = 4L)
 print(ll_wrapper(sqn_out$par), digits = 8)
-#> [1] -1618.4835
+#> [1] -1618.5087
 #> attr(,"n_fails")
-#> [1] 151
+#> [1] 155
 print(ll_wrapper(opt_out$par), digits = 8)
-#> [1] -1618.4089
+#> [1] -1618.4088
 #> attr(,"n_fails")
 #> [1] 163
 
@@ -531,8 +531,8 @@ print(ll_wrapper(opt_out$par), digits = 8)
 rbind(optim = opt_out$par, 
       sqn   = sqn_out$par)
 #>       (Intercept) Continuous Binary       
-#> optim      -2.871     0.9687  1.878 1.0661
-#> sqn        -2.755     0.9400  1.800 0.9624
+#> optim      -2.872     0.9689  1.878 1.0668
+#> sqn        -2.770     0.9461  1.828 0.9746
 
 # plot the marginal log likelihood versus the iteration number
 lls <- apply(sqn_out$omegas, 2L, ll_wrapper)
@@ -558,21 +558,21 @@ system.time(
     # but use fewer samples in each iteration
     n_grad = 20L, n_hess = 100L))
 #>    user  system elapsed 
-#> 247.904   0.088  62.168
+#> 240.007   0.008  60.007
 
 # compute the marginal log likelihood and compare the parameter estimates
 print(ll_wrapper(sqn_out_few$par), digits = 8)
-#> [1] -1618.4857
+#> [1] -1618.4639
 #> attr(,"n_fails")
-#> [1] 143
+#> [1] 148
 
 rbind(optim       = opt_out    $par, 
       sqn         = sqn_out    $par, 
       `sqn (few)` = sqn_out_few$par)
 #>           (Intercept) Continuous Binary       
-#> optim          -2.871     0.9687  1.878 1.0661
-#> sqn            -2.755     0.9400  1.800 0.9624
-#> sqn (few)      -2.774     0.9261  1.811 0.9623
+#> optim          -2.872     0.9689  1.878 1.0668
+#> sqn            -2.770     0.9461  1.828 0.9746
+#> sqn (few)      -2.779     0.9300  1.817 0.9757
 ```
 
 ### Profile Likelihood Curve
@@ -644,9 +644,9 @@ ub <- uniroot(function(x) 2 * (max_ml - predict(smooth_est, x)$y) - crit_val,
 
 # the confidence interval 
 c(lb, ub)
-#> [1] 1.260 2.528
+#> [1] 1.259 2.528
 c(lb, ub)^2 # on the variance scale
-#> [1] 1.587 6.392
+#> [1] 1.586 6.391
 ```
 
 A caveat is that issues with the
@@ -1010,12 +1010,12 @@ system.time(ll_res <- eval_pedigree_ll(
   ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4))
 #>    user  system elapsed 
-#>   2.303   0.000   0.632
+#>   2.217   0.000   0.609
 system.time(grad_res <- eval_pedigree_grad(
   ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4))
 #>    user  system elapsed 
-#>   74.05    0.00   18.55
+#>   74.25    0.00   18.62
 
 # find the duplicated combinations of pedigrees, covariates, and outcomes. One 
 # likely needs to change this code if the pedigrees are not identical but are 
@@ -1038,13 +1038,13 @@ system.time(ll_res_fast <- eval_pedigree_ll(
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4, 
   cluster_weights = c_weights))
 #>    user  system elapsed 
-#>   1.196   0.000   0.310
+#>   1.207   0.000   0.312
 system.time(grad_res_fast <- eval_pedigree_grad(
   ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4, 
   cluster_weights = c_weights))
 #>    user  system elapsed 
-#>  31.354   0.008   7.850
+#>  31.062   0.000   7.781
 
 # show that we get the same (up to a Monte Carlo error)
 print(c(redundant = ll_res, fast = ll_res_fast), digits = 6)
@@ -1052,8 +1052,8 @@ print(c(redundant = ll_res, fast = ll_res_fast), digits = 6)
 #>  -2632.06  -2632.14
 rbind(redundant = grad_res, fast = grad_res_fast)
 #>             [,1]   [,2]  [,3]  [,4]
-#> redundant -1.851 -5.203 3.463 1.086
-#> fast      -1.835 -5.202 3.687 1.101
+#> redundant -1.851 -5.203 3.435 1.086
+#> fast      -1.850 -5.204 3.500 1.083
 rm(dat) # will not need this anymore
 
 # find the starting values
@@ -1061,7 +1061,7 @@ system.time(
   start <- pedmod_start(ptr = ll_terms, data = dat_unqiue, 
                         cluster_weights = c_weights))
 #>    user  system elapsed 
-#>  66.314   0.124  66.433
+#>   9.835   0.004   9.839
 
 # optimize
 system.time(
@@ -1070,7 +1070,7 @@ system.time(
     n_threads = 4L,  cluster_weights = c_weights,
     maxvls = 5000L, rel_eps = 1e-2, minvls = 500L))
 #>    user  system elapsed 
-#>  29.478   0.012   7.380
+#>   17.03    0.00    4.26
 system.time(
   opt_out <- pedmod_opt(
     ptr = ll_terms, par = opt_out_quick$par, abs_eps = 0, use_aprx = TRUE, 
@@ -1078,7 +1078,7 @@ system.time(
     # we changed the parameters
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 #>    user  system elapsed 
-#> 111.986   0.016  28.937
+#> 110.550   0.004  28.345
 ```
 
 The results are shown below:
@@ -1089,22 +1089,22 @@ rbind(opt_out       = head(opt_out$par, -2),
       opt_out_quick = head(start  $par, -2), 
       truth         = attr(dat_unqiue, "beta"))
 #>               (Intercept) Binary
-#> opt_out            -2.936  3.883
-#> opt_out_quick      -2.885  3.812
+#> opt_out            -2.954  3.906
+#> opt_out_quick      -2.828  3.736
 #> truth              -3.000  4.000
 rbind(opt_out       = exp(tail(opt_out$par, 2)), 
       opt_out_quick = exp(tail(start  $par, 2)), 
       truth         = attr(dat_unqiue, "sig_sq"))
 #>                           
-#> opt_out       1.870 0.9709
-#> opt_out_quick 1.757 0.9530
+#> opt_out       1.915 0.9734
+#> opt_out_quick 1.645 0.9199
 #> truth         2.000 1.0000
 
 # log marginal likelihoods
 print( start  $logLik_est, digits = 8)  # this is unreliably/imprecise
-#> [1] -2631.9955
+#> [1] -2632.0603
 print(-opt_out$value     , digits = 8)
-#> [1] -2631.9493
+#> [1] -2631.9566
 ```
 
 As before, we can also work with the standardized parameterization.
@@ -1115,10 +1115,10 @@ As before, we can also work with the standardized parameterization.
 std_par <- direct_to_standardized(opt_out$par, n_scales = 2L)
 std_par # the standardized parameterization
 #> (Intercept)      Binary                         
-#>    -1.49807     1.98102     0.62602    -0.02953
+#>    -1.49809     1.98102     0.64974    -0.02694
 opt_out$par # the direct parameterization 
 #> (Intercept)      Binary                         
-#>    -2.93602     3.88252     0.62602    -0.02953
+#>    -2.95412     3.90641     0.64974    -0.02694
 
 # we can map back as follows
 par_back <- standardized_to_direct(std_par, n_scales = 2L)
@@ -1127,13 +1127,13 @@ all.equal(opt_out$par, par_back, check.attributes = FALSE)
 # the proportion of variance of each effect
 attr(par_back, "variance proportions") 
 #> Residual                   
-#>   0.2603   0.4869   0.2528
+#>   0.2572   0.4925   0.2503
 
 # the proportions match
 total_var <- sum(exp(tail(opt_out$par, 2))) + 1
 exp(tail(opt_out$par, 2)) / total_var
 #>               
-#> 0.4869 0.2528
+#> 0.4925 0.2503
 
 # compute the likelihood with either parameterization
 set.seed(1L)
@@ -1141,14 +1141,14 @@ eval_pedigree_ll(ptr = ll_terms, par = opt_out$par, maxvls = 10000L,
                  minvls = 1000L, rel_eps = 1e-3, use_aprx = TRUE, abs_eps = 0)
 #> [1] -1757
 #> attr(,"n_fails")
-#> [1] 35
+#> [1] 36
 set.seed(1L)
 eval_pedigree_ll(ptr = ll_terms, par = std_par    , maxvls = 10000L, 
                  minvls = 1000L, rel_eps = 1e-3, use_aprx = TRUE, abs_eps = 0, 
                  standardized = TRUE)
 #> [1] -1757
 #> attr(,"n_fails")
-#> [1] 35
+#> [1] 36
 
 # we can also get the same gradient with an application of the chain rule
 jac <- attr(
@@ -1176,26 +1176,26 @@ system.time(start_std <- pedmod_start(
   ptr = ll_terms, data = dat_unqiue, cluster_weights = c_weights, 
   standardized = TRUE))
 #>    user  system elapsed 
-#>   8.813   0.047   8.859
+#>   6.849   0.013   6.860
 
 # are the starting values similar?
 standardized_to_direct(start_std$par, n_scales = 2L)
 #> (Intercept)      Binary                         
-#>    -2.87560     3.79900     0.55107    -0.05084 
+#>    -2.83083     3.73984     0.49824    -0.07708 
 #> attr(,"variance proportions")
 #> Residual                   
-#>   0.2713   0.4708   0.2579
+#>   0.2800   0.4608   0.2592
 start$par
 #> (Intercept)      Binary                         
-#>    -2.88508     3.81152     0.56352    -0.04812
+#>    -2.82827     3.73647     0.49792    -0.08348
 
 # this may have required different number of gradient and function evaluations
 start_std$opt$counts
 #> function gradient 
-#>       67       12
+#>       43       13
 start    $opt$counts
 #> function gradient 
-#>      126      126
+#>       24       24
 
 # estimate the model
 system.time(
@@ -1204,7 +1204,7 @@ system.time(
     n_threads = 4L,  cluster_weights = c_weights, standardized = TRUE,
     maxvls = 5000L, rel_eps = 1e-2, minvls = 500L))
 #>    user  system elapsed 
-#>  21.877   0.016   5.480
+#>   16.43    0.00    4.11
 system.time(
   opt_out_std <- pedmod_opt(
     ptr = ll_terms, par = opt_out_quick_std$par, abs_eps = 0, use_aprx = TRUE, 
@@ -1212,33 +1212,33 @@ system.time(
     # we changed the parameters
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 #>    user  system elapsed 
-#> 147.115   0.064  37.710
+#>  128.28    0.00   33.03
 
 # we get the same
 standardized_to_direct(opt_out_std$par, n_scales = 2L)
 #> (Intercept)      Binary                         
-#>    -2.93762     3.88332     0.62978    -0.03279 
+#>    -2.95744     3.91078     0.65307    -0.02428 
 #> attr(,"variance proportions")
 #> Residual                   
-#>   0.2601   0.4882   0.2517
+#>   0.2566   0.4930   0.2504
 opt_out$par
 #> (Intercept)      Binary                         
-#>    -2.93602     3.88252     0.62602    -0.02953
+#>    -2.95412     3.90641     0.64974    -0.02694
 
 # this may have required different number of gradient and function evaluations
 opt_out_quick_std$counts
 #> function gradient 
-#>       69        7
+#>       54        5
 opt_out_quick    $counts
 #> function gradient 
-#>       85       11
+#>       52        5
 
 opt_out_std$counts
 #> function gradient 
-#>       60        7
+#>       53        6
 opt_out    $counts
 #> function gradient 
-#>       53        4
+#>       38        7
 ```
 
 ### Profile Likelihood Curve
@@ -1738,16 +1738,16 @@ gr <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE,
 # check output at the starting values
 system.time(ll <- -fn(c(beta, sc)))
 #>    user  system elapsed 
-#>   8.151   0.000   2.079
+#>   7.972   0.000   2.030
 ll # the log likelihood at the starting values
 #> [1] -26042
 #> attr(,"n_fails")
 #> [1] 0
 system.time(gr_val <- gr(c(beta, sc)))
 #>    user  system elapsed 
-#> 121.254   0.016  30.622
+#>   119.4     0.0    30.2
 gr_val # the gradient at the starting values
-#> [1] 1894.41 -548.71 -236.31   47.91  -47.25
+#> [1] 1894.83 -549.43 -235.73   47.21  -47.84
 #> attr(,"value")
 #> [1] 26042
 #> attr(,"n_fails")
@@ -1762,26 +1762,26 @@ sd(sapply(1:25, function(seed) fn(c(beta, sc), seed = seed)))
 gr_hats <- sapply(1:25, function(seed) gr(c(beta, sc), seed = seed, 
                                           indices = 0:99))
 apply(gr_hats, 1, sd)
-#> [1] 0.2556 0.2119 0.1913 0.2535 0.2144
+#> [1] 0.06953 0.11432 0.06340 0.02204 0.02467
 
 # verify the gradient (may not be exactly equal due to MC error)
 rbind(numDeriv = numDeriv::grad(fn, c(beta, sc), indices = 0:10), 
       pedmod   = gr(c(beta, sc), indices = 0:10))
-#>           [,1]    [,2]  [,3]  [,4]    [,5]
-#> numDeriv 28.00 -0.2980 7.415 1.105 -1.0706
-#> pedmod   27.89 -0.3569 7.295 1.287 -0.9057
+#>           [,1]   [,2]  [,3]  [,4]   [,5]
+#> numDeriv 28.00 -0.298 7.415 1.105 -1.071
+#> pedmod   27.98 -0.331 7.402 1.113 -1.062
 
 # optimize the log likelihood approximation
 system.time(opt <- optim(c(beta, sc), fn, gr, method = "BFGS"))
 #>     user   system  elapsed 
-#> 2469.362    0.272  628.190
+#> 3783.630    0.052  961.616
 ```
 
 The output from the optimization is shown below:
 
 ``` r
 print(-opt$value, digits = 8) # the maximum log likelihood
-#> [1] -25823.301
+#> [1] -25823.021
 opt$convergence               # check convergence
 #> [1] 0
 
@@ -1790,14 +1790,14 @@ rbind(truth     = dat$beta,
       estimated = head(opt$par, length(dat$beta)))
 #>           (Intercept)     X1     X2
 #> truth          -1.000 0.3000 0.2000
-#> estimated      -1.029 0.3125 0.1913
+#> estimated      -1.007 0.3059 0.1866
 
 # compare estimated scale parameters with the true values
 rbind(truth     = dat$sc, 
       estimated = exp(tail(opt$par, length(dat$sc))))
 #>           Genetic Maternal
 #> truth      0.5000   0.3300
-#> estimated  0.6269   0.3475
+#> estimated  0.5233   0.3643
 ```
 
 ### Computation in Parallel
@@ -1817,12 +1817,12 @@ microbenchmark(
   times = 1)
 #> Unit: seconds
 #>            expr     min      lq    mean  median      uq     max neval
-#>   fn (1 thread)   7.562   7.562   7.562   7.562   7.562   7.562     1
-#>  fn (2 threads)   3.963   3.963   3.963   3.963   3.963   3.963     1
-#>  fn (4 threads)   2.028   2.028   2.028   2.028   2.028   2.028     1
-#>   gr (1 thread) 102.912 102.912 102.912 102.912 102.912 102.912     1
-#>  gr (2 threads)  55.939  55.939  55.939  55.939  55.939  55.939     1
-#>  gr (4 threads)  29.057  29.057  29.057  29.057  29.057  29.057     1
+#>   fn (1 thread)   7.396   7.396   7.396   7.396   7.396   7.396     1
+#>  fn (2 threads)   3.765   3.765   3.765   3.765   3.765   3.765     1
+#>  fn (4 threads)   1.951   1.951   1.951   1.951   1.951   1.951     1
+#>   gr (1 thread) 101.558 101.558 101.558 101.558 101.558 101.558     1
+#>  gr (2 threads)  54.003  54.003  54.003  54.003  54.003  54.003     1
+#>  gr (4 threads)  27.905  27.905  27.905  27.905  27.905  27.905     1
 ```
 
 ### Using ADAM
@@ -1924,14 +1924,14 @@ system.time(
                    verbose = FALSE, maxvls = maxpts_use, 
                    minvls = minvls))
 #>     user   system  elapsed 
-#> 4253.067    0.374 1087.725
+#> 4140.040    0.092 1059.443
 ```
 
 The result is shown below.
 
 ``` r
 print(-fn(adam_res$par), digits = 8) # the maximum log likelihood
-#> [1] -25823.21
+#> [1] -25823.228
 #> attr(,"n_fails")
 #> [1] 0
 
@@ -1941,8 +1941,8 @@ rbind(truth             = dat$beta,
       `estimated ADAM`  = head(adam_res$par, length(dat$beta)))
 #>                 (Intercept)     X1     X2
 #> truth                -1.000 0.3000 0.2000
-#> estimated optim      -1.029 0.3125 0.1913
-#> estimated ADAM       -1.002 0.3054 0.1851
+#> estimated optim      -1.007 0.3059 0.1866
+#> estimated ADAM       -1.006 0.3068 0.1858
 
 # compare estimated scale parameters with the true values
 rbind(truth             = dat$sc, 
@@ -1950,8 +1950,8 @@ rbind(truth             = dat$sc,
       `estimated ADAM`  = exp(tail(adam_res$par, length(dat$sc))))
 #>                 Genetic Maternal
 #> truth            0.5000   0.3300
-#> estimated optim  0.6269   0.3475
-#> estimated ADAM   0.4966   0.3729
+#> estimated optim  0.5233   0.3643
+#> estimated ADAM   0.5191   0.3653
 
 # could possibly have stopped much earlier maybe. Dashed lines are final 
 # estimates
@@ -2045,7 +2045,7 @@ The new implementation is faster when the approximation is used:
 ``` r
 rowMeans(sim_res[, "time", ])
 #>          mvtnorm mvndst (no aprx) mvndst (w/ aprx) 
-#>          0.01838          0.01645          0.01113
+#>          0.01695          0.01655          0.01085
 par(mar = c(5, 4, 1, 1))
 boxplot(t(sim_res[, "time", ]))
 ```

@@ -765,7 +765,12 @@ public:
     if(n_mem > 1){
       out.likelihood *= norm_const;
 
-      double const rel_likelihood = norm_const / out.likelihood;
+      {
+        // correct for the normalization constant
+        double const rel_likelihood = norm_const / out.likelihood;
+        for(int i = 1; i <= n_fix + n_scales; ++i)
+          res[i] *= rel_likelihood;
+      }
 
       double * __restrict__ const d_sc = res + n_fix + 1L;
       double * sig_inv_ele = sig_inv;
@@ -775,12 +780,10 @@ public:
       for(int c = 0; c < n_mem; ++c){
         for(int r = 0; r < c; ++r, ++sig_inv_ele)
           for(int s = 0; s < n_scales; ++s)
-            d_sc[s] -=
-              rel_likelihood * *sig_inv_ele * *scale_mats_ptr[s]++;
+            d_sc[s] -= *sig_inv_ele * *scale_mats_ptr[s]++;
 
         for(int s = 0; s < n_scales; ++s){
-          d_sc[s] -=
-            .5 * rel_likelihood * *sig_inv_ele * *scale_mats_ptr[s];
+          d_sc[s] -= .5 * *sig_inv_ele * *scale_mats_ptr[s];
           scale_mats_ptr[s] += n_mem - c;
         }
         ++sig_inv_ele;

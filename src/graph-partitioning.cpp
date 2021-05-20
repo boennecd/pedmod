@@ -1421,7 +1421,7 @@ mbcp_result unconnected_partition
     std::vector<bool> s2_flag;
     s2_flag.reserve(vertices.size());
     for(vertex const &v : vertices)
-      s2_flag.emplace_back(init.count(&v) ? is_s2_init : !is_s2_init);
+      s2_flag.push_back(init.count(&v) ? is_s2_init : !is_s2_init);
 
     for(size_t i = 0; i < vertices.size(); ++i){
       // compute the gain
@@ -1460,7 +1460,7 @@ mbcp_result unconnected_partition
   // updates the gains for a vertex and the neighbors as if the vertex was
   // just moved. The passed vertex is moved and marked as used
   auto update_gain =
-    [&scores, &scores_ptrs, &update_score_entry, &cut_cost]
+    [&scores_ptrs, &update_score_entry, &cut_cost]
     (vertex const *x) -> void {
       score const &score_x = *scores_ptrs[x->id];
       bool const new_set_2_flag = !score_x.is_in_set_2;

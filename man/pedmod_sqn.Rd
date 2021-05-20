@@ -27,7 +27,8 @@ pedmod_sqn(
   maxvls_hess = maxvls,
   abs_eps_hess = abs_eps,
   rel_eps_hess = rel_eps,
-  verbose = FALSE
+  verbose = FALSE,
+  method = 0L
 )
 }
 \arguments{
@@ -98,6 +99,9 @@ approximation.}
 approximation.}
 
 \item{verbose}{logical for whether to print output during the estimation.}
+
+\item{method}{integer with the method to use. Zero yields Korobov lattice
+rules while one yields scrambled Sobol sequences.}
 }
 \description{
 Optimizes \code{\link{eval_pedigree_ll}} and \code{\link{eval_pedigree_grad}}

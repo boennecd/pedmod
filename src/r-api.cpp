@@ -21,6 +21,8 @@
 //' @param use_aprx \code{TRUE} if a less precise approximation of
 //' \code{\link{pnorm}} and \code{\link{qnorm}} should be used. This may
 //' reduce the computation time while not affecting the result much.
+//' @param method integer with the method to use. Zero yields Korobov lattice
+//' rules while one yields scrambled Sobol sequences.
 //'
 //' @return
 //' An approximation of the CDF. The \code{"n_it"} attribute shows the number of
@@ -59,7 +61,7 @@ Rcpp::NumericVector mvndst
    arma::mat const &sigma, unsigned const maxvls = 25000,
    double const abs_eps = .001, double const rel_eps = 0,
    int minvls = -1, bool const do_reorder = true,
-   bool const use_aprx = false){
+   bool const use_aprx = false, int const method = 0){
   arma::uword const n = lower.n_elem;
   if(upper.n_elem != n)
     throw std::invalid_argument("mvndst: invalid upper");
@@ -83,7 +85,7 @@ Rcpp::NumericVector mvndst
   pedmod::likelihood::alloc_mem(lower.n_elem, 1);
   auto const out = pedmod::cdf<pedmod::likelihood>(
     func, lower, upper, mu, sigma, do_reorder, use_aprx).approximate(
-        maxvls, abs_eps, rel_eps, minvls);
+        maxvls, abs_eps, rel_eps, pedmod::get_cdf_methods(method), minvls);
 
   Rcpp::NumericVector res(1);
   res[0] = out.likelihood;
@@ -256,7 +258,8 @@ Rcpp::NumericVector eval_pedigree_ll
    Rcpp::Nullable<Rcpp::IntegerVector> indices = R_NilValue,
    int const minvls = -1, bool const do_reorder = true,
    bool const use_aprx = false, unsigned n_threads = 1L,
-   Rcpp::Nullable<Rcpp::NumericVector> cluster_weights = R_NilValue){
+   Rcpp::Nullable<Rcpp::NumericVector> cluster_weights = R_NilValue,
+   int const method = 0){
   Rcpp::XPtr<pedigree_terms> terms_ptr(ptr);
   std::vector<pedmod::pedigree_ll_term > &terms = terms_ptr->terms;
   n_threads = eval_get_n_threads(n_threads, *terms_ptr);
@@ -301,6 +304,7 @@ Rcpp::NumericVector eval_pedigree_ll
 
   int n_fails(0);
   openmp_exception_ptr exception_handler;
+  pedmod::cdf_methods const meth = pedmod::get_cdf_methods(method);
 
 #ifdef _OPENMP
 #pragma omp parallel num_threads(n_threads)
@@ -323,7 +327,7 @@ Rcpp::NumericVector eval_pedigree_ll
 
       *wmem += w_i * terms.at(idx[i]).fn(
         &par[0], maxvls, abs_eps, rel_eps, minvls, do_reorder, use_aprx,
-        did_fail);
+        did_fail, meth);
       n_fails += did_fail;
     });
 #ifdef _OPENMP
@@ -349,7 +353,8 @@ Rcpp::NumericVector eval_pedigree_grad
    Rcpp::Nullable<Rcpp::IntegerVector> indices = R_NilValue,
    int const minvls = -1, bool const do_reorder = true,
    bool const use_aprx = false, unsigned n_threads = 1L,
-   Rcpp::Nullable<Rcpp::NumericVector> cluster_weights = R_NilValue){
+   Rcpp::Nullable<Rcpp::NumericVector> cluster_weights = R_NilValue,
+   int const method = 0){
   Rcpp::XPtr<pedigree_terms> terms_ptr(ptr);
   std::vector<pedmod::pedigree_ll_term > &terms = terms_ptr->terms;
   n_threads = eval_get_n_threads(n_threads, *terms_ptr);
@@ -391,6 +396,8 @@ Rcpp::NumericVector eval_pedigree_grad
   int n_fails(0);
 
   openmp_exception_ptr exception_handler;
+  pedmod::cdf_methods const meth = pedmod::get_cdf_methods(method);
+
 #ifdef _OPENMP
 #pragma omp parallel num_threads(n_threads)
 {
@@ -412,7 +419,7 @@ Rcpp::NumericVector eval_pedigree_grad
 
       *wmem += terms.at(idx[i]).gr(
         &par[0], wmem + 1, maxvls, abs_eps, rel_eps, minvls, do_reorder,
-        use_aprx, did_fail, w_i);
+        use_aprx, did_fail, w_i, meth);
       n_fails += did_fail;
     });
 #ifdef _OPENMP

@@ -17,7 +17,8 @@ eval_pedigree_ll(
   use_aprx = FALSE,
   n_threads = 1L,
   cluster_weights = NULL,
-  standardized = FALSE
+  standardized = FALSE,
+  method = 0L
 )
 
 eval_pedigree_grad(
@@ -32,7 +33,8 @@ eval_pedigree_grad(
   use_aprx = FALSE,
   n_threads = 1L,
   cluster_weights = NULL,
-  standardized = FALSE
+  standardized = FALSE,
+  method = 0L
 )
 }
 \arguments{
@@ -69,6 +71,9 @@ reduce the computation time while not affecting the result much.}
 \item{standardized}{logical for whether to use the standardized or direct
 parameterization. See \code{\link{standardized_to_direct}} and the vignette
 at \code{vignette("pedmod", package = "pedmod")}.}
+
+\item{method}{integer with the method to use. Zero yields Korobov lattice
+rules while one yields scrambled Sobol sequences.}
 }
 \value{
 \code{eval_pedigree_ll}:

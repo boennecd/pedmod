@@ -38,7 +38,7 @@ pedmod_opt <- function(ptr, par, maxvls, abs_eps, rel_eps,
                        opt_func = NULL, seed = 1L, indices = NULL, minvls = -1L,
                        do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L,
                        cluster_weights = NULL, fix = NULL, standardized = FALSE,
-                       ...){
+                       method = 0L, ...){
   # handle defaults
   if(is.null(opt_func)){
     opt_func <- optim
@@ -69,7 +69,8 @@ pedmod_opt <- function(ptr, par, maxvls, abs_eps, rel_eps,
         ptr = ptr, par = get_par(x), maxvls = maxvls, rel_eps = rel_eps,
         indices = indices, minvls = minvls, abs_eps = abs_eps,
         do_reorder = do_reorder, use_aprx = use_aprx, n_threads = n_threads,
-        cluster_weights = cluster_weights, standardized = standardized),
+        cluster_weights = cluster_weights, standardized = standardized,
+        method = method),
       silent = TRUE)
     if(inherits(out, "try-error"))
       return(NA_real_)
@@ -84,7 +85,8 @@ pedmod_opt <- function(ptr, par, maxvls, abs_eps, rel_eps,
                           abs_eps = abs_eps, do_reorder = do_reorder,
                           use_aprx = use_aprx, n_threads = n_threads,
                           cluster_weights = cluster_weights,
-                          standardized = standardized)
+                          standardized = standardized,
+                          method = method)
     if(length(fix) > 0)
       out <- out[-fix]
     out
@@ -116,7 +118,7 @@ pedmod_start <- function(ptr, data, maxvls = 1000L, abs_eps = 0, rel_eps = 1e-2,
                          seed = 1L, indices = NULL, scale_max = 9,
                          minvls = 100L, do_reorder = TRUE, use_aprx = TRUE,
                          n_threads = 1L, cluster_weights = NULL,
-                         standardized = FALSE){
+                         standardized = FALSE, method = 0L){
   # checks
   stopifnot(is.numeric(scale_max), length(scale_max) == 1L,
             scale_max > 0,
@@ -161,7 +163,7 @@ pedmod_start <- function(ptr, data, maxvls = 1000L, abs_eps = 0, rel_eps = 1e-2,
         rel_eps = rel_eps, minvls = minvls, use_aprx = use_aprx,
         n_threads = n_threads, cluster_weights = cluster_weights,
         indices = indices, do_reorder = do_reorder,
-        standardized = standardized),
+        standardized = standardized, method = method),
         silent = TRUE)
       if(inherits(out, "try-error"))
         return(NA_real_)
@@ -177,7 +179,7 @@ pedmod_start <- function(ptr, data, maxvls = 1000L, abs_eps = 0, rel_eps = 1e-2,
         rel_eps = rel_eps, minvls = minvls, use_aprx = use_aprx,
         n_threads = n_threads, cluster_weights = cluster_weights,
         indices = indices, do_reorder = do_reorder,
-        standardized = standardized)
+        standardized = standardized, method = method)
 
       tail(out, -length(beta))
     }
@@ -224,7 +226,7 @@ pedmod_start <- function(ptr, data, maxvls = 1000L, abs_eps = 0, rel_eps = 1e-2,
       ptr = ptr, par = c(beta_scaled, sc), maxvls = maxvls, abs_eps = abs_eps,
       rel_eps = rel_eps, minvls = minvls, use_aprx = use_aprx,
       n_threads = n_threads, cluster_weights = cluster_weights,
-      indices = indices, do_reorder = do_reorder),
+      indices = indices, do_reorder = do_reorder, method = method),
       silent = TRUE)
     if(inherits(out, "try-error"))
       return(NA_real_)
@@ -241,7 +243,7 @@ pedmod_start <- function(ptr, data, maxvls = 1000L, abs_eps = 0, rel_eps = 1e-2,
       ptr = ptr, par = c(beta_scaled, sc), maxvls = maxvls, abs_eps = abs_eps,
       rel_eps = rel_eps, minvls = minvls, use_aprx = use_aprx,
       n_threads = n_threads, cluster_weights = cluster_weights,
-      indices = indices, do_reorder = do_reorder)
+      indices = indices, do_reorder = do_reorder, method = method)
 
     sum_d_beta <- sum(beta * out[seq_along(beta)])
     sum_d_beta * exp(sc) / (2 * fac) + tail(out, -length(beta))
@@ -340,7 +342,8 @@ pedmod_sqn <- function(ptr, par, maxvls, abs_eps, rel_eps, step_factor,
                        use_aprx = FALSE, n_threads = 1L, cluster_weights = NULL,
                        fix = NULL, standardized = FALSE, minvls_hess = minvls,
                        maxvls_hess = maxvls, abs_eps_hess = abs_eps,
-                       rel_eps_hess = rel_eps, verbose = FALSE){
+                       rel_eps_hess = rel_eps, verbose = FALSE,
+                       method = 0L){
   #####
   # setup before the estimation
   n_pars <- length(par) - length(fix)
@@ -375,7 +378,8 @@ pedmod_sqn <- function(ptr, par, maxvls, abs_eps, rel_eps, step_factor,
       ptr = ptr, par = get_par(x), maxvls = maxvls, rel_eps = rel_eps,
       indices = indices, minvls = minvls, abs_eps = abs_eps,
       do_reorder = do_reorder, use_aprx = use_aprx, n_threads = n_threads,
-      cluster_weights = cluster_weights, standardized = standardized),
+      cluster_weights = cluster_weights, standardized = standardized,
+      method = method),
       silent = TRUE)
     if(inherits(out, "try-error"))
       return(NA_real_)
@@ -389,7 +393,7 @@ pedmod_sqn <- function(ptr, par, maxvls, abs_eps, rel_eps, step_factor,
                           abs_eps = abs_eps, do_reorder = do_reorder,
                           use_aprx = use_aprx, n_threads = n_threads,
                           cluster_weights = cluster_weights,
-                          standardized = standardized)
+                          standardized = standardized, method = method)
     if(any_fixed)
       out <- out[-fix]
     if(!is.null(indices))

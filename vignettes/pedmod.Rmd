@@ -546,6 +546,109 @@ matplot(sigs, t(pls) - colMeans(pls), pch = seq_along(seeds) + 15L, bty = "l",
 grid()
 ```
 
+### Randomized Quasi-Monte Carlo
+There are two randomized quasi-Monte Carlo methods which are implemented in the 
+package: randomized Korobov rules as in the implementation by @Genz02 and 
+scrambled Sobol sequences. The former is used by default. The questions is which 
+method to use. As an example, we will increase the number of samples with either
+methods and see how this effects the error for the gradient of the log 
+likelihood from the first couple of families. We do this below:
+
+```{r pre_rqmc, echo=FALSE}
+ll_terms <- get_pedigree_ll_terms(dat, max_threads = 4L)
+```
+
+```{r rqmc, cache = 1}
+# create a simple function which computes the gradient. We set the convergence 
+# threshold values low such that all the samples will be used
+gr <- function(maxvls, method, par = start$par)
+  eval_pedigree_grad(ptr = ll_terms, par = par, maxvls = maxvls, abs_eps = 0,
+                     rel_eps = 1e-12, indices = 0:9, minvls = 500L, 
+                     method = method, n_threads = 4L)
+
+# compute the estimator for either method using an increasing number of samples
+n_samp <- 1000 * 2^(0:8) # the sample sizes we will use
+seeds <- 1:20 # the seeds we will use
+
+res <- sapply(setNames(n_samp, n_samp), function(maxvls){
+  sapply(c(Korobov = 0, Sobol = 1), function(method){
+    # estimate the gradient
+    ests <- sapply(seeds, function(s){
+      set.seed(s)
+      gr(maxvls = maxvls, method = method)
+    })
+    
+    # return the mean of the estimators and the standard deviation
+    rbind(mean = rowMeans(ests), 
+          sd = apply(ests, 1L, sd))
+  }, simplify = "array")
+}, simplify = "array")
+
+# set the names of the dimensions
+dimnames(res) <- list(
+  metric = dimnames(res)[[1L]], parameter = names(opt_out$par),
+  method = dimnames(res)[[3L]], samples = n_samp)
+
+# they seem to converge to the same estimate as expected
+print(t(res["mean", , "Korobov", ]), digits = 6)
+print(t(res["mean", , "Sobol"  , ]), digits = 6)
+
+# get a best estimator of the gradient by combining the two
+precise_est <- rowMeans(res["mean", , , length(n_samp)])
+  
+# the standard deviation of the result scaled by the absolute value of the 
+# estimated gradient to get the number of significant digits
+round(t(res["sd", , "Korobov", ] / abs(precise_est)), 6)
+round(t(res["sd", , "Sobol"  , ] / abs(precise_est)), 6)
+```
+
+```{r show_res_rqmc}
+# look at log-log regression for convergence rate. We except a rate between 
+# 0.5, O(sqrt(n)) rate, and 1, O(n) rate, which can be seen from minus the 
+# slopes below
+lm(t(log(res["sd", , "Korobov", ])) ~ log(n_samp))
+lm(t(log(res["sd", , "Sobol", ])) ~ log(n_samp))
+
+# plot the two standard deviation estimates
+par(mar = c(5, 4, 1, 1))
+matplot(n_samp, t(res["sd", , "Korobov", ]), log = "xy", ylab = "L2 error", 
+        type = "p", pch = 1:4, col = "black", bty = "l", 
+        xlab = "Number of samples", ylim = range(res["sd", , , ]))
+matlines(n_samp, t(res["sd", , "Korobov", ]), col = "black", lty = 2)
+
+# add the points from Sobol method
+matplot(n_samp, t(res["sd", , "Sobol", ]), type = "p", pch = 16:19, 
+        col = "darkgray", add = TRUE)
+matlines(n_samp, t(res["sd", , "Sobol", ]), col = "darkgray", lty = 3)
+```
+
+The above seems to suggest that the scrambled Sobol sequences have a higher 
+initial error but a convergence rate which is closer to the optimal 
+$O(n^{-1 + \epsilon})$ rate for some small epsilon.
+
+We fit the model again below as example of using the scrambled Sobol sequences:
+
+```{r rqmc_est_simple, cache = 1}
+# estimate the model using Sobol sequences
+system.time(
+  opt_out_sobol <- pedmod_opt(
+    ptr = ll_terms, par = start$par, abs_eps = 0, use_aprx = TRUE, 
+    n_threads = 4L, 
+    maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L, method = 1L))
+
+# compare the result. We start with the log-likelihood
+print(-opt_out_sobol$value, digits = 8)
+print(-opt_out      $value, digits = 8)
+
+# the parameters
+rbind(Korobov = opt_out      $par, 
+      Sobol   = opt_out_sobol$par)
+
+# number of used function and gradient evaluations
+opt_out$counts
+opt_out_sobol$counts
+```
+
 ### Simulation Study
 
 We make a small simulation study below where we are interested in the estimation 
@@ -1291,20 +1394,22 @@ sc <- rep(log(.2), 2)
 # check log likelihood at the starting values. First we assign a function 
 # to approximate the log likelihood and the gradient
 fn <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE, 
-               n_threads = 4L, indices = NULL, maxvls = 25000L){
+               n_threads = 4L, indices = NULL, maxvls = 25000L, 
+               method = 0L){
   set.seed(seed)
   -eval_pedigree_ll(
     ptr = ll_terms, par = par, maxvls = maxvls, abs_eps = 0, rel_eps = rel_eps, 
     minvls = 1000L, use_aprx = use_aprx, n_threads = n_threads, 
-    indices = indices)
+    indices = indices, method = method)
 }
 gr <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE, 
-               n_threads = 4L, indices = NULL, maxvls = 25000L){
+               n_threads = 4L, indices = NULL, maxvls = 25000L, 
+               method = 0L){
   set.seed(seed)
   out <- -eval_pedigree_grad(
     ptr = ll_terms, par = par, maxvls = maxvls, abs_eps = 0, rel_eps = rel_eps, 
     minvls = 1000L, use_aprx = use_aprx, n_threads = n_threads, 
-    indices = indices)
+    indices = indices, method = method)
   structure(c(out), value = -attr(out, "logLik"), 
             n_fails = attr(out, "n_fails"))
 }
@@ -1611,10 +1716,10 @@ sim_res <- replicate(expr = {
       abseps = 0, releps = rel_eps, maxpts = 1e7))
   
   # function to use this package
-  use_mvndst <- function(use_aprx = FALSE)
+  use_mvndst <- function(use_aprx = FALSE, method = 0L)
     mvndst(lower = rep(-Inf, n), upper = u, mu = rep(0, n), 
            sigma = S, use_aprx = use_aprx, abs_eps = 0, rel_eps = rel_eps,
-           maxvls = 1e7)
+           maxvls = 1e7, method = method)
 
   # get a very precise estimate
   truth <- use_mvtnorm(rel_eps / 100)
@@ -1631,14 +1736,18 @@ sim_res <- replicate(expr = {
     c(SE = sqrt(sum(err^2) / n_rep), time = ti / n_rep / 1e9)
   }
   
-  mvtnorm_res        <- run_n_time(use_mvtnorm(rel_eps))
-  mvndst_no_aprx_res <- run_n_time(use_mvndst(FALSE))
-  mvndst_w_aprx_res  <- run_n_time(use_mvndst(TRUE))
+  mvtnorm_res                <- run_n_time(use_mvtnorm(rel_eps))
+  mvndst_no_aprx_res_Korobov <- run_n_time(use_mvndst(FALSE, method = 0L))
+  mvndst_w_aprx_res_Korobov  <- run_n_time(use_mvndst(TRUE , method = 0L))
+  mvndst_no_aprx_res_Sobol   <- run_n_time(use_mvndst(FALSE, method = 1L))
+  mvndst_w_aprx_res_Sobol    <- run_n_time(use_mvndst(TRUE , method = 1L))
   
   # return 
   rbind(mvtnorm            = mvtnorm_res, 
-        `mvndst (no aprx)` = mvndst_no_aprx_res, 
-        `mvndst (w/ aprx)` = mvndst_w_aprx_res)
+        `no aprx; Korobov` = mvndst_no_aprx_res_Korobov, 
+        `no aprx; Sobol` = mvndst_no_aprx_res_Sobol, 
+        `w/ aprx; Korobov` = mvndst_w_aprx_res_Korobov,
+        `w/ aprx; Sobol` = mvndst_w_aprx_res_Sobol)
 }, n = 100, simplify = "array")
 ```
 
@@ -1646,16 +1755,18 @@ They have about the same average relative error as expected:
 
 ```{r show_averge_rel_err}
 rowMeans(sim_res[, "SE", ])
-par(mar = c(5, 4, 1, 1))
-boxplot(t(sim_res[, "SE", ]))
+par(mar = c(9, 4, 1, 1), bty = "l")
+boxplot(t(sim_res[, "SE", ]), las = 2)
+grid()
 ```
 
 The new implementation is faster when the approximation is used:
 
 ```{r use_new_impl}
 rowMeans(sim_res[, "time", ])
-par(mar = c(5, 4, 1, 1))
-boxplot(t(sim_res[, "time", ]))
+par(mar = c(9, 4, 1, 1), bty = "l")
+boxplot(t(sim_res[, "time", ]), log = "y", las = 2)
+grid()
 ```
 
 ## References

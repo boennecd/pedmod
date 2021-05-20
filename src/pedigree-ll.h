@@ -73,7 +73,7 @@ public:
   double fn
     (double const * par, int const maxvls, double const abs_eps,
      double const rel_eps, int minvls, bool const do_reorder,
-     bool const use_aprx, bool &did_fail){
+     bool const use_aprx, bool &did_fail, cdf_methods const method){
     did_fail = true;
     arma::vec mu(dmem.get_mem(), n_members, false),
            lower(mu.end()      , n_members, false),
@@ -94,7 +94,7 @@ public:
       minvls = std::min(1000, 100 * n_members);
     auto const res = cdf<likelihood>(
       func, lower, upper, mu, sig, do_reorder, use_aprx).approximate(
-          maxvls, abs_eps, rel_eps, minvls);
+          maxvls, abs_eps, rel_eps, method, minvls);
 
     did_fail = res.inform > 0;
 
@@ -108,7 +108,7 @@ public:
     (double const * par, double * d_par, int const maxvls,
      double const abs_eps, double const rel_eps, int minvls,
      bool const do_reorder, bool const use_aprx, bool &did_fail,
-     double const weight){
+     double const weight, cdf_methods const method){
     did_fail = true;
     arma::vec mu(dmem.get_mem(), n_members, false),
            lower(mu.end()      , n_members, false),
@@ -127,7 +127,7 @@ public:
       pedmod::likelihood lfunc;
       auto const norm_const = pedmod::cdf<pedmod::likelihood>(
         lfunc, lower, upper, mu, sig, do_reorder, use_aprx).approximate(
-            maxvls, abs_eps, std::min(1., 10. * rel_eps), minvls);
+            maxvls, abs_eps, std::min(1., 10. * rel_eps), method, minvls);
 
       l_factor.setup(sig, par + n_fix_effect, norm_const.likelihood, false);
     }
@@ -136,7 +136,7 @@ public:
       minvls = std::min(1000, 100 * n_members);
     auto const res = cdf<pedigree_l_factor>(
       l_factor, lower, upper, mu, sig, do_reorder, use_aprx).approximate(
-          maxvls, abs_eps, rel_eps, minvls);
+          maxvls, abs_eps, rel_eps, method, minvls);
 
     // derivatives for the slopes
     for(int i = 0; i < n_fix_effect; ++i)

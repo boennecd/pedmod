@@ -36,6 +36,8 @@
 #' @param use_aprx \code{TRUE} if a less precise approximation of
 #' \code{\link{pnorm}} and \code{\link{qnorm}} should be used. This may
 #' reduce the computation time while not affecting the result much.
+#' @param method integer with the method to use. Zero yields Korobov lattice
+#' rules while one yields scrambled Sobol sequences.
 #'
 #' @return
 #' An approximation of the CDF. The \code{"n_it"} attribute shows the number of
@@ -68,8 +70,8 @@
 #' }
 #'
 #' @export
-mvndst <- function(lower, upper, mu, sigma, maxvls = 25000L, abs_eps = .001, rel_eps = 0L, minvls = -1L, do_reorder = TRUE, use_aprx = FALSE) {
-    .Call(`_pedmod_mvndst`, lower, upper, mu, sigma, maxvls, abs_eps, rel_eps, minvls, do_reorder, use_aprx)
+mvndst <- function(lower, upper, mu, sigma, maxvls = 25000L, abs_eps = .001, rel_eps = 0L, minvls = -1L, do_reorder = TRUE, use_aprx = FALSE, method = 0L) {
+    .Call(`_pedmod_mvndst`, lower, upper, mu, sigma, maxvls, abs_eps, rel_eps, minvls, do_reorder, use_aprx, method)
 }
 
 #' Get C++ Object for Log Marginal Likelihood Approximations
@@ -155,11 +157,11 @@ get_n_terms <- function(ptr) {
     .Call(`_pedmod_get_n_terms`, ptr)
 }
 
-eval_pedigree_ll_cpp <- function(ptr, par, maxvls, abs_eps, rel_eps, indices = NULL, minvls = -1L, do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L, cluster_weights = NULL) {
-    .Call(`_pedmod_eval_pedigree_ll`, ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder, use_aprx, n_threads, cluster_weights)
+eval_pedigree_ll_cpp <- function(ptr, par, maxvls, abs_eps, rel_eps, indices = NULL, minvls = -1L, do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L, cluster_weights = NULL, method = 0L) {
+    .Call(`_pedmod_eval_pedigree_ll`, ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder, use_aprx, n_threads, cluster_weights, method)
 }
 
-eval_pedigree_grad_cpp <- function(ptr, par, maxvls, abs_eps, rel_eps, indices = NULL, minvls = -1L, do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L, cluster_weights = NULL) {
-    .Call(`_pedmod_eval_pedigree_grad`, ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder, use_aprx, n_threads, cluster_weights)
+eval_pedigree_grad_cpp <- function(ptr, par, maxvls, abs_eps, rel_eps, indices = NULL, minvls = -1L, do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L, cluster_weights = NULL, method = 0L) {
+    .Call(`_pedmod_eval_pedigree_grad`, ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder, use_aprx, n_threads, cluster_weights, method)
 }
 

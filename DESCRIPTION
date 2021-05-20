@@ -46,4 +46,4 @@ Suggests:
 Depends: 
     R (>= 3.5.0)
 VignetteBuilder: R.rsp
-SystemRequirements: C++11
+SystemRequirements: C++14

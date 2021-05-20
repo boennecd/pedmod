@@ -11,6 +11,7 @@
 #include <string>
 #include <iostream>
 #include <numeric>
+#include <functional>
 
 namespace {
 
@@ -565,6 +566,25 @@ struct mbcp_result {
   std::unordered_set<vertex const *> s1, s2;
 };
 
+// from https://stackoverflow.com/a/9729747/5861244
+template <class T>
+inline void hash_combine(std::size_t &seed, T const &v)
+{
+  std::hash<T> hasher;
+  seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+}
+
+template<typename T>
+struct pair_hash {
+  inline std::size_t operator()(std::pair<T, T> const &v) const
+  {
+    std::size_t seed(0);
+    hash_combine(seed, v.first);
+    hash_combine(seed, v.second);
+    return seed;
+  }
+};
+
 /**
  * constructs an approximate maximally balanced connected partition using the
  * method suggested by Chlebíková (1996). All member functions assume that the
@@ -572,6 +592,10 @@ struct mbcp_result {
  */
 template<typename Tstream>
 class max_balanced_partition {
+  using block_info_pair = std::pair<block const *, block const *>;
+  using block_info_pair_set =
+    std::unordered_set<block_info_pair, pair_hash<block const *> >;
+
   /**
    * struct to hold the weights needed for the algorithm. The class computes
    * the weights once and avoids repeated computation of the same quantities.
@@ -607,10 +631,11 @@ class max_balanced_partition {
      * sets the edges_to_other_blocks. This needs to be called for each
      * block_info object. The last argument is to avoid and inf recursion.
      */
-    void set_edges_to_other_blocks(
-        block_cut_tree const &bct,
-        std::unordered_map<block const *, block_info> &b_info,
-        std::unordered_set<vertex const *> &visited_cut_points){
+    void set_edges_to_other_blocks
+      (block_cut_tree const &bct,
+       std::unordered_map<block const *, block_info> &b_info,
+       std::unordered_set<vertex const *> &visited_cut_points,
+       block_info_pair_set &visited_block_pairs){
       for(vertex const *v : b.cut_vertices){
         // get or create the vector of directed edges with weights
         std::vector<directed_edge_w_weight> &vec_w_edges =
@@ -628,20 +653,14 @@ class max_balanced_partition {
           block const *other = edge.v1 != &b ? edge.v1 : edge.v2;
 
           // only step further if the edge does not exists
-          {
-            // TODO: possibly done many times. Perhaps use a set instead?
-            auto ptr_match = std::find_if(
-              vec_w_edges.begin(), vec_w_edges.end(),
-              [&](directed_edge_w_weight const &x) -> bool {
-                return &x.other_block->b == other;
-              });
-            if(ptr_match != vec_w_edges.end())
-              continue;
-          }
+          if(!visited_block_pairs.emplace(&b, other).second)
+            // we have already add the edge in this direction
+            continue;
 
           // add the edges to other block if needed
           block_info &other_info = b_info.at(other);
-          other_info.set_edges_to_other_blocks(bct, b_info, visited_cut_points);
+          other_info.set_edges_to_other_blocks(bct, b_info, visited_cut_points,
+                                               visited_block_pairs);
 
           // compute the weight and add the edge
           double weight(other_info.inner_weight - v->weight);
@@ -1026,9 +1045,11 @@ public:
   })()),
   trace(trace), Tout(Tout), check_weights(check_weights) {
     std::unordered_set<vertex const *> visited_cut_points;
+    block_info_pair_set used_block_pairs;
     for(auto &b_i : b_info){
       visited_cut_points.clear();
-      b_i.second.set_edges_to_other_blocks(bct, b_info, visited_cut_points);
+      b_i.second.set_edges_to_other_blocks(bct, b_info, visited_cut_points,
+                                           used_block_pairs);
     }
   }
 
@@ -1400,7 +1421,7 @@ mbcp_result unconnected_partition
     std::vector<bool> s2_flag;
     s2_flag.reserve(vertices.size());
     for(vertex const &v : vertices)
-      s2_flag.emplace_back(init.count(&v) ? is_s2_init : !is_s2_init);
+      s2_flag.push_back(init.count(&v) ? is_s2_init : !is_s2_init);
 
     for(size_t i = 0; i < vertices.size(); ++i){
       // compute the gain
@@ -1439,7 +1460,7 @@ mbcp_result unconnected_partition
   // updates the gains for a vertex and the neighbors as if the vertex was
   // just moved. The passed vertex is moved and marked as used
   auto update_gain =
-    [&scores, &scores_ptrs, &update_score_entry, &cut_cost]
+    [&scores_ptrs, &update_score_entry, &cut_cost]
     (vertex const *x) -> void {
       score const &score_x = *scores_ptrs[x->id];
       bool const new_set_2_flag = !score_x.is_in_set_2;

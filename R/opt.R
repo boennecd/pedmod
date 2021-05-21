@@ -43,6 +43,7 @@ pedmod_opt <- function(ptr, par, maxvls, abs_eps, rel_eps,
   if(is.null(opt_func)){
     opt_func <- optim
     formals(opt_func)$method <- "BFGS"
+    formals(opt_func)$control <- list(fnscale = get_n_terms(ptr))
   }
   if(is.null(fix))
     fix <- integer()
@@ -191,7 +192,8 @@ pedmod_start <- function(ptr, data, maxvls = 1000L, abs_eps = 0, rel_eps = 1e-2,
     for(sc_sqrt in seq(.1, sqrt(scale_max), length.out = 5)){
       sc <- rep(log(sc_sqrt) * 2, n_scales)
       opt <- try(optim(sc, fn, gr, method = "BFGS",
-                       control = list(maxit = 1000L)),
+                       control = list(maxit = 1000L,
+                                      fnscale = get_n_terms(ptr))),
                  silent = TRUE)
       if(!inherits(opt, "try-error") && opt$convergence < 2)
         # found a good solution
@@ -257,7 +259,8 @@ pedmod_start <- function(ptr, data, maxvls = 1000L, abs_eps = 0, rel_eps = 1e-2,
     sc <- rep(2 * log(sc_sqrt), n_scales)
     opt <- try(optim(sc, fn, gr, upper = rep(log(scale_max), n_scales),
                      method = "L-BFGS-B",
-                     control = list(lmm = 10L, maxit = 1000L)),
+                     control = list(lmm = 10L, maxit = 1000L,
+                                    fnscale = get_n_terms(ptr))),
                silent = TRUE)
     if(!inherits(opt, "try-error") && opt$convergence < 2)
       # found a good solution

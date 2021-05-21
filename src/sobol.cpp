@@ -46,6 +46,7 @@
  */
 
 #include "sobol.h"
+#include <string>
 
 namespace {
 /// pseudo-random number generator

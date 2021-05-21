@@ -2,23 +2,26 @@
 #define NEW_MVT_H
 #include <memory>
 #include <algorithm>
+#include <limits>
 #include "threat-safe-random.h"
 #include "ped-mem.h"
 #include "kahan.h"
+#include "sobol.h"
+#include <vector>
 
 namespace pedmod {
+struct rand_Korobov_output {
+  size_t minvls;
+  double abserr;
+  int inform;
+};
+
 template<class Func>
 class rand_Korobov {
   static cache_mem<double> dmem;
   static cache_mem<int   > imem;
 
 public:
-  struct rand_Korobov_output {
-    size_t minvls;
-    double abserr;
-    int inform;
-  };
-
   static void alloc_mem
     (int const max_ndim, int const max_nf, int const max_threads) {
     dmem.set_n_mem(6 * max_nf + 3 * max_ndim, max_threads);
@@ -244,6 +247,107 @@ template<class Func>
 cache_mem<double> rand_Korobov<Func>::dmem;
 template<class Func>
 cache_mem<int   > rand_Korobov<Func>::imem;
+
+template<class Func>
+class sobol_wrapper {
+  static cache_mem<double> dmem;
+  static constexpr unsigned const n_sequences = 8;
+
+public:
+  static void alloc_mem
+  (int const max_ndim, int const max_nf, int const max_threads) {
+    dmem.set_n_mem((1 + n_sequences) * max_nf, max_threads);
+  }
+
+  static rand_Korobov_output comp
+  (Func &f, int const ndim, size_t const minvls, size_t const maxvls,
+   int const nf, double const abseps, double const releps,
+   double * const __restrict__ finest, parallelrng::unif_drawer &sampler,
+   sobol::scrambling_type const method){
+    if(method == sobol::scrambling_type::none)
+      throw std::invalid_argument("sobol::scrambling_type::none passed but it makes no sense");
+
+    // the variables we will return
+    size_t intvls(0L);
+    int inform(1L);
+    double abserr(std::numeric_limits<double>::infinity());
+
+    // get the sequences we need
+    std::vector<sobol> seqs;
+    seqs.reserve(n_sequences);
+    for(unsigned i = 0; i < n_sequences; ++i){
+      int const i_seed =
+        static_cast<int>(std::numeric_limits<int>::max() * sampler());
+      seqs.emplace_back(ndim, method, i_seed < 0 ? 1 : i_seed);
+    }
+
+    // initialize the objects we need
+    double * const __restrict__ integrand_vals = dmem.get_mem(),
+           * const __restrict__ seq_means      = integrand_vals + nf;
+    std::fill(seq_means, seq_means + nf * n_sequences, 0);
+
+    // main loop where we compute the result
+    unsigned n_draw_next = minvls / n_sequences + 1L,
+             n_drawn_per_seq = 0;
+    for(; intvls < maxvls; ){
+      // update the estimator for each of the Sobol sequences
+      for(unsigned i = 0; i < n_sequences; ++i){
+        double denom(n_drawn_per_seq);
+        for(size_t k = 0; k < n_draw_next; ++k, ++intvls){
+          seqs[i].next();
+          f(&ndim, seqs[i].get_qausi(), &nf, integrand_vals);
+          denom += 1;
+          double *meas = seq_means + i * nf;
+          for(int j = 0; j < nf; ++j, ++meas)
+            *meas += (integrand_vals[j] - *meas) / denom;
+        }
+      }
+
+      // update the denominator counter
+      n_drawn_per_seq += n_draw_next;
+
+      // compute the mean estimator and the metric to compute the standard error
+      double * const __restrict__ M = integrand_vals;
+      std::fill(finest, finest + nf, 0);
+      std::fill(M     , M      + nf, 0);
+
+      for(unsigned i = 0; i < n_sequences; ++i){
+        // stable version of Welford's online algorithm
+        double *values = seq_means + i * nf;
+        for(int j = 0; j < nf; ++j){
+          double const term_diff = values[j] - finest[j];
+          finest[j] +=  term_diff / (i + 1.);
+          M     [j] += term_diff * (values[j] - finest[j]);
+        }
+      }
+
+      // check if we can exit early
+      bool passes_conv_check = true;
+      for(int j = 0; j < nf; ++j){
+        double const sigma =
+          M[j] / (n_sequences - 1.) / static_cast<double>(n_sequences);
+        abserr = 7 / 2 * std::sqrt(sigma);
+        passes_conv_check &=
+          abserr <= std::max(abseps, std::abs(finest[j]) * releps);
+      }
+
+      // exit or compute the number of samples to compute next time
+      if(!passes_conv_check){
+        n_draw_next = (n_draw_next * 3L) / 2L + 1L;
+        if(n_draw_next * n_sequences + intvls > maxvls)
+          n_draw_next = (maxvls - intvls) / n_sequences + 1L;
+      } else {
+        inform = 0L;
+        break;
+      }
+    }
+
+    return { intvls, abserr, inform };
+  }
+};
+
+template<class Func>
+cache_mem<double> sobol_wrapper<Func>::dmem;
 
 } // namespace pedmod
 

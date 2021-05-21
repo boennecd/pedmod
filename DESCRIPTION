@@ -14,6 +14,10 @@ Authors@R: c(
          role = c("cph")), 
   person("Torsten", "Hothorn", 
          role = c("cph")),
+  person("Christophe", "Dutang", 
+         role = c("cph")),
+  person("Diethelm", "Wuertz", 
+         role = c("cph")),
   person("R-core", email = "R-core@R-project.org",
          role = "cph"))
 Maintainer: Benjamin Christoffersen <boennecd@gmail.com>

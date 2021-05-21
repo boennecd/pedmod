@@ -21,6 +21,7 @@ pedmod_opt(
   cluster_weights = NULL,
   fix = NULL,
   standardized = FALSE,
+  method = 0L,
   ...
 )
 
@@ -38,7 +39,8 @@ pedmod_start(
   use_aprx = TRUE,
   n_threads = 1L,
   cluster_weights = NULL,
-  standardized = FALSE
+  standardized = FALSE,
+  method = 0L
 )
 }
 \arguments{
@@ -86,6 +88,9 @@ for computing profile likelihoods. \code{NULL} yields all parameters.}
 \item{standardized}{logical for whether to use the standardized or direct
 parameterization. See \code{\link{standardized_to_direct}} and the vignette
 at \code{vignette("pedmod", package = "pedmod")}.}
+
+\item{method}{integer with the method to use. Zero yields Korobov lattice
+rules while one yields scrambled Sobol sequences.}
 
 \item{...}{Arguments passed to \code{opt_func}.}
 

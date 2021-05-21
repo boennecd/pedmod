@@ -108,14 +108,15 @@
 eval_pedigree_ll <- function(ptr, par, maxvls, abs_eps, rel_eps,
                              indices = NULL, minvls = -1L, do_reorder = TRUE,
                              use_aprx = FALSE, n_threads = 1L,
-                             cluster_weights = NULL, standardized = FALSE){
+                             cluster_weights = NULL, standardized = FALSE,
+                             method = 0L){
   if(standardized)
     par <- standardized_to_direct(par = par, n_scales = get_n_scales(ptr))
   eval_pedigree_ll_cpp(
     ptr = ptr, par = par, maxvls = maxvls, abs_eps = abs_eps, rel_eps = rel_eps,
     indices = indices, minvls = minvls, do_reorder = do_reorder,
     use_aprx = use_aprx, n_threads = n_threads,
-    cluster_weights = cluster_weights)
+    cluster_weights = cluster_weights, method = method)
 }
 
 #' @rdname eval_pedigree
@@ -129,7 +130,8 @@ eval_pedigree_ll <- function(ptr, par, maxvls, abs_eps, rel_eps,
 eval_pedigree_grad <- function(ptr, par, maxvls, abs_eps, rel_eps,
                                indices = NULL, minvls = -1L, do_reorder = TRUE,
                                use_aprx = FALSE, n_threads = 1L,
-                               cluster_weights = NULL, standardized = FALSE){
+                               cluster_weights = NULL, standardized = FALSE,
+                               method = 0L){
   if(standardized)
     par <- standardized_to_direct(par = par, n_scales = get_n_scales(ptr),
                                   jacobian = TRUE)
@@ -138,7 +140,7 @@ eval_pedigree_grad <- function(ptr, par, maxvls, abs_eps, rel_eps,
     ptr = ptr, par = par, maxvls = maxvls, abs_eps = abs_eps, rel_eps = rel_eps,
     indices = indices, minvls = minvls, do_reorder = do_reorder,
     use_aprx = use_aprx, n_threads = n_threads,
-    cluster_weights = cluster_weights)
+    cluster_weights = cluster_weights, method = method)
 
   if(!standardized)
     return(out)

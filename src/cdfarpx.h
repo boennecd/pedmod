@@ -140,6 +140,17 @@ inline void copy_lower_tri
       *x = X.at(r, c);
 }
 
+enum cdf_methods : int {
+  Korobov = 0,
+  Sobol = 1
+};
+
+inline cdf_methods get_cdf_methods(int const x){
+  if(x < 0 or x > 1)
+    throw std::invalid_argument("cdf_methods is not implemented");
+  return static_cast<cdf_methods>(x);
+}
+
 /**
  * TODO: describe what this class does.
  */
@@ -402,7 +413,7 @@ public:
    */
   out_type approximate
   (int const maxvls, double const abs_eps, double const rel_eps,
-   int const minvls = 0L){
+   cdf_methods const method, int const minvls = 0L){
 #ifdef DO_CHECKS
     if(abs_eps <= 0 and rel_eps <= 0)
       throw std::invalid_argument("cdf::approximate: no valid convergence threshold");
@@ -428,9 +439,18 @@ public:
       throw std::runtime_error("std::isinf(*sigma_chol.begin())");
 
     /* perform the approximation */
-    auto res = rand_Korobov<cdf<T_Functor> >::comp(
-      *this, ndim, minvls, maxvls, n_integrands, abs_eps, rel_eps,
-      int_apprx, sampler);
+    auto res = ([&]() -> rand_Korobov_output {
+      if(method == cdf_methods::Sobol)
+        return sobol_wrapper<cdf<T_Functor> >::comp(
+            *this, ndim, minvls, maxvls, n_integrands, abs_eps, rel_eps,
+            int_apprx, sampler, sobol::scrambling_type::owen);
+      if(method != cdf_methods::Korobov)
+        throw std::invalid_argument("method is not implemented");
+
+      return rand_Korobov<cdf<T_Functor> >::comp(
+          *this, ndim, minvls, maxvls, n_integrands, abs_eps, rel_eps,
+          int_apprx, sampler);
+    })();
 
     return functor.get_output(int_apprx, res.minvls, res.inform,
                               res.abserr, indices.begin());
@@ -452,6 +472,8 @@ public:
   static void alloc_mem
   (unsigned const max_dim, unsigned const max_threads){
     rand_Korobov<cdf<likelihood> >::alloc_mem(
+        max_dim, get_n_integrands(), max_threads);
+    sobol_wrapper<cdf<likelihood> >::alloc_mem(
         max_dim, get_n_integrands(), max_threads);
     dmen.set_n_mem(1, max_threads);
   }
@@ -577,6 +599,8 @@ public:
     // setup working memory
     rand_Korobov<cdf<pedigree_l_factor> >::alloc_mem(
         n_mem, get_n_integrands(), max_threads);
+    sobol_wrapper<cdf<pedigree_l_factor> >::alloc_mem(
+        n_mem, get_n_integrands(), max_threads);
     dmem.set_n_mem(
       2 * n_mem * n_mem + n_mem * (n_mem + 1) + get_n_integrands() + 2 * n_mem,
       max_threads);
@@ -695,8 +719,8 @@ public:
 
         for(int r = 0; r < c; ++r, ++d_mu_r){
           double const mu_prod = *d_mu_c * *d_mu_r;
-          for(int s = 0; s < n_scales; ++s)
-            d_sc[s] += mu_prod * *scale_mats_ptr[s]++;
+          for(int s = 0; s < n_scales; ++scale_mats_ptr[s],++s)
+            d_sc[s] += mu_prod * *scale_mats_ptr[s];
         }
 
         for(int s = 0; s < n_scales; ++s){

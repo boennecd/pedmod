@@ -14,7 +14,8 @@ mvndst(
   rel_eps = 0L,
   minvls = -1L,
   do_reorder = TRUE,
-  use_aprx = FALSE
+  use_aprx = FALSE,
+  method = 0L
 )
 }
 \arguments{
@@ -41,6 +42,9 @@ be used. \code{TRUE} is likely the best value.}
 \item{use_aprx}{\code{TRUE} if a less precise approximation of
 \code{\link{pnorm}} and \code{\link{qnorm}} should be used. This may
 reduce the computation time while not affecting the result much.}
+
+\item{method}{integer with the method to use. Zero yields Korobov lattice
+rules while one yields scrambled Sobol sequences.}
 }
 \value{
 An approximation of the CDF. The \code{"n_it"} attribute shows the number of

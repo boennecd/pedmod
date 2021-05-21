@@ -719,8 +719,8 @@ public:
 
         for(int r = 0; r < c; ++r, ++d_mu_r){
           double const mu_prod = *d_mu_c * *d_mu_r;
-          for(int s = 0; s < n_scales; ++s)
-            d_sc[s] += mu_prod * *scale_mats_ptr[s]++;
+          for(int s = 0; s < n_scales; ++scale_mats_ptr[s],++s)
+            d_sc[s] += mu_prod * *scale_mats_ptr[s];
         }
 
         for(int s = 0; s < n_scales; ++s){

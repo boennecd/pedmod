@@ -61,6 +61,9 @@ inline double unis(int &ix) noexcept {
  * function like ibits in Fortran. From
  *    https://www.dreamincode.net/forums/topic/237767-bit-extraction/
  *
+ * and
+ *    https://stackoverflow.com/a/10090450/5861244
+ *
  * That is extracts a field of length len from i, starting from bit position pos
  * and extending left for len bits.
  *
@@ -71,8 +74,20 @@ inline double unis(int &ix) noexcept {
  *      ~~~~~~ len ~~~~~pos
  */
 inline int ibits
-  (int const i, unsigned char const pos, unsigned char const len) noexcept {
+  (int const i, unsigned char const pos,
+   unsigned char const len) noexcept {
   unsigned char const shift = sizeof(int) * 8 - pos - len;
+  return
+    // remove left most bits
+    (i << shift) >>
+      // remove right most bits
+      (pos + shift);
+}
+
+// the special case where len = 1
+inline int ibits
+  (int const i, unsigned char const pos) noexcept {
+  unsigned char const shift = sizeof(int) * 8 - pos - 1L;
   return
     // remove left most bits
     (i << shift) >>
@@ -1055,7 +1070,10 @@ sobol::sobol(unsigned const dimen_arg, scrambling_type const scrambling_method,
   for(int j = 0; j < max_col; ++j)
     v(0, j) = 1;
 
-  std::vector<bool> includ(max_deg);
+  static bool includ[max_deg];
+#ifdef _OPENMP
+#pragma omp threadprivate(includ)
+#endif
   for(int i = 1; i < dimen; ++i){
     int const m = find_n_bits(poly[i - 1]);
 
@@ -1093,27 +1111,31 @@ sobol::sobol(unsigned const dimen_arg, scrambling_type const scrambling_method,
   }
 
   // variables for scrambling
-  std::vector<int> shift(dimen);
-  simple_matrix<int> lsm(dimen, max_bit + 1L);
+  static int shift[max_dim];
+  static int lsm[max_dim][max_bit + 1L];
+#ifdef _OPENMP
+#pragma omp threadprivate(shift, lsm)
+#endif
+
   constexpr int const maxv(30);
 
   if(scrambling_method == scrambling_type::none){
     std::copy(v.data(), v.data() + dimen * max_col, sv.data());
-    std::fill(shift.begin(), shift.end() + dimen, 0L);
+    std::fill(shift, shift + dimen, 0L);
     ll = 1;
     for(int j = 0; j < max_col; ++j)
       ll *= 2;
 
   } else if(scrambling_method == scrambling_type::owen or
               scrambling_method == scrambling_type::owen_and_faure_tezuka){
-    auto sgen_scrml = [](int const max,  simple_matrix<int> &lsm,
-                         std::vector<int> &shift, int const dimen,
+    auto sgen_scrml = [](int const max, int lsm[max_dim][max_bit + 1L],
+                         int shift[max_dim], int const dimen,
                          int const max_col, int i_seed){
       for(int p = 0; p < dimen; ++p){
         shift[p] = 0;
         int l(1);
         for(unsigned i = max; i-- > 0; ){
-          lsm(p, i) = 0;
+          lsm[p][i] = 0;
           int const stepm = static_cast<int>(unis(i_seed) * 1000.) % 2;
           shift[p] += stepm * l;
           l *= 2L;
@@ -1126,7 +1148,7 @@ sobol::sobol(unsigned const dimen_arg, scrambling_type const scrambling_method,
                 return static_cast<int>(unis(i_seed) * 1000.) % 2;
               return 0;
             })();
-            lsm(p, i) += tmp * ll;
+            lsm[p][i] += tmp * ll;
             ll *= 2L;
           }
         }
@@ -1134,19 +1156,35 @@ sobol::sobol(unsigned const dimen_arg, scrambling_type const scrambling_method,
     };
 
     sgen_scrml(maxv, lsm, shift, dimen, max_col, i_seed);
-    for(int i = 0; i < dimen; ++i)
+
+    static int lsm_ibits[max_bit + 1L][max_col],
+               v_ibits  [max_bit][max_col];
+#ifdef _OPENMP
+#pragma omp threadprivate(lsm_ibits, v_ibits)
+#endif
+
+    for(int i = 0; i < dimen; ++i){
+      // pre-compute ibits values
+      for(unsigned p = maxv; p-- > 0;)
+        for(int k = 0; k < max_col; ++k)
+          lsm_ibits[p][k] = ibits(lsm[i][p], k);
+      for(int j = 0; j < max_col; ++j)
+        for(int k = 0; k < max_col; ++k)
+          v_ibits[j][k] = ibits(v(i, j), k);
+
       for(int j = 0; j < max_col; ++j){
         int temp2(0),
             l(1);
         for(unsigned p = maxv; p-- > 0;){
           int temp1(0);
           for(int k = 0; k < max_col; ++k)
-            temp1 += ibits(lsm(i, p), k, 1) * ibits(v(i, j), k, 1);
+            temp1 += lsm_ibits[p][k] * v_ibits[j][k];
           temp2 += (temp1 % 2) * l;
           l *= 2;
         }
         sv(i, j) = temp2;
       }
+    }
 
     ll = 1;
     for(int j = 0; j < max_col; ++j)

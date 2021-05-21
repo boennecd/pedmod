@@ -567,8 +567,8 @@ gr <- function(maxvls, method, par = start$par)
                      method = method, n_threads = 4L)
 
 # compute the estimator for either method using an increasing number of samples
-n_samp <- 1000 * 2^(0:8) # the sample sizes we will use
-seeds <- 1:20 # the seeds we will use
+n_samp <- 1000 * 2^(0:9) # the sample sizes we will use
+seeds <- 1:40 # the seeds we will use
 
 res <- sapply(setNames(n_samp, n_samp), function(maxvls){
   sapply(c(Korobov = 0, Sobol = 1), function(method){
@@ -610,7 +610,7 @@ lm(t(log(res["sd", , "Korobov", ])) ~ log(n_samp))
 lm(t(log(res["sd", , "Sobol", ])) ~ log(n_samp))
 
 # plot the two standard deviation estimates
-par(mar = c(5, 4, 1, 1))
+par(mar = c(5, 5, 1, 1))
 matplot(n_samp, t(res["sd", , "Korobov", ]), log = "xy", ylab = "L2 error", 
         type = "p", pch = 1:4, col = "black", bty = "l", 
         xlab = "Number of samples", ylim = range(res["sd", , , ]))
@@ -624,7 +624,7 @@ matlines(n_samp, t(res["sd", , "Sobol", ]), col = "darkgray", lty = 3)
 
 The above seems to suggest that the scrambled Sobol sequences have a higher 
 initial error but a convergence rate which is closer to the optimal 
-$O(n^{-1 + \epsilon})$ rate for some small epsilon.
+$O(n^{-1 + \epsilon})$ rate for some small $\epsilon$.
 
 We fit the model again below as example of using the scrambled Sobol sequences:
 

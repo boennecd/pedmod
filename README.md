@@ -330,7 +330,7 @@ library(pedmod)
 ll_terms <- get_pedigree_ll_terms(dat, max_threads = 4L)
 system.time(start <- pedmod_start(ptr = ll_terms, data = dat, n_threads = 4L))
 #>    user  system elapsed 
-#>  11.605   0.122   3.026
+#>  11.127   0.117   2.899
 
 # log-likelihood without the random effects and at the starting values
 start$logLik_no_rng
@@ -345,7 +345,7 @@ system.time(
     n_threads = 4L, 
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 #>    user  system elapsed 
-#> 102.632   0.195  25.772
+#>   93.95    0.00   23.51
 ```
 
 The results of the estimation are shown below:
@@ -441,15 +441,15 @@ parameterization:
 system.time(start_std <- pedmod_start(
   ptr = ll_terms, data = dat, n_threads = 4L, standardized = TRUE))
 #>    user  system elapsed 
-#>  89.484   0.194  22.442
+#>  27.317   0.009   6.843
 
 # the starting values are close
 standardized_to_direct(start_std$par, n_scales = 1L)
 #> (Intercept)  Continuous      Binary             
-#>     -2.8178      0.9769      1.8398      1.0085 
+#>      -2.844       0.986       1.857       1.034 
 #> attr(,"variance proportions")
 #> Residual          
-#>   0.2673   0.7327
+#>   0.2623   0.7377
 start$par
 #> (Intercept)  Continuous      Binary             
 #>     -2.8435      0.9858      1.8566      1.0332
@@ -457,7 +457,7 @@ start$par
 # this may have required different number of gradient and function evaluations
 start_std$opt$counts
 #> function gradient 
-#>      248      227
+#>       26       26
 start    $opt$counts
 #> function gradient 
 #>       31       31
@@ -469,15 +469,15 @@ system.time(
     n_threads = 4L, standardized = TRUE,
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 #>    user  system elapsed 
-#>  85.360   0.056  21.395
+#>  80.387   0.004  20.231
 
 # we get the same
 standardized_to_direct(opt_out_std$par, n_scales = 1L)
 #> (Intercept)  Continuous      Binary             
-#>     -2.8724      0.9691      1.8785      1.0682 
+#>     -2.8708      0.9691      1.8771      1.0673 
 #> attr(,"variance proportions")
 #> Residual          
-#>   0.2558   0.7442
+#>   0.2559   0.7441
 opt_out$par
 #> (Intercept)  Continuous      Binary             
 #>     -2.8687      0.9677      1.8768      1.0636
@@ -485,7 +485,7 @@ opt_out$par
 # this may have required different number of gradient and function evaluations
 opt_out_std$counts
 #> function gradient 
-#>       14       10
+#>       15       10
 opt_out    $counts
 #> function gradient 
 #>       19       12
@@ -511,7 +511,7 @@ system.time(
     minvls = 1000L, n_it = 400L, n_grad_steps = 20L, n_grad = 50L, 
     n_hess = 200L))
 #>    user  system elapsed 
-#> 410.951   0.666 103.400
+#> 385.865   0.017  96.739
 
 # show the log marginal likelihood
 ll_wrapper <- function(x)
@@ -558,7 +558,7 @@ system.time(
     # but use fewer samples in each iteration
     n_grad = 20L, n_hess = 100L))
 #>    user  system elapsed 
-#> 257.632   0.404  64.515
+#> 244.495   0.012  61.141
 
 # compute the marginal log likelihood and compare the parameter estimates
 print(ll_wrapper(sqn_out_few$par), digits = 8)
@@ -894,7 +894,7 @@ system.time(
     n_threads = 4L, 
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L, method = 1L))
 #>    user  system elapsed 
-#> 126.534   0.355  32.206
+#> 117.565   0.112  29.701
 
 # compare the result. We start with the log-likelihood
 print(-opt_out_sobol$value, digits = 8)
@@ -1006,16 +1006,16 @@ n_sims <- dim(err)[[3]]
 SE <- apply(err , 1:2, sd) / sqrt(n_sims)
 bias
 #>               Direct Standardized
-#> (Intercept) -0.06568       -3.862
-#> Continuous   0.02816        1.329
-#> Binary       0.03728        2.550
-#> std genetic  0.05624        2.681
+#> (Intercept) -0.06568     -0.06516
+#> Continuous   0.02816      0.02800
+#> Binary       0.03728      0.03682
+#> std genetic  0.05624      0.05592
 SE
 #>              Direct Standardized
-#> (Intercept) 0.05080       1.7966
-#> Continuous  0.01718       0.6114
-#> Binary      0.03369       1.1980
-#> std genetic 0.03908       1.2327
+#> (Intercept) 0.05080      0.05034
+#> Continuous  0.01718      0.01706
+#> Binary      0.03369      0.03336
+#> std genetic 0.03908      0.03875
 
 # make a box plot
 b_vals <- expand.grid(rownames(err), strtrim(colnames(err), 1))
@@ -1045,40 +1045,40 @@ time_vals <- sapply(sim_study, function(x) {
         Standardized = .(x$fit_std))
 }, simplify = "array")
 apply(time_vals, 1:2, mean)
-#>              opt_out  start total
-#> Direct         17.01  4.506 21.51
-#> Standardized   39.52 25.995 65.51
+#>              opt_out start total
+#> Direct         15.94 4.195 20.14
+#> Standardized   20.70 4.140 24.84
 apply(time_vals, 1:2, sd)
-#>              opt_out  start total
-#> Direct         9.818  2.892 10.74
-#> Standardized  36.356 16.531 42.40
+#>              opt_out start  total
+#> Direct         9.234 2.691 10.106
+#> Standardized   6.454 2.654  6.759
 apply(time_vals, 1:2, quantile)
 #> , , opt_out
 #> 
 #>      Direct Standardized
-#> 0%    7.393        11.71
-#> 25%  11.093        21.71
-#> 50%  11.866        27.09
-#> 75%  23.024        35.76
-#> 100% 57.731       200.97
+#> 0%    7.063        10.65
+#> 25%  10.467        14.50
+#> 50%  11.137        21.36
+#> 75%  21.835        25.05
+#> 100% 54.478        32.84
 #> 
 #> , , start
 #> 
 #>      Direct Standardized
-#> 0%    1.761        15.86
-#> 25%   2.890        19.67
-#> 50%   3.305        21.30
-#> 75%   4.978        24.32
-#> 100% 15.407       102.10
+#> 0%    1.635        1.621
+#> 25%   2.660        2.687
+#> 50%   3.061        3.030
+#> 75%   4.649        4.512
+#> 100% 14.161       14.042
 #> 
 #> , , total
 #> 
 #>      Direct Standardized
-#> 0%    11.21        28.26
-#> 25%   14.46        42.54
-#> 50%   17.23        48.57
-#> 75%   26.42        64.67
-#> 100%  66.23       223.61
+#> 0%    10.53        13.62
+#> 25%   13.51        19.40
+#> 50%   16.09        25.26
+#> 75%   25.15        29.40
+#> 100%  62.44        37.62
 ```
 
 ## Example: Adding Environmental Effects
@@ -1193,12 +1193,12 @@ system.time(ll_res <- eval_pedigree_ll(
   ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4))
 #>    user  system elapsed 
-#>   1.563   0.000   0.391
+#>   1.457   0.000   0.365
 system.time(grad_res <- eval_pedigree_grad(
   ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4))
 #>    user  system elapsed 
-#>   43.35    0.10   11.05
+#>   40.84    0.00   10.36
 
 # find the duplicated combinations of pedigrees, covariates, and outcomes. One 
 # likely needs to change this code if the pedigrees are not identical but are 
@@ -1221,13 +1221,13 @@ system.time(ll_res_fast <- eval_pedigree_ll(
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4, 
   cluster_weights = c_weights))
 #>    user  system elapsed 
-#>   0.684   0.000   0.171
+#>   0.624   0.000   0.156
 system.time(grad_res_fast <- eval_pedigree_grad(
   ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4, 
   cluster_weights = c_weights))
 #>    user  system elapsed 
-#>  18.910   0.028   4.965
+#>  17.507   0.000   4.606
 
 # show that we get the same (up to a Monte Carlo error)
 print(c(redundant = ll_res, fast = ll_res_fast), digits = 6)
@@ -1244,7 +1244,7 @@ system.time(
   start <- pedmod_start(ptr = ll_terms, data = dat_unqiue, 
                         cluster_weights = c_weights))
 #>    user  system elapsed 
-#>  28.270   0.076  28.342
+#>   27.42    0.00   27.42
 
 # optimize
 system.time(
@@ -1253,7 +1253,7 @@ system.time(
     n_threads = 4L,  cluster_weights = c_weights,
     maxvls = 5000L, rel_eps = 1e-2, minvls = 500L))
 #>    user  system elapsed 
-#>  38.045   0.048   9.720
+#>  35.352   0.016   9.026
 system.time(
   opt_out <- pedmod_opt(
     ptr = ll_terms, par = opt_out_quick$par, abs_eps = 0, use_aprx = TRUE, 
@@ -1261,7 +1261,7 @@ system.time(
     # we changed the parameters
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 #>    user  system elapsed 
-#> 226.308   0.368  56.678
+#> 213.597   0.052  53.563
 ```
 
 The results are shown below:
@@ -1359,15 +1359,15 @@ system.time(start_std <- pedmod_start(
   ptr = ll_terms, data = dat_unqiue, cluster_weights = c_weights, 
   standardized = TRUE))
 #>    user  system elapsed 
-#>  78.108   0.167  78.265
+#>    18.1     0.0    18.1
 
 # are the starting values similar?
 standardized_to_direct(start_std$par, n_scales = 2L)
 #> (Intercept)      Binary                         
-#>      -2.303       3.076       0.246      -3.685 
+#>     -2.7558      3.6812      0.4737     -0.3651 
 #> attr(,"variance proportions")
 #> Residual                   
-#>  0.43403  0.55508  0.01089
+#>   0.3030   0.4866   0.2103
 start$par
 #> (Intercept)      Binary                         
 #>     -2.5782      3.4440      0.2816     -0.5741
@@ -1375,7 +1375,7 @@ start$par
 # this may have required different number of gradient and function evaluations
 start_std$opt$counts
 #> function gradient 
-#>      229      206
+#>       50       50
 start    $opt$counts
 #> function gradient 
 #>       20       20
@@ -1387,7 +1387,7 @@ system.time(
     n_threads = 4L,  cluster_weights = c_weights, standardized = TRUE,
     maxvls = 5000L, rel_eps = 1e-2, minvls = 500L))
 #>    user  system elapsed 
-#>  86.907   0.124  22.200
+#>  35.276   0.008   9.070
 system.time(
   opt_out_std <- pedmod_opt(
     ptr = ll_terms, par = opt_out_quick_std$par, abs_eps = 0, use_aprx = TRUE, 
@@ -1395,15 +1395,15 @@ system.time(
     # we changed the parameters
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 #>    user  system elapsed 
-#>  11.427   0.020   2.863
+#>  112.83    0.00   28.21
 
 # we get the same
 standardized_to_direct(opt_out_std$par, n_scales = 2L)
 #> (Intercept)      Binary                         
-#>     -2.9084      3.8938      0.6098     -0.1921 
+#>     -2.9087      3.8935      0.6071     -0.1847 
 #> attr(,"variance proportions")
 #> Residual                   
-#>   0.2728   0.5020   0.2251
+#>   0.2727   0.5005   0.2267
 opt_out$par
 #> (Intercept)      Binary                         
 #>     -2.8941      3.8742      0.5952     -0.2017
@@ -1411,14 +1411,14 @@ opt_out$par
 # this may have required different number of gradient and function evaluations
 opt_out_quick_std$counts
 #> function gradient 
-#>      109       60
+#>       36       29
 opt_out_quick    $counts
 #> function gradient 
 #>       45       27
 
 opt_out_std$counts
 #> function gradient 
-#>        3        1
+#>       34       10
 opt_out    $counts
 #> function gradient 
 #>       31       25
@@ -1683,16 +1683,16 @@ n_sims <- dim(err)[[3]]
 SE <- apply(err , 1:2, sd) / sqrt(n_sims)
 bias
 #>               Direct Standardized
-#> (Intercept) -0.08021     -0.07091
-#> Binary       0.11418      0.10206
-#> std genetic  0.03649      0.03223
-#> std env.     0.04022      0.03582
+#> (Intercept) -0.08021     -0.08267
+#> Binary       0.11418      0.11748
+#> std genetic  0.03649      0.03783
+#> std env.     0.04022      0.04133
 SE
 #>              Direct Standardized
-#> (Intercept) 0.07932      0.06761
-#> Binary      0.10729      0.09218
-#> std genetic 0.04774      0.04215
-#> std env.    0.03715      0.03172
+#> (Intercept) 0.07932      0.07969
+#> Binary      0.10729      0.10780
+#> std genetic 0.04774      0.04778
+#> std env.    0.03715      0.03731
 
 # make a box plot
 b_vals <- expand.grid(rownames(err), strtrim(colnames(err), 1))
@@ -1722,40 +1722,40 @@ time_vals <- sapply(sim_study, function(x) {
         Standardized = .(x$fit_std))
 }, simplify = "array")
 apply(time_vals, 1:2, mean)
-#>              opt_out  start total
-#> Direct         44.12  6.956 51.08
-#> Standardized   27.34 26.228 53.57
+#>              opt_out start total
+#> Direct         41.67 6.560 48.23
+#> Standardized   27.20 6.409 33.61
 apply(time_vals, 1:2, sd)
 #>              opt_out start total
-#> Direct         26.21 5.182 25.76
-#> Standardized   21.88 9.540 22.06
+#> Direct         24.77 4.903 24.34
+#> Standardized   12.95 3.796 13.99
 apply(time_vals, 1:2, quantile)
 #> , , opt_out
 #> 
 #>       Direct Standardized
-#> 0%     7.975         2.64
-#> 25%   27.224        17.45
-#> 50%   39.283        23.18
-#> 75%   49.749        33.08
-#> 100% 120.702       135.69
+#> 0%     7.492         2.36
+#> 25%   25.765        19.73
+#> 50%   36.990        26.48
+#> 75%   47.137        34.09
+#> 100% 114.218        60.70
 #> 
 #> , , start
 #> 
 #>      Direct Standardized
-#> 0%    2.545        3.773
-#> 25%   3.865       20.143
-#> 50%   5.177       23.679
-#> 75%   6.718       30.019
-#> 100% 31.509       54.275
+#> 0%    2.360        2.390
+#> 25%   3.678        3.883
+#> 50%   4.825        5.466
+#> 75%   6.313        6.832
+#> 100% 29.849       21.916
 #> 
 #> , , total
 #> 
 #>      Direct Standardized
-#> 0%    12.31        21.31
-#> 25%   32.22        41.29
-#> 50%   44.92        48.74
-#> 75%   62.60        62.00
-#> 100% 124.52       156.25
+#> 0%    11.52        5.907
+#> 25%   30.37       24.241
+#> 50%   42.46       32.155
+#> 75%   59.44       41.790
+#> 100% 117.84       66.332
 ```
 
 ## More Complicated Example
@@ -1923,14 +1923,14 @@ gr <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE,
 # check output at the starting values
 system.time(ll <- -fn(c(beta, sc)))
 #>    user  system elapsed 
-#>   8.443   0.028   2.157
+#>   7.850   0.000   2.001
 ll # the log likelihood at the starting values
 #> [1] -26042
 #> attr(,"n_fails")
 #> [1] 0
 system.time(gr_val <- gr(c(beta, sc)))
 #>    user  system elapsed 
-#> 127.047   0.208  32.160
+#>  118.66    0.00   30.06
 gr_val # the gradient at the starting values
 #> [1] 1894.83 -549.43 -235.73   47.21  -47.84
 #> attr(,"value")
@@ -1958,8 +1958,8 @@ rbind(numDeriv = numDeriv::grad(fn, c(beta, sc), indices = 0:10),
 
 # optimize the log likelihood approximation
 system.time(opt <- optim(c(beta, sc), fn, gr, method = "BFGS"))
-#>     user   system  elapsed 
-#> 3982.769    5.904 1015.654
+#>    user  system elapsed 
+#>  3785.8     0.0   962.2
 ```
 
 The output from the optimization is shown below:
@@ -2002,12 +2002,12 @@ microbenchmark(
   times = 1)
 #> Unit: seconds
 #>            expr     min      lq    mean  median      uq     max neval
-#>   fn (1 thread)   7.759   7.759   7.759   7.759   7.759   7.759     1
-#>  fn (2 threads)   4.158   4.158   4.158   4.158   4.158   4.158     1
-#>  fn (4 threads)   2.174   2.174   2.174   2.174   2.174   2.174     1
-#>   gr (1 thread) 108.156 108.156 108.156 108.156 108.156 108.156     1
-#>  gr (2 threads)  58.275  58.275  58.275  58.275  58.275  58.275     1
-#>  gr (4 threads)  31.141  31.141  31.141  31.141  31.141  31.141     1
+#>   fn (1 thread)   7.519   7.519   7.519   7.519   7.519   7.519     1
+#>  fn (2 threads)   3.954   3.954   3.954   3.954   3.954   3.954     1
+#>  fn (4 threads)   2.117   2.117   2.117   2.117   2.117   2.117     1
+#>   gr (1 thread) 104.692 104.692 104.692 104.692 104.692 104.692     1
+#>  gr (2 threads)  56.691  56.691  56.691  56.691  56.691  56.691     1
+#>  gr (4 threads)  28.881  28.881  28.881  28.881  28.881  28.881     1
 ```
 
 ### Using ADAM
@@ -2109,7 +2109,7 @@ system.time(
                    verbose = FALSE, maxvls = maxpts_use, 
                    minvls = minvls))
 #>     user   system  elapsed 
-#> 4092.972    0.074 1047.343
+#> 4245.560    0.008 1085.677
 ```
 
 The result is shown below.
@@ -2235,7 +2235,7 @@ The new implementation is faster when the approximation is used:
 ``` r
 rowMeans(sim_res[, "time", ])
 #>          mvtnorm no aprx; Korobov   no aprx; Sobol w/ aprx; Korobov   w/ aprx; Sobol 
-#>          0.02002          0.02070          0.02308          0.01400          0.01575
+#>          0.02028          0.02099          0.02338          0.01420          0.01598
 par(mar = c(9, 4, 1, 1), bty = "l")
 boxplot(t(sim_res[, "time", ]), log = "y", las = 2)
 grid()

@@ -28,7 +28,8 @@ pedmod_sqn(
   abs_eps_hess = abs_eps,
   rel_eps_hess = rel_eps,
   verbose = FALSE,
-  method = 0L
+  method = 0L,
+  check_every = 2L * n_grad_steps
 )
 }
 \arguments{
@@ -102,6 +103,10 @@ approximation.}
 
 \item{method}{integer with the method to use. Zero yields Korobov lattice
 rules while one yields scrambled Sobol sequences.}
+
+\item{check_every}{integer for the number of gradient steps between checking
+that the likelihood did decrease. If not, the iterations are reset and the
+step-size is halved.}
 }
 \description{
 Optimizes \code{\link{eval_pedigree_ll}} and \code{\link{eval_pedigree_grad}}

@@ -18,6 +18,13 @@ test_that("examples in manual pages gives the correct answer for eval_pedigree_[
     maxvls = 1e6, abs_eps = 0, rel_eps = 1e-4, use_aprx = TRUE)
   expect_equal(truth, pedmod_res, check.attributes = FALSE,
                tolerance = 1e-4)
+
+  pedmod_res <- mvndst(
+    lower = rep(-Inf, n), upper = u, sigma = S, mu = numeric(n),
+    maxvls = 1e6, abs_eps = 0, rel_eps = 1e-4, use_aprx = TRUE,
+    method = 1L)
+  expect_equal(truth, pedmod_res, check.attributes = FALSE,
+               tolerance = 1e-4)
 })
 
 test_that("examples in manual pages gives the correct answer for eval_pedigree_[ll]/[grad]", {
@@ -59,7 +66,8 @@ test_that("examples in manual pages gives the correct answer for eval_pedigree_[
   # truth <- eval_pedigree_ll(
   #   ptr = ptr, par = c(beta, log(scs)), abs_eps = -1, maxvls = 1e9,
   #   rel_eps = 1e-8, minvls = 2000, use_aprx = FALSE)
-  truth <- structure(-5.30140009701486, n_fails = 0L)
+  truth <- structure(-5.30140009701486, n_fails = 0L,
+                     std = 3.3296139122967e-09)
 
   set.seed(44492929)
   ll1 <- eval_pedigree_ll(
@@ -72,6 +80,12 @@ test_that("examples in manual pages gives the correct answer for eval_pedigree_[
     ptr = ptr, par = c(beta, log(scs)), abs_eps = -1, maxvls = 1e6,
     rel_eps = 1e-5, minvls = 2000, use_aprx = TRUE)
   expect_equal(ll2, truth, tolerance = 1e-5)
+
+  # with Sobol sequences
+  ll3 <- eval_pedigree_ll(
+    ptr = ptr, par = c(beta, log(scs)), abs_eps = -1, maxvls = 1e6,
+    rel_eps = 1e-5, minvls = 2000, use_aprx = FALSE, method = 1L)
+  expect_equal(ll3, truth, tolerance = 1e-5)
 
   # w/ weights
   # truth_dat <- dat_arg[c(1, 2, 2, 2)]

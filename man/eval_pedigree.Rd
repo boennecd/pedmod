@@ -80,7 +80,8 @@ rules while one yields scrambled Sobol sequences.}
 a scalar with the log marginal likelihood approximation.
 It has an attribute called \code{"n_fails"} which show the number of
 log marginal likelihood term approximations which do not satisfy
-the \code{abs_eps} and \code{rel_eps} criterion.
+the \code{abs_eps} and \code{rel_eps} criterion and attribute called
+\code{std} with a standard error estimate based on the delta rule.
 
 \code{eval_pedigree_grad}: a vector with the derivatives with
 respect to \code{par}. An attribute called \code{"logLik"} contains the

@@ -67,10 +67,15 @@ public:
       3 * n_members + n_members * n_members, max_threads);
   }
 
+  struct fn_res {
+    double log_likelihood;
+    double estimator_var;
+  };
+
   /**
    * Approximates the log-likelihood term.
    */
-  double fn
+  fn_res fn
     (double const * par, int const maxvls, double const abs_eps,
      double const rel_eps, int minvls, bool const do_reorder,
      bool const use_aprx, bool &did_fail, cdf_methods const method){
@@ -98,7 +103,13 @@ public:
 
     did_fail = res.inform > 0;
 
-    return std::log(res.likelihood);
+    double const log_likelihood = std::log(res.likelihood);
+
+    // crude variance estimator based on the delta rule
+    double const sig_est = res.abserr * 2 / 7 / res.likelihood,
+                 var_est = sig_est * sig_est;
+
+    return { log_likelihood, var_est };
   }
 
   /**

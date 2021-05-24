@@ -103,6 +103,8 @@ pedmod_opt <- function(ptr, par, maxvls, abs_eps, rel_eps,
 #' @param scale_max the maximum value for the scale parameters. Sometimes, the
 #' optimization method tends to find large scale parameters and get stuck.
 #' Setting a maximum solves this.
+#' @param sc_start starting value for the scale parameters. Use \code{NULL} if
+#' you have no value to start with.
 #'
 #' @return
 #' \code{pedmod_start}: A \code{list} with:
@@ -119,7 +121,8 @@ pedmod_start <- function(ptr, data, maxvls = 1000L, abs_eps = 0, rel_eps = 1e-2,
                          seed = 1L, indices = NULL, scale_max = 9,
                          minvls = 100L, do_reorder = TRUE, use_aprx = TRUE,
                          n_threads = 1L, cluster_weights = NULL,
-                         standardized = FALSE, method = 0L){
+                         standardized = FALSE, method = 0L,
+                         sc_start = NULL){
   # checks
   stopifnot(is.numeric(scale_max), length(scale_max) == 1L,
             scale_max > 0,
@@ -149,6 +152,44 @@ pedmod_start <- function(ptr, data, maxvls = 1000L, abs_eps = 0, rel_eps = 1e-2,
   start_fit <-  glm.fit(X, y, weights = w, family = binomial("probit"))
   beta <- start_fit$coefficients
   logLik_no_rng <- -sum(start_fit$deviance) / 2
+
+  # function to optimize the parameters
+  do_opt <- function(sc, fn, gr){
+    n_scales <- get_n_scales(ptr)
+    optim(sc, fn, gr, upper = rep(log(scale_max), n_scales),
+          method = "L-BFGS-B", control = list(
+            lmm = 10L, maxit = 1000L, fnscale = get_n_terms(ptr)))
+  }
+  try_opt <- function(fn, gr){
+    n_scales <- get_n_scales(ptr)
+    stopifnot(n_scales > 0,
+              is.null(sc_start) ||
+                (length(sc_start) == n_scales && is.numeric(sc_start) &&
+                   all(is.finite(sc_start) & sc_start > 0 &
+                         sc_start <= scale_max)))
+
+    check_ok <- function(opt)
+      !inherits(opt, "try-error") && opt$convergence < 2
+
+    has_starting_value <- !is.null(sc_start)
+    if(has_starting_value){
+      sc <- log(sc_start)
+      opt <- try(do_opt(sc, fn = fn, gr = gr), silent = TRUE)
+      is_ok <- check_ok(opt)
+    }
+
+    if(!has_starting_value || !is_ok)
+      for(sc_sqrt in seq(.1, sqrt(scale_max), length.out = 5)){
+        sc <- rep(log(sc_sqrt) * 2, n_scales)
+        opt <- try(do_opt(sc, fn = fn, gr = gr), silent = TRUE)
+        if(is_ok <- check_ok(opt))
+          # found a good solution
+          break
+      }
+
+    list(opt = opt, sc = sc, is_ok = is_ok)
+  }
+
 
   if(standardized){
     fn <- function(sc){
@@ -182,35 +223,22 @@ pedmod_start <- function(ptr, data, maxvls = 1000L, abs_eps = 0, rel_eps = 1e-2,
     }
 
     # optimize
-    n_scales <- get_n_scales(ptr)
-    stopifnot(n_scales > 0)
+    res <- try_opt(fn = fn, gr = gr)
 
-    for(sc_sqrt in seq(.1, sqrt(scale_max), length.out = 5)){
-      sc <- rep(log(sc_sqrt) * 2, n_scales)
-      opt <- try(optim(sc, fn, gr, upper = rep(log(scale_max), n_scales),
-                       method = "L-BFGS-B",
-                       control = list(lmm = 10L, maxit = 1000L,
-                                      fnscale = get_n_terms(ptr))),
-                 silent = TRUE)
-      if(!inherits(opt, "try-error") && opt$convergence < 2)
-        # found a good solution
-        break
-    }
-
-    if(inherits(opt, "try-error") || opt$convergence > 1){
+    if(!res$is_ok){
       # fall to find a good solution
+      n_scales <- get_n_scales(ptr)
       sc <- rep(log(.01), n_scales)
       logLik_est <- -fn(sc)
 
     } else {
-      sc <- opt$par
-      logLik_est <- -opt$value
-
+      sc <- res$opt$par
+      logLik_est <- -res$opt$value
     }
 
     return(list(par = c(beta, sc), beta_no_rng = beta,
                 logLik_no_rng = logLik_no_rng,
-                logLik_est = logLik_est, opt = opt))
+                logLik_est = logLik_est, opt = res$opt))
   }
 
   #####
@@ -249,38 +277,26 @@ pedmod_start <- function(ptr, data, maxvls = 1000L, abs_eps = 0, rel_eps = 1e-2,
   }
 
   # optimize
-  n_scales <- get_n_scales(ptr)
-  stopifnot(n_scales > 0)
+  res <- try_opt(fn = fn, gr = gr)
 
-  for(sc_sqrt in seq(.1, sqrt(scale_max), length.out = 5)){
-    sc <- rep(2 * log(sc_sqrt), n_scales)
-    opt <- try(optim(sc, fn, gr, upper = rep(log(scale_max), n_scales),
-                     method = "L-BFGS-B",
-                     control = list(lmm = 10L, maxit = 1000L,
-                                    fnscale = get_n_terms(ptr))),
-               silent = TRUE)
-    if(!inherits(opt, "try-error") && opt$convergence < 2)
-      # found a good solution
-      break
-  }
-
-  if(inherits(opt, "try-error") || opt$convergence > 1){
+  if(!res$is_ok){
     # fall to find a good solution
+    n_scales <- get_n_scales(ptr)
     sc <- rep(log(.01), n_scales)
     beta_scaled <- beta * sqrt(1 + sum(exp(sc)))
     logLik_est <- -fn(sc)
 
   } else {
-    sc <- opt$par
+    sc <- res$opt$par
     beta_scaled <- beta * sqrt(1 + sum(exp(sc)))
-    logLik_est <- -opt$value
+    logLik_est <- -res$opt$value
 
   }
 
   # return
   list(par = c(beta_scaled, sc), beta_no_rng = beta,
        logLik_no_rng = logLik_no_rng,
-       logLik_est = logLik_est, opt = opt)
+       logLik_est = logLik_est, opt = res$opt)
 }
 
 #' Optimize the Log Marginal Likelihood Using a Stochastic Quasi-Newton Method
@@ -310,6 +326,9 @@ pedmod_start <- function(ptr, data, maxvls = 1000L, abs_eps = 0, rel_eps = 1e-2,
 #' @param rel_eps_hess \code{rel_eps} argument to use when updating the Hessian
 #' approximation.
 #' @param verbose logical for whether to print output during the estimation.
+#' @param check_every integer for the number of gradient steps between checking
+#' that the likelihood did increase. If not, the iterations are reset and the
+#' step-size is halved.
 #'
 #' @details
 #' The function uses a stochastic quasi-Newton method like suggested by
@@ -343,11 +362,11 @@ pedmod_sqn <- function(ptr, par, maxvls, abs_eps, rel_eps, step_factor,
                        fix = NULL, standardized = FALSE, minvls_hess = minvls,
                        maxvls_hess = maxvls, abs_eps_hess = abs_eps,
                        rel_eps_hess = rel_eps, verbose = FALSE,
-                       method = 0L){
+                       method = 0L, check_every = 2L * n_grad_steps){
   #####
   # setup before the estimation
   n_pars <- length(par) - length(fix)
-  omegas <- matrix(NA_real_, n_pars, floor(n_it / n_grad_steps) + 1L)
+  omegas <- matrix(NA_real_, n_pars, ceiling(n_it / n_grad_steps) + 1L)
   H <- diag(n_pars)
   any_fixed <- length(fix) > 0
   w_old <- if(any_fixed) par[-fix] else par
@@ -383,8 +402,11 @@ pedmod_sqn <- function(ptr, par, maxvls, abs_eps, rel_eps, step_factor,
       silent = TRUE)
     if(inherits(out, "try-error"))
       return(NA_real_)
-    if(!is.null(out))
-      out / length(indices) else out / n_terms
+
+    denom <- if(!is.null(indices))
+      length(indices) else n_terms
+
+    structure(c(out) / denom, std = attr(out, "std") / denom)
   }
   gr <- function(x, abs_eps, rel_eps, minvls, maxvls, indices){
     out <-
@@ -413,10 +435,62 @@ pedmod_sqn <- function(ptr, par, maxvls, abs_eps, rel_eps, step_factor,
   w_vals <- matrix(NA_real_, n_pars, n_grad_steps)
   w_new <- w_old
   t <- 1L
+
+  # values for the from the previous check
+  fn_old <- fn(w_new, abs_eps = abs_eps, rel_eps = rel_eps,
+               minvls = minvls, maxvls = maxvls, indices = NULL)
+  old_par <- w_new
+  old_k <- k
+  old_H <- H
+  t_old <- t
+  min_step_size <- step_factor / 2^8
+
+  .check_if_increased <- function(){
+    if(k %% check_every == 0){
+      fn_new <- fn(w_new, abs_eps = abs_eps, rel_eps = rel_eps,
+                   minvls = minvls, maxvls = maxvls, indices = NULL)
+      var_est <- attr(fn_new, "std")^2 + attr(fn_old, "std")^2
+
+      if(fn_new < fn_old + 2.326 * sqrt(var_est)){
+        # fine as we are minimizing the negative likelihood
+        fn_old <<- fn_new
+        old_k <<- k
+        old_H <<- H
+        old_par <<- w_new
+        t_old <<- t
+
+      } else {
+        # we reset
+        H <<- old_H
+        w_new <<- old_par
+        step_factor <<- step_factor / 2
+        t <<- t_old
+        if(step_factor > min_step_size)
+          # otherwise we can go on forever
+          k <<- old_k
+
+        if(verbose)
+          cat(sprintf(
+            "\nThe log-likelihood had not increased. The difference is %.6f from %.3f.\nHalving the step size to %f\n",
+            -(fn_new - fn_old), -fn_old * n_terms, step_factor))
+
+        return(FALSE)
+
+      }
+    }
+
+    TRUE
+  }
+
   while(k < n_it){
     w_vals[] <- NA_real_
-    for(i in 1:n_grad_steps){
+    i_indices <- if(k < 1) 1L else 1:n_grad_steps
+    for(i in i_indices){
       if((k <- k + 1L) > n_it)
+        break
+
+      # check if we need to reset
+      if(!(is_ok <- .check_if_increased()))
         break
 
       # perform the gradient step
@@ -428,12 +502,15 @@ pedmod_sqn <- function(ptr, par, maxvls, abs_eps, rel_eps, step_factor,
       w_vals[, i] <- w_new
     }
 
-    if(i < n_grad_steps)
+    if(!is_ok)
+      next
+
+    if(i < min(n_grad_steps, length(i_indices)))
       # no need for an update of the Hessian approximation
       break
 
     t <- t + 1L
-    omegas[, t] <- rowMeans(w_vals)
+    omegas[, t] <- rowMeans(w_vals[, i_indices, drop = FALSE])
     s <- omegas[, t] - omegas[, t - 1L]
     S <- if(hess_use_all) indices else sample(indices, n_hess)
 
@@ -458,7 +535,7 @@ pedmod_sqn <- function(ptr, par, maxvls, abs_eps, rel_eps, step_factor,
     }
 
     y <- g_new - g_old
-    s_y <- sum(s  * y)
+    s_y <- sum(s * y)
     if(t <= 2L){
       # the first iteration
       rho <- s_y / sum(y * y)
@@ -481,5 +558,6 @@ pedmod_sqn <- function(ptr, par, maxvls, abs_eps, rel_eps, step_factor,
     H <- crossprod(D, H %*% D) + outer(s, s) / r_s
   }
 
+  omegas <- omegas[, apply(!is.na(omegas), 2L, all), drop = FALSE]
   list(par = w_new, omegas = omegas, H = H)
 }

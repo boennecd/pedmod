@@ -296,7 +296,7 @@ Rcpp::NumericVector eval_pedigree_ll
     par[i] = std::exp(par[i]);
 
   pedmod::cache_mem<double> r_mem;
-  r_mem.set_n_mem(1, n_threads);
+  r_mem.set_n_mem(2, n_threads);
 
   // compute
   auto all_idx = get_indices(indices, *terms_ptr);
@@ -311,7 +311,8 @@ Rcpp::NumericVector eval_pedigree_ll
 {
 #endif
   double *wmem = r_mem.get_mem();
-  *wmem = 0;
+  wmem[0] = 0;
+  wmem[1] = 0;
 
 #ifdef _OPENMP
 #pragma omp for schedule(static) reduction(+:n_fails)
@@ -325,9 +326,12 @@ Rcpp::NumericVector eval_pedigree_ll
       if(std::abs(w_i) < std::numeric_limits<double>::epsilon())
         return;
 
-      *wmem += w_i * terms.at(idx[i]).fn(
+      auto const res = terms.at(idx[i]).fn(
         &par[0], maxvls, abs_eps, rel_eps, minvls, do_reorder, use_aprx,
         did_fail, meth);
+
+      wmem[0] += w_i * res.log_likelihood;
+      wmem[1] += w_i * w_i * res.estimator_var;
       n_fails += did_fail;
     });
 #ifdef _OPENMP
@@ -336,12 +340,16 @@ Rcpp::NumericVector eval_pedigree_ll
 
   exception_handler.rethrow_if_error();
 
-  double out(0.);
-  for(unsigned i = 0; i < n_threads; ++i)
-    out += *r_mem.get_mem(i);
+  double out(0.),
+     var_est(0.);
+  for(unsigned i = 0; i < n_threads; ++i){
+    out     += r_mem.get_mem(i)[0];
+    var_est += r_mem.get_mem(i)[1];
+  }
 
   Rcpp::NumericVector v_out = Rcpp::NumericVector::create(out);
   v_out.attr("n_fails") = Rcpp::IntegerVector::create(n_fails);
+  v_out.attr("std"    ) = Rcpp::NumericVector::create(std::sqrt(var_est));
   return v_out;
 }
 

@@ -40,7 +40,8 @@ pedmod_start(
   n_threads = 1L,
   cluster_weights = NULL,
   standardized = FALSE,
-  method = 0L
+  method = 0L,
+  sc_start = NULL
 )
 }
 \arguments{
@@ -100,6 +101,9 @@ rules while one yields scrambled Sobol sequences.}
 \item{scale_max}{the maximum value for the scale parameters. Sometimes, the
 optimization method tends to find large scale parameters and get stuck.
 Setting a maximum solves this.}
+
+\item{sc_start}{starting value for the scale parameters. Use \code{NULL} if
+you have no value to start with.}
 }
 \value{
 \code{pedmod_opt}: The output from the \code{opt_func} argument. Thus, if

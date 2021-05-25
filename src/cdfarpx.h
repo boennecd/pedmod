@@ -542,8 +542,8 @@ public:
  * derivatives of the likelihood factors for each family.
  *
  * The returned approximations is a) the likelihood factor, b) the
- * derivative w.r.t. the mean vector, and c) the derivative w.r.t. each
- * scale parameter.
+ * derivative of log likelihood w.r.t. the mean vector, and w.r.t. each of the
+ * scale parameters.
  */
 class pedigree_l_factor {
 public:
@@ -731,9 +731,9 @@ public:
     }
 
   inline void univariate(double * out, double const lw, double const ub) {
-    constexpr double const sqrt_2_pi_inv = 0.398942280401433;
-    auto dnrm = [&](double const x){
-      return std::exp(-x * x / 2.) * sqrt_2_pi_inv;
+    constexpr double const log_sqrt_2_pi_inv = 0.918938533204673;
+    auto log_dnrm = [&](double const x){
+      return -x * x / 2. - log_sqrt_2_pi_inv;
     };
 
     bool const f_ub = std::isinf(ub),
@@ -741,8 +741,8 @@ public:
 
     double const p_ub = f_ub ? 1 : pnorm_std(ub, 1L, 0L),
                  p_lb = f_lb ? 0 : pnorm_std(lw, 1L, 0L),
-                 d_ub = f_ub ? 0 : dnrm(ub),
-                 d_lb = f_lb ? 0 : dnrm(lw),
+                 d_ub = f_ub ? 0 : std::exp(log_dnrm(ub) - pnorm_std(ub, 1L, 1L)),
+                 d_lb = f_lb ? 0 : std::exp(log_dnrm(lw) - pnorm_std(lw, 1L, 1L)),
               d_ub_ub = f_ub ? 0 : ub * d_ub,
               d_lb_lb = f_lb ? 0 : lw * d_lb,
                sd_inv = *sigma_chol_inv;

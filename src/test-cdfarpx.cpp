@@ -153,16 +153,20 @@ context("restrictcdf unit tests") {
  mu <- .5
  xs <- c(.33, .5)
 
- f <- function(x, lw, ub){
+ f <- function(x, lw, ub, use_log){
  va <- sigs[[1]] * x[2] + sigs[[2]] * x[3] + 1
- pnorm(ub, x[1], sqrt(va)) - pnorm(lw, x[1], sqrt(va))
+ vub <- if(is.finite(ub))
+ pnorm(ub, x[1], sqrt(va), log.p = use_log) else 1
+ vlb <- if(is.finite(lw))
+ pnorm(lw, x[1], sqrt(va), log.p = use_log) else 0
+ vub - vlb
  }
 
  library(numDeriv)
  dput(mapply(function(lw, ub){
  arg <- c(mu, xs)
- o <- f(arg, lw, ub)
- do <- numDeriv::grad(f, arg, lw = lw, ub = ub)
+ o <- f(arg, lw, ub, use_log = FALSE)
+ do <- numDeriv::grad(f, arg, lw = lw, ub = ub, use_log = TRUE)
  c(o, do)
  }, lw = lws, ub = ubs))
  */
@@ -172,7 +176,7 @@ context("restrictcdf unit tests") {
     ubs << 2    << Inf << 2;
     arma::mat expect;
 
-    expect << 0.860805198822333 << -0.160210819773154 << -0.0313728759304053 << -0.0941186277942389 << 0.358932107909215 << 0.270070701739698 << 0.0176286358843925 << 0.0528859076385526 << 0.219737306731548 << 0.109859881966544 << -0.0137442400460128 << -0.0412327201556863;
+    expect << 0.860805198822333 << -0.186117393338058 << -0.0364459647521367 << -0.109337894247473 << 0.358932107909215 << 0.421282527277076 << 0.0274988594855953 << 0.0824965784320902 << 0.219737306731548 << 0.235165133942785 << -0.00894710527045604 << -0.0268413158128328;
     expect.reshape(4, 3);
 
     std::vector<arma::mat> scales;

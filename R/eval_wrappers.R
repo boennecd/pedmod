@@ -129,7 +129,8 @@ eval_pedigree_ll <- function(ptr, par, maxvls, abs_eps, rel_eps,
 #' \code{"std"} which first element is the standard error estimate of the
 #' log likelihood based on the delta method and the last elements are the
 #' standard error estimates of the gradient. The latter ignores the Monte Carlo
-#' error from the likelihood approximation but this is typically minor.
+#' error from the likelihood approximation but this is typically minor and it is
+#' for the parameterization with \code{standardized = FALSE}.
 #'
 #' @export
 eval_pedigree_grad <- function(ptr, par, maxvls, abs_eps, rel_eps,

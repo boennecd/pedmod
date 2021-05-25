@@ -90,7 +90,8 @@ attribute like for \code{eval_pedigree_ll} and an attribute called
 \code{"std"} which first element is the standard error estimate of the
 log likelihood based on the delta method and the last elements are the
 standard error estimates of the gradient. The latter ignores the Monte Carlo
-error from the likelihood approximation but this is typically minor.
+error from the likelihood approximation but this is typically minor and it is
+for the parameterization with \code{standardized = FALSE}.
 }
 \description{
 Approximate the log marginal likelihood and the derivatives with

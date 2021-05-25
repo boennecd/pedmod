@@ -47,6 +47,7 @@
 
 #include "sobol.h"
 #include <string>
+#include <cstdint>
 
 namespace {
 /// pseudo-random number generator
@@ -78,9 +79,22 @@ inline int ibits
   (int const i, unsigned char const pos,
    unsigned char const len) noexcept {
   unsigned char const shift = sizeof(int) * 8 - pos - len;
+  /**
+   * One has to be careful with the following from the C++ standard
+   *
+   *   In any case, if the value of the right operand [of << or >>] is negative
+   *   or is greater or equal to the number of bits in the promoted left
+   *   operand, the behavior is undefined.
+   *
+   * When pos = 0 and len = 1 then we make a left shift first of size 31 and
+   * this UB if we use a signed integer.
+   *
+   * See also https://stackoverflow.com/a/53566048/5861244
+   */
+
   return
     // remove left most bits
-    (i << shift) >>
+    (uint32_t(i) << shift) >>
       // remove right most bits
       (pos + shift);
 }
@@ -91,7 +105,7 @@ inline int ibits
   unsigned char const shift = sizeof(int) * 8 - pos - 1L;
   return
     // remove left most bits
-    (i << shift) >>
+    (uint32_t(i) << shift) >>
       // remove right most bits
       (pos + shift);
 }

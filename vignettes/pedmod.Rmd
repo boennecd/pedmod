@@ -266,12 +266,14 @@ We emphasize that we set the `rel_eps` parameter to `1e-3` above
 which perhaps is fine for this size of a data set but may not be fine for larger 
 data sets for the following reason. Suppose that we have $i = 1,\dots,m$ 
 families/clusters and suppose that we estimate the log likelihood term for each 
-family with a variance of $\psi$. This implies that the variance of the 
-log likelihood for all the families is $\mathcal O(\psi m)$. Thus, the 
-precision we require for each family's log likelihood term needs to 
-proportional to $\mathcal O(m^{-1/2})$ if we want fixed number of precise digits
+family with a variance of $\zeta$. This implies that the variance of the 
+log likelihood for all the families is $\zeta m$. Thus, the 
+precision we require for each family's log likelihood term needs to be
+proportional to $\mathcal O(m^{-1/2})$ if we want a fixed number of precise 
+digits
 for the log likelihood for all the families. The latter is important e.g. 
-for the profile likelihood curve we compute later. Thus, one may need to reduce
+for the profile likelihood curve we compute later and also for the line search
+used by some optimization methods. Thus, one may need to reduce
 `rel_eps` and increase `maxvls` when there are many families.
 
 As an alternative to the direct parameterization we use above, we can also use
@@ -615,9 +617,9 @@ round(t(res["sd", , "Sobol"  , ] / abs(precise_est)), 6)
 ```
 
 ```{r show_res_rqmc}
-# look at log-log regression for convergence rate. We except a rate between 
-# 0.5, O(sqrt(n)) rate, and 1, O(n) rate, which can be seen from minus the 
-# slopes below
+# look at a log-log regression to check convergence rate. We expect a rate 
+# between 0.5, O(sqrt(n)) rate, and 1, O(n) rate, which can be seen from minus  
+# the slopes below
 lm(t(log(res["sd", , "Korobov", ])) ~ log(n_samp))
 lm(t(log(res["sd", , "Sobol", ])) ~ log(n_samp))
 

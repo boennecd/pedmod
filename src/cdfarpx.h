@@ -423,7 +423,8 @@ public:
 
     // setup
     // needs to have at least n_integrands memory to use.
-    double * const int_apprx = functor.get_wk_mem();
+    double * const int_apprx = functor.get_wk_mem(),
+           * const int_sdest = int_apprx + n_integrands;
 
     auto sampler = parallelrng::get_unif_drawer();
 
@@ -431,8 +432,10 @@ public:
       /* handle the one-dimensional case as a special case */
       functor.univariate(int_apprx, lower[0], upper[0]);
       indices[0] = 0;
+      // assume that there is zero error in the univariate case
+      std::fill(int_sdest, int_sdest + n_integrands, 0.);
 
-      return functor.get_output(int_apprx, 0, 0, 0,
+      return functor.get_output(int_apprx, int_sdest, 0, 0, 0,
                                 indices.begin());
 
     } else if(std::isinf(*sigma_chol))
@@ -443,16 +446,16 @@ public:
       if(method == cdf_methods::Sobol)
         return sobol_wrapper<cdf<T_Functor> >::comp(
             *this, ndim, minvls, maxvls, n_integrands, abs_eps, rel_eps,
-            int_apprx, sampler, sobol::scrambling_type::owen);
+            int_apprx, int_sdest, sampler, sobol::scrambling_type::owen);
       if(method != cdf_methods::Korobov)
         throw std::invalid_argument("method is not implemented");
 
       return rand_Korobov<cdf<T_Functor> >::comp(
           *this, ndim, minvls, maxvls, n_integrands, abs_eps, rel_eps,
-          int_apprx, sampler);
+          int_apprx, int_sdest, sampler);
     })();
 
-    return functor.get_output(int_apprx, res.minvls, res.inform,
+    return functor.get_output(int_apprx, int_sdest, res.minvls, res.inform,
                               res.abserr, indices.begin());
   }
 };
@@ -475,7 +478,7 @@ public:
         max_dim, get_n_integrands(), max_threads);
     sobol_wrapper<cdf<likelihood> >::alloc_mem(
         max_dim, get_n_integrands(), max_threads);
-    dmen.set_n_mem(1, max_threads);
+    dmen.set_n_mem(2, max_threads);
   }
 
   double * get_wk_mem(){
@@ -528,8 +531,8 @@ public:
     double likelihood;
   };
 
-  out_type get_output(double const * res, int const minvls,
-                      int const inform, double const abserr,
+  out_type get_output(double const * res, double const * sdest,
+                      int const minvls, int const inform, double const abserr,
                       int const *){
     return out_type { minvls, inform, abserr, *res };
   }
@@ -602,7 +605,8 @@ public:
     sobol_wrapper<cdf<pedigree_l_factor> >::alloc_mem(
         n_mem, get_n_integrands(), max_threads);
     dmem.set_n_mem(
-      2 * n_mem * n_mem + n_mem * (n_mem + 1) + get_n_integrands() + 2 * n_mem,
+      2 * n_mem * n_mem + n_mem * (n_mem + 1) + 2 * get_n_integrands() +
+        2 * n_mem,
       max_threads);
   }
 
@@ -676,7 +680,7 @@ public:
     (double const * __restrict__ draw, double * __restrict__ out,
      int const *indices, bool const is_permutated) {
       *out = 1;
-      double * __restrict__ const d_mu      = get_wk_mem() + get_n_integrands(),
+      double * __restrict__ const d_mu      = get_wk_mem() + 2 * get_n_integrands(),
              * __restrict__ const d_mu_perm = d_mu + n_mem,
              * __restrict__ const d_fix     = out + 1,
              * __restrict__ const d_sc      = d_fix + n_fix;
@@ -768,15 +772,17 @@ public:
      *        accuracy. In this case a value finest is returned with
      *        estimated absolute accuracy ABSERR. */
     int minvls, inform;
-    /// maximum norm of estimated absolute accuracy of finest
+    /// maximum estimated absolute accuracy of finest
     double abserr;
     /// likelihood approximation
     double likelihood;
     /// the derivative approximation
     arma::vec derivs;
+    /// the approximate standard errors
+    arma::vec sd_errs;
   };
 
-  out_type get_output(double * res, int const minvls,
+  out_type get_output(double * res,  double const * sdest, int const minvls,
                       int const inform, double const abserr,
                       int const *indices){
     out_type out;
@@ -786,16 +792,23 @@ public:
 
     double const likelihood = *res;
     out.likelihood = likelihood;
+    out.sd_errs = arma::vec(sdest, get_n_integrands());
 
     // add terms to the derivative w.r.t. the scale parameters
     if(n_mem > 1){
       out.likelihood *= norm_const;
+      out.sd_errs[0] *= norm_const;
 
       {
         // correct for the normalization constant
         double const rel_likelihood = norm_const / out.likelihood;
-        for(int i = 1; i <= n_fix + n_scales; ++i)
-          res[i] *= rel_likelihood;
+        for(int i = 1; i <= n_fix + n_scales; ++i){
+          res        [i] *= rel_likelihood;
+          // we ignore the uncertainty from the likelihood approximation.
+          // This is typically quite small compared to that of the derivative
+          // of the likelihood
+          out.sd_errs[i] *= rel_likelihood;
+        }
       }
 
       double * __restrict__ const d_sc = res + n_fix + 1L;

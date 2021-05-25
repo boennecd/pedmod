@@ -94,9 +94,11 @@ test_that("examples in manual pages gives the correct answer for eval_pedigree_[
   #   ptr = truth_ptr, par = c(beta, log(scs)), abs_eps = -1, maxvls = 1e8,
   #   rel_eps = 1e-6, minvls = 2000, use_aprx = FALSE)
   deriv_truth <- structure(
-    c(-2.39509625084942, -0.108241919844364, -0.940601063950875,
-      -0.314925521657899, -0.278867360618454), logLik = -4.88592585241055,
-    n_fails = 0L)
+    c(-2.39509630042317, -0.10824194375542, -0.940601039742817,
+      -0.314925453459061, -0.278867316602556),
+    logLik = -4.88592585105156, n_fails = 0L,
+    std = c(1.17013082330889e-09, 4.84625759211153e-08, 2.05599876859111e-08,
+            3.71573106370985e-08, 9.95606406437179e-08, 7.01965244943291e-08))
 
   deriv_w_weight <- eval_pedigree_grad(
     ptr = ptr, par = c(beta, log(scs)), abs_eps = -1, maxvls = 1e6,

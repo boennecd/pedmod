@@ -31,7 +31,8 @@ public:
   static rand_Korobov_output comp
     (Func &f, int const ndim, size_t const minvls, size_t const maxvls,
      int const nf, double const abseps, double const releps,
-     double * const __restrict__ finest, parallelrng::unif_drawer &sampler){
+     double * const __restrict__ finest,
+     double * const __restrict__ sdest, parallelrng::unif_drawer &sampler){
     /* constants */
     constexpr int const plim(28L),
                         klim(100L),
@@ -217,7 +218,8 @@ public:
         }
 
         // passes criteria
-        abserr = 7 / 2 * std::sqrt(finest_var[k]);
+        sdest[k] = std::sqrt(finest_var[k]);
+        abserr = 7 / 2 * sdest[k];
         passes_conv_check &=
           abserr <= std::max(abseps, std::abs(finest[k]) * releps);
       }
@@ -262,7 +264,8 @@ public:
   static rand_Korobov_output comp
   (Func &f, int const ndim, size_t const minvls, size_t const maxvls,
    int const nf, double const abseps, double const releps,
-   double * const __restrict__ finest, parallelrng::unif_drawer &sampler,
+   double * const __restrict__ finest,
+   double * const __restrict__ sdest, parallelrng::unif_drawer &sampler,
    sobol::scrambling_type const method){
     if(method == sobol::scrambling_type::none)
       throw std::invalid_argument("sobol::scrambling_type::none passed but it makes no sense");
@@ -326,7 +329,8 @@ public:
       for(int j = 0; j < nf; ++j){
         double const sigma =
           M[j] / (n_sequences - 1.) / static_cast<double>(n_sequences);
-        abserr = 7 / 2 * std::sqrt(sigma);
+        sdest[j] = std::sqrt(sigma);
+        abserr = 7 / 2 * sdest[j];
         passes_conv_check &=
           abserr <= std::max(abseps, std::abs(finest[j]) * releps);
       }

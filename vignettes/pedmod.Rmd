@@ -234,7 +234,7 @@ library(pedmod)
 ll_terms <- get_pedigree_ll_terms(dat, max_threads = 4L)
 system.time(start <- pedmod_start(ptr = ll_terms, data = dat, n_threads = 4L))
 
-# log-likelihood without the random effects and at the starting values
+# log likelihood without the random effects and at the starting values
 start$logLik_no_rng
 start$logLik_est # this is unreliably/imprecise
 
@@ -261,6 +261,18 @@ c(opt_out       = exp(tail(opt_out$par, 1)),
 print(start   $logLik_est, digits = 8) # this is unreliably/imprecise
 print(-opt_out$value     , digits = 8)
 ```
+
+We emphasize that we set the `rel_eps` parameter to `1e-3` above 
+which perhaps is fine for this size of a data set but may not be fine for larger 
+data sets for the following reason. Suppose that we have $i = 1,\dots,m$ 
+families/clusters and suppose that we estimate the log likelihood term for each 
+family with a variance of $\psi$. This implies that the variance of the 
+log likelihood for all the families is $\mathcal O(\psi m)$. Thus, the 
+precision we require for each family's log likelihood term needs to 
+proportional to $\mathcal O(m^{-1/2})$ if we want fixed number of precise digits
+for the log likelihood for all the families. The latter is important e.g. 
+for the profile likelihood curve we compute later. Thus, one may need to reduce
+`rel_eps` and increase `maxvls` when there are many families.
 
 As an alternative to the direct parameterization we use above, we can also use
 the standardized parameterization. Below are some illustrations which you may 
@@ -432,7 +444,7 @@ pl_curve_res <- lapply(sigs, function(sig){
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L)
   
   # report to console and return
-  message(sprintf("\nLog-likelihood %.5f (%.5f). Estimated parameters:", 
+  message(sprintf("\nLog likelihood %.5f (%.5f). Estimated parameters:", 
                   -opt_out$value, -opt_out_quick$value))
   message(paste0(capture.output(print(
     c(opt_out$par, Scale = sig))), collapse = "\n"))
@@ -521,7 +533,7 @@ pl_curve_res <- Map(function(sig, seed){
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L)
   
   # report to console and return
-  message(sprintf("\nLog-likelihood %.5f (%.5f). Estimated parameters:", 
+  message(sprintf("\nLog likelihood %.5f (%.5f). Estimated parameters:", 
                   -opt_out$value, -opt_out_quick$value))
   message(paste0(capture.output(print(
     c(opt_out$par, Scale = sig))), collapse = "\n"))
@@ -624,7 +636,56 @@ matlines(n_samp, t(res["sd", , "Sobol", ]), col = "darkgray", lty = 3)
 
 The above seems to suggest that the scrambled Sobol sequences have a higher 
 initial error but a convergence rate which is closer to the optimal 
-$O(n^{-1 + \epsilon})$ rate for some small $\epsilon$.
+$O(n^{-1 + \epsilon})$ rate for some small $\epsilon$. 
+
+We can also consider the convergence rate for the log likelihood:
+
+```{r rqmc_likelihood, cache = 1}
+# create a simple function which computes the log likelihood. We set the 
+# convergence threshold values low such that all the samples will be used
+fn <- function(maxvls, method, par = start$par)
+  eval_pedigree_ll(ptr = ll_terms, par = par, maxvls = maxvls, abs_eps = 0,
+                   rel_eps = 1e-12, indices = 0:9, minvls = 500L, 
+                   method = method, n_threads = 4L)
+
+# compute the estimator for either method using an increasing number of samples
+res <- sapply(setNames(n_samp, n_samp), function(maxvls){
+  sapply(c(Korobov = 0, Sobol = 1), function(method){
+    # estimate the gradient
+    ests <- sapply(seeds, function(s){
+      set.seed(s)
+      fn(maxvls = maxvls, method = method)
+    })
+    
+    # return the mean of the estimators and the standard deviation
+    c(mean = mean(ests), sd = sd(ests))
+  }, simplify = "array")
+}, simplify = "array")
+```
+
+```{r show_rqmc_likelihood}
+# the standard deviation of the result scaled by the absolute value of the 
+# estimated log likelihood to get the number of significant digits. Notice that
+# we scale up the figures by 1000!
+precise_est <- mean(res["mean", , length(n_samp)])
+round(1000 * res["sd", "Korobov", ] / abs(precise_est), 6)
+round(1000 * res["sd", "Sobol"  , ] / abs(precise_est), 6)
+
+# look at log-log regressions
+lm(log(res["sd", "Korobov", ]) ~ log(n_samp))
+lm(log(res["sd", "Sobol", ]) ~ log(n_samp))
+
+# plot the two standard deviation estimates
+par(mar = c(5, 5, 1, 1))
+matplot(n_samp, t(res["sd", , ]), log = "xy", ylab = "L2 error", lty = 1, 
+        type = "l", bty = "l", xlab = "Number of samples", 
+        col = c("black", "darkgray"))
+matplot(n_samp, t(res["sd", , ]), pch = c(1, 16), col = c("black", "darkgray"), 
+        add = TRUE)
+```
+
+The two randomized quasi-Monte Carlo methods seems fairly comparable in this 
+case and both give precise estimates.
 
 We fit the model again below as example of using the scrambled Sobol sequences:
 
@@ -636,7 +697,7 @@ system.time(
     n_threads = 4L, 
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L, method = 1L))
 
-# compare the result. We start with the log-likelihood
+# compare the result. We start with the log likelihood
 print(-opt_out_sobol$value, digits = 8)
 print(-opt_out      $value, digits = 8)
 
@@ -1073,7 +1134,7 @@ pl_curve_func <- function(fix, fix_val,
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L)
   
   # report to console and return
-  message(sprintf("\nLog-likelihood %.5f (%.5f). Estimated parameters:", 
+  message(sprintf("\nLog likelihood %.5f (%.5f). Estimated parameters:", 
                   -opt_out$value, -opt_out_quick$value))
   message(paste0(capture.output(print(
     c(`non-fixed` = opt_out$par, fixed = fix_par[fix]))), collapse = "\n"))
@@ -1384,7 +1445,7 @@ y <- unlist(lapply(dat_arg, `[[`, "y"))
 X <- do.call(rbind, lapply(dat_arg, `[[`, "X"))
 start_fit <-  glm.fit(X, y, family = binomial("probit"))
 
-# log-likelihood at the starting values without random effects
+# log likelihood at the starting values without random effects
 -sum(start_fit$deviance) / 2     
 (beta <- start_fit$coefficients) # starting values for fixed effects 
 
@@ -1411,7 +1472,8 @@ gr <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE,
     minvls = 1000L, use_aprx = use_aprx, n_threads = n_threads, 
     indices = indices, method = method)
   structure(c(out), value = -attr(out, "logLik"), 
-            n_fails = attr(out, "n_fails"))
+            n_fails = attr(out, "n_fails"), 
+            std = attr(out, "std"))
 }
 
 # check output at the starting values

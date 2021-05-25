@@ -23,9 +23,9 @@
 #'
 #' @return \code{eval_pedigree_ll}:
 #' a scalar with the log marginal likelihood approximation.
-#' It has an attribute called \code{"n_fails"} which show the number of
+#' It has an attribute called \code{"n_fails"} which shows the number of
 #' log marginal likelihood term approximations which do not satisfy
-#' the \code{abs_eps} and \code{rel_eps} criterion and attribute called
+#' the \code{abs_eps} and \code{rel_eps} criteria and an attribute called
 #' \code{std} with a standard error estimate based on the delta rule.
 #'
 #' @examples
@@ -125,7 +125,11 @@ eval_pedigree_ll <- function(ptr, par, maxvls, abs_eps, rel_eps,
 #' @return \code{eval_pedigree_grad}: a vector with the derivatives with
 #' respect to \code{par}. An attribute called \code{"logLik"} contains the
 #' log marginal likelihood approximation. There will also be \code{"n_fails"}
-#' attribute like for \code{eval_pedigree_ll}.
+#' attribute like for \code{eval_pedigree_ll} and an attribute called
+#' \code{"std"} which first element is the standard error estimate of the
+#' log likelihood based on the delta method and the last elements are the
+#' standard error estimates of the gradient. The latter ignores the Monte Carlo
+#' error from the likelihood approximation but this is typically minor.
 #'
 #' @export
 eval_pedigree_grad <- function(ptr, par, maxvls, abs_eps, rel_eps,

@@ -326,7 +326,7 @@ show_split(dat, weighted_partition)
 
 We end up cutting the link to the grandparents instead.
 
-### Potentialy Unconnected Partition
+### Potentially Unconnected Partition
 
 We may not require that the two sets in the partition is connected. The 
 `get_unconnected_partition_pedigree` function does not impose this constraint. 

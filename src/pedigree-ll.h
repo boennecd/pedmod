@@ -116,7 +116,7 @@ public:
    * Approximates the log-likelihood term and the derivative.
    */
   double gr
-    (double const * par, double * d_par, int const maxvls,
+    (double const * par, double * d_par, double * var_est, int const maxvls,
      double const abs_eps, double const rel_eps, int minvls,
      bool const do_reorder, bool const use_aprx, bool &did_fail,
      double const weight, cdf_methods const method){
@@ -149,19 +149,19 @@ public:
       l_factor, lower, upper, mu, sig, do_reorder, use_aprx).approximate(
           maxvls, abs_eps, rel_eps, method, minvls);
 
-    // derivatives for the slopes
-    for(int i = 0; i < n_fix_effect; ++i)
+    // derivatives for the slopes and the scale parameters
+    int const n_scales = l_factor.scale_mats.size();
+    for(int i = 0; i < n_fix_effect + n_scales; ++i)
       d_par[i] += weight * res.derivs[i];
 
-    // derivatives for the scale parameters
-    double * rhs       = d_par              + n_fix_effect;
-    double const * lhs = res.derivs.begin() + n_fix_effect;
-    int const n_scales = l_factor.scale_mats.size();
-    for(int i = 0; i < n_scales; ++i)
-      *rhs++ += weight * *lhs++;
+    // add variance terms to var_est. The first one for the log likelihood is an
+    // application of the delta rule
+    var_est[0] += weight * weight * res.sd_errs[0] * res.sd_errs[0] /
+      (res.likelihood * res.likelihood);
+    for(int i = 1; i < n_fix_effect + n_scales + 1; ++i)
+      var_est[i] += weight * weight * res.sd_errs[i] * res.sd_errs[i];
 
     did_fail = res.inform > 0;
-
     return weight * std::log(res.likelihood);
   }
 };

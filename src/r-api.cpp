@@ -396,7 +396,7 @@ Rcpp::NumericVector eval_pedigree_grad
     par[i] = std::exp(par[i]);
 
   pedmod::cache_mem<double> r_mem;
-  r_mem.set_n_mem(1 + par.size(), n_threads);
+  r_mem.set_n_mem(2 * (1 + par.size()), n_threads);
 
   // compute
   auto all_idx = get_indices(indices, *terms_ptr);
@@ -410,8 +410,10 @@ Rcpp::NumericVector eval_pedigree_grad
 #pragma omp parallel num_threads(n_threads)
 {
 #endif
-  double *wmem = r_mem.get_mem();
-  std::fill(wmem, wmem + 1 + par.size(), 0.);
+  double * wmem    = r_mem.get_mem(),
+         * var_est = wmem + 1 + par.size();
+  std::fill(wmem   , wmem    + 1 + par.size(), 0.);
+  std::fill(var_est, var_est + 1 + par.size(), 0.);
 
 #ifdef _OPENMP
 #pragma omp for schedule(static) reduction(+:n_fails)
@@ -426,8 +428,8 @@ Rcpp::NumericVector eval_pedigree_grad
         return;
 
       *wmem += terms.at(idx[i]).gr(
-        &par[0], wmem + 1, maxvls, abs_eps, rel_eps, minvls, do_reorder,
-        use_aprx, did_fail, w_i, meth);
+        &par[0], wmem + 1, var_est, maxvls, abs_eps, rel_eps, minvls,
+        do_reorder, use_aprx, did_fail, w_i, meth);
       n_fails += did_fail;
     });
 #ifdef _OPENMP
@@ -437,20 +439,30 @@ Rcpp::NumericVector eval_pedigree_grad
   exception_handler.rethrow_if_error();
 
   // aggregate the result
-  Rcpp::NumericVector grad(n_fix + n_scales);
+  Rcpp::NumericVector grad(n_fix + n_scales),
+                   std_est(n_fix + n_scales + 1);
   double ll(0.);
   for(unsigned i = 0; i < n_threads; ++i){
     double *wmem = r_mem.get_mem(i);
     ll += *wmem;
-    for(unsigned j = 0; j <  par.size(); ++j)
-      grad[j] += wmem[j + 1];
+    for(unsigned j = 0; j < par.size(); ++j){
+      grad   [j] += wmem[j + 1];
+      std_est[j] += wmem[j + 1 + par.size()];
+    }
+    std_est[par.size()] += wmem[par.size() + 1 + par.size()];
   }
+
+  for(unsigned j = 0; j < par.size() + 1; ++j)
+    std_est[j] = std::sqrt(std_est[j]);
+  for(unsigned j = 1 + n_fix; j < par.size() + 1; ++j)
+    std_est[j] *= par[j - 1];
 
   // account for exp(...)
   for(int i = n_fix; i < n_fix + n_scales; ++i)
     grad[i] *= par[i];
   grad.attr("logLik")  = Rcpp::NumericVector::create(ll);
   grad.attr("n_fails") = Rcpp::IntegerVector::create(n_fails);
+  grad.attr("std")     = std_est;
 
   return grad;
 }

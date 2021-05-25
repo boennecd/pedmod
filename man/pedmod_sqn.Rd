@@ -105,7 +105,7 @@ approximation.}
 rules while one yields scrambled Sobol sequences.}
 
 \item{check_every}{integer for the number of gradient steps between checking
-that the likelihood did decrease. If not, the iterations are reset and the
+that the likelihood did increase. If not, the iterations are reset and the
 step-size is halved.}
 }
 \description{

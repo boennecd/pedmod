@@ -90,8 +90,8 @@ for computing profile likelihoods. \code{NULL} yields all parameters.}
 parameterization. See \code{\link{standardized_to_direct}} and the vignette
 at \code{vignette("pedmod", package = "pedmod")}.}
 
-\item{method}{integer with the method to use. Zero yields Korobov lattice
-rules while one yields scrambled Sobol sequences.}
+\item{method}{integer with the method to use. Zero yields randomized Korobov
+lattice rules while one yields scrambled Sobol sequences.}
 
 \item{...}{Arguments passed to \code{opt_func}.}
 

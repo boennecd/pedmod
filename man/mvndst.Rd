@@ -43,8 +43,8 @@ be used. \code{TRUE} is likely the best value.}
 \code{\link{pnorm}} and \code{\link{qnorm}} should be used. This may
 reduce the computation time while not affecting the result much.}
 
-\item{method}{integer with the method to use. Zero yields Korobov lattice
-rules while one yields scrambled Sobol sequences.}
+\item{method}{integer with the method to use. Zero yields randomized Korobov
+lattice rules while one yields scrambled Sobol sequences.}
 }
 \value{
 An approximation of the CDF. The \code{"n_it"} attribute shows the number of

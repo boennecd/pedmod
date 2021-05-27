@@ -703,66 +703,171 @@ abline(h = max_ml - crit_val / 2, lty = 3) # mark the critical value
 
 <img src="man/figures/README-plot_simple_ex_profile_likelihood-1.png" width="100%" />
 
+The `pedmod_profile` function is a convenience function to do like
+above. An example of using the `pedmod_profile` function is provided
+below:
+
+``` r
+# find the profile likelihood based confidence interval
+prof_res <- pedmod_profile(
+  ptr = ll_terms, par = opt_out$par, delta = .5, maxvls = 10000L, 
+  minvls = 1000L, alpha = .05, abs_eps = 0, rel_eps = 1e-4, which_prof = 4L,
+  use_aprx = TRUE, n_threads = 4L, verbose = TRUE)
+#> The estimate of the standard error of the log likelihood is 0.00264430. Preferably this should be below 0.001
+#> 
+#> Finding the lower limit of the profile likelihood curve
+#> Log likelihood is -1619.7818 at 0.563571 (critical value is -1620.3321)
+#> Log likelihood is -1624.4826 at 0.063571 (critical value is -1620.3321)
+#> Log likelihood is -1620.8659 at 0.406804 (critical value is -1620.3321)
+#> Log likelihood is -1620.3385 at 0.476874 (critical value is -1620.3321)
+#> 
+#> Finding the upper limit of the profile likelihood curve
+#> Log likelihood is -1619.2922 at 1.563571 (critical value is -1620.3321)
+#> Log likelihood is -1621.1630 at 2.063571 (critical value is -1620.3321)
+#> Log likelihood is -1620.2662 at 1.837993 (critical value is -1620.3321)
+#> Log likelihood is -1620.4234 at 1.878543 (critical value is -1620.3321)
+#> Log likelihood is -1618.4113 at 1.063571 (critical value is -1620.3321)
+
+# the confidence interval for the scale parameter
+exp(prof_res$confs)
+#>  2.50 pct. 97.50 pct. 
+#>      1.613      6.395
+
+# plot the estimated profile likelihood curve and check that everything looks 
+# fine
+sigs <- exp(prof_res$xs / 2)
+pls <- prof_res$p_log_Lik
+par(mar = c(5, 5, 1, 1))
+plot(sigs, pls, bty = "l",
+     pch = 16, xlab = expression(sigma), ylab = "Profile likelihood")
+```
+
+<img src="man/figures/README-simple_pedmod_profile-1.png" width="100%" />
+
+``` r
+grid()
+```
+
+<img src="man/figures/README-simple_pedmod_profile-2.png" width="100%" />
+
+``` r
+smooth_est <- smooth.spline(sigs, pls)
+lines(predict(smooth_est, seq(min(sigs), max(sigs), length.out = 100)))
+```
+
+<img src="man/figures/README-simple_pedmod_profile-3.png" width="100%" />
+
+``` r
+abline(v = exp(tail(opt_out$par, 1) / 2), lty = 2) # the estimate
+```
+
+<img src="man/figures/README-simple_pedmod_profile-4.png" width="100%" />
+
+``` r
+abline(v = sqrt(attr(dat, "sig_sq")), lty = 3) # the true value
+```
+
+<img src="man/figures/README-simple_pedmod_profile-5.png" width="100%" />
+
+``` r
+abline(h = max(pls) - qchisq(.95, 1) / 2, lty = 3) # mark the critical value
+```
+
+<img src="man/figures/README-simple_pedmod_profile-6.png" width="100%" />
+
+``` r
+# we can do the same for the slope of the binary covariates
+prof_res <- pedmod_profile(
+  ptr = ll_terms, par = opt_out$par, delta = .5, maxvls = 10000L, 
+  minvls = 1000L, alpha = .05, abs_eps = 0, rel_eps = 1e-4, which_prof = 3L,
+  use_aprx = TRUE, n_threads = 4L, verbose = TRUE)
+#> The estimate of the standard error of the log likelihood is 0.00264430. Preferably this should be below 0.001
+#> 
+#> Finding the lower limit of the profile likelihood curve
+#> Log likelihood is -1622.3897 at 1.376782 (critical value is -1620.3321)
+#> Log likelihood is -1618.4113 at 1.876782 (critical value is -1620.3321)
+#> Log likelihood is -1619.2905 at 1.606650 (critical value is -1620.3321)
+#> Log likelihood is -1620.4762 at 1.490459 (critical value is -1620.3321)
+#> Log likelihood is -1620.1975 at 1.512557 (critical value is -1620.3321)
+#> 
+#> Finding the upper limit of the profile likelihood curve
+#> Log likelihood is -1619.5942 at 2.376782 (critical value is -1620.3321)
+#> Log likelihood is -1621.3454 at 2.876782 (critical value is -1620.3321)
+#> Log likelihood is -1620.5164 at 2.634646 (critical value is -1620.3321)
+#> Log likelihood is -1620.2557 at 2.561415 (critical value is -1620.3321)
+#> Log likelihood is -1618.4113 at 1.876782 (critical value is -1620.3321)
+
+# the confidence interval for the slope of the binary covariate
+prof_res$confs
+#>  2.50 pct. 97.50 pct. 
+#>      1.502      2.583
+
+# plot the estimated profile likelihood curve and check that everything looks 
+# fine
+bin_slope <- prof_res$xs
+pls <- prof_res$p_log_Lik
+par(mar = c(5, 5, 1, 1))
+plot(bin_slope, pls, bty = "l",
+     pch = 16, xlab = expression(beta[2]), ylab = "Profile likelihood")
+```
+
+<img src="man/figures/README-simple_pedmod_profile-7.png" width="100%" />
+
+``` r
+grid()
+```
+
+<img src="man/figures/README-simple_pedmod_profile-8.png" width="100%" />
+
+``` r
+lines(spline(bin_slope, pls, n = 100))
+```
+
+<img src="man/figures/README-simple_pedmod_profile-9.png" width="100%" />
+
+``` r
+abline(v = opt_out$par[3], lty = 2) # the estimate
+```
+
+<img src="man/figures/README-simple_pedmod_profile-10.png" width="100%" />
+
+``` r
+abline(v = attr(dat, "beta")[3], lty = 3) # the true value
+```
+
+<img src="man/figures/README-simple_pedmod_profile-11.png" width="100%" />
+
+``` r
+abline(h = max(pls) - qchisq(.95, 1) / 2, lty = 3) # mark the critical value
+```
+
+<img src="man/figures/README-simple_pedmod_profile-12.png" width="100%" />
+
 We only ran the above with one seed. We can draw the curve with using
 different seeds to check if this does not change the estimates. We will
 likely need to use more samples if the result depends on the seed.
 
 ``` r
-# assign the seeds we will use along with the grid of seeds and scale parameters
-seeds <- 1:4
-seeds_n_sigs <- expand.grid(seed = seeds, sig = sigs)
-
-# compute the profile likelihood
-ll_terms <- get_pedigree_ll_terms(dat, max_threads = 4L)
-pl_curve_res <- Map(function(sig, seed){
-  # set the parameters to pass
-  beta <- start$beta_no_rng
-  sig_sq_log <- 2 * log(sig)
-  beta_scaled <- beta * sqrt(1 + sig^2)
-  
-  # optimize like before but using the fix argument
-  opt_out_quick <- pedmod_opt(
-    ptr = ll_terms, par = c(beta_scaled, sig_sq_log), maxvls = 1000L, 
-    abs_eps = 0, rel_eps = 1e-2, minvls = 100L, use_aprx = TRUE, n_threads = 4L, 
-    fix = length(beta) + 1L, seed = seed)
-  opt_out <- pedmod_opt(
-    ptr = ll_terms, par = c(opt_out_quick$par, sig_sq_log), abs_eps = 0, 
-    use_aprx = TRUE, n_threads = 4L, fix = length(beta) + 1L, seed = seed,
-    # we changed the parameters
-    maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L)
-  
-  # report to console and return
-  message(sprintf("\nLog likelihood %.5f (%.5f). Estimated parameters:", 
-                  -opt_out$value, -opt_out_quick$value))
-  message(paste0(capture.output(print(
-    c(opt_out$par, Scale = sig))), collapse = "\n"))
-  
-  list(opt_out_quick = opt_out_quick, opt_out = opt_out)
-}, sig = seeds_n_sigs$sig, seed = seeds_n_sigs$seed)
+# compute the profile likelihood using different seeds
+pl_curve_res <- lapply(1:5, function(seed) pedmod_profile(
+  ptr = ll_terms, par = opt_out$par, delta = .5, maxvls = 10000L, 
+  minvls = 1000L, alpha = .05, abs_eps = 0, rel_eps = 1e-4, which_prof = 4L,
+  use_aprx = TRUE, n_threads = 4L, seed = seed))
 ```
 
-The different profile likelihood curves are drawn below:
+We show the estimated profile likelihood based confidence intervals
+below:
 
 ``` r
-# plot the profile likelihood values
-pls <- -sapply(pl_curve_res, function(x) x$opt_out$value)
-pls <- matrix(pls, length(seeds), dimnames = list(seeds, sigs))
-matplot(sigs, t(pls), pch = seq_along(seeds) + 15L, bty = "l", col = "black", 
-        xlab = expression(sigma), ylab = "Profile likelihood")
-grid()
+# the profile likelihood based confidence intervals
+print(exp(t(sapply(pl_curve_res, `[[`, "confs"))), digits = 8)
+#>      2.50 pct. 97.50 pct.
+#> [1,] 1.6127283  6.3946385
+#> [2,] 1.6113272  6.4131140
+#> [3,] 1.6126226  6.3943693
+#> [4,] 1.6123746  6.3926285
+#> [5,] 1.6123966  6.4174979
 ```
-
-<img src="man/figures/README-draw_mult_pf_curves-1.png" width="100%" />
-
-``` r
-# plot the difference from the mean
-matplot(sigs, t(pls) - colMeans(pls), pch = seq_along(seeds) + 15L, bty = "l", 
-        col = "black", xlab = expression(sigma), 
-        ylab = "Diff. profile likelihood")
-grid()
-```
-
-<img src="man/figures/README-draw_mult_pf_curves-2.png" width="100%" />
 
 ### Randomized Quasi-Monte Carlo
 
@@ -1620,62 +1725,78 @@ for(i in 1:3 - 1L)
 
 <img src="man/figures/README-draw_simple_w_ev_ex_profile_likelihood-1.png" width="100%" />
 
-We may just be interested creating two profile likelihood curves for
+We may just be interested in creating two profile likelihood curves for
 each of the scale parameters. This can be done as follows:
 
 ``` r
 # First we compute data for the two profile likelihood curves staring with the
 # curve for the additive genetic effect
-sigs_genetic <- exp(opt_out$par[3] / 2)
-sigs_genetic <- c(sigs_genetic,
-                  seq(sigs_genetic - .5, sigs_genetic + .7, length.out = 15))
-sigs_genetic <- sort(sigs_genetic)
-
-pl_genetic <- lapply(sigs_genetic, pl_curve_func, fix = 
-                       length(start$beta_no_rng) + 1L)
+pl_genetic <- pedmod_profile(
+  ptr = ll_terms, par = opt_out$par, delta = .4, maxvls = 20000L, 
+  minvls = 1000L, alpha = .05, abs_eps = 0, rel_eps = 1e-4, which_prof = 3L,
+  use_aprx = TRUE, n_threads = 4L, verbose = TRUE, cluster_weights = c_weights)
+#> The estimate of the standard error of the log likelihood is 0.00795584. Preferably this should be below 0.001
+#> 
+#> Finding the lower limit of the profile likelihood curve
+#> Log likelihood is -2697.1260 at 0.195214 (critical value is -2698.0522)
+#> Log likelihood is -2700.2176 at -0.204786 (critical value is -2698.0522)
+#> Log likelihood is -2698.4581 at -0.010800 (critical value is -2698.0522)
+#> Log likelihood is -2697.9711 at 0.054567 (critical value is -2698.0522)
+#> 
+#> Finding the upper limit of the profile likelihood curve
+#> Log likelihood is -2696.7891 at 0.995214 (critical value is -2698.0522)
+#> Log likelihood is -2698.4177 at 1.395214 (critical value is -2698.0522)
+#> Log likelihood is -2697.8984 at 1.281241 (critical value is -2698.0522)
+#> Log likelihood is -2696.1315 at 0.595214 (critical value is -2698.0522)
+exp(pl_genetic$confs) # the confidence interval
+#>  2.50 pct. 97.50 pct. 
+#>      1.044      3.727
 
 # then we compute the curve for the environmental effect
-sigs_env <- exp(opt_out$par[4] / 2)
-sigs_env <- c(sigs_env, seq(sigs_env - .3, sigs_env + .5, length.out = 15))
-sigs_env <- sort(sigs_env)
-
-pl_env <- lapply(sigs_env, pl_curve_func, fix = 
-                       length(start$beta_no_rng) + 2L)
+pl_env <- pedmod_profile(
+  ptr = ll_terms, par = opt_out$par, delta = .6, maxvls = 20000L, 
+  minvls = 1000L, alpha = .05, abs_eps = 0, rel_eps = 1e-4, which_prof = 4L,
+  use_aprx = TRUE, n_threads = 4L, verbose = TRUE, cluster_weights = c_weights)
+#> The estimate of the standard error of the log likelihood is 0.00795584. Preferably this should be below 0.001
+#> 
+#> Finding the lower limit of the profile likelihood curve
+#> Log likelihood is -2697.1772 at -0.801732 (critical value is -2698.0522)
+#> Log likelihood is -2699.2953 at -1.401732 (critical value is -2698.0522)
+#> Log likelihood is -2698.2832 at -1.127622 (critical value is -2698.0522)
+#> Log likelihood is -2697.9609 at -1.037194 (critical value is -2698.0522)
+#> 
+#> Finding the upper limit of the profile likelihood curve
+#> Log likelihood is -2697.2176 at 0.398268 (critical value is -2698.0522)
+#> Log likelihood is -2699.9784 at 0.998268 (critical value is -2698.0522)
+#> Log likelihood is -2698.4343 at 0.686596 (critical value is -2698.0522)
+#> Log likelihood is -2697.9846 at 0.588406 (critical value is -2698.0522)
+#> Log likelihood is -2696.1315 at -0.201732 (critical value is -2698.0522)
+exp(pl_env$confs) # the confidence interval
+#>  2.50 pct. 97.50 pct. 
+#>     0.3452     1.8294
 ```
 
+We plot the two profile likelihood curves below:
+
 ``` r
-# we create the plots starting with the additive genetic effect  
-par(mar = c(5, 5, 1, 1))
-pls <- -sapply(pl_genetic, function(x) x$opt_out$value)
-plot(sigs_genetic, pls, bty = "l",
-     pch = 16, xlab = bquote(paste(sigma['G'])), 
-     ylab = "Profile likelihood")
-grid()
-smooth_est <- smooth.spline(sigs_genetic, pls)
-lines(predict(smooth_est, seq(min(sigs_genetic), max(sigs_genetic), 
-                              length.out = 100)))
-abline(v = exp(opt_out$par[3] / 2), lty = 2) # the estimate
-abline(v = sqrt(attr(dat_unqiue, "sig_sq")[1]), lty = 3) # the true value
-alpha <- .05
-crit_val <- qchisq(1 - alpha, 1)
-abline(h = -opt_out$value - crit_val / 2, lty = 3) # mark the critical value
+do_plot <- function(obj, xlab, estimate){
+  xs <- exp(obj$xs / 2)
+  pls <- obj$p_log_Lik
+  par(mar = c(5, 5, 1, 1))
+  plot(xs, pls, bty = "l", pch = 16, xlab = xlab, ylab = "Profile likelihood")
+  grid()
+  lines(spline(xs, pls, n = 100L))
+  abline(v = estimate, lty = 2) # the estimate
+  abline(h = max(pls) - qchisq(.95, 1) / 2, lty = 3) # mark the critical value
+}
+
+do_plot(pl_genetic, expression(sigma[G]), exp(opt_out$par[3] / 2))
 ```
 
 <img src="man/figures/README-plot_env_pl_curves-1.png" width="100%" />
 
 ``` r
-# then we create the plot for the environmental effect 
-par(mar = c(5, 5, 1, 1))
-pls <- -sapply(pl_env, function(x) x$opt_out$value)
-plot(sigs_env, pls, bty = "l",
-     pch = 16, xlab = bquote(paste(sigma['E'])), 
-     ylab = "Profile likelihood")
-grid()
-smooth_est <- smooth.spline(sigs_env, pls)
-lines(predict(smooth_est, seq(min(sigs_env), max(sigs_env), length.out = 100)))
-abline(v = exp(opt_out$par[4] / 2), lty = 2) # the estimate
-abline(v = sqrt(attr(dat_unqiue, "sig_sq")[2]), lty = 3) # the true value
-abline(h = -opt_out$value - crit_val / 2, lty = 3) # mark the critical value
+do_plot(pl_env, expression(sigma[E]), exp(opt_out$par[4] / 2))
 ```
 
 <img src="man/figures/README-plot_env_pl_curves-2.png" width="100%" />

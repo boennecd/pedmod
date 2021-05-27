@@ -101,8 +101,8 @@ approximation.}
 
 \item{verbose}{logical for whether to print output during the estimation.}
 
-\item{method}{integer with the method to use. Zero yields Korobov lattice
-rules while one yields scrambled Sobol sequences.}
+\item{method}{integer with the method to use. Zero yields randomized Korobov
+lattice rules while one yields scrambled Sobol sequences.}
 
 \item{check_every}{integer for the number of gradient steps between checking
 that the likelihood did increase. If not, the iterations are reset and the

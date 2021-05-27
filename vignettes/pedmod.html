@@ -862,9 +862,8 @@ prof_res &lt;- pedmod_profile(
 # the confidence interval for the slope of the binary covariate
 prof_res$confs
 #&gt;  2.50 pct. 97.50 pct. 
-#&gt;      1.502      2.583
-
-# plot the estimated profile likelihood curve and check that everything looks 
+#&gt;      1.502      2.583</code></pre>
+<pre class="r"><code># plot the estimated profile likelihood curve and check that everything looks 
 # fine
 bin_slope &lt;- prof_res$xs
 pls &lt;- prof_res$p_log_Lik
@@ -1046,15 +1045,11 @@ res &lt;- sapply(setNames(n_samp, n_samp), function(maxvls){
 # we scale up the figures by 1000!
 precise_est &lt;- mean(res[&quot;mean&quot;, , length(n_samp)])
 round(1000 * res[&quot;sd&quot;, &quot;Korobov&quot;, ] / abs(precise_est), 6)
-#&gt;     1000     2000     4000     8000    16000    32000    64000   128000   256000 
-#&gt; 0.035230 0.028935 0.025578 0.012647 0.007994 0.004134 0.001305 0.000975 0.000580 
-#&gt;   512000 
-#&gt; 0.000193
+#&gt;     1000     2000     4000     8000    16000    32000    64000   128000   256000   512000 
+#&gt; 0.035230 0.028935 0.025578 0.012647 0.007994 0.004134 0.001305 0.000975 0.000580 0.000193
 round(1000 * res[&quot;sd&quot;, &quot;Sobol&quot;  , ] / abs(precise_est), 6)
-#&gt;     1000     2000     4000     8000    16000    32000    64000   128000   256000 
-#&gt; 0.109138 0.046494 0.024814 0.011070 0.006089 0.003202 0.001260 0.000630 0.000336 
-#&gt;   512000 
-#&gt; 0.000166
+#&gt;     1000     2000     4000     8000    16000    32000    64000   128000   256000   512000 
+#&gt; 0.109138 0.046494 0.024814 0.011070 0.006089 0.003202 0.001260 0.000630 0.000336 0.000166
 
 # look at log-log regressions
 lm(log(res[&quot;sd&quot;, &quot;Korobov&quot;, ]) ~ log(n_samp))

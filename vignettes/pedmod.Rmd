@@ -513,7 +513,7 @@ example of using the `pedmod_profile` function is provided below:
 ll_terms <- get_pedigree_ll_terms(dat, max_threads = 4L)
 ```
 
-```{r simple_pedmod_profile, cache = 1, message = TRUE}
+```{r simple_pedmod_profile, cache = 1, message = TRUE, fig.keep="last"}
 # find the profile likelihood based confidence interval
 prof_res <- pedmod_profile(
   ptr = ll_terms, par = opt_out$par, delta = .5, maxvls = 10000L, 
@@ -544,7 +544,10 @@ prof_res <- pedmod_profile(
 
 # the confidence interval for the slope of the binary covariate
 prof_res$confs
+```
 
+
+```{r binary_simple_pedmod_profile, cache = 1, message = TRUE, fig.keep="last"}
 # plot the estimated profile likelihood curve and check that everything looks 
 # fine
 bin_slope <- prof_res$xs

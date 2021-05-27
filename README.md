@@ -740,40 +740,15 @@ pls <- prof_res$p_log_Lik
 par(mar = c(5, 5, 1, 1))
 plot(sigs, pls, bty = "l",
      pch = 16, xlab = expression(sigma), ylab = "Profile likelihood")
-```
-
-<img src="man/figures/README-simple_pedmod_profile-1.png" width="100%" />
-
-``` r
 grid()
-```
-
-<img src="man/figures/README-simple_pedmod_profile-2.png" width="100%" />
-
-``` r
 smooth_est <- smooth.spline(sigs, pls)
 lines(predict(smooth_est, seq(min(sigs), max(sigs), length.out = 100)))
-```
-
-<img src="man/figures/README-simple_pedmod_profile-3.png" width="100%" />
-
-``` r
 abline(v = exp(tail(opt_out$par, 1) / 2), lty = 2) # the estimate
-```
-
-<img src="man/figures/README-simple_pedmod_profile-4.png" width="100%" />
-
-``` r
 abline(v = sqrt(attr(dat, "sig_sq")), lty = 3) # the true value
-```
-
-<img src="man/figures/README-simple_pedmod_profile-5.png" width="100%" />
-
-``` r
 abline(h = max(pls) - qchisq(.95, 1) / 2, lty = 3) # mark the critical value
 ```
 
-<img src="man/figures/README-simple_pedmod_profile-6.png" width="100%" />
+<img src="man/figures/README-simple_pedmod_profile-1.png" width="100%" />
 
 ``` r
 # we can do the same for the slope of the binary covariates
@@ -801,7 +776,9 @@ prof_res <- pedmod_profile(
 prof_res$confs
 #>  2.50 pct. 97.50 pct. 
 #>      1.502      2.583
+```
 
+``` r
 # plot the estimated profile likelihood curve and check that everything looks 
 # fine
 bin_slope <- prof_res$xs
@@ -809,39 +786,14 @@ pls <- prof_res$p_log_Lik
 par(mar = c(5, 5, 1, 1))
 plot(bin_slope, pls, bty = "l",
      pch = 16, xlab = expression(beta[2]), ylab = "Profile likelihood")
-```
-
-<img src="man/figures/README-simple_pedmod_profile-7.png" width="100%" />
-
-``` r
 grid()
-```
-
-<img src="man/figures/README-simple_pedmod_profile-8.png" width="100%" />
-
-``` r
 lines(spline(bin_slope, pls, n = 100))
-```
-
-<img src="man/figures/README-simple_pedmod_profile-9.png" width="100%" />
-
-``` r
 abline(v = opt_out$par[3], lty = 2) # the estimate
-```
-
-<img src="man/figures/README-simple_pedmod_profile-10.png" width="100%" />
-
-``` r
 abline(v = attr(dat, "beta")[3], lty = 3) # the true value
-```
-
-<img src="man/figures/README-simple_pedmod_profile-11.png" width="100%" />
-
-``` r
 abline(h = max(pls) - qchisq(.95, 1) / 2, lty = 3) # mark the critical value
 ```
 
-<img src="man/figures/README-simple_pedmod_profile-12.png" width="100%" />
+<img src="man/figures/README-binary_simple_pedmod_profile-1.png" width="100%" />
 
 We only ran the above with one seed. We can draw the curve with using
 different seeds to check if this does not change the estimates. We will
@@ -1048,15 +1000,11 @@ res <- sapply(setNames(n_samp, n_samp), function(maxvls){
 # we scale up the figures by 1000!
 precise_est <- mean(res["mean", , length(n_samp)])
 round(1000 * res["sd", "Korobov", ] / abs(precise_est), 6)
-#>     1000     2000     4000     8000    16000    32000    64000   128000   256000 
-#> 0.035230 0.028935 0.025578 0.012647 0.007994 0.004134 0.001305 0.000975 0.000580 
-#>   512000 
-#> 0.000193
+#>     1000     2000     4000     8000    16000    32000    64000   128000   256000   512000 
+#> 0.035230 0.028935 0.025578 0.012647 0.007994 0.004134 0.001305 0.000975 0.000580 0.000193
 round(1000 * res["sd", "Sobol"  , ] / abs(precise_est), 6)
-#>     1000     2000     4000     8000    16000    32000    64000   128000   256000 
-#> 0.109138 0.046494 0.024814 0.011070 0.006089 0.003202 0.001260 0.000630 0.000336 
-#>   512000 
-#> 0.000166
+#>     1000     2000     4000     8000    16000    32000    64000   128000   256000   512000 
+#> 0.109138 0.046494 0.024814 0.011070 0.006089 0.003202 0.001260 0.000630 0.000336 0.000166
 
 # look at log-log regressions
 lm(log(res["sd", "Korobov", ]) ~ log(n_samp))

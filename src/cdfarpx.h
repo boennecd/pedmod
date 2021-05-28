@@ -557,7 +557,7 @@ public:
   /// design matrix for the fixed effects
   arma::mat const X;
   /// the number of fixed effects
-  int const n_fix = X.n_rows,
+  int const n_fix = X.n_cols,
      n_integrands = 1 + n_fix + scale_mats.size(),
          n_scales = scale_mats.size();
 
@@ -587,8 +587,8 @@ private:
 public:
   /// sets the scale matrices. There are no checks on the validity
   pedigree_l_factor(std::vector<arma::mat> const &scale_mats,
-                    unsigned const max_threads, arma::mat const &X):
-  scale_mats(scale_mats), X(X) {
+                    unsigned const max_threads, arma::mat const &X_in):
+  scale_mats(scale_mats), X(X_in.t()) {
     // checks
     if(scale_mats.size() < 1)
       throw std::invalid_argument("pedigree_l_factor::pedigree_l_factor: not scale matrices are passed");
@@ -596,7 +596,7 @@ public:
     for(auto &S : scale_mats)
       if(S.n_rows != u_mem or S.n_rows != u_mem)
         throw std::invalid_argument("pedigree_l_factor::pedigree_l_factor: not all scale matrices are square matrices or have the same dimensions");
-    if(X.n_cols != u_mem)
+    if(X.n_rows != u_mem)
       throw std::invalid_argument("pedigree_l_factor::pedigree_l_factor: invalid X");
 
     // setup working memory
@@ -706,10 +706,9 @@ public:
       // derivatives w.r.t. the fixed effects
       {
         double const *xij = X.begin();
-        for(int i = 0; i < n_mem; ++i){
-          double *d_fixj =  d_fix;
-          for(int j = 0; j < n_fix; ++j)
-            *d_fixj++ += *xij++ * d_mu_perm[i];
+        for(int j = 0; j < n_fix; ++j){
+          for(int i = 0; i < n_mem; ++i)
+            d_fix[j] += *xij++ * d_mu_perm[i];
         }
       }
 
@@ -718,18 +717,16 @@ public:
       for(int s = 0; s < n_scales; ++s)
         scale_mats_ptr[s] = scale_mats.at(s).begin();
 
-      for(int c = 0; c < n_mem; ++c, ++d_mu_c){
-        double const *d_mu_r = d_mu_perm;
-
-        for(int r = 0; r < c; ++r, ++d_mu_r){
-          double const mu_prod = *d_mu_c * *d_mu_r;
-          for(int s = 0; s < n_scales; ++scale_mats_ptr[s],++s)
-            d_sc[s] += mu_prod * *scale_mats_ptr[s];
-        }
+      for(int c = 0; c < n_mem; ++c){
+        double * __restrict__ d_mu_prod = d_mu;
+        for(int r = 0; r < c; ++r)
+          d_mu_prod[r] = d_mu_perm[r] * d_mu_perm[c];
+        d_mu_prod[c] = .5 * d_mu_perm[c] * d_mu_perm[c];
 
         for(int s = 0; s < n_scales; ++s){
-          d_sc[s] += .5 * *d_mu_c * *d_mu_c * *scale_mats_ptr[s];
-          scale_mats_ptr[s] += n_mem - c;
+          for(int r = 0; r <= c; ++r, ++scale_mats_ptr[s])
+            d_sc[s] += d_mu_prod[r] * *scale_mats_ptr[s];
+          scale_mats_ptr[s] += n_mem - c - 1;
         }
       }
     }

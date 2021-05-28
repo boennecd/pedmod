@@ -706,14 +706,13 @@ public:
       // derivatives w.r.t. the fixed effects
       {
         double const *xij = X.begin();
-        for(int j = 0; j < n_fix; ++j){
+        for(int j = 0; j < n_fix; ++j, xij += n_mem){
           for(int i = 0; i < n_mem; ++i)
-            d_fix[j] += *xij++ * d_mu_perm[i];
+            d_fix[j] += xij[i] * d_mu_perm[i];
         }
       }
 
       // handle the derivatives w.r.t. the scale parameters
-      double const *d_mu_c = d_mu_perm;
       for(int s = 0; s < n_scales; ++s)
         scale_mats_ptr[s] = scale_mats.at(s).begin();
 
@@ -751,7 +750,7 @@ public:
     out[0L] = p_ub - p_lb;
     double const d_mu = -(d_ub - d_lb) * sd_inv;
     for(int j = 0; j < n_fix; ++j)
-      out[j + 1] = X.at(j, 0) * d_mu;
+      out[j + 1] = X.at(0, j) * d_mu;
 
     double const d_sig = -(d_ub_ub - d_lb_lb) / 2 * sd_inv * sd_inv;
     for(unsigned s = 0; s  < scale_mats.size(); ++s)

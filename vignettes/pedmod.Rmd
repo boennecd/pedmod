@@ -154,6 +154,9 @@ The package can be installed from Github by calling:
 remotes::install_github("boennecd/pedmod", build_vignettes = TRUE)
 ```
 
+The code benefits from being build with automatic vectorization so having e.g. 
+`-O3` in the `CXX11FLAGS` flags in your Makevars file may be useful.
+
 ## Example
 
 We start with a simple example only with a direct genetic effect. We have one 

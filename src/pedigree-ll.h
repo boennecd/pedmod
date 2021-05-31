@@ -21,7 +21,8 @@ public:
 
   pedigree_ll_term(arma::mat const &X_in, arma::vec const &y,
                    std::vector<arma::mat> const &scale_mats,
-                   unsigned const max_threads):
+                   unsigned const max_threads,
+                   unsigned const min_sparse_len):
     X(([&](){
       if(X_in.n_rows != y.n_elem)
         throw std::invalid_argument("pedigree_ll_term::pedigree_ll_term: y and X's dimension do not match");
@@ -55,7 +56,8 @@ public:
           }
       }
 
-      return pedigree_l_factor(out, max_threads, X.t());
+      return pedigree_l_factor(out, max_threads, X.t(),
+                               y.size() >= min_sparse_len);
     })()) {
     // checks
     if(l_factor.n_mem != n_members)

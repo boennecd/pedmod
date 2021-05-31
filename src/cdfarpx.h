@@ -560,6 +560,23 @@ public:
   int const n_fix = X.n_cols,
      n_integrands = 1 + n_fix + scale_mats.size(),
          n_scales = scale_mats.size();
+  /// should sparse matrices be used
+  bool const use_sparse;
+  /// the scale matrices as sparse matrices
+  std::vector<arma::sp_mat> scale_mats_sparse =
+    ([&]() -> std::vector<arma::sp_mat> {
+      std::vector<arma::sp_mat> out;
+      if(use_sparse){
+        out.reserve(scale_mats.size());
+        for(arma::mat const &m : scale_mats){
+          arma::mat tmp = arma::trimatu(m);
+          tmp.diag() *= .5;
+          out.emplace_back(std::move(tmp));
+        }
+      }
+
+      return out;
+    })();
 
 private:
   /// working memory
@@ -587,8 +604,9 @@ private:
 public:
   /// sets the scale matrices. There are no checks on the validity
   pedigree_l_factor(std::vector<arma::mat> const &scale_mats,
-                    unsigned const max_threads, arma::mat const &X_in):
-  scale_mats(scale_mats), X(X_in.t()) {
+                    unsigned const max_threads, arma::mat const &X_in,
+                    bool const use_sparse):
+  scale_mats(scale_mats), X(X_in.t()), use_sparse(use_sparse) {
     // checks
     if(scale_mats.size() < 1)
       throw std::invalid_argument("pedigree_l_factor::pedigree_l_factor: not scale matrices are passed");
@@ -713,6 +731,17 @@ public:
       }
 
       // handle the derivatives w.r.t. the scale parameters
+      if(use_sparse){
+        for(int s = 0; s < n_scales; ++s){
+          arma::sp_mat::const_iterator it = scale_mats_sparse[s].begin();
+          arma::sp_mat::const_iterator const end = scale_mats_sparse[s].end();
+          for(; it != end; ++it)
+            d_sc[s] += d_mu_perm[it.col()] * d_mu_perm[it.row()] * *it;
+        }
+
+        return;
+      }
+
       for(int s = 0; s < n_scales; ++s)
         scale_mats_ptr[s] = scale_mats.at(s).begin();
 

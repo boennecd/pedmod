@@ -4,7 +4,7 @@
 \alias{get_pedigree_ll_terms}
 \title{Get C++ Object for Log Marginal Likelihood Approximations}
 \usage{
-get_pedigree_ll_terms(data, max_threads)
+get_pedigree_ll_terms(data, max_threads = 1L, min_sparse_len = 100L)
 }
 \arguments{
 \item{data}{\code{\link{list}} where each element is a list for a cluster
@@ -17,6 +17,8 @@ scale/correlation matrix for a particular type of effect.}
 }}
 
 \item{max_threads}{maximum number of threads to use.}
+
+\item{min_sparse_len}{minimum cluster size before sparse matrices are used.}
 }
 \description{
 Constructs an object needed for \code{\link{eval_pedigree_ll}} and

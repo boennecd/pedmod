@@ -1974,7 +1974,9 @@ dat_arg &lt;- lapply(dat$sim_data, function(x){
 
 # create a C++ object
 library(pedmod)
-ll_terms &lt;- get_pedigree_ll_terms(dat_arg, max_threads = 4L)
+ll_terms        &lt;- get_pedigree_ll_terms(dat_arg, max_threads = 4L)
+ll_terms_sparse &lt;- get_pedigree_ll_terms(dat_arg, max_threads = 4L, 
+                                         min_sparse_len = 40L)
 
 # get the starting values. This is very fast
 y &lt;- unlist(lapply(dat_arg, `[[`, &quot;y&quot;))
@@ -1995,21 +1997,23 @@ sc &lt;- rep(log(.2), 2)
 # to approximate the log likelihood and the gradient
 fn &lt;- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE, 
                n_threads = 4L, indices = NULL, maxvls = 25000L, 
-               method = 0L){
+               method = 0L, use_sparse = FALSE){
   set.seed(seed)
   -eval_pedigree_ll(
-    ptr = ll_terms, par = par, maxvls = maxvls, abs_eps = 0, rel_eps = rel_eps, 
-    minvls = 1000L, use_aprx = use_aprx, n_threads = n_threads, 
-    indices = indices, method = method)
+    ptr = if(use_sparse) ll_terms_sparse else ll_terms, par = par, 
+    maxvls = maxvls, abs_eps = 0, rel_eps = rel_eps, minvls = 1000L, 
+    use_aprx = use_aprx, n_threads = n_threads, indices = indices, 
+    method = method)
 }
 gr &lt;- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE, 
                n_threads = 4L, indices = NULL, maxvls = 25000L, 
-               method = 0L){
+               method = 0L, use_sparse = FALSE){
   set.seed(seed)
   out &lt;- -eval_pedigree_grad(
-    ptr = ll_terms, par = par, maxvls = maxvls, abs_eps = 0, rel_eps = rel_eps, 
-    minvls = 1000L, use_aprx = use_aprx, n_threads = n_threads, 
-    indices = indices, method = method)
+    ptr = if(use_sparse) ll_terms_sparse else ll_terms, par = par, 
+    maxvls = maxvls, abs_eps = 0, rel_eps = rel_eps, minvls = 1000L, 
+    use_aprx = use_aprx, n_threads = n_threads, indices = indices, 
+    method = method)
   structure(c(out), value = -attr(out, &quot;logLik&quot;), 
             n_fails = attr(out, &quot;n_fails&quot;), 
             std = attr(out, &quot;std&quot;))
@@ -2018,7 +2022,7 @@ gr &lt;- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE,
 # check output at the starting values
 system.time(ll &lt;- -fn(c(beta, sc)))
 #&gt;    user  system elapsed 
-#&gt;   8.202   0.000   2.090
+#&gt;   7.687   0.003   1.963
 ll # the log likelihood at the starting values
 #&gt; [1] -26042
 #&gt; attr(,&quot;n_fails&quot;)
@@ -2027,7 +2031,7 @@ ll # the log likelihood at the starting values
 #&gt; [1] 0.05963
 system.time(gr_val &lt;- gr(c(beta, sc)))
 #&gt;    user  system elapsed 
-#&gt;   93.72    0.00   23.69
+#&gt;  87.704   0.005  22.165
 gr_val # the gradient at the starting values
 #&gt; [1] 1894.83 -549.43 -235.73   47.21  -47.84
 #&gt; attr(,&quot;value&quot;)
@@ -2036,6 +2040,16 @@ gr_val # the gradient at the starting values
 #&gt; [1] 715
 #&gt; attr(,&quot;std&quot;)
 #&gt; [1] 0.01845 0.25149 0.28043 0.20515 0.10778 0.11060
+
+# with the sparse scale matrices
+system.time(gr_val_sparse &lt;- gr(c(beta, sc), use_sparse = TRUE))
+#&gt;    user  system elapsed 
+#&gt;  67.661   0.003  17.110
+all.equal(gr_val, gr_val_sparse)
+#&gt; [1] TRUE
+
+# the sparse method is faster so we change the default 
+formals(gr)$use_sparse &lt;- TRUE
 
 # standard deviation of the approximation
 sd(sapply(1:25, function(seed) fn(c(beta, sc), seed = seed)))
@@ -2048,6 +2062,16 @@ gr_hats &lt;- sapply(1:25, function(seed) gr(c(beta, sc), seed = seed,
 apply(gr_hats, 1, sd)
 #&gt; [1] 0.06953 0.11432 0.06340 0.02204 0.02467
 
+# the errors are on similar magnitudes
+gr(c(beta, sc), indices = 0:99)
+#&gt; [1] 197.674 -81.013  20.820   5.137  -6.452
+#&gt; attr(,&quot;value&quot;)
+#&gt; [1] 2602
+#&gt; attr(,&quot;n_fails&quot;)
+#&gt; [1] 73
+#&gt; attr(,&quot;std&quot;)
+#&gt; [1] 0.005841 0.076801 0.084451 0.068685 0.032688 0.033749
+
 # verify the gradient (may not be exactly equal due to MC error)
 rbind(numDeriv = numDeriv::grad(fn, c(beta, sc), indices = 0:10), 
       pedmod   = gr(c(beta, sc), indices = 0:10))
@@ -2058,7 +2082,7 @@ rbind(numDeriv = numDeriv::grad(fn, c(beta, sc), indices = 0:10),
 # optimize the log likelihood approximation
 system.time(opt &lt;- optim(c(beta, sc), fn, gr, method = &quot;BFGS&quot;))
 #&gt;     user   system  elapsed 
-#&gt; 3478.048    0.248  885.067</code></pre>
+#&gt; 2948.214    0.063  749.901</code></pre>
 <p>The output from the optimization is shown below:</p>
 <pre class="r"><code>print(-opt$value, digits = 8) # the maximum log likelihood
 #&gt; [1] -25823.021
@@ -2092,12 +2116,12 @@ microbenchmark(
   times = 1)
 #&gt; Unit: seconds
 #&gt;            expr    min     lq   mean median     uq    max neval
-#&gt;   fn (1 thread)  7.593  7.593  7.593  7.593  7.593  7.593     1
-#&gt;  fn (2 threads)  3.919  3.919  3.919  3.919  3.919  3.919     1
-#&gt;  fn (4 threads)  2.033  2.033  2.033  2.033  2.033  2.033     1
-#&gt;   gr (1 thread) 84.098 84.098 84.098 84.098 84.098 84.098     1
-#&gt;  gr (2 threads) 44.498 44.498 44.498 44.498 44.498 44.498     1
-#&gt;  gr (4 threads) 22.648 22.648 22.648 22.648 22.648 22.648     1</code></pre>
+#&gt;   fn (1 thread)  7.511  7.511  7.511  7.511  7.511  7.511     1
+#&gt;  fn (2 threads)  3.825  3.825  3.825  3.825  3.825  3.825     1
+#&gt;  fn (4 threads)  2.044  2.044  2.044  2.044  2.044  2.044     1
+#&gt;   gr (1 thread) 61.663 61.663 61.663 61.663 61.663 61.663     1
+#&gt;  gr (2 threads) 31.961 31.961 31.961 31.961 31.961 31.961     1
+#&gt;  gr (4 threads) 16.999 16.999 16.999 16.999 16.999 16.999     1</code></pre>
 </div>
 <div id="using-adam" class="section level3">
 <h3>Using ADAM</h3>
@@ -2188,7 +2212,7 @@ system.time(
                    verbose = FALSE, maxvls = maxpts_use, 
                    minvls = minvls))
 #&gt;     user   system  elapsed 
-#&gt; 3465.286    0.206  885.268</code></pre>
+#&gt; 2601.269    0.161  661.407</code></pre>
 <p>The result is shown below.</p>
 <pre class="r"><code>print(-fn(adam_res$par), digits = 8) # the maximum log likelihood
 #&gt; [1] -25823.228

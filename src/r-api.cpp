@@ -101,7 +101,8 @@ struct pedigree_terms {
   unsigned const max_threads;
   std::vector<pedmod::pedigree_ll_term > terms;
 
-  pedigree_terms(Rcpp::List data, unsigned const max_threads):
+  pedigree_terms(Rcpp::List data, unsigned const max_threads,
+                 unsigned const min_sparse_len):
     max_threads(std::max(1U, max_threads)) {
     terms.reserve(data.size());
     for(auto x : data){
@@ -119,7 +120,7 @@ struct pedigree_terms {
       for(auto &s : s_mats)
         scale_mats.emplace_back(Rcpp::as<arma::mat>(s));
 
-      terms.emplace_back(X, y, scale_mats, max_threads);
+      terms.emplace_back(X, y, scale_mats, max_threads, min_sparse_len);
     }
 
     // checks
@@ -180,6 +181,7 @@ inline unsigned eval_get_n_threads(unsigned const n_threads,
 //' scale/correlation matrix for a particular type of effect.}
 //' }
 //' @param max_threads maximum number of threads to use.
+//' @param min_sparse_len minimum cluster size before sparse matrices are used.
 //'
 //' @details
 //' An intercept column is not added to the \code{X} matrices
@@ -237,8 +239,10 @@ inline unsigned eval_get_n_threads(unsigned const n_threads,
 //'
 //' @export
 // [[Rcpp::export]]
-SEXP get_pedigree_ll_terms(Rcpp::List data, unsigned const max_threads){
-  return Rcpp::XPtr<pedigree_terms>(new pedigree_terms(data, max_threads));
+SEXP get_pedigree_ll_terms(Rcpp::List data, unsigned const max_threads = 1,
+                           unsigned const min_sparse_len = 100){
+  return Rcpp::XPtr<pedigree_terms>(
+    new pedigree_terms(data, max_threads, min_sparse_len));
 }
 
 // [[Rcpp::export]]

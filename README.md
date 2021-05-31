@@ -2059,7 +2059,9 @@ dat_arg <- lapply(dat$sim_data, function(x){
 
 # create a C++ object
 library(pedmod)
-ll_terms <- get_pedigree_ll_terms(dat_arg, max_threads = 4L)
+ll_terms        <- get_pedigree_ll_terms(dat_arg, max_threads = 4L)
+ll_terms_sparse <- get_pedigree_ll_terms(dat_arg, max_threads = 4L, 
+                                         min_sparse_len = 40L)
 
 # get the starting values. This is very fast
 y <- unlist(lapply(dat_arg, `[[`, "y"))
@@ -2080,21 +2082,23 @@ sc <- rep(log(.2), 2)
 # to approximate the log likelihood and the gradient
 fn <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE, 
                n_threads = 4L, indices = NULL, maxvls = 25000L, 
-               method = 0L){
+               method = 0L, use_sparse = FALSE){
   set.seed(seed)
   -eval_pedigree_ll(
-    ptr = ll_terms, par = par, maxvls = maxvls, abs_eps = 0, rel_eps = rel_eps, 
-    minvls = 1000L, use_aprx = use_aprx, n_threads = n_threads, 
-    indices = indices, method = method)
+    ptr = if(use_sparse) ll_terms_sparse else ll_terms, par = par, 
+    maxvls = maxvls, abs_eps = 0, rel_eps = rel_eps, minvls = 1000L, 
+    use_aprx = use_aprx, n_threads = n_threads, indices = indices, 
+    method = method)
 }
 gr <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE, 
                n_threads = 4L, indices = NULL, maxvls = 25000L, 
-               method = 0L){
+               method = 0L, use_sparse = FALSE){
   set.seed(seed)
   out <- -eval_pedigree_grad(
-    ptr = ll_terms, par = par, maxvls = maxvls, abs_eps = 0, rel_eps = rel_eps, 
-    minvls = 1000L, use_aprx = use_aprx, n_threads = n_threads, 
-    indices = indices, method = method)
+    ptr = if(use_sparse) ll_terms_sparse else ll_terms, par = par, 
+    maxvls = maxvls, abs_eps = 0, rel_eps = rel_eps, minvls = 1000L, 
+    use_aprx = use_aprx, n_threads = n_threads, indices = indices, 
+    method = method)
   structure(c(out), value = -attr(out, "logLik"), 
             n_fails = attr(out, "n_fails"), 
             std = attr(out, "std"))
@@ -2103,7 +2107,7 @@ gr <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE,
 # check output at the starting values
 system.time(ll <- -fn(c(beta, sc)))
 #>    user  system elapsed 
-#>   8.202   0.000   2.090
+#>   7.687   0.003   1.963
 ll # the log likelihood at the starting values
 #> [1] -26042
 #> attr(,"n_fails")
@@ -2112,7 +2116,7 @@ ll # the log likelihood at the starting values
 #> [1] 0.05963
 system.time(gr_val <- gr(c(beta, sc)))
 #>    user  system elapsed 
-#>   93.72    0.00   23.69
+#>  87.704   0.005  22.165
 gr_val # the gradient at the starting values
 #> [1] 1894.83 -549.43 -235.73   47.21  -47.84
 #> attr(,"value")
@@ -2121,6 +2125,16 @@ gr_val # the gradient at the starting values
 #> [1] 715
 #> attr(,"std")
 #> [1] 0.01845 0.25149 0.28043 0.20515 0.10778 0.11060
+
+# with the sparse scale matrices
+system.time(gr_val_sparse <- gr(c(beta, sc), use_sparse = TRUE))
+#>    user  system elapsed 
+#>  67.661   0.003  17.110
+all.equal(gr_val, gr_val_sparse)
+#> [1] TRUE
+
+# the sparse method is faster so we change the default 
+formals(gr)$use_sparse <- TRUE
 
 # standard deviation of the approximation
 sd(sapply(1:25, function(seed) fn(c(beta, sc), seed = seed)))
@@ -2133,6 +2147,16 @@ gr_hats <- sapply(1:25, function(seed) gr(c(beta, sc), seed = seed,
 apply(gr_hats, 1, sd)
 #> [1] 0.06953 0.11432 0.06340 0.02204 0.02467
 
+# the errors are on similar magnitudes
+gr(c(beta, sc), indices = 0:99)
+#> [1] 197.674 -81.013  20.820   5.137  -6.452
+#> attr(,"value")
+#> [1] 2602
+#> attr(,"n_fails")
+#> [1] 73
+#> attr(,"std")
+#> [1] 0.005841 0.076801 0.084451 0.068685 0.032688 0.033749
+
 # verify the gradient (may not be exactly equal due to MC error)
 rbind(numDeriv = numDeriv::grad(fn, c(beta, sc), indices = 0:10), 
       pedmod   = gr(c(beta, sc), indices = 0:10))
@@ -2143,7 +2167,7 @@ rbind(numDeriv = numDeriv::grad(fn, c(beta, sc), indices = 0:10),
 # optimize the log likelihood approximation
 system.time(opt <- optim(c(beta, sc), fn, gr, method = "BFGS"))
 #>     user   system  elapsed 
-#> 3478.048    0.248  885.067
+#> 2948.214    0.063  749.901
 ```
 
 The output from the optimization is shown below:
@@ -2186,12 +2210,12 @@ microbenchmark(
   times = 1)
 #> Unit: seconds
 #>            expr    min     lq   mean median     uq    max neval
-#>   fn (1 thread)  7.593  7.593  7.593  7.593  7.593  7.593     1
-#>  fn (2 threads)  3.919  3.919  3.919  3.919  3.919  3.919     1
-#>  fn (4 threads)  2.033  2.033  2.033  2.033  2.033  2.033     1
-#>   gr (1 thread) 84.098 84.098 84.098 84.098 84.098 84.098     1
-#>  gr (2 threads) 44.498 44.498 44.498 44.498 44.498 44.498     1
-#>  gr (4 threads) 22.648 22.648 22.648 22.648 22.648 22.648     1
+#>   fn (1 thread)  7.511  7.511  7.511  7.511  7.511  7.511     1
+#>  fn (2 threads)  3.825  3.825  3.825  3.825  3.825  3.825     1
+#>  fn (4 threads)  2.044  2.044  2.044  2.044  2.044  2.044     1
+#>   gr (1 thread) 61.663 61.663 61.663 61.663 61.663 61.663     1
+#>  gr (2 threads) 31.961 31.961 31.961 31.961 31.961 31.961     1
+#>  gr (4 threads) 16.999 16.999 16.999 16.999 16.999 16.999     1
 ```
 
 ### Using ADAM
@@ -2293,7 +2317,7 @@ system.time(
                    verbose = FALSE, maxvls = maxpts_use, 
                    minvls = minvls))
 #>     user   system  elapsed 
-#> 3465.286    0.206  885.268
+#> 2601.269    0.161  661.407
 ```
 
 The result is shown below.

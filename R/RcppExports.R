@@ -89,6 +89,7 @@ mvndst <- function(lower, upper, mu, sigma, maxvls = 25000L, abs_eps = .001, rel
 #' scale/correlation matrix for a particular type of effect.}
 #' }
 #' @param max_threads maximum number of threads to use.
+#' @param min_sparse_len minimum cluster size before sparse matrices are used.
 #'
 #' @details
 #' An intercept column is not added to the \code{X} matrices
@@ -145,8 +146,8 @@ mvndst <- function(lower, upper, mu, sigma, maxvls = 25000L, abs_eps = .001, rel
 #' ptr <- get_pedigree_ll_terms(dat_arg, max_threads = 1L)
 #'
 #' @export
-get_pedigree_ll_terms <- function(data, max_threads) {
-    .Call(`_pedmod_get_pedigree_ll_terms`, data, max_threads)
+get_pedigree_ll_terms <- function(data, max_threads = 1L, min_sparse_len = 100L) {
+    .Call(`_pedmod_get_pedigree_ll_terms`, data, max_threads, min_sparse_len)
 }
 
 get_n_scales <- function(ptr) {

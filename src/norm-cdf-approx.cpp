@@ -39,58 +39,59 @@ fastncdf_pos(double const x) noexcept {
             inc = i * 3L;
 
     // bounds checks
+    if(i >= 0 and i < n_pts - 1){
+      double const x0 = d_xmy[inc     ],
+                   m0 = d_xmy[inc + 1L],
+                   y0 = d_xmy[inc + 2L],
+                   m1 = d_xmy[inc + 4L],
+                   y1 = d_xmy[inc + 5L],
+                   t = (x - x0) * hinv,
+                   t1 = t - 1,
+                   h01 = t * t * (3 - 2 * t),
+                   h00 = 1 - h01,
+                   tt1 = t * t1,
+                   h10 = tt1 * t1,
+                   h11 = tt1 * t;
+
+      return y0 * h00 + h * m0 * h10 + y1 * h01 + h * m1 * h11;
+    }
     if(i >= n_pts - 1)
       return .5;
     else if(x < xinf)
       return 0.;
-    else if(i < 0){
-      constexpr double const p[6] = {
-        0.21589853405795699,
-        0.1274011611602473639,
-        0.022235277870649807,
-        0.001421619193227893466,
-        2.9112874951168792e-5,
-        0.02307344176494017303
-      };
-      constexpr double const  q[5] = {
-        1.28426009614491121,
-        0.468238212480865118,
-        0.0659881378689285515,
-        0.00378239633202758244,
-        7.29751555083966205e-5
-      };
 
-      double const y = -x;
-      double xsq = 1.0 / (x * x),
-            xnum = p[5] * xsq,
-            xden = xsq;
-      for (int i = 0; i < 4; ++i) {
-        xnum = (xnum + p[i]) * xsq;
-        xden = (xden + q[i]) * xsq;
-      }
-      double temp = xsq * (xnum + p[4]) / (xden + q[4]);
-      constexpr double const M_1_SQRT_2PI =	0.398942280401432677939946059934;	/* 1/sqrt(2pi) */
-      temp = (M_1_SQRT_2PI - temp) / y;
+    // i < 0 and x >= xinf
+    constexpr double const p[6] = {
+      0.21589853405795699,
+      0.1274011611602473639,
+      0.022235277870649807,
+      0.001421619193227893466,
+      2.9112874951168792e-5,
+      0.02307344176494017303
+    };
+    constexpr double const  q[5] = {
+      1.28426009614491121,
+      0.468238212480865118,
+      0.0659881378689285515,
+      0.00378239633202758244,
+      7.29751555083966205e-5
+    };
 
-      xsq = std::trunc(x * 16) / 16;
-      double const del = (x - xsq) * (x + xsq);
-      return std::exp(-xsq * xsq * 0.5 -del * 0.5) * temp;
+    double const y = -x;
+    double xsq = 1.0 / (x * x),
+          xnum = p[5] * xsq,
+          xden = xsq;
+    for (int i = 0; i < 4; ++i) {
+      xnum = (xnum + p[i]) * xsq;
+      xden = (xden + q[i]) * xsq;
     }
+    double temp = xsq * (xnum + p[4]) / (xden + q[4]);
+    constexpr double const M_1_SQRT_2PI =	0.398942280401432677939946059934;	/* 1/sqrt(2pi) */
+    temp = (M_1_SQRT_2PI - temp) / y;
 
-    double const x0 = d_xmy[inc     ],
-                 m0 = d_xmy[inc + 1L],
-                 y0 = d_xmy[inc + 2L],
-                 m1 = d_xmy[inc + 4L],
-                 y1 = d_xmy[inc + 5L],
-                  t = (x - x0) / h,
-                 t1 = t - 1,
-                h01 = t * t * (3 - 2 * t),
-                h00 = 1 - h01,
-                tt1 = t * t1,
-                h10 = tt1 * t1,
-                h11 = tt1 * t;
-
-    return y0 * h00 + h * m0 * h10 + y1 * h01 + h * m1 * h11;
+    xsq = std::trunc(x * 16) / 16;
+    double const del = (x - xsq) * (x + xsq);
+    return std::exp(-xsq * xsq * 0.5 -del * 0.5) * temp;
 }
 } // namespace
 

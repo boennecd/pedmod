@@ -108,15 +108,6 @@ public:
     double abserr(std::numeric_limits<double>::infinity());
 
     for(size_t nit = 0; nit < maxit; nit++){
-      if(np < plim - 1L){
-        // check if we should increase the number of samples to "use all the
-        // samples"
-        size_t const n_samp_now = intvls     + 2 * sampls * p[np],
-                    n_samp_next = n_samp_now + 2 * sampls * p[np + 1];
-        if(n_samp_next > maxvls)
-          sampls = std::max<int>(sampls, (maxvls - intvls) / (2L * p[np]));
-      }
-
       *vk = 1. / static_cast<double>(p[np]);
       int k(1L);
       for(int i = 1; i < ndim; ++i){

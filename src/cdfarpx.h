@@ -355,9 +355,8 @@ public:
      * variables */
     for(int j = 0; j < ndim; ++j, ++sc, ++lw, ++up, ++infin_j, ++unif){
       double su(0.);
-      double const *d = dr;
-      for(int i = 0; i < j; ++i, sc++, d++)
-        su += *sc * *d;
+      for(int i = 0; i < j; ++i, sc++)
+        su += *sc * dr[i];
 
       auto pnorm_use = [&](double const x) -> double {
         return use_aprx ? pnorm_approx(x) : pnorm_std(x, 1L, 0L);
@@ -753,11 +752,12 @@ public:
           d_mu_prod[r] = d_mu_perm[r] * d_mu_perm[c];
         d_mu_prod[c] = .5 * d_mu_perm[c] * d_mu_perm[c];
 
-        for(int s = 0; s < n_scales; ++s){
-          for(int r = 0; r <= c; ++r, ++scale_mats_ptr[s])
-            d_sc[s] += d_mu_prod[r] * *scale_mats_ptr[s];
-          scale_mats_ptr[s] += n_mem - c - 1;
-        }
+        for(int s = 0; s < n_scales; ++s)
+          for(int r = 0; r <= c; ++r)
+            d_sc[s] += d_mu_prod[r] * scale_mats_ptr[s][r];
+
+        for(int s = 0; s < n_scales; ++s)
+          scale_mats_ptr[s] += n_mem;
       }
     }
 

@@ -74,8 +74,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // mvndst
-Rcpp::NumericVector mvndst(arma::vec const& lower, arma::vec const& upper, arma::vec const& mu, arma::mat const& sigma, unsigned const maxvls, double const abs_eps, double const rel_eps, int minvls, bool const do_reorder, bool const use_aprx, int const method);
-RcppExport SEXP _pedmod_mvndst(SEXP lowerSEXP, SEXP upperSEXP, SEXP muSEXP, SEXP sigmaSEXP, SEXP maxvlsSEXP, SEXP abs_epsSEXP, SEXP rel_epsSEXP, SEXP minvlsSEXP, SEXP do_reorderSEXP, SEXP use_aprxSEXP, SEXP methodSEXP) {
+Rcpp::NumericVector mvndst(arma::vec const& lower, arma::vec const& upper, arma::vec const& mu, arma::mat const& sigma, unsigned const maxvls, double const abs_eps, double const rel_eps, int minvls, bool const do_reorder, bool const use_aprx, int const method, unsigned const n_sequences);
+RcppExport SEXP _pedmod_mvndst(SEXP lowerSEXP, SEXP upperSEXP, SEXP muSEXP, SEXP sigmaSEXP, SEXP maxvlsSEXP, SEXP abs_epsSEXP, SEXP rel_epsSEXP, SEXP minvlsSEXP, SEXP do_reorderSEXP, SEXP use_aprxSEXP, SEXP methodSEXP, SEXP n_sequencesSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -90,20 +90,22 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< bool const >::type do_reorder(do_reorderSEXP);
     Rcpp::traits::input_parameter< bool const >::type use_aprx(use_aprxSEXP);
     Rcpp::traits::input_parameter< int const >::type method(methodSEXP);
-    rcpp_result_gen = Rcpp::wrap(mvndst(lower, upper, mu, sigma, maxvls, abs_eps, rel_eps, minvls, do_reorder, use_aprx, method));
+    Rcpp::traits::input_parameter< unsigned const >::type n_sequences(n_sequencesSEXP);
+    rcpp_result_gen = Rcpp::wrap(mvndst(lower, upper, mu, sigma, maxvls, abs_eps, rel_eps, minvls, do_reorder, use_aprx, method, n_sequences));
     return rcpp_result_gen;
 END_RCPP
 }
 // get_pedigree_ll_terms
-SEXP get_pedigree_ll_terms(Rcpp::List data, unsigned const max_threads, unsigned const min_sparse_len);
-RcppExport SEXP _pedmod_get_pedigree_ll_terms(SEXP dataSEXP, SEXP max_threadsSEXP, SEXP min_sparse_lenSEXP) {
+SEXP get_pedigree_ll_terms(Rcpp::List data, unsigned const max_threads, unsigned const min_sparse_len, unsigned const n_sequences);
+RcppExport SEXP _pedmod_get_pedigree_ll_terms(SEXP dataSEXP, SEXP max_threadsSEXP, SEXP min_sparse_lenSEXP, SEXP n_sequencesSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::List >::type data(dataSEXP);
     Rcpp::traits::input_parameter< unsigned const >::type max_threads(max_threadsSEXP);
     Rcpp::traits::input_parameter< unsigned const >::type min_sparse_len(min_sparse_lenSEXP);
-    rcpp_result_gen = Rcpp::wrap(get_pedigree_ll_terms(data, max_threads, min_sparse_len));
+    Rcpp::traits::input_parameter< unsigned const >::type n_sequences(n_sequencesSEXP);
+    rcpp_result_gen = Rcpp::wrap(get_pedigree_ll_terms(data, max_threads, min_sparse_len, n_sequences));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -181,8 +183,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_pedmod_get_block_cut_tree", (DL_FUNC) &_pedmod_get_block_cut_tree, 5},
     {"_pedmod_get_max_balanced_partition", (DL_FUNC) &_pedmod_get_max_balanced_partition, 11},
     {"_pedmod_unconnected_partition_rcpp", (DL_FUNC) &_pedmod_unconnected_partition_rcpp, 10},
-    {"_pedmod_mvndst", (DL_FUNC) &_pedmod_mvndst, 11},
-    {"_pedmod_get_pedigree_ll_terms", (DL_FUNC) &_pedmod_get_pedigree_ll_terms, 3},
+    {"_pedmod_mvndst", (DL_FUNC) &_pedmod_mvndst, 12},
+    {"_pedmod_get_pedigree_ll_terms", (DL_FUNC) &_pedmod_get_pedigree_ll_terms, 4},
     {"_pedmod_get_n_scales", (DL_FUNC) &_pedmod_get_n_scales, 1},
     {"_pedmod_get_n_terms", (DL_FUNC) &_pedmod_get_n_terms, 1},
     {"_pedmod_eval_pedigree_ll", (DL_FUNC) &_pedmod_eval_pedigree_ll, 12},

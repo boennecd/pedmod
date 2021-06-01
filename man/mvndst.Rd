@@ -15,7 +15,8 @@ mvndst(
   minvls = -1L,
   do_reorder = TRUE,
   use_aprx = FALSE,
-  method = 0L
+  method = 0L,
+  n_sequences = 8L
 )
 }
 \arguments{

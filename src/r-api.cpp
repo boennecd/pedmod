@@ -23,6 +23,9 @@
 //' reduce the computation time while not affecting the result much.
 //' @param method integer with the method to use. Zero yields randomized Korobov
 //' lattice rules while one yields scrambled Sobol sequences.
+//' @param n_sequences number of randomized quasi-Monte Carlo sequences to use.
+//' More samples yields a better estimate of the error but a worse
+//' approximation. Eight is used in the original Fortran code.
 //'
 //' @return
 //' An approximation of the CDF. The \code{"n_it"} attribute shows the number of
@@ -61,7 +64,8 @@ Rcpp::NumericVector mvndst
    arma::mat const &sigma, unsigned const maxvls = 25000,
    double const abs_eps = .001, double const rel_eps = 0,
    int minvls = -1, bool const do_reorder = true,
-   bool const use_aprx = false, int const method = 0){
+   bool const use_aprx = false, int const method = 0,
+   unsigned const n_sequences = 8){
   arma::uword const n = lower.n_elem;
   if(upper.n_elem != n)
     throw std::invalid_argument("mvndst: invalid upper");
@@ -82,10 +86,11 @@ Rcpp::NumericVector mvndst
   parallelrng::set_rng_seeds(1);
 
   pedmod::cdf<pedmod::likelihood>::alloc_mem(lower.n_elem, 1);
-  pedmod::likelihood::alloc_mem(lower.n_elem, 1);
+  pedmod::likelihood::alloc_mem(lower.n_elem, 1, n_sequences);
   auto const out = pedmod::cdf<pedmod::likelihood>(
     func, lower, upper, mu, sigma, do_reorder, use_aprx).approximate(
-        maxvls, abs_eps, rel_eps, pedmod::get_cdf_methods(method), minvls);
+        maxvls, abs_eps, rel_eps, pedmod::get_cdf_methods(method), minvls,
+        n_sequences);
 
   Rcpp::NumericVector res(1);
   res[0] = out.likelihood;
@@ -102,7 +107,8 @@ struct pedigree_terms {
   std::vector<pedmod::pedigree_ll_term > terms;
 
   pedigree_terms(Rcpp::List data, unsigned const max_threads,
-                 unsigned const min_sparse_len):
+                 unsigned const min_sparse_len,
+                 unsigned const n_sequences):
     max_threads(std::max(1U, max_threads)) {
     terms.reserve(data.size());
     for(auto x : data){
@@ -120,7 +126,8 @@ struct pedigree_terms {
       for(auto &s : s_mats)
         scale_mats.emplace_back(Rcpp::as<arma::mat>(s));
 
-      terms.emplace_back(X, y, scale_mats, max_threads, min_sparse_len);
+      terms.emplace_back(X, y, scale_mats, max_threads, min_sparse_len,
+                         n_sequences);
     }
 
     // checks
@@ -182,6 +189,9 @@ inline unsigned eval_get_n_threads(unsigned const n_threads,
 //' }
 //' @param max_threads maximum number of threads to use.
 //' @param min_sparse_len minimum cluster size before sparse matrices are used.
+//' @param n_sequences number of randomized quasi-Monte Carlo sequences to use.
+//' More samples yields a better estimate of the error but a worse
+//' approximation. Eight is used in the original Fortran code.
 //'
 //' @details
 //' An intercept column is not added to the \code{X} matrices
@@ -240,9 +250,10 @@ inline unsigned eval_get_n_threads(unsigned const n_threads,
 //' @export
 // [[Rcpp::export]]
 SEXP get_pedigree_ll_terms(Rcpp::List data, unsigned const max_threads = 1,
-                           unsigned const min_sparse_len = 100){
+                           unsigned const min_sparse_len = 100,
+                           unsigned const n_sequences = 8){
   return Rcpp::XPtr<pedigree_terms>(
-    new pedigree_terms(data, max_threads, min_sparse_len));
+    new pedigree_terms(data, max_threads, min_sparse_len, n_sequences));
 }
 
 // [[Rcpp::export]]

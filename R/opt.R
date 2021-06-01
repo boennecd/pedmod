@@ -366,7 +366,7 @@ pedmod_sqn <- function(ptr, par, maxvls, abs_eps, rel_eps, step_factor,
   #####
   # setup before the estimation
   n_pars <- length(par) - length(fix)
-  omegas <- matrix(NA_real_, n_pars, ceiling(n_it / n_grad_steps) + 1L)
+  omegas <- matrix(NA_real_, n_pars, ceiling(n_it / n_grad_steps) + 2L)
   H <- diag(n_pars)
   any_fixed <- length(fix) > 0
   w_old <- if(any_fixed) par[-fix] else par
@@ -467,7 +467,7 @@ pedmod_sqn <- function(ptr, par, maxvls, abs_eps, rel_eps, step_factor,
         t <<- t_old
         if(step_factor > min_step_size)
           # otherwise we can go on forever
-          k <<- old_k
+          k <<- old_k - 1L
 
         if(verbose)
           cat(sprintf(
@@ -510,7 +510,7 @@ pedmod_sqn <- function(ptr, par, maxvls, abs_eps, rel_eps, step_factor,
       break
 
     t <- t + 1L
-    omegas[, t] <- rowMeans(w_vals[, i_indices, drop = FALSE])
+    omegas[, t] <- rowMeans(w_vals[, i_indices, drop = FALSE], na.rm = TRUE)
     s <- omegas[, t] - omegas[, t - 1L]
     S <- if(hess_use_all) indices else sample(indices, n_hess)
 

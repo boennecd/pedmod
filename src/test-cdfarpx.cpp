@@ -44,12 +44,12 @@ context("restrictcdf unit tests") {
                                    .33);
     double constexpr E_prop(0.0693596863013216);
     pedmod::cdf<pedmod::likelihood>::alloc_mem(4, 1);
-    pedmod::likelihood::alloc_mem(4, 1);
+    pedmod::likelihood::alloc_mem(4, 1, 8);
     pedmod::likelihood func;
     {
       auto res = pedmod::cdf<pedmod::likelihood>(
         func, lower, upper, mean, sigma, false, false).approximate(
-            1000000L, abs_eps, -1, pedmod::cdf_methods::Korobov);
+            1000000L, abs_eps, -1, pedmod::cdf_methods::Korobov, 0, 8);
 
       expect_true(res.inform == 0L);
       expect_true(res.abserr                        < 100. * abs_eps);
@@ -58,7 +58,7 @@ context("restrictcdf unit tests") {
     {
       auto res = pedmod::cdf<pedmod::likelihood>(
         func, lower, upper, mean, sigma, true, false).approximate(
-            1000000L, abs_eps, -1, pedmod::cdf_methods::Korobov);
+            1000000L, abs_eps, -1, pedmod::cdf_methods::Korobov, 0, 8);
 
       expect_true(res.inform == 0L);
       expect_true(res.abserr                        < 100. * abs_eps);
@@ -67,7 +67,7 @@ context("restrictcdf unit tests") {
     {
       auto res = pedmod::cdf<pedmod::likelihood>(
         func, lower, upper, mean, sigma, true, true).approximate(
-            1000000L, abs_eps, -1, pedmod::cdf_methods::Korobov);
+            1000000L, abs_eps, -1, pedmod::cdf_methods::Korobov, 0, 8);
 
       expect_true(res.inform == 0L);
       expect_true(res.abserr                        < 100. * abs_eps);
@@ -76,7 +76,16 @@ context("restrictcdf unit tests") {
     {
       auto res = pedmod::cdf<pedmod::likelihood>(
         func, lower, upper, mean, sigma, true, true).approximate(
-            1000000L, abs_eps, -1, pedmod::cdf_methods::Sobol);
+            1000000L, abs_eps / 100, -1, pedmod::cdf_methods::Korobov, 0, 2);
+
+      expect_true(res.inform == 0L);
+      expect_true(res.abserr                        < 100. * abs_eps);
+      expect_true(std::abs(res.likelihood - E_prop) < 100. * abs_eps);
+    }
+    {
+      auto res = pedmod::cdf<pedmod::likelihood>(
+        func, lower, upper, mean, sigma, true, true).approximate(
+            1000000L, abs_eps, -1, pedmod::cdf_methods::Sobol, 0, 8);
 
       expect_true(res.inform == 0L);
       expect_true(res.abserr                        < 100. * abs_eps);
@@ -107,7 +116,7 @@ context("restrictcdf unit tests") {
 
     double const eps = std::pow(std::numeric_limits<double>::epsilon(), .5);
     pedmod::cdf<pedmod::likelihood>::alloc_mem(1, 1);
-    pedmod::likelihood::alloc_mem(1, 1);
+    pedmod::likelihood::alloc_mem(1, 1, 8);
     pedmod::likelihood func;
     for(size_t i = 0; i < 3; ++i){
       arma::vec l(1), u(1), m(1);
@@ -119,7 +128,7 @@ context("restrictcdf unit tests") {
 
       auto res = pedmod::cdf<pedmod::likelihood>(
         func, l, u, m, s, false, false).approximate(
-            1000000L, 1e-8, -1, pedmod::cdf_methods::Korobov);
+            1000000L, 1e-8, -1, pedmod::cdf_methods::Korobov, 0, 8);
 
       expect_true(res.inform == 0L);
       expect_true(res.abserr                           <= 0);
@@ -136,7 +145,7 @@ context("restrictcdf unit tests") {
 
       auto res = pedmod::cdf<pedmod::likelihood>(
         func, l, u, m, s, true, false).approximate(
-            1000000L, 1e-8, -1, pedmod::cdf_methods::Korobov);
+            1000000L, 1e-8, -1, pedmod::cdf_methods::Korobov, 0, 8);
 
       expect_true(res.inform == 0L);
       expect_true(res.abserr                           <= 0);
@@ -187,7 +196,7 @@ context("restrictcdf unit tests") {
     scales.emplace_back(s2);
     arma::mat X(1, 1, arma::fill::ones);
 
-    pedmod::pedigree_l_factor func(scales, 1L, X, false);
+    pedmod::pedigree_l_factor func(scales, 1L, X, false, 8);
     arma::vec par;
     par << .5 << .33 << .5;
 
@@ -203,7 +212,7 @@ context("restrictcdf unit tests") {
 
       auto const res = pedmod::cdf<pedmod::pedigree_l_factor>(
         func, lower, upper, mu, sig, true, false).approximate(
-            1000000L, 1e-8, -1, pedmod::cdf_methods::Korobov);
+            1000000L, 1e-8, -1, pedmod::cdf_methods::Korobov, 0, 8);
 
       arma::vec const ex_res = expect.col(i);
       expect_true(res.inform == 0L);
@@ -257,8 +266,8 @@ context("restrictcdf unit tests") {
 
     arma::mat X(3, 3, arma::fill::zeros);
     X.diag().ones();
-    pedmod::pedigree_l_factor func(scales, 1L, X, false),
-                       func_sparse(scales, 1L, X, true);
+    pedmod::pedigree_l_factor func(scales, 1L, X, false, 8),
+                       func_sparse(scales, 1L, X, true , 8);
 
     arma::mat sig(3, 3);
     double const scalar = .5;
@@ -269,13 +278,13 @@ context("restrictcdf unit tests") {
     {
       // set the normalization constant
       pedmod::cdf<pedmod::likelihood>::alloc_mem(3, 1);
-      pedmod::likelihood::alloc_mem(3, 1);
+      pedmod::likelihood::alloc_mem(3, 1, 8);
       pedmod::likelihood lfunc;
       func.setup(sig, &scalar, 1., true);
 
       auto const norm_const = pedmod::cdf<pedmod::likelihood>(
         lfunc, lbs, ubs, mu, sig, false, false).approximate(
-            1000000L, eps, -1, pedmod::cdf_methods::Korobov);
+            1000000L, eps, -1, pedmod::cdf_methods::Korobov, 0, 8);
 
       func       .setup(sig, &scalar, norm_const.likelihood);
       func_sparse.setup(sig, &scalar, norm_const.likelihood);
@@ -285,7 +294,7 @@ context("restrictcdf unit tests") {
     {
       auto const res = pedmod::cdf<pedmod::pedigree_l_factor>(
         func, lbs, ubs, mu, sig, false, false).approximate(
-            10000000L, eps / 1000, -1, pedmod::cdf_methods::Korobov);
+            10000000L, eps / 10000, -1, pedmod::cdf_methods::Korobov, 0, 8);
 
       expect_true(std::abs(res.likelihood - expect[0]) <  eps);
       expect_true(res.derivs.n_elem == n_deriv);
@@ -297,7 +306,7 @@ context("restrictcdf unit tests") {
     {
       auto const res = pedmod::cdf<pedmod::pedigree_l_factor>(
         func, lbs, ubs, mu, sig, true, false).approximate(
-            10000000L, eps / 1000, -1, pedmod::cdf_methods::Korobov);
+            10000000L, eps / 1000, -1, pedmod::cdf_methods::Korobov, 0, 8);
 
       expect_true(std::abs(res.likelihood - expect[0]) <  eps);
       expect_true(res.derivs.n_elem == n_deriv);
@@ -308,7 +317,7 @@ context("restrictcdf unit tests") {
     {
       auto const res = pedmod::cdf<pedmod::pedigree_l_factor>(
         func, lbs, ubs, mu, sig, true, true).approximate(
-            10000000L, eps / 1000, -1, pedmod::cdf_methods::Korobov);
+            10000000L, eps / 1000, -1, pedmod::cdf_methods::Korobov, 0, 8);
 
       expect_true(std::abs(res.likelihood - expect[0]) <  eps);
       expect_true(res.derivs.n_elem == n_deriv);
@@ -318,7 +327,17 @@ context("restrictcdf unit tests") {
     {
       auto const res = pedmod::cdf<pedmod::pedigree_l_factor>(
         func, lbs, ubs, mu, sig, true, true).approximate(
-            10000000L, eps / 1000, -1, pedmod::cdf_methods::Sobol);
+            10000000L, eps / 1000, -1, pedmod::cdf_methods::Korobov, 0, 2);
+
+      expect_true(std::abs(res.likelihood - expect[0]) <  eps);
+      expect_true(res.derivs.n_elem == n_deriv);
+      for(unsigned i = 0; i < n_deriv; ++i)
+        expect_true(std::abs(res.derivs[i] - expect[i + 1] / expect[0]) <  eps);
+    }
+    {
+      auto const res = pedmod::cdf<pedmod::pedigree_l_factor>(
+        func, lbs, ubs, mu, sig, true, true).approximate(
+            10000000L, eps / 1000, -1, pedmod::cdf_methods::Sobol, 0, 8);
 
       expect_true(std::abs(res.likelihood - expect[0]) <  eps);
       expect_true(res.derivs.n_elem == n_deriv);
@@ -328,7 +347,7 @@ context("restrictcdf unit tests") {
     {
       auto const res = pedmod::cdf<pedmod::pedigree_l_factor>(
         func_sparse, lbs, ubs, mu, sig, true, true).approximate(
-            10000000L, eps / 1000, -1, pedmod::cdf_methods::Sobol);
+            10000000L, eps / 1000, -1, pedmod::cdf_methods::Sobol, 0, 8);
 
       expect_true(std::abs(res.likelihood - expect[0]) <  eps);
       expect_true(res.derivs.n_elem == n_deriv);
@@ -383,8 +402,8 @@ context("restrictcdf unit tests") {
 
     arma::mat X(3, 3, arma::fill::zeros);
     X.diag().ones();
-    pedmod::pedigree_l_factor func(scales, 1L, X, false),
-                       func_sparse(scales, 1L, X, true);
+    pedmod::pedigree_l_factor func(scales, 1L, X, false, 8),
+                       func_sparse(scales, 1L, X, true, 8);
 
     arma::mat sig(3, 3);
     double const scs[2] = { .5, .67 };
@@ -394,13 +413,13 @@ context("restrictcdf unit tests") {
 
     {
       pedmod::cdf<pedmod::likelihood>::alloc_mem(3, 1);
-      pedmod::likelihood::alloc_mem(3, 1);
+      pedmod::likelihood::alloc_mem(3, 1, 8);
       pedmod::likelihood lfunc;
       func.setup(sig, scs, 1., true);
 
       auto const norm_const = pedmod::cdf<pedmod::likelihood>(
         lfunc, lbs, ubs, mu, sig, false, false).approximate(
-            1000000L, 1e-8, -1, pedmod::cdf_methods::Korobov);
+            1000000L, 1e-8, -1, pedmod::cdf_methods::Korobov, 0, 8);
 
       func       .setup(sig, scs, norm_const.likelihood);
       func_sparse.setup(sig, scs, norm_const.likelihood);
@@ -411,7 +430,7 @@ context("restrictcdf unit tests") {
       auto const res = pedmod::cdf<pedmod::pedigree_l_factor>(
         func, lbs, ubs, mu, sig, false, false).approximate(
             10000000L, eps / 10, -1,
-            pedmod::cdf_methods::Korobov);
+            pedmod::cdf_methods::Korobov, 0, 8);
 
       expect_true(std::abs(res.likelihood - expect[0]) <  eps);
       expect_true(res.derivs.n_elem == n_deriv);
@@ -423,7 +442,7 @@ context("restrictcdf unit tests") {
       auto const res = pedmod::cdf<pedmod::pedigree_l_factor>(
         func, lbs, ubs, mu, sig, true, false).approximate(
             10000000L, eps / 1000, -1,
-            pedmod::cdf_methods::Korobov);
+            pedmod::cdf_methods::Korobov, 0, 8);
 
       expect_true(std::abs(res.likelihood - expect[0]) <  eps);
       expect_true(res.derivs.n_elem == n_deriv);
@@ -435,7 +454,7 @@ context("restrictcdf unit tests") {
       auto const res = pedmod::cdf<pedmod::pedigree_l_factor>(
         func, lbs, ubs, mu, sig, true, true).approximate(
             10000000L, eps / 1000, -1,
-            pedmod::cdf_methods::Korobov);
+            pedmod::cdf_methods::Korobov, 0, 8);
 
       expect_true(std::abs(res.likelihood - expect[0]) <  eps);
       expect_true(res.derivs.n_elem == n_deriv);
@@ -447,7 +466,19 @@ context("restrictcdf unit tests") {
       auto const res = pedmod::cdf<pedmod::pedigree_l_factor>(
         func, lbs, ubs, mu, sig, true, true).approximate(
             10000000L, eps / 1000, -1,
-            pedmod::cdf_methods::Sobol);
+            pedmod::cdf_methods::Sobol, 0, 8);
+
+      expect_true(std::abs(res.likelihood - expect[0]) <  eps);
+      expect_true(res.derivs.n_elem == n_deriv);
+      for(unsigned i = 0; i < n_deriv; ++i)
+        expect_true(std::abs(res.derivs[i] - expect[i + 1] / expect[0]) <  eps);
+    }
+
+    {
+      auto const res = pedmod::cdf<pedmod::pedigree_l_factor>(
+        func, lbs, ubs, mu, sig, true, true).approximate(
+            10000000L, eps / 10000, -1,
+            pedmod::cdf_methods::Sobol, 0, 2);
 
       expect_true(std::abs(res.likelihood - expect[0]) <  eps);
       expect_true(res.derivs.n_elem == n_deriv);
@@ -459,7 +490,7 @@ context("restrictcdf unit tests") {
       auto const res = pedmod::cdf<pedmod::pedigree_l_factor>(
         func_sparse, lbs, ubs, mu, sig, true, true).approximate(
             10000000L, eps / 1000, -1,
-            pedmod::cdf_methods::Sobol);
+            pedmod::cdf_methods::Sobol, 0, 8);
 
       expect_true(std::abs(res.likelihood - expect[0]) <  eps);
       expect_true(res.derivs.n_elem == n_deriv);

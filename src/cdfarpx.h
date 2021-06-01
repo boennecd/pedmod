@@ -413,7 +413,7 @@ public:
    */
   out_type approximate
   (int const maxvls, double const abs_eps, double const rel_eps,
-   cdf_methods const method, int const minvls = 0L){
+   cdf_methods const method, int const minvls, unsigned const n_sequences){
 #ifdef DO_CHECKS
     if(abs_eps <= 0 and rel_eps <= 0)
       throw std::invalid_argument("cdf::approximate: no valid convergence threshold");
@@ -446,13 +446,14 @@ public:
       if(method == cdf_methods::Sobol)
         return sobol_wrapper<cdf<T_Functor> >::comp(
             *this, ndim, minvls, maxvls, n_integrands, abs_eps, rel_eps,
-            int_apprx, int_sdest, sampler, sobol::scrambling_type::owen);
+            int_apprx, int_sdest, sampler, sobol::scrambling_type::owen,
+            n_sequences);
       if(method != cdf_methods::Korobov)
         throw std::invalid_argument("method is not implemented");
 
       return rand_Korobov<cdf<T_Functor> >::comp(
           *this, ndim, minvls, maxvls, n_integrands, abs_eps, rel_eps,
-          int_apprx, int_sdest, sampler);
+          int_apprx, int_sdest, sampler, n_sequences);
     })();
 
     return functor.get_output(int_apprx, int_sdest, res.minvls, res.inform,
@@ -473,11 +474,12 @@ class likelihood {
 
 public:
   static void alloc_mem
-  (unsigned const max_dim, unsigned const max_threads){
+  (unsigned const max_dim, unsigned const max_threads,
+   unsigned const max_n_sequences){
     rand_Korobov<cdf<likelihood> >::alloc_mem(
         max_dim, get_n_integrands(), max_threads);
     sobol_wrapper<cdf<likelihood> >::alloc_mem(
-        max_dim, get_n_integrands(), max_threads);
+        max_dim, get_n_integrands(), max_threads, max_n_sequences);
     dmen.set_n_mem(2, max_threads);
   }
 
@@ -605,7 +607,7 @@ public:
   /// sets the scale matrices. There are no checks on the validity
   pedigree_l_factor(std::vector<arma::mat> const &scale_mats,
                     unsigned const max_threads, arma::mat const &X_in,
-                    bool const use_sparse):
+                    bool const use_sparse, unsigned const max_n_sequences):
   scale_mats(scale_mats), X(X_in.t()), use_sparse(use_sparse) {
     // checks
     if(scale_mats.size() < 1)
@@ -621,7 +623,7 @@ public:
     rand_Korobov<cdf<pedigree_l_factor> >::alloc_mem(
         n_mem, get_n_integrands(), max_threads);
     sobol_wrapper<cdf<pedigree_l_factor> >::alloc_mem(
-        n_mem, get_n_integrands(), max_threads);
+        n_mem, get_n_integrands(), max_threads, max_n_sequences);
     dmem.set_n_mem(
       2 * n_mem * n_mem + n_mem * (n_mem + 1) + 2 * get_n_integrands() +
         2 * n_mem,

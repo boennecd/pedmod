@@ -12,6 +12,8 @@ class pedigree_ll_term {
 
   static cache_mem<double> dmem;
 
+  unsigned const max_n_sequences;
+
 public:
   /// object to compute the likelihood factor
   pedigree_l_factor l_factor;
@@ -22,7 +24,8 @@ public:
   pedigree_ll_term(arma::mat const &X_in, arma::vec const &y,
                    std::vector<arma::mat> const &scale_mats,
                    unsigned const max_threads,
-                   unsigned const min_sparse_len):
+                   unsigned const min_sparse_len,
+                   unsigned const max_n_sequences):
     X(([&](){
       if(X_in.n_rows != y.n_elem)
         throw std::invalid_argument("pedigree_ll_term::pedigree_ll_term: y and X's dimension do not match");
@@ -34,6 +37,7 @@ public:
 
       return out;
     })()),
+    max_n_sequences(max_n_sequences),
     l_factor(([&](){
       // set cache
       cdf<likelihood       >::alloc_mem(y.n_elem, max_threads);
@@ -56,15 +60,15 @@ public:
           }
       }
 
-      return pedigree_l_factor(out, max_threads, X.t(),
-                               y.size() >= min_sparse_len);
+      return pedigree_l_factor(
+        out, max_threads, X.t(), y.size() >= min_sparse_len, max_n_sequences);
     })()) {
     // checks
     if(l_factor.n_mem != n_members)
       throw std::invalid_argument("pedigree_ll_term::pedigree_ll_term: X and scale matrices dimension do not match");
 
     // set working memory
-    likelihood::alloc_mem(n_members, max_threads);
+    likelihood::alloc_mem(n_members, max_threads, max_n_sequences);
     dmem.set_n_mem(
       3 * n_members + n_members * n_members, max_threads);
   }
@@ -101,7 +105,7 @@ public:
       minvls = std::min(1000, 100 * n_members);
     auto const res = cdf<likelihood>(
       func, lower, upper, mu, sig, do_reorder, use_aprx).approximate(
-          maxvls, abs_eps, rel_eps, method, minvls);
+          maxvls, abs_eps, rel_eps, method, minvls, max_n_sequences);
 
     did_fail = res.inform > 0;
 
@@ -140,7 +144,8 @@ public:
       pedmod::likelihood lfunc;
       auto const norm_const = pedmod::cdf<pedmod::likelihood>(
         lfunc, lower, upper, mu, sig, do_reorder, use_aprx).approximate(
-            maxvls, abs_eps, std::min(1., 10. * rel_eps), method, minvls);
+            maxvls, abs_eps, std::min(1., 10. * rel_eps), method, minvls,
+            max_n_sequences);
 
       l_factor.setup(sig, par + n_fix_effect, norm_const.likelihood, false);
     }
@@ -149,7 +154,8 @@ public:
       minvls = std::min(1000, 100 * n_members);
     auto const res = cdf<pedigree_l_factor>(
       l_factor, lower, upper, mu, sig, do_reorder, use_aprx).approximate(
-          maxvls, abs_eps, rel_eps, method, minvls);
+          maxvls, abs_eps, rel_eps, method, minvls,
+          max_n_sequences);
 
     // derivatives for the slopes and the scale parameters
     int const n_scales = l_factor.scale_mats.size();

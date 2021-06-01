@@ -32,11 +32,14 @@ public:
     (Func &f, int const ndim, size_t const minvls, size_t const maxvls,
      int const nf, double const abseps, double const releps,
      double * const __restrict__ finest,
-     double * const __restrict__ sdest, parallelrng::unif_drawer &sampler){
+     double * const __restrict__ sdest, parallelrng::unif_drawer &sampler,
+     unsigned const n_sequences){
+    if(n_sequences < 2)
+      throw std::invalid_argument("n_sequences is less than two");
+
     /* constants */
     constexpr int const plim(28L),
-                        klim(100L),
-                      minsmp(8L);
+                        klim(100L);
     constexpr int const p[plim] = { 31L, 47L, 73L, 113L, 173L, 263L, 397L, 593L, 907L, 1361L, 2053L, 3079L, 4621L, 6947L, 10427L, 15641L, 23473L, 35221L, 52837L, 79259L, 118891L, 178349L, 267523L, 401287L, 601943L, 902933L, 1354471L, 2031713L };
     constexpr int const C[plim][klim - 1L] = {
       { 12L, 9L, 9L, 13L, 12L, 12L, 12L, 12L, 12L, 12L, 12L, 12L, 3L, 3L, 3L, 12L, 7L, 7L, 12L, 12L, 12L, 12L, 12L, 12L, 12L, 12L, 12L, 3L, 3L, 3L, 12L, 7L, 7L, 12L, 12L, 12L, 12L, 12L, 12L, 12L, 12L, 12L, 3L, 3L, 3L, 12L, 7L, 7L, 12L, 12L, 12L, 12L, 12L, 12L, 12L, 12L, 12L, 3L, 3L, 3L, 12L, 7L, 7L, 12L, 12L, 12L, 12L, 12L, 12L, 12L, 12L, 7L, 3L, 3L, 3L, 7L, 7L, 7L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L },
@@ -85,7 +88,7 @@ public:
     // initialize
     std::fill(finest    , finest     + nf, 0);
     std::fill(finest_var, finest_var + nf, 0);
-    int sampls = minsmp;
+    int sampls = n_sequences;
     int np(0L);
     {
       int i = 0L;
@@ -95,7 +98,8 @@ public:
           break;
       }
       if(i >= plim)
-        sampls = std::max(minsmp, static_cast<int>(minvls / (2L * p[np])));
+        sampls = std::max<int>(
+          n_sequences, static_cast<int>(minvls / (2L * p[np])));
     }
 
     constexpr size_t const maxit(1000L);
@@ -104,6 +108,15 @@ public:
     double abserr(std::numeric_limits<double>::infinity());
 
     for(size_t nit = 0; nit < maxit; nit++){
+      if(np < plim - 1L){
+        // check if we should increase the number of samples to "use all the
+        // samples"
+        size_t const n_samp_now = intvls     + 2 * sampls * p[np],
+                    n_samp_next = n_samp_now + 2 * sampls * p[np + 1];
+        if(n_samp_next > maxvls)
+          sampls = std::max<int>(sampls, (maxvls - intvls) / (2L * p[np]));
+      }
+
       *vk = 1. / static_cast<double>(p[np]);
       int k(1L);
       for(int i = 1; i < ndim; ++i){
@@ -229,9 +242,8 @@ public:
           ++np;
         else {
           sampls = std::min(3 * sampls / 2,
-                            static_cast<int>(
-                              (maxvls - intvls) / (2 * p[np])));
-          sampls = std::max(minsmp, sampls);
+                            static_cast<int>((maxvls - intvls) / (2 * p[np])));
+          sampls = std::max<int>(n_sequences, sampls);
         }
         if(intvls + 2 * sampls * p[np] > maxvls)
           break;
@@ -253,12 +265,14 @@ cache_mem<int   > rand_Korobov<Func>::imem;
 template<class Func>
 class sobol_wrapper {
   static cache_mem<double> dmem;
-  static constexpr unsigned const n_sequences = 8;
+  static unsigned max_n_sequences;
 
 public:
   static void alloc_mem
-  (int const max_ndim, int const max_nf, int const max_threads) {
-    dmem.set_n_mem((1 + n_sequences) * max_nf, max_threads);
+  (int const max_ndim, int const max_nf, int const max_threads,
+   unsigned const max_n_sequences_in) {
+    max_n_sequences = std::max(max_n_sequences, max_n_sequences_in);
+    dmem.set_n_mem((1 + max_n_sequences) * max_nf, max_threads);
   }
 
   static rand_Korobov_output comp
@@ -266,7 +280,11 @@ public:
    int const nf, double const abseps, double const releps,
    double * const __restrict__ finest,
    double * const __restrict__ sdest, parallelrng::unif_drawer &sampler,
-   sobol::scrambling_type const method){
+   sobol::scrambling_type const method, unsigned const n_sequences){
+    if(n_sequences < 2)
+      throw std::invalid_argument("n_sequences is less than two");
+    if(n_sequences > max_n_sequences)
+      throw std::invalid_argument("n_sequences is larger then the set max_n_sequences");
     if(method == sobol::scrambling_type::none)
       throw std::invalid_argument("sobol::scrambling_type::none passed but it makes no sense");
 
@@ -352,6 +370,8 @@ public:
 
 template<class Func>
 cache_mem<double> sobol_wrapper<Func>::dmem;
+template<class Func>
+unsigned sobol_wrapper<Func>::max_n_sequences = 2;
 
 } // namespace pedmod
 

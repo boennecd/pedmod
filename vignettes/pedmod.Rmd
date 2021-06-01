@@ -599,9 +599,9 @@ ll_terms <- get_pedigree_ll_terms(dat, max_threads = 4L)
 ```{r rqmc, cache = 1}
 # create a simple function which computes the gradient. We set the convergence 
 # threshold values low such that all the samples will be used
-gr <- function(maxvls, method, par = start$par)
+gr <- function(maxvls, method, par = start$par, minvls = 500L)
   eval_pedigree_grad(ptr = ll_terms, par = par, maxvls = maxvls, abs_eps = 0,
-                     rel_eps = 1e-12, indices = 0:9, minvls = 500L, 
+                     rel_eps = 1e-12, indices = 0:9, minvls = minvls, 
                      method = method, n_threads = 4L)
 
 # compute the estimator for either method using an increasing number of samples
@@ -613,7 +613,7 @@ res <- sapply(setNames(n_samp, n_samp), function(maxvls){
     # estimate the gradient
     ests <- sapply(seeds, function(s){
       set.seed(s)
-      gr(maxvls = maxvls, method = method)
+      gr(maxvls = maxvls, minvls = maxvls, method = method)
     })
     
     # return the mean of the estimators and the standard deviation
@@ -644,34 +644,38 @@ round(t(res["sd", , "Sobol"  , ] / abs(precise_est)), 6)
 # look at a log-log regression to check convergence rate. We expect a rate 
 # between 0.5, O(sqrt(n)) rate, and 1, O(n) rate, which can be seen from minus  
 # the slopes below
-lm(t(log(res["sd", , "Korobov", ])) ~ log(n_samp))
-lm(t(log(res["sd", , "Sobol", ])) ~ log(n_samp))
+coef(lm(t(log(res["sd", , "Korobov", ])) ~ log(n_samp)))
+coef(lm(t(log(res["sd", , "Sobol", ])) ~ log(n_samp)))
 
 # plot the two standard deviation estimates
 par(mar = c(5, 5, 1, 1))
 matplot(n_samp, t(res["sd", , "Korobov", ]), log = "xy", ylab = "L2 error", 
-        type = "p", pch = 1:4, col = "black", bty = "l", 
+        type = "p", pch = c(0:2, 5L), col = "black", bty = "l", 
         xlab = "Number of samples", ylim = range(res["sd", , , ]))
 matlines(n_samp, t(res["sd", , "Korobov", ]), col = "black", lty = 2)
 
 # add the points from Sobol method
-matplot(n_samp, t(res["sd", , "Sobol", ]), type = "p", pch = 16:19, 
+matplot(n_samp, t(res["sd", , "Sobol", ]), type = "p", pch = 15:18, 
         col = "darkgray", add = TRUE)
 matlines(n_samp, t(res["sd", , "Sobol", ]), col = "darkgray", lty = 3)
 ```
 
-The above seems to suggest that the scrambled Sobol sequences have a higher 
-initial error but a convergence rate which is closer to the optimal 
-$O(n^{-1 + \epsilon})$ rate for some small $\epsilon$. 
+The above seems to suggest that the randomized Korobov rules a preferable and 
+that both method achieve close to a
+$O(n^{-1 + \epsilon})$ rate for some small $\epsilon$. Notice that we have to 
+set `minvls` equal to `maxvls` to achieve the $O(n^{-1 + \epsilon})$ rate with 
+randomized Korobov rules.
 
-We can also consider the convergence rate for the log likelihood:
+We can also consider the convergence rate for the log likelihood. We also show 
+how the error can be reduced by using fewer randomized qausi-Monte Carlo 
+sequences at the cost of the precision of the error estimate:
 
 ```{r rqmc_likelihood, cache = 1}
 # create a simple function which computes the log likelihood. We set the 
 # convergence threshold values low such that all the samples will be used
-fn <- function(maxvls, method, par = start$par)
-  eval_pedigree_ll(ptr = ll_terms, par = par, maxvls = maxvls, abs_eps = 0,
-                   rel_eps = 1e-12, indices = 0:9, minvls = 500L, 
+fn <- function(maxvls, method, par = start$par, ptr = ll_terms,  minvls = 500L)
+  eval_pedigree_ll(ptr = ptr, par = par, maxvls = maxvls, abs_eps = 0,
+                   rel_eps = 1e-12, indices = 0:9, minvls = minvls, 
                    method = method, n_threads = 4L)
 
 # compute the estimator for either method using an increasing number of samples
@@ -680,7 +684,24 @@ res <- sapply(setNames(n_samp, n_samp), function(maxvls){
     # estimate the gradient
     ests <- sapply(seeds, function(s){
       set.seed(s)
-      fn(maxvls = maxvls, method = method)
+      fn(maxvls = maxvls, minvls = maxvls, method = method)
+    })
+    
+    # return the mean of the estimators and the standard deviation
+    c(mean = mean(ests), sd = sd(ests))
+  }, simplify = "array")
+}, simplify = "array")
+
+# compute the errors with fewer randomized quasi-Monte Carlo sequences
+ll_terms_few_sequences <- get_pedigree_ll_terms(dat, max_threads = 4L, 
+                                                n_sequences = 2L)
+res_few_seqs <- sapply(setNames(n_samp, n_samp), function(maxvls){
+  sapply(c(Korobov = 0, Sobol = 1), function(method){
+    # estimate the gradient
+    ests <- sapply(seeds, function(s){
+      set.seed(s)
+      fn(maxvls = maxvls, minvls = maxvls, method = method, 
+         ptr = ll_terms_few_sequences)
     })
     
     # return the mean of the estimators and the standard deviation
@@ -697,22 +718,28 @@ precise_est <- mean(res["mean", , length(n_samp)])
 round(1000 * res["sd", "Korobov", ] / abs(precise_est), 6)
 round(1000 * res["sd", "Sobol"  , ] / abs(precise_est), 6)
 
-# look at log-log regressions
-lm(log(res["sd", "Korobov", ]) ~ log(n_samp))
-lm(log(res["sd", "Sobol", ]) ~ log(n_samp))
+# with fewer sequences
+round(1000 * res_few_seqs["sd", "Korobov", ] / abs(precise_est), 6)
+round(1000 * res_few_seqs["sd", "Sobol"  , ] / abs(precise_est), 6)
 
-# plot the two standard deviation estimates
+# look at log-log regressions
+coef(lm(log(res["sd", "Korobov", ]) ~ log(n_samp)))
+coef(lm(log(res["sd", "Sobol", ]) ~ log(n_samp)))
+coef(lm(log(res_few_seqs["sd", "Korobov", ]) ~ log(n_samp)))
+coef(lm(log(res_few_seqs["sd", "Sobol", ]) ~ log(n_samp)))
+
+# plot the two standard deviation estimates. Dashed lines are with fewer 
+# sequences
 par(mar = c(5, 5, 1, 1))
-matplot(n_samp, t(res["sd", , ]), log = "xy", ylab = "L2 error", lty = 1, 
+sds <- cbind(t(res["sd", , ]), t(res_few_seqs["sd", , ]))
+matplot(n_samp, sds, log = "xy", ylab = "L2 error", lty = c(1, 1, 2, 2), 
         type = "l", bty = "l", xlab = "Number of samples", 
         col = c("black", "darkgray"))
-matplot(n_samp, t(res["sd", , ]), pch = c(1, 16), col = c("black", "darkgray"), 
+matplot(n_samp, sds, pch = c(1, 16), col = c("black", "darkgray"), 
         add = TRUE)
 ```
 
-The two randomized quasi-Monte Carlo methods seems fairly comparable in this 
-case and both give precise estimates.
-
+Again the randomized Korobov rules seems preferable.
 We fit the model again below as example of using the scrambled Sobol sequences:
 
 ```{r rqmc_est_simple, cache = 1}

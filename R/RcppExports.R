@@ -38,6 +38,9 @@
 #' reduce the computation time while not affecting the result much.
 #' @param method integer with the method to use. Zero yields randomized Korobov
 #' lattice rules while one yields scrambled Sobol sequences.
+#' @param n_sequences number of randomized quasi-Monte Carlo sequences to use.
+#' More samples yields a better estimate of the error but a worse
+#' approximation. Eight is used in the original Fortran code.
 #'
 #' @return
 #' An approximation of the CDF. The \code{"n_it"} attribute shows the number of
@@ -70,8 +73,8 @@
 #' }
 #'
 #' @export
-mvndst <- function(lower, upper, mu, sigma, maxvls = 25000L, abs_eps = .001, rel_eps = 0L, minvls = -1L, do_reorder = TRUE, use_aprx = FALSE, method = 0L) {
-    .Call(`_pedmod_mvndst`, lower, upper, mu, sigma, maxvls, abs_eps, rel_eps, minvls, do_reorder, use_aprx, method)
+mvndst <- function(lower, upper, mu, sigma, maxvls = 25000L, abs_eps = .001, rel_eps = 0L, minvls = -1L, do_reorder = TRUE, use_aprx = FALSE, method = 0L, n_sequences = 8L) {
+    .Call(`_pedmod_mvndst`, lower, upper, mu, sigma, maxvls, abs_eps, rel_eps, minvls, do_reorder, use_aprx, method, n_sequences)
 }
 
 #' Get C++ Object for Log Marginal Likelihood Approximations
@@ -90,6 +93,9 @@ mvndst <- function(lower, upper, mu, sigma, maxvls = 25000L, abs_eps = .001, rel
 #' }
 #' @param max_threads maximum number of threads to use.
 #' @param min_sparse_len minimum cluster size before sparse matrices are used.
+#' @param n_sequences number of randomized quasi-Monte Carlo sequences to use.
+#' More samples yields a better estimate of the error but a worse
+#' approximation. Eight is used in the original Fortran code.
 #'
 #' @details
 #' An intercept column is not added to the \code{X} matrices
@@ -146,8 +152,8 @@ mvndst <- function(lower, upper, mu, sigma, maxvls = 25000L, abs_eps = .001, rel
 #' ptr <- get_pedigree_ll_terms(dat_arg, max_threads = 1L)
 #'
 #' @export
-get_pedigree_ll_terms <- function(data, max_threads = 1L, min_sparse_len = 100L) {
-    .Call(`_pedmod_get_pedigree_ll_terms`, data, max_threads, min_sparse_len)
+get_pedigree_ll_terms <- function(data, max_threads = 1L, min_sparse_len = 100L, n_sequences = 8L) {
+    .Call(`_pedmod_get_pedigree_ll_terms`, data, max_threads, min_sparse_len, n_sequences)
 }
 
 get_n_scales <- function(ptr) {

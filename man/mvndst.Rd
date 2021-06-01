@@ -46,6 +46,10 @@ reduce the computation time while not affecting the result much.}
 
 \item{method}{integer with the method to use. Zero yields randomized Korobov
 lattice rules while one yields scrambled Sobol sequences.}
+
+\item{n_sequences}{number of randomized quasi-Monte Carlo sequences to use.
+More samples yields a better estimate of the error but a worse
+approximation. Eight is used in the original Fortran code.}
 }
 \value{
 An approximation of the CDF. The \code{"n_it"} attribute shows the number of

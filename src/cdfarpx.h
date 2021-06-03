@@ -92,12 +92,13 @@ inline double safe_qnorm_w(double const x) noexcept {
     std::numeric_limits<double>::epsilon() *
     std::numeric_limits<double>::epsilon() *
     std::numeric_limits<double>::epsilon();
-  if(x <= 0)
-    return  qnorm_w(eps, 0, 1, 1L, 0L);
-  else if(x >= 1.)
-    return -qnorm_w(eps, 0, 1, 1L, 0L);
+  if(x > 0 and x < 1)
+    return qnorm_w(x  , 0, 1, 1L, 0L);
+  else if(x <= 0)
+    return qnorm_w(eps, 0, 1, 1L, 0L);
 
-  return qnorm_w   (x  , 0, 1, 1L, 0L);
+  // x >= 1.
+  return -qnorm_w (eps, 0, 1, 1L, 0L);
 }
 
 inline double safe_qnorm_aprx(double const x) noexcept {
@@ -105,12 +106,16 @@ inline double safe_qnorm_aprx(double const x) noexcept {
     std::numeric_limits<double>::epsilon() *
     std::numeric_limits<double>::epsilon() *
     std::numeric_limits<double>::epsilon();
+  if(x > 0 and x < 1)
+    return qnorm_aprx(x);
   if(x <= 0)
-    return  qnorm_aprx(eps);
-  else if(x >= 1.)
-    return -qnorm_aprx(eps);
+    return qnorm_aprx(eps);
+  // x >= 1.
+  return -qnorm_aprx (eps);
+}
 
-  return qnorm_aprx   (x);
+inline double pnorm_use(double const x, bool const use_aprx) {
+  return use_aprx ? pnorm_approx(x) : pnorm_std(x, 1L, 0L);
 }
 
 /**
@@ -361,18 +366,15 @@ public:
       for(int i = 0; i < j; ++i, sc++)
         su += *sc * dr[i];
 
-      auto pnorm_use = [&](double const x) -> double {
-        return use_aprx ? pnorm_approx(x) : pnorm_std(x, 1L, 0L);
-      };
       double lim_l(0.),
              lim_u(1.);
       if(*infin_j == 0L)
-        lim_u = pnorm_use(*up - su);
+        lim_u = pnorm_use(*up - su, use_aprx);
       else if(*infin_j == 1L)
-        lim_l = pnorm_use(*lw - su);
+        lim_l = pnorm_use(*lw - su, use_aprx);
       else if(*infin_j == 2L){
-        lim_l = pnorm_use(*lw - su);
-        lim_u = pnorm_use(*up - su);
+        lim_l = pnorm_use(*lw - su, use_aprx);
+        lim_u = pnorm_use(*up - su, use_aprx);
 
       }
 
@@ -597,7 +599,7 @@ private:
    * stores how many non-zero Eigen values each S_C_S_matrices has. It is minus
    * one if it is a Cholesky decomposition is used.
    */
-  std::unique_ptr<int[]> S_C_n_eigen;
+  int * S_C_n_eigen;
 
   /// points to the upper triangular part of the inverse.
   double * sig_inv;
@@ -634,14 +636,11 @@ public:
     sobol_wrapper<cdf<pedigree_l_factor> >::alloc_mem(
         n_mem, get_n_integrands(), max_threads, max_n_sequences);
     dmem.set_n_mem(
-      4 * n_mem * n_mem + (n_mem * (n_mem + 1)) / 2 +
+      3 * n_mem * n_mem + (n_mem * (n_mem + 1)) / 2 +
         n_mem + n_mem * n_mem * scale_mats.size() +
-        n_fix * n_mem + 2 * get_n_integrands(),
+        2 * n_fix * n_mem + 2 * get_n_integrands(),
       max_threads);
-    imem.set_n_mem(n_mem, max_threads);
-
-    // set up the array we need
-    S_C_n_eigen   .reset(new int    [n_scales]);
+    imem.set_n_mem(n_scales, max_threads);
 
     // check that the scale matrices are positive semi definite
     arma::vec vdum(dmem.get_mem(), n_mem, false);
@@ -700,52 +699,48 @@ public:
       return;
     norm_const = norm_constant_arg;
 
-    int *indices = imem.get_mem();
-    for(int i = 0; i < n_mem; ++i)
-      indices[i] = i;
+    double * next_mem = dmem.get_mem();
+    sig_inv = next_mem;
+    next_mem += (n_mem * (n_mem + 1)) / 2;
+    cdf_mem = next_mem;
+    next_mem += 2 * get_n_integrands();
 
-    // TODO: very hard coded! See how much to increment in prep_permutated
-    double * next_mem =
-      dmem.get_mem() +
-      4 * n_mem * n_mem + n_mem * n_fix + n_mem * n_mem * n_scales;
-
-    arma::mat t1(dmem.get_mem(), n_mem, n_mem, false);
+    arma::mat t1(next_mem, n_mem, n_mem, false);
     if(!arma::inv_sympd(t1, sig))
       throw std::runtime_error("pedigree_ll_factor::setup: inv_sympd failed");
-    sig_inv = next_mem;
-    copy_upper_tri(t1, sig_inv);
 
-    cdf_mem = sig_inv + (n_mem * (n_mem + 1)) / 2;
+    copy_upper_tri(t1, sig_inv);
   }
 
   void prep_permutated(arma::mat const &sig, int const *indices) {
     if(n_mem < 2)
       return;
 
-    // create the objects we need
-    arma::vec dum_vec(dmem.get_mem() , n_mem, false);
+    // create the objects we need. We have to account for the memory used by
+    // setup
+    double * to_use =
+      dmem.get_mem() + (n_mem * (n_mem + 1)) / 2 + 2 * get_n_integrands();
+    arma::vec dum_vec(to_use  , n_mem, false);
     arma::mat t1(dum_vec.end(), n_mem, n_mem, false),
               t2(t1.end()     , n_mem, n_mem, false),
               t3(t2.end()     , n_mem, n_mem, false),
-              t4(t3.end()     , n_mem, n_mem, false);
-    if(!arma::chol(t1, sig))
+         X_permu(t3.end()     , n_mem, n_fix, false),
+       d_fix_obj(X_permu.end(), n_mem, n_fix, false);
+    if(!arma::chol(t1, sig, "lower"))
       throw std::runtime_error("pedigree_ll_factor::setup: chol failed");
-    if(!arma::inv(t2, t1))
-      throw std::runtime_error("pedigree_ll_factor::setup: inv failed");
 
-    d_fix_mat = t4.end();
-    {
-      double * __restrict__ d_fix_mat_col = d_fix_mat;
-      for(int j = 0; j < n_fix; ++j, d_fix_mat_col += n_mem)
-        for(int i = 0; i < n_mem; ++i){
-          double sum(0);
-          for(int k = 0; k <= i /* inverse of Cholesky */; ++k)
-            sum += t2(k, i) * X(indices[k], j);
-          d_fix_mat_col[i] = sum;
-        }
-    }
+    d_fix_mat = d_fix_obj.begin();
 
-    double * next_mem = d_fix_mat + n_mem * n_fix;
+    // permute X
+    for(int j = 0; j < n_fix; ++j)
+      for(int i = 0; i < n_mem; ++i)
+        X_permu(i, j) = X(indices[i], j);
+
+    arma::solve(d_fix_obj, arma::trimatl(t1), X_permu);
+
+    // set up the array we need
+    S_C_n_eigen = imem.get_mem();
+    double * next_mem = d_fix_obj.end();
     S_C_S_matrices = next_mem;
     {
       unsigned s(0);
@@ -753,42 +748,40 @@ public:
         // setup the permutation of the scale matrix
         for(int j = 0; j < n_mem; ++j)
           for(int i = 0; i < n_mem; ++i)
-            t4(i, j) = m(indices[i], indices[j]);
+            t2(i, j) = m(indices[i], indices[j]);
 
-        t1 = t2.t();
-        t1 *= t4;
-        t1 *= t2;
+        arma::solve(t3, arma::trimatl(t1), t2);
+        arma::inplace_trans(t3);
+        arma::solve(t2, arma::trimatl(t1), t3);
 
-        if(arma::chol(t3, t1)){
+        if(arma::chol(t3, t2)){
           S_C_n_eigen[s] = -1;
-          arma::inplace_trans(t3);
-          copy_lower_tri(t3, next_mem);
+          copy_upper_tri(t3, next_mem);
 
         } else {
           arma::mat &eigen_vectors = t3;
 
           // form the Eigen decomposition
-          if(!arma::eig_sym(dum_vec, eigen_vectors, t1))
+          if(!arma::eig_sym(dum_vec, eigen_vectors, t2))
             throw std::runtime_error("Eigen decomposition failed");
 
-          // we need the elements to be in descending order
-          std::reverse(dum_vec.begin(), dum_vec.end());
-          for(int j = 0; j < n_mem / 2; ++j){
-            double *p1 = eigen_vectors.colptr(j),
-                   *p2 = eigen_vectors.colptr(n_mem - j - 1);
-            for(int k = 0; k < n_mem; ++k, ++p1, ++p2)
-              std::iter_swap(p1, p2);
-          }
-
           // count the number of Eigen values greater than zero
-          double const eps = eps_pos_def * n_mem * dum_vec[0];
-          int j = 1;
-          for(; j < n_mem; ++j){
-            if(dum_vec[j] < eps)
+          double const eps = eps_pos_def * n_mem * dum_vec[n_mem - 1];
+          int j = n_mem - 1;
+          for(; j > 0; --j)
+            if(dum_vec[j - 1] < eps)
               break;
-          }
-          int const n_eigen_vectors = j;
+          int const n_eigen_vectors = n_mem - j;
           S_C_n_eigen[s] = n_eigen_vectors;
+
+          // over write the first column
+          int const n_unused = n_mem - n_eigen_vectors;
+          for(int k = 0; k < n_eigen_vectors; ++k){
+            dum_vec[k] = dum_vec[k + n_unused];
+            std::copy(eigen_vectors.colptr(k + n_unused),
+                      eigen_vectors.colptr(k + n_unused) + n_mem,
+                      eigen_vectors.colptr(k));
+          }
 
           // scale the Eigen vectors
           double * eg_val = eigen_vectors.begin();
@@ -798,8 +791,11 @@ public:
               eg_val[j] *= scale;
           }
 
-          std::copy(eigen_vectors.begin(),
-                    eigen_vectors.begin() + n_mem * n_eigen_vectors, next_mem);
+          // copy the transpose of the eigen vectors
+          double *next_memij = next_mem;
+          for(int j = 0; j < n_mem; ++j)
+            for(int i = 0; i < n_eigen_vectors; ++i, ++next_memij)
+              *next_memij = eigen_vectors.at(j, i);
         }
 
         ++s;
@@ -812,8 +808,9 @@ public:
     (double const * __restrict__ draw, double * __restrict__ out,
      int const *, bool const) {
       *out = 1;
-      double * __restrict__ const d_fix  = out + 1,
-             * __restrict__ const d_sc   = d_fix + n_fix;
+      double * __restrict__       dum_vec = cdf_mem + 2 * get_n_integrands(),
+             * __restrict__ const d_fix   = out + 1,
+             * __restrict__ const d_sc    = d_fix + n_fix;
 
       // derivatives w.r.t. the fixed effects
       {
@@ -829,39 +826,32 @@ public:
       // handle the derivatives w.r.t. the scale parameters
       double * next_mat = S_C_S_matrices;
       for(int s = 0; s < n_scales; ++s, next_mat += n_mem * n_mem){
+        std::fill(dum_vec, dum_vec + n_mem, 0.);
+
         if(S_C_n_eigen[s] < 0){
           // a Cholesky decomposition was used
           double *chol_ele = next_mat;
 
-          double sum(0);
-          double const * d = draw;
-          for(int c = 0; c < n_mem; chol_ele += n_mem - c, ++d, ++c){
-            double sqrt_term(0);
-            for(int r = 0; r < n_mem - c; ++r)
-              sqrt_term += chol_ele[r] * d[r];
-
-            sum += sqrt_term * sqrt_term;
-          }
-
-          d_sc[s] = sum * .5;
+          for(int c = 0; c < n_mem; ++c, chol_ele += c)
+            for(int r = 0; r <= c; ++r)
+              dum_vec[r] += chol_ele[r] * draw[c];
 
         } else {
           // an Eigen decomposition was used
           double *eig_vec_ele = next_mat;
           int const n_eigen_vec = S_C_n_eigen[s];
 
-          double sum(0);
-          for(int r = 0; r < n_eigen_vec; ++r, eig_vec_ele += n_mem){
-            double sqrt_term(0);
-            for(int c = 0; c < n_mem; ++c)
-              sqrt_term += eig_vec_ele[c] * draw[c];
-
-            sum += sqrt_term * sqrt_term;
-          }
-
-          d_sc[s] = sum * .5;
+          for(int c = 0; c < n_mem; ++c, eig_vec_ele += n_eigen_vec)
+            for(int r = 0; r < n_eigen_vec; ++r)
+              dum_vec[r] += eig_vec_ele[r] * draw[c];
 
         }
+
+        double sum(0.);
+        for(int r = 0; r < n_mem; ++r)
+          sum += dum_vec[r] * dum_vec[r];
+
+        d_sc[s] = sum * .5;
       }
     }
 

@@ -334,7 +334,7 @@ library(pedmod)
 ll_terms <- get_pedigree_ll_terms(dat, max_threads = 4L)
 system.time(start <- pedmod_start(ptr = ll_terms, data = dat, n_threads = 4L))
 #>    user  system elapsed 
-#>  32.170   0.087   8.157
+#>  30.912   0.070   7.823
 
 # log likelihood without the random effects and at the starting values
 start$logLik_no_rng
@@ -349,7 +349,7 @@ system.time(
     n_threads = 4L, 
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 #>    user  system elapsed 
-#>  68.794   0.004  17.206
+#>  103.91    0.00   25.99
 ```
 
 The results of the estimation are shown below:
@@ -360,20 +360,20 @@ rbind(opt_out       = head(opt_out$par, -1),
       opt_out_quick = head(start  $par, -1), 
       truth         = attr(dat, "beta"))
 #>               (Intercept) Continuous Binary
-#> opt_out            -2.871     0.9688  1.878
-#> opt_out_quick      -2.766     0.9589  1.806
+#> opt_out            -2.872     0.9689  1.878
+#> opt_out_quick      -2.844     0.9860  1.857
 #> truth              -3.000     1.0000  2.000
 c(opt_out       = exp(tail(opt_out$par, 1)), 
   opt_out_quick = exp(tail(start  $par, 1)), 
   truth         = attr(dat, "sig_sq"))
 #>       opt_out opt_out_quick         truth 
-#>         2.906         2.605         3.000
+#>         2.908         2.812         3.000
 
 # log marginal likelihoods
 print(start   $logLik_est, digits = 8) # this is unreliably/imprecise
-#> [1] -1618.5409
+#> [1] -1618.5064
 print(-opt_out$value     , digits = 8)
-#> [1] -1618.4044
+#> [1] -1618.4045
 ```
 
 We emphasize that we set the `rel_eps` parameter to `1e-3` above which
@@ -405,10 +405,10 @@ which you may skip.
 std_par <- direct_to_standardized(opt_out$par, n_scales = 1L)
 std_par # the standardized parameterization
 #> (Intercept)  Continuous      Binary             
-#>     -1.4527      0.4901      0.9501      1.0669
+#>     -1.4528      0.4901      0.9502      1.0673
 opt_out$par # the direct parameterization 
 #> (Intercept)  Continuous      Binary             
-#>     -2.8713      0.9688      1.8778      1.0669
+#>     -2.8718      0.9689      1.8783      1.0673
 
 # we can map back as follows
 par_back <- standardized_to_direct(std_par, n_scales = 1L)
@@ -417,12 +417,12 @@ all.equal(opt_out$par, par_back, check.attributes = FALSE)
 # the proportion of variance of each effect
 attr(par_back, "variance proportions") 
 #> Residual          
-#>    0.256    0.744
+#>   0.2559   0.7441
 
 # the proportion match
 exp(tail(opt_out$par, 1)) / (exp(tail(opt_out$par, 1)) + 1)
-#>       
-#> 0.744
+#>        
+#> 0.7441
 
 # compute the likelihood with either parameterization
 set.seed(1L)
@@ -432,7 +432,7 @@ eval_pedigree_ll(ptr = ll_terms, par = opt_out$par, maxvls = 10000L,
 #> attr(,"n_fails")
 #> [1] 10
 #> attr(,"std")
-#> [1] 0.00405
+#> [1] 0.004053
 set.seed(1L)
 eval_pedigree_ll(ptr = ll_terms, par = std_par    , maxvls = 10000L, 
                  minvls = 1000L, rel_eps = 1e-3, use_aprx = TRUE, abs_eps = 0, 
@@ -441,7 +441,7 @@ eval_pedigree_ll(ptr = ll_terms, par = std_par    , maxvls = 10000L,
 #> attr(,"n_fails")
 #> [1] 10
 #> attr(,"std")
-#> [1] 0.00405
+#> [1] 0.004053
 
 # we can also get the same gradient with an application of the chain rule
 jac <- attr(
@@ -468,26 +468,26 @@ parameterization:
 system.time(start_std <- pedmod_start(
   ptr = ll_terms, data = dat, n_threads = 4L, standardized = TRUE))
 #>    user  system elapsed 
-#>  24.015   0.022   6.021
+#>   9.778   0.018   2.470
 
 # the starting values are close
 standardized_to_direct(start_std$par, n_scales = 1L)
 #> (Intercept)  Continuous      Binary             
-#>      -2.844       0.986       1.857       1.034 
+#>     -2.8435      0.9858      1.8566      1.0332 
 #> attr(,"variance proportions")
 #> Residual          
-#>   0.2623   0.7377
+#>   0.2625   0.7375
 start$par
 #> (Intercept)  Continuous      Binary             
-#>     -2.7658      0.9589      1.8059      0.9573
+#>      -2.844       0.986       1.857       1.034
 
 # this may have required different number of gradient and function evaluations
 start_std$opt$counts
 #> function gradient 
-#>       26       26
+#>       31       31
 start    $opt$counts
 #> function gradient 
-#>        7        7
+#>       48       48
 
 # estimate the model
 system.time(
@@ -496,18 +496,18 @@ system.time(
     n_threads = 4L, standardized = TRUE,
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 #>    user  system elapsed 
-#>   66.99    0.00   16.75
+#>   68.82    0.02   17.45
 
 # we get the same
 standardized_to_direct(opt_out_std$par, n_scales = 1L)
 #> (Intercept)  Continuous      Binary             
-#>     -2.8708      0.9691      1.8771      1.0673 
+#>     -2.8708      0.9691      1.8772      1.0674 
 #> attr(,"variance proportions")
 #> Residual          
 #>   0.2559   0.7441
 opt_out$par
 #> (Intercept)  Continuous      Binary             
-#>     -2.8713      0.9688      1.8778      1.0669
+#>     -2.8718      0.9689      1.8783      1.0673
 
 # this may have required different number of gradient and function evaluations
 opt_out_std$counts
@@ -515,7 +515,7 @@ opt_out_std$counts
 #>       15       10
 opt_out    $counts
 #> function gradient 
-#>       14       11
+#>       37       12
 ```
 
 ### Stochastic Quasi-Newton Method
@@ -538,7 +538,7 @@ system.time(
     minvls = 1000L, n_it = 400L, n_grad_steps = 10L, n_grad = 100L, 
     n_hess = 400L))
 #>    user  system elapsed 
-#> 620.535   0.027 155.249
+#> 756.580   0.022 189.393
 
 # show the log marginal likelihood
 ll_wrapper <- function(x)
@@ -546,24 +546,24 @@ ll_wrapper <- function(x)
     ptr = ll_terms, x, maxvls = 50000L, minvls = 1000L, abs_eps = 0, 
     rel_eps = 1e-4, n_threads = 4L)
 print(ll_wrapper(sqn_out$par), digits = 8)
-#> [1] -1618.5252
+#> [1] -1618.4635
 #> attr(,"n_fails")
-#> [1] 146
+#> [1] 151
 #> attr(,"std")
-#> [1] 0.00068844499
+#> [1] 0.00073468344
 print(ll_wrapper(opt_out$par), digits = 8)
-#> [1] -1618.4071
+#> [1] -1618.4063
 #> attr(,"n_fails")
-#> [1] 163
+#> [1] 169
 #> attr(,"std")
-#> [1] 0.00074254571
+#> [1] 0.00073978509
 
 # compare the parameters
 rbind(optim = opt_out$par, 
       sqn   = sqn_out$par)
-#>       (Intercept) Continuous Binary       
-#> optim      -2.871     0.9688  1.878 1.0669
-#> sqn        -2.766     0.9474  1.821 0.9588
+#>       (Intercept) Continuous Binary      
+#> optim      -2.872     0.9689  1.878 1.067
+#> sqn        -2.841     0.9734  1.865 1.039
 
 # plot the marginal log likelihood versus the iteration number
 lls <- apply(sqn_out$omegas, 2L, ll_wrapper)
@@ -589,23 +589,23 @@ system.time(
     # but use fewer samples in each iteration
     n_grad = 20L, n_hess = 100L))
 #>    user  system elapsed 
-#> 725.268   0.008 181.564
+#>   762.0     0.3   190.9
 
 # compute the marginal log likelihood and compare the parameter estimates
 print(ll_wrapper(sqn_out_few$par), digits = 8)
-#> [1] -1618.5027
+#> [1] -1618.4489
 #> attr(,"n_fails")
-#> [1] 146
+#> [1] 156
 #> attr(,"std")
-#> [1] 0.00073034897
+#> [1] 0.00074678963
 
 rbind(optim       = opt_out    $par, 
       sqn         = sqn_out    $par, 
       `sqn (few)` = sqn_out_few$par)
-#>           (Intercept) Continuous Binary       
-#> optim          -2.871     0.9688  1.878 1.0669
-#> sqn            -2.766     0.9474  1.821 0.9588
-#> sqn (few)      -2.762     0.9320  1.824 0.9600
+#>           (Intercept) Continuous Binary      
+#> optim          -2.872     0.9689  1.878 1.067
+#> sqn            -2.841     0.9734  1.865 1.039
+#> sqn (few)      -2.845     0.9533  1.877 1.035
 ```
 
 ### Profile Likelihood Curve
@@ -677,9 +677,9 @@ ub <- uniroot(function(x) 2 * (max_ml - predict(smooth_est, x)$y) - crit_val,
 
 # the confidence interval 
 c(lb, ub)
-#> [1] 1.257 2.528
+#> [1] 1.260 2.528
 c(lb, ub)^2 # on the variance scale
-#> [1] 1.580 6.389
+#> [1] 1.586 6.392
 ```
 
 A caveat is that issues with the
@@ -717,20 +717,20 @@ prof_res <- pedmod_profile(
   ptr = ll_terms, par = opt_out$par, delta = .5, maxvls = 10000L, 
   minvls = 1000L, alpha = .05, abs_eps = 0, rel_eps = 1e-4, which_prof = 4L,
   use_aprx = TRUE, n_threads = 4L, verbose = TRUE)
-#> The estimate of the standard error of the log likelihood is 0.00263671. Preferably this should be below 0.001
+#> The estimate of the standard error of the log likelihood is 0.00264089. Preferably this should be below 0.001
 #> 
 #> Finding the lower limit of the profile likelihood curve
-#> Log likelihood is -1619.7623 at 0.566935 (critical value is -1620.3315)
-#> Log likelihood is -1624.4387 at 0.066935 (critical value is -1620.3315)
-#> Log likelihood is -1620.8722 at 0.406019 (critical value is -1620.3315)
-#> Log likelihood is -1620.3375 at 0.477011 (critical value is -1620.3315)
+#> Log likelihood is -1619.7602 at 0.567300 (critical value is -1620.3315)
+#> Log likelihood is -1624.4340 at 0.067300 (critical value is -1620.3315)
+#> Log likelihood is -1620.8729 at 0.405927 (critical value is -1620.3315)
+#> Log likelihood is -1620.3374 at 0.477020 (critical value is -1620.3315)
 #> 
 #> Finding the upper limit of the profile likelihood curve
-#> Log likelihood is -1619.3026 at 1.566935 (critical value is -1620.3315)
-#> Log likelihood is -1621.1767 at 2.066935 (critical value is -1620.3315)
-#> Log likelihood is -1620.2673 at 1.838284 (critical value is -1620.3315)
-#> Log likelihood is -1620.4243 at 1.878781 (critical value is -1620.3315)
-#> Log likelihood is -1618.4108 at 1.066935 (critical value is -1620.3315)
+#> Log likelihood is -1619.3037 at 1.567300 (critical value is -1620.3315)
+#> Log likelihood is -1621.1781 at 2.067300 (critical value is -1620.3315)
+#> Log likelihood is -1620.2674 at 1.838322 (critical value is -1620.3315)
+#> Log likelihood is -1620.4244 at 1.878811 (critical value is -1620.3315)
+#> Log likelihood is -1618.4107 at 1.067300 (critical value is -1620.3315)
 
 # the confidence interval for the scale parameter
 exp(prof_res$confs)
@@ -760,21 +760,21 @@ prof_res <- pedmod_profile(
   ptr = ll_terms, par = opt_out$par, delta = .5, maxvls = 10000L, 
   minvls = 1000L, alpha = .05, abs_eps = 0, rel_eps = 1e-4, which_prof = 3L,
   use_aprx = TRUE, n_threads = 4L, verbose = TRUE)
-#> The estimate of the standard error of the log likelihood is 0.00263671. Preferably this should be below 0.001
+#> The estimate of the standard error of the log likelihood is 0.00264089. Preferably this should be below 0.001
 #> 
 #> Finding the lower limit of the profile likelihood curve
-#> Log likelihood is -1622.3693 at 1.377760 (critical value is -1620.3315)
-#> Log likelihood is -1618.4108 at 1.877760 (critical value is -1620.3315)
-#> Log likelihood is -1619.2913 at 1.606553 (critical value is -1620.3315)
-#> Log likelihood is -1620.4757 at 1.490500 (critical value is -1620.3315)
-#> Log likelihood is -1620.1972 at 1.512586 (critical value is -1620.3315)
+#> Log likelihood is -1622.3590 at 1.378256 (critical value is -1620.3315)
+#> Log likelihood is -1618.4107 at 1.878256 (critical value is -1620.3315)
+#> Log likelihood is -1619.2917 at 1.606488 (critical value is -1620.3315)
+#> Log likelihood is -1620.4759 at 1.490487 (critical value is -1620.3315)
+#> Log likelihood is -1620.1972 at 1.512580 (critical value is -1620.3315)
 #> 
 #> Finding the upper limit of the profile likelihood curve
-#> Log likelihood is -1619.5977 at 2.377760 (critical value is -1620.3315)
-#> Log likelihood is -1621.3487 at 2.877760 (critical value is -1620.3315)
-#> Log likelihood is -1620.5159 at 2.634498 (critical value is -1620.3315)
-#> Log likelihood is -1620.2556 at 2.561379 (critical value is -1620.3315)
-#> Log likelihood is -1618.4108 at 1.877760 (critical value is -1620.3315)
+#> Log likelihood is -1619.5992 at 2.378256 (critical value is -1620.3315)
+#> Log likelihood is -1621.3504 at 2.878256 (critical value is -1620.3315)
+#> Log likelihood is -1620.5160 at 2.634541 (critical value is -1620.3315)
+#> Log likelihood is -1620.2558 at 2.561432 (critical value is -1620.3315)
+#> Log likelihood is -1618.4107 at 1.878256 (critical value is -1620.3315)
 
 # the confidence interval for the slope of the binary covariate
 prof_res$confs
@@ -818,11 +818,11 @@ below:
 # the profile likelihood based confidence intervals
 print(exp(t(sapply(pl_curve_res, `[[`, "confs"))), digits = 8)
 #>      2.50 pct. 97.50 pct.
-#> [1,] 1.6128364  6.3934452
-#> [2,] 1.6113762  6.4124692
-#> [3,] 1.6126335  6.3939017
-#> [4,] 1.6124878  6.3912076
-#> [5,] 1.6124991  6.4164565
+#> [1,] 1.6128424  6.3933552
+#> [2,] 1.6113412  6.4126894
+#> [3,] 1.6126150  6.3939883
+#> [4,] 1.6124613  6.3913291
+#> [5,] 1.6124794  6.4165491
 ```
 
 ### Randomized Quasi-Monte Carlo
@@ -870,29 +870,29 @@ dimnames(res) <- list(
 print(t(res["mean", , "Korobov", ]), digits = 6)
 #>         parameter
 #> samples  (Intercept) Continuous   Binary          
-#>   1000     -0.575308    3.15962 -1.69272 -0.909315
-#>   2000     -0.577677    3.15968 -1.69394 -0.909642
-#>   4000     -0.578087    3.15920 -1.69366 -0.909038
-#>   8000     -0.578146    3.16007 -1.69446 -0.907360
-#>   16000    -0.577919    3.15986 -1.69431 -0.908621
-#>   32000    -0.577956    3.15985 -1.69421 -0.908331
-#>   64000    -0.577931    3.15993 -1.69425 -0.908152
-#>   128000   -0.577969    3.15991 -1.69425 -0.908163
-#>   256000   -0.577966    3.15989 -1.69426 -0.908218
-#>   512000   -0.577965    3.15989 -1.69427 -0.908205
+#>   1000     -0.542977    3.07220 -1.64744 -0.903425
+#>   2000     -0.545156    3.07124 -1.64875 -0.904159
+#>   4000     -0.545396    3.07055 -1.64847 -0.903605
+#>   8000     -0.545606    3.07174 -1.64928 -0.902010
+#>   16000    -0.545329    3.07147 -1.64913 -0.903307
+#>   32000    -0.545353    3.07142 -1.64903 -0.903075
+#>   64000    -0.545338    3.07154 -1.64908 -0.902849
+#>   128000   -0.545369    3.07151 -1.64908 -0.902838
+#>   256000   -0.545366    3.07148 -1.64908 -0.902898
+#>   512000   -0.545370    3.07149 -1.64910 -0.902875
 print(t(res["mean", , "Sobol"  , ]), digits = 6)
 #>         parameter
 #> samples  (Intercept) Continuous   Binary          
-#>   1000     -0.578008    3.16055 -1.69477 -0.914606
-#>   2000     -0.577309    3.16072 -1.69388 -0.912786
-#>   4000     -0.578354    3.16000 -1.69408 -0.908503
-#>   8000     -0.577800    3.15927 -1.69421 -0.908377
-#>   16000    -0.577981    3.15989 -1.69397 -0.907805
-#>   32000    -0.577963    3.15993 -1.69418 -0.907909
-#>   64000    -0.577973    3.15982 -1.69424 -0.908158
-#>   128000   -0.577959    3.15984 -1.69423 -0.908156
-#>   256000   -0.577973    3.15989 -1.69424 -0.908137
-#>   512000   -0.577972    3.15989 -1.69426 -0.908183
+#>   1000     -0.545443    3.07244 -1.64925 -0.909546
+#>   2000     -0.544713    3.07247 -1.64857 -0.907893
+#>   4000     -0.545858    3.07177 -1.64887 -0.903273
+#>   8000     -0.545198    3.07091 -1.64901 -0.903082
+#>   16000    -0.545413    3.07152 -1.64880 -0.902484
+#>   32000    -0.545362    3.07154 -1.64900 -0.902564
+#>   64000    -0.545370    3.07142 -1.64907 -0.902848
+#>   128000   -0.545363    3.07144 -1.64906 -0.902843
+#>   256000   -0.545373    3.07149 -1.64907 -0.902815
+#>   512000   -0.545372    3.07149 -1.64909 -0.902858
 
 # get a best estimator of the gradient by combining the two
 precise_est <- rowMeans(res["mean", , , length(n_samp)])
@@ -902,29 +902,29 @@ precise_est <- rowMeans(res["mean", , , length(n_samp)])
 round(t(res["sd", , "Korobov", ] / abs(precise_est)), 6)
 #>         parameter
 #> samples  (Intercept) Continuous   Binary         
-#>   1000      0.019550   0.007654 0.006333 0.024975
-#>   2000      0.003591   0.001700 0.001450 0.007603
-#>   4000      0.004310   0.002076 0.001772 0.008944
-#>   8000      0.001481   0.000596 0.000603 0.003243
-#>   16000     0.000658   0.000252 0.000253 0.001513
-#>   32000     0.000378   0.000146 0.000166 0.001376
-#>   64000     0.000214   0.000099 0.000096 0.000628
-#>   128000    0.000071   0.000026 0.000025 0.000206
-#>   256000    0.000045   0.000022 0.000023 0.000156
-#>   512000    0.000094   0.000040 0.000033 0.000272
+#>   1000      0.020412   0.008023 0.006444 0.026864
+#>   2000      0.003959   0.001780 0.001473 0.007806
+#>   4000      0.004619   0.002070 0.001824 0.008830
+#>   8000      0.001635   0.000607 0.000610 0.003488
+#>   16000     0.000653   0.000251 0.000256 0.001580
+#>   32000     0.000389   0.000155 0.000168 0.001423
+#>   64000     0.000235   0.000103 0.000094 0.000637
+#>   128000    0.000075   0.000028 0.000025 0.000217
+#>   256000    0.000046   0.000022 0.000024 0.000162
+#>   512000    0.000091   0.000041 0.000033 0.000286
 round(t(res["sd", , "Sobol"  , ] / abs(precise_est)), 6)
 #>         parameter
 #> samples  (Intercept) Continuous   Binary         
-#>   1000      0.019149   0.008383 0.007225 0.033589
-#>   2000      0.011497   0.004268 0.004703 0.019533
-#>   4000      0.006054   0.002038 0.002587 0.013300
-#>   8000      0.003078   0.001087 0.001308 0.005003
-#>   16000     0.001715   0.000645 0.000707 0.003269
-#>   32000     0.000781   0.000339 0.000274 0.001089
-#>   64000     0.000350   0.000176 0.000169 0.000837
-#>   128000    0.000193   0.000078 0.000076 0.000396
-#>   256000    0.000095   0.000049 0.000048 0.000189
-#>   512000    0.000043   0.000018 0.000016 0.000130
+#>   1000      0.019472   0.008728 0.007275 0.033470
+#>   2000      0.011401   0.004239 0.004862 0.020085
+#>   4000      0.006189   0.002074 0.002653 0.013707
+#>   8000      0.003146   0.001051 0.001301 0.005197
+#>   16000     0.001674   0.000675 0.000741 0.003351
+#>   32000     0.000834   0.000346 0.000284 0.001169
+#>   64000     0.000352   0.000175 0.000173 0.000862
+#>   128000    0.000193   0.000083 0.000076 0.000398
+#>   256000    0.000099   0.000051 0.000049 0.000203
+#>   512000    0.000047   0.000020 0.000017 0.000135
 ```
 
 ``` r
@@ -933,12 +933,12 @@ round(t(res["sd", , "Sobol"  , ] / abs(precise_est)), 6)
 # the slopes below
 coef(lm(t(log(res["sd", , "Korobov", ])) ~ log(n_samp)))
 #>             (Intercept) Continuous  Binary        
-#> (Intercept)      1.3092     2.1433  1.2916  1.4538
-#> log(n_samp)     -0.9235    -0.9227 -0.9058 -0.8022
+#> (Intercept)       1.404     2.1636  1.2910  1.4868
+#> log(n_samp)      -0.934    -0.9249 -0.9073 -0.8022
 coef(lm(t(log(res["sd", , "Sobol", ])) ~ log(n_samp)))
 #>             (Intercept) Continuous  Binary        
-#> (Intercept)      2.4884     2.9360  2.5932  3.0476
-#> log(n_samp)     -0.9876    -0.9512 -0.9791 -0.9312
+#> (Intercept)      2.3776     2.8581  2.5625  3.0248
+#> log(n_samp)     -0.9801    -0.9438 -0.9763 -0.9262
 
 # plot the two standard deviation estimates
 par(mar = c(5, 5, 1, 1))
@@ -1017,32 +1017,32 @@ res_few_seqs <- sapply(setNames(n_samp, n_samp), function(maxvls){
 precise_est <- mean(res["mean", , length(n_samp)])
 round(1000 * res["sd", "Korobov", ] / abs(precise_est), 6)
 #>     1000     2000     4000     8000    16000    32000    64000   128000   256000   512000 
-#> 0.060401 0.011645 0.013057 0.004721 0.002086 0.000943 0.000876 0.000209 0.000151 0.000231
+#> 0.063582 0.011445 0.013834 0.004873 0.002329 0.000949 0.000855 0.000219 0.000160 0.000245
 round(1000 * res["sd", "Sobol"  , ] / abs(precise_est), 6)
 #>     1000     2000     4000     8000    16000    32000    64000   128000   256000   512000 
-#> 0.106964 0.044997 0.024667 0.011170 0.006274 0.003098 0.001235 0.000615 0.000321 0.000157
+#> 0.109163 0.046504 0.024819 0.011072 0.006090 0.003202 0.001260 0.000630 0.000336 0.000167
 
 # with fewer sequences
 round(1000 * res_few_seqs["sd", "Korobov", ] / abs(precise_est), 6)
 #>     1000     2000     4000     8000    16000    32000    64000   128000   256000   512000 
-#> 0.027392 0.011642 0.004141 0.001859 0.001180 0.000436 0.000270 0.000485 0.000115 0.000035
+#> 0.026319 0.012389 0.003913 0.001982 0.001221 0.000437 0.000301 0.000523 0.000125 0.000034
 round(1000 * res_few_seqs["sd", "Sobol"  , ] / abs(precise_est), 6)
 #>     1000     2000     4000     8000    16000    32000    64000   128000   256000   512000 
-#> 0.051313 0.021434 0.013668 0.005779 0.002782 0.001305 0.000706 0.000300 0.000158 0.000079
+#> 0.051360 0.021503 0.014061 0.005755 0.002830 0.001294 0.000703 0.000306 0.000160 0.000081
 
 # look at log-log regressions
 coef(lm(log(res["sd", "Korobov", ]) ~ log(n_samp)))
 #> (Intercept) log(n_samp) 
-#>     -0.1579     -0.9360
+#>     -0.1441     -0.9335
 coef(lm(log(res["sd", "Sobol", ]) ~ log(n_samp)))
 #> (Intercept) log(n_samp) 
-#>       1.647      -1.041
+#>       1.609      -1.035
 coef(lm(log(res_few_seqs["sd", "Korobov", ]) ~ log(n_samp)))
 #> (Intercept) log(n_samp) 
-#>     -0.5821     -0.9606
+#>     -0.6534     -0.9502
 coef(lm(log(res_few_seqs["sd", "Sobol", ]) ~ log(n_samp)))
 #> (Intercept) log(n_samp) 
-#>      0.9167     -1.0389
+#>      0.9099     -1.0373
 
 # plot the two standard deviation estimates. Dashed lines are with fewer 
 # sequences
@@ -1068,25 +1068,25 @@ system.time(
     n_threads = 4L, 
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L, method = 1L))
 #>    user  system elapsed 
-#>  94.814   0.232  24.134
+#> 100.587   0.017  25.365
 
 # compare the result. We start with the log likelihood
 print(-opt_out_sobol$value, digits = 8)
 #> [1] -1618.4027
 print(-opt_out      $value, digits = 8)
-#> [1] -1618.4044
+#> [1] -1618.4045
 
 # the parameters
 rbind(Korobov = opt_out      $par, 
       Sobol   = opt_out_sobol$par)
 #>         (Intercept) Continuous Binary      
-#> Korobov      -2.871     0.9688  1.878 1.067
-#> Sobol        -2.873     0.9691  1.879 1.070
+#> Korobov      -2.872     0.9689  1.878 1.067
+#> Sobol        -2.874     0.9694  1.880 1.069
 
 # number of used function and gradient evaluations
 opt_out$counts
 #> function gradient 
-#>       14       11
+#>       37       12
 opt_out_sobol$counts
 #> function gradient 
 #>       13       10
@@ -1367,12 +1367,12 @@ system.time(ll_res <- eval_pedigree_ll(
   ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4))
 #>    user  system elapsed 
-#>   1.343   0.000   0.338
+#>   1.355   0.000   0.341
 system.time(grad_res <- eval_pedigree_grad(
   ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4))
 #>    user  system elapsed 
-#>  31.199   0.000   7.933
+#>  35.416   0.000   8.994
 
 # find the duplicated combinations of pedigrees, covariates, and outcomes. One 
 # likely needs to change this code if the pedigrees are not identical but are 
@@ -1395,13 +1395,13 @@ system.time(ll_res_fast <- eval_pedigree_ll(
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4, 
   cluster_weights = c_weights))
 #>    user  system elapsed 
-#>   0.584   0.000   0.149
+#>   0.583   0.000   0.148
 system.time(grad_res_fast <- eval_pedigree_grad(
   ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4, 
   cluster_weights = c_weights))
 #>    user  system elapsed 
-#>  13.364   0.000   3.518
+#>  14.710   0.000   3.869
 
 # show that we get the same (up to a Monte Carlo error)
 print(c(redundant = ll_res, fast = ll_res_fast), digits = 6)
@@ -1418,7 +1418,7 @@ system.time(
   start <- pedmod_start(ptr = ll_terms, data = dat_unqiue, 
                         cluster_weights = c_weights))
 #>    user  system elapsed 
-#>  25.833   0.004  25.835
+#>   11.55    0.00   11.55
 
 # optimize
 system.time(
@@ -1427,7 +1427,7 @@ system.time(
     n_threads = 4L,  cluster_weights = c_weights,
     maxvls = 5000L, rel_eps = 1e-2, minvls = 500L))
 #>    user  system elapsed 
-#>  29.099   0.008   7.379
+#>  18.436   0.012   4.678
 system.time(
   opt_out <- pedmod_opt(
     ptr = ll_terms, par = opt_out_quick$par, abs_eps = 0, use_aprx = TRUE, 
@@ -1435,7 +1435,7 @@ system.time(
     # we changed the parameters
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 #>    user  system elapsed 
-#>  173.42    0.00   43.36
+#>  143.19    0.06   35.84
 ```
 
 The results are shown below:
@@ -1446,22 +1446,22 @@ rbind(opt_out       = head(opt_out$par, -2),
       opt_out_quick = head(start  $par, -2), 
       truth         = attr(dat_unqiue, "beta"))
 #>               (Intercept) Binary
-#> opt_out            -2.894  3.874
-#> opt_out_quick      -2.578  3.444
+#> opt_out            -2.892  3.871
+#> opt_out_quick      -2.756  3.681
 #> truth              -3.000  4.000
 rbind(opt_out       = exp(tail(opt_out$par, 2)), 
       opt_out_quick = exp(tail(start  $par, 2)), 
       truth         = attr(dat_unqiue, "sig_sq"))
 #>                           
-#> opt_out       1.813 0.8173
-#> opt_out_quick 1.325 0.5632
+#> opt_out       1.815 0.8082
+#> opt_out_quick 1.606 0.6941
 #> truth         2.000 1.0000
 
 # log marginal likelihoods
 print( start  $logLik_est, digits = 8)  # this is unreliably/imprecise
-#> [1] -2696.8414
+#> [1] -2696.1881
 print(-opt_out$value     , digits = 8)
-#> [1] -2696.1177
+#> [1] -2696.1193
 ```
 
 As before, we can also work with the standardized parameterization.
@@ -1472,10 +1472,10 @@ As before, we can also work with the standardized parameterization.
 std_par <- direct_to_standardized(opt_out$par, n_scales = 2L)
 std_par # the standardized parameterization
 #> (Intercept)      Binary                         
-#>     -1.5188      2.0332      0.5952     -0.2017
+#>     -1.5191      2.0336      0.5960     -0.2129
 opt_out$par # the direct parameterization 
 #> (Intercept)      Binary                         
-#>     -2.8941      3.8742      0.5952     -0.2017
+#>     -2.8916      3.8708      0.5960     -0.2129
 
 # we can map back as follows
 par_back <- standardized_to_direct(std_par, n_scales = 2L)
@@ -1484,13 +1484,13 @@ all.equal(opt_out$par, par_back, check.attributes = FALSE)
 # the proportion of variance of each effect
 attr(par_back, "variance proportions") 
 #> Residual                   
-#>   0.2754   0.4995   0.2251
+#>   0.2760   0.5009   0.2231
 
 # the proportions match
 total_var <- sum(exp(tail(opt_out$par, 2))) + 1
 exp(tail(opt_out$par, 2)) / total_var
 #>               
-#> 0.4995 0.2251
+#> 0.5009 0.2231
 
 # compute the likelihood with either parameterization
 set.seed(1L)
@@ -1500,7 +1500,7 @@ eval_pedigree_ll(ptr = ll_terms, par = opt_out$par, maxvls = 10000L,
 #> attr(,"n_fails")
 #> [1] 1
 #> attr(,"std")
-#> [1] 0.004242
+#> [1] 0.004233
 set.seed(1L)
 eval_pedigree_ll(ptr = ll_terms, par = std_par    , maxvls = 10000L, 
                  minvls = 1000L, rel_eps = 1e-3, use_aprx = TRUE, abs_eps = 0, 
@@ -1509,7 +1509,7 @@ eval_pedigree_ll(ptr = ll_terms, par = std_par    , maxvls = 10000L,
 #> attr(,"n_fails")
 #> [1] 1
 #> attr(,"std")
-#> [1] 0.004242
+#> [1] 0.004233
 
 # we can also get the same gradient with an application of the chain rule
 jac <- attr(
@@ -1537,26 +1537,26 @@ system.time(start_std <- pedmod_start(
   ptr = ll_terms, data = dat_unqiue, cluster_weights = c_weights, 
   standardized = TRUE))
 #>    user  system elapsed 
-#>  30.659   0.023  30.680
+#>   11.65    0.02   11.66
 
 # are the starting values similar?
 standardized_to_direct(start_std$par, n_scales = 2L)
 #> (Intercept)      Binary                         
-#>     -2.5782      3.4440      0.2816     -0.5741 
+#>     -2.7558      3.6812      0.4737     -0.3651 
 #> attr(,"variance proportions")
 #> Residual                   
-#>   0.3462   0.4588   0.1950
+#>   0.3030   0.4866   0.2103
 start$par
 #> (Intercept)      Binary                         
-#>     -2.5782      3.4440      0.2816     -0.5741
+#>     -2.7558      3.6812      0.4737     -0.3651
 
 # this may have required different number of gradient and function evaluations
 start_std$opt$counts
 #> function gradient 
-#>       39       39
+#>       34       34
 start    $opt$counts
 #> function gradient 
-#>       24       24
+#>       34       34
 
 # estimate the model
 system.time(
@@ -1565,7 +1565,7 @@ system.time(
     n_threads = 4L,  cluster_weights = c_weights, standardized = TRUE,
     maxvls = 5000L, rel_eps = 1e-2, minvls = 500L))
 #>    user  system elapsed 
-#>  28.171   0.000   7.133
+#>  32.420   0.008   8.263
 system.time(
   opt_out_std <- pedmod_opt(
     ptr = ll_terms, par = opt_out_quick_std$par, abs_eps = 0, use_aprx = TRUE, 
@@ -1573,33 +1573,33 @@ system.time(
     # we changed the parameters
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 #>    user  system elapsed 
-#>   63.47    0.00   15.87
+#>   99.76    0.00   24.94
 
 # we get the same
 standardized_to_direct(opt_out_std$par, n_scales = 2L)
 #> (Intercept)      Binary                         
-#>     -2.8956      3.8748      0.5933     -0.1923 
+#>     -2.9087      3.8935      0.6071     -0.1847 
 #> attr(,"variance proportions")
 #> Residual                   
-#>   0.2751   0.4979   0.2270
+#>   0.2727   0.5005   0.2268
 opt_out$par
 #> (Intercept)      Binary                         
-#>     -2.8941      3.8742      0.5952     -0.2017
+#>     -2.8916      3.8708      0.5960     -0.2129
 
 # this may have required different number of gradient and function evaluations
 opt_out_quick_std$counts
 #> function gradient 
-#>       47       26
+#>       36       29
 opt_out_quick    $counts
 #> function gradient 
-#>       45       27
+#>       31       14
 
 opt_out_std$counts
 #> function gradient 
-#>       21        7
+#>       30       10
 opt_out    $counts
 #> function gradient 
-#>       31       25
+#>       35       16
 ```
 
 ### Profile Likelihood Curve
@@ -1702,19 +1702,19 @@ pl_genetic <- pedmod_profile(
   ptr = ll_terms, par = opt_out$par, delta = .4, maxvls = 20000L, 
   minvls = 1000L, alpha = .05, abs_eps = 0, rel_eps = 1e-4, which_prof = 3L,
   use_aprx = TRUE, n_threads = 4L, verbose = TRUE, cluster_weights = c_weights)
-#> The estimate of the standard error of the log likelihood is 0.00795584. Preferably this should be below 0.001
+#> The estimate of the standard error of the log likelihood is 0.00796661. Preferably this should be below 0.001
 #> 
 #> Finding the lower limit of the profile likelihood curve
-#> Log likelihood is -2697.1260 at 0.195214 (critical value is -2698.0522)
-#> Log likelihood is -2700.2176 at -0.204786 (critical value is -2698.0522)
-#> Log likelihood is -2698.4581 at -0.010800 (critical value is -2698.0522)
-#> Log likelihood is -2697.9711 at 0.054567 (critical value is -2698.0522)
+#> Log likelihood is -2697.1218 at 0.196047 (critical value is -2698.0519)
+#> Log likelihood is -2700.2095 at -0.203953 (critical value is -2698.0519)
+#> Log likelihood is -2698.4584 at -0.010803 (critical value is -2698.0519)
+#> Log likelihood is -2697.9700 at 0.054707 (critical value is -2698.0519)
 #> 
 #> Finding the upper limit of the profile likelihood curve
-#> Log likelihood is -2696.7891 at 0.995214 (critical value is -2698.0522)
-#> Log likelihood is -2698.4170 at 1.395214 (critical value is -2698.0522)
-#> Log likelihood is -2697.8988 at 1.281332 (critical value is -2698.0522)
-#> Log likelihood is -2696.1315 at 0.595214 (critical value is -2698.0522)
+#> Log likelihood is -2696.7918 at 0.996047 (critical value is -2698.0519)
+#> Log likelihood is -2698.4218 at 1.396047 (critical value is -2698.0519)
+#> Log likelihood is -2697.8991 at 1.281305 (critical value is -2698.0519)
+#> Log likelihood is -2696.1311 at 0.596047 (critical value is -2698.0519)
 exp(pl_genetic$confs) # the confidence interval
 #>  2.50 pct. 97.50 pct. 
 #>      1.044      3.727
@@ -1724,23 +1724,23 @@ pl_env <- pedmod_profile(
   ptr = ll_terms, par = opt_out$par, delta = .6, maxvls = 20000L, 
   minvls = 1000L, alpha = .05, abs_eps = 0, rel_eps = 1e-4, which_prof = 4L,
   use_aprx = TRUE, n_threads = 4L, verbose = TRUE, cluster_weights = c_weights)
-#> The estimate of the standard error of the log likelihood is 0.00795584. Preferably this should be below 0.001
+#> The estimate of the standard error of the log likelihood is 0.00796661. Preferably this should be below 0.001
 #> 
 #> Finding the lower limit of the profile likelihood curve
-#> Log likelihood is -2697.1772 at -0.801732 (critical value is -2698.0522)
-#> Log likelihood is -2699.2953 at -1.401732 (critical value is -2698.0522)
-#> Log likelihood is -2698.2832 at -1.127622 (critical value is -2698.0522)
-#> Log likelihood is -2697.9609 at -1.037194 (critical value is -2698.0522)
+#> Log likelihood is -2697.2090 at -0.812885 (critical value is -2698.0519)
+#> Log likelihood is -2699.3365 at -1.412885 (critical value is -2698.0519)
+#> Log likelihood is -2698.2859 at -1.128323 (critical value is -2698.0519)
+#> Log likelihood is -2697.9653 at -1.038420 (critical value is -2698.0519)
 #> 
 #> Finding the upper limit of the profile likelihood curve
-#> Log likelihood is -2697.2176 at 0.398268 (critical value is -2698.0522)
-#> Log likelihood is -2699.9784 at 0.998268 (critical value is -2698.0522)
-#> Log likelihood is -2698.4343 at 0.686596 (critical value is -2698.0522)
-#> Log likelihood is -2697.9846 at 0.588406 (critical value is -2698.0522)
-#> Log likelihood is -2696.1315 at -0.201732 (critical value is -2698.0522)
+#> Log likelihood is -2697.1774 at 0.387115 (critical value is -2698.0519)
+#> Log likelihood is -2699.9222 at 0.987115 (critical value is -2698.0519)
+#> Log likelihood is -2698.4396 at 0.687705 (critical value is -2698.0519)
+#> Log likelihood is -2697.9801 at 0.587516 (critical value is -2698.0519)
+#> Log likelihood is -2696.1311 at -0.212885 (critical value is -2698.0519)
 exp(pl_env$confs) # the confidence interval
 #>  2.50 pct. 97.50 pct. 
-#>     0.3452     1.8294
+#>     0.3453     1.8291
 ```
 
 We plot the two profile likelihood curves below:
@@ -2120,7 +2120,7 @@ gr <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE,
 # check output at the starting values
 system.time(ll <- -fn(c(beta, sc)))
 #>    user  system elapsed 
-#>   7.588   0.000   1.932
+#>   8.063   0.000   2.054
 ll # the log likelihood at the starting values
 #> [1] -26042
 #> attr(,"n_fails")
@@ -2129,7 +2129,7 @@ ll # the log likelihood at the starting values
 #> [1] 0.05963
 system.time(gr_val <- gr(c(beta, sc)))
 #>    user  system elapsed 
-#>   72.44    0.00   18.26
+#>   71.57    0.00   17.99
 gr_val # the gradient at the starting values
 #> [1] 1894.83 -549.43 -235.73   47.21  -47.84
 #> attr(,"value")
@@ -2170,7 +2170,7 @@ rbind(numDeriv = numDeriv::grad(fn, c(beta, sc), indices = 0:10),
 # optimize the log likelihood approximation
 system.time(opt <- optim(c(beta, sc), fn, gr, method = "BFGS"))
 #>     user   system  elapsed 
-#> 2977.504    0.044  757.423
+#> 2926.066    0.232  745.720
 ```
 
 The output from the optimization is shown below:
@@ -2213,12 +2213,12 @@ microbenchmark(
   times = 1)
 #> Unit: seconds
 #>            expr    min     lq   mean median     uq    max neval
-#>   fn (1 thread)  7.172  7.172  7.172  7.172  7.172  7.172     1
-#>  fn (2 threads)  3.772  3.772  3.772  3.772  3.772  3.772     1
-#>  fn (4 threads)  1.971  1.971  1.971  1.971  1.971  1.971     1
-#>   gr (1 thread) 66.207 66.207 66.207 66.207 66.207 66.207     1
-#>  gr (2 threads) 34.302 34.302 34.302 34.302 34.302 34.302     1
-#>  gr (4 threads) 17.722 17.722 17.722 17.722 17.722 17.722     1
+#>   fn (1 thread)  7.289  7.289  7.289  7.289  7.289  7.289     1
+#>  fn (2 threads)  3.818  3.818  3.818  3.818  3.818  3.818     1
+#>  fn (4 threads)  2.103  2.103  2.103  2.103  2.103  2.103     1
+#>   gr (1 thread) 60.864 60.864 60.864 60.864 60.864 60.864     1
+#>  gr (2 threads) 32.282 32.282 32.282 32.282 32.282 32.282     1
+#>  gr (4 threads) 17.086 17.086 17.086 17.086 17.086 17.086     1
 ```
 
 ### Using ADAM
@@ -2320,7 +2320,7 @@ system.time(
                    verbose = FALSE, maxvls = maxpts_use, 
                    minvls = minvls))
 #>     user   system  elapsed 
-#> 2788.266    0.056  710.210
+#> 2654.642    0.104  675.830
 ```
 
 The result is shown below.
@@ -2448,7 +2448,7 @@ The new implementation is faster when the approximation is used:
 ``` r
 rowMeans(sim_res[, "time", ])
 #>          mvtnorm no aprx; Korobov   no aprx; Sobol w/ aprx; Korobov   w/ aprx; Sobol 
-#>          0.02058          0.02077          0.02366          0.01331          0.01482
+#>          0.02113          0.02137          0.02367          0.01375          0.01536
 par(mar = c(9, 4, 1, 1), bty = "l")
 boxplot(t(sim_res[, "time", ]), log = "y", las = 2)
 grid()

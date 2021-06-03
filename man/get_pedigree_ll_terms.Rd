@@ -4,12 +4,7 @@
 \alias{get_pedigree_ll_terms}
 \title{Get C++ Object for Log Marginal Likelihood Approximations}
 \usage{
-get_pedigree_ll_terms(
-  data,
-  max_threads = 1L,
-  min_sparse_len = 100L,
-  n_sequences = 8L
-)
+get_pedigree_ll_terms(data, max_threads = 1L, n_sequences = 8L)
 }
 \arguments{
 \item{data}{\code{\link{list}} where each element is a list for a cluster
@@ -22,8 +17,6 @@ scale/correlation matrix for a particular type of effect.}
 }}
 
 \item{max_threads}{maximum number of threads to use.}
-
-\item{min_sparse_len}{minimum cluster size before sparse matrices are used.}
 
 \item{n_sequences}{number of randomized quasi-Monte Carlo sequences to use.
 More samples yields a better estimate of the error but a worse

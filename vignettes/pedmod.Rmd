@@ -1476,9 +1476,7 @@ dat_arg <- lapply(dat$sim_data, function(x){
 
 # create a C++ object
 library(pedmod)
-ll_terms        <- get_pedigree_ll_terms(dat_arg, max_threads = 4L)
-ll_terms_sparse <- get_pedigree_ll_terms(dat_arg, max_threads = 4L, 
-                                         min_sparse_len = 40L)
+ll_terms <- get_pedigree_ll_terms(dat_arg, max_threads = 4L)
 
 # get the starting values. This is very fast
 y <- unlist(lapply(dat_arg, `[[`, "y"))
@@ -1523,13 +1521,6 @@ system.time(ll <- -fn(c(beta, sc)))
 ll # the log likelihood at the starting values
 system.time(gr_val <- gr(c(beta, sc)))
 gr_val # the gradient at the starting values
-
-# with the sparse scale matrices
-system.time(gr_val_sparse <- gr(c(beta, sc), use_sparse = TRUE))
-all.equal(gr_val, gr_val_sparse)
-
-# the sparse method is faster so we change the default 
-formals(gr)$use_sparse <- TRUE
 
 # standard deviation of the approximation
 sd(sapply(1:25, function(seed) fn(c(beta, sc), seed = seed)))

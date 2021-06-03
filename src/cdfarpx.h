@@ -16,6 +16,7 @@
 #include <cmath>
 #include <stdexcept>
 #include "ped-mem.h"
+#include "string"
 
 namespace pedmod {
 extern "C"
@@ -290,7 +291,7 @@ public:
         for(int j = 0; j < ndim; ++j)
           for(int i = 0; i < ndim; ++i)
             sigma_permu.at(i, j) = sigma_in.at(indices[i], indices[j]);
-        functor.prep_permutated(sigma_permu);
+        functor.prep_permutated(sigma_permu, indices.begin());
 
         return;
 
@@ -327,6 +328,8 @@ public:
       }
     } else
       *sigma_chol = 1.;
+
+    functor.prep_permutated(sigma_in, indices.begin());
   }
 
   /**
@@ -538,7 +541,7 @@ public:
     return out_type { minvls, inform, abserr, *res };
   }
 
-  inline void prep_permutated(arma::mat const&) { }
+  inline void prep_permutated(arma::mat const&, int const*) { }
 };
 
 /**
@@ -561,33 +564,40 @@ public:
   int const n_fix = X.n_cols,
      n_integrands = 1 + n_fix + scale_mats.size(),
          n_scales = scale_mats.size();
-  /// should sparse matrices be used
-  bool const use_sparse;
-  /// the scale matrices as sparse matrices
-  std::vector<arma::sp_mat> scale_mats_sparse =
-    ([&]() -> std::vector<arma::sp_mat> {
-      std::vector<arma::sp_mat> out;
-      if(use_sparse){
-        out.reserve(scale_mats.size());
-        for(arma::mat const &m : scale_mats){
-          arma::mat tmp = arma::trimatu(m);
-          tmp.diag() *= .5;
-          out.emplace_back(std::move(tmp));
-        }
-      }
-
-      return out;
-    })();
+  /// scale free constant to check that a matrix is positive semi definite
+  static constexpr double const eps_pos_def =
+    10 * std::numeric_limits<double>::epsilon();
 
 private:
   /// working memory
   static cache_mem<double> dmem;
+  static cache_mem<int   > imem;
 
   /**
-   * points to the upper triangular part of the inverse of the Cholesky
-   * decomposition.
+   * the matrix  [cluster size] x [number of fixed effect] matrix which is
+   * needed to compute the derivatives w.r.t. the slopes for the fixed effects.
    */
-  double * sigma_chol_inv;
+  double * d_fix_mat;
+
+  /**
+   * Let S^top S = Sigma be the Cholesky decomposition and C_{i1}, ..., C_{iK}
+   * be the scale matrices. Then this is the first pointer to the following for
+   * each of the K scale matrices:
+   *  a. the upper triangular part of the Cholesky decomposition of
+   *     S^-top C_{i1}S^-1, ..., S^-top C_{iK}S^-1 if the matrix
+   *     S^-top C_{ik}S^-1 is positive definite.
+   *  b. the transpose of the Eigen vectors Q scaled by the square root of the
+   *     Eigen values where QDQ^top = S^-top C_{i1}S^-1.
+   *
+   * These objects can be found increaments of n_mem * n_mem
+   */
+  double * S_C_S_matrices;
+
+  /**
+   * stores how many non-zero Eigen values each S_C_S_matrices has. It is minus
+   * one if it is a Cholesky decomposition is used.
+   */
+  std::unique_ptr<int[]> S_C_n_eigen;
 
   /// points to the upper triangular part of the inverse.
   double * sig_inv;
@@ -606,8 +616,8 @@ public:
   /// sets the scale matrices. There are no checks on the validity
   pedigree_l_factor(std::vector<arma::mat> const &scale_mats,
                     unsigned const max_threads, arma::mat const &X_in,
-                    bool const use_sparse, unsigned const max_n_sequences):
-  scale_mats(scale_mats), X(X_in.t()), use_sparse(use_sparse) {
+                    unsigned const max_n_sequences):
+  scale_mats(scale_mats), X(X_in.t()) {
     // checks
     if(scale_mats.size() < 1)
       throw std::invalid_argument("pedigree_l_factor::pedigree_l_factor: not scale matrices are passed");
@@ -624,9 +634,33 @@ public:
     sobol_wrapper<cdf<pedigree_l_factor> >::alloc_mem(
         n_mem, get_n_integrands(), max_threads, max_n_sequences);
     dmem.set_n_mem(
-      2 * n_mem * n_mem + n_mem * (n_mem + 1) + 2 * get_n_integrands() +
-        2 * n_mem,
+      4 * n_mem * n_mem + (n_mem * (n_mem + 1)) / 2 +
+        n_mem + n_mem * n_mem * scale_mats.size() +
+        n_fix * n_mem + 2 * get_n_integrands(),
       max_threads);
+    imem.set_n_mem(n_mem, max_threads);
+
+    // set up the array we need
+    S_C_n_eigen   .reset(new int    [n_scales]);
+
+    // check that the scale matrices are positive semi definite
+    arma::vec vdum(dmem.get_mem(), n_mem, false);
+    for(arma::mat const &m : scale_mats){
+      if(!arma::eig_sym(vdum, m))
+        throw std::runtime_error("Eigen decomposition failed in pedigree_l_factor constructor");
+
+      std::reverse(vdum.begin(), vdum.end());
+      if(vdum[0] < 0)
+        throw std::invalid_argument  ("None positive definite scale matrix. The largest eigen value is " +
+                                      std::to_string(vdum[0]));
+      double const eps = eps_pos_def * n_mem * vdum[0];
+      for(int i = 1; i < n_mem; ++i)
+        if(vdum[i] < -eps)
+          throw std::invalid_argument(
+              "None positive definite scale matrix. Largest eigen value is " +
+                std::to_string(vdum[0]) + " and one eigen value is equal to " +
+                std::to_string(vdum[i]));
+    }
   }
 
   inline int get_n_integrands() PEDMOD_NOEXCEPT {
@@ -666,98 +700,168 @@ public:
       return;
     norm_const = norm_constant_arg;
 
-    // create the objects we need
-    arma::mat t1(dmem.get_mem(), n_mem, n_mem, false),
-              t2(t1.end()      , n_mem, n_mem, false);
-    if(!arma::chol(t1, sig))
-      throw std::runtime_error("pedigree_ll_factor::setup: chol failed");
-    if(!arma::inv(t2, t1))
-      throw std::runtime_error("pedigree_ll_factor::setup: inv failed");
-    sigma_chol_inv = t2.end();
-    copy_upper_tri(t2, sigma_chol_inv);
+    int *indices = imem.get_mem();
+    for(int i = 0; i < n_mem; ++i)
+      indices[i] = i;
 
+    // TODO: very hard coded! See how much to increment in prep_permutated
+    double * next_mem =
+      dmem.get_mem() +
+      4 * n_mem * n_mem + n_mem * n_fix + n_mem * n_mem * n_scales;
+
+    arma::mat t1(dmem.get_mem(), n_mem, n_mem, false);
     if(!arma::inv_sympd(t1, sig))
       throw std::runtime_error("pedigree_ll_factor::setup: inv_sympd failed");
-    sig_inv = sigma_chol_inv + (n_mem * (n_mem + 1)) / 2;
+    sig_inv = next_mem;
     copy_upper_tri(t1, sig_inv);
 
     cdf_mem = sig_inv + (n_mem * (n_mem + 1)) / 2;
   }
 
-  void prep_permutated(arma::mat const &sigma_permu) {
-    // need to re-compute the inverse of the Cholesky decomposition
-    arma::mat t1(dmem.get_mem(), n_mem, n_mem, false),
-              t2(t1.end()      , n_mem, n_mem, false);
-    if(!arma::chol(t1, sigma_permu))
+  void prep_permutated(arma::mat const &sig, int const *indices) {
+    if(n_mem < 2)
+      return;
+
+    // create the objects we need
+    arma::vec dum_vec(dmem.get_mem() , n_mem, false);
+    arma::mat t1(dum_vec.end(), n_mem, n_mem, false),
+              t2(t1.end()     , n_mem, n_mem, false),
+              t3(t2.end()     , n_mem, n_mem, false),
+              t4(t3.end()     , n_mem, n_mem, false);
+    if(!arma::chol(t1, sig))
       throw std::runtime_error("pedigree_ll_factor::setup: chol failed");
     if(!arma::inv(t2, t1))
       throw std::runtime_error("pedigree_ll_factor::setup: inv failed");
-    copy_upper_tri(t2, sigma_chol_inv);
+
+    d_fix_mat = t4.end();
+    {
+      double * __restrict__ d_fix_mat_col = d_fix_mat;
+      for(int j = 0; j < n_fix; ++j, d_fix_mat_col += n_mem)
+        for(int i = 0; i < n_mem; ++i){
+          double sum(0);
+          for(int k = 0; k <= i /* inverse of Cholesky */; ++k)
+            sum += t2(k, i) * X(indices[k], j);
+          d_fix_mat_col[i] = sum;
+        }
+    }
+
+    double * next_mem = d_fix_mat + n_mem * n_fix;
+    S_C_S_matrices = next_mem;
+    {
+      unsigned s(0);
+      for(arma::mat const &m : scale_mats){
+        // setup the permutation of the scale matrix
+        for(int j = 0; j < n_mem; ++j)
+          for(int i = 0; i < n_mem; ++i)
+            t4(i, j) = m(indices[i], indices[j]);
+
+        t1 = t2.t();
+        t1 *= t4;
+        t1 *= t2;
+
+        if(arma::chol(t3, t1)){
+          S_C_n_eigen[s] = -1;
+          arma::inplace_trans(t3);
+          copy_lower_tri(t3, next_mem);
+
+        } else {
+          arma::mat &eigen_vectors = t3;
+
+          // form the Eigen decomposition
+          if(!arma::eig_sym(dum_vec, eigen_vectors, t1))
+            throw std::runtime_error("Eigen decomposition failed");
+
+          // we need the elements to be in descending order
+          std::reverse(dum_vec.begin(), dum_vec.end());
+          for(int j = 0; j < n_mem / 2; ++j){
+            double *p1 = eigen_vectors.colptr(j),
+                   *p2 = eigen_vectors.colptr(n_mem - j - 1);
+            for(int k = 0; k < n_mem; ++k, ++p1, ++p2)
+              std::iter_swap(p1, p2);
+          }
+
+          // count the number of Eigen values greater than zero
+          double const eps = eps_pos_def * n_mem * dum_vec[0];
+          int j = 1;
+          for(; j < n_mem; ++j){
+            if(dum_vec[j] < eps)
+              break;
+          }
+          int const n_eigen_vectors = j;
+          S_C_n_eigen[s] = n_eigen_vectors;
+
+          // scale the Eigen vectors
+          double * eg_val = eigen_vectors.begin();
+          for(int k = 0; k < n_eigen_vectors; ++k, eg_val += n_mem){
+            double const scale = std::sqrt(dum_vec[k]);
+            for(int j = 0; j < n_mem; ++j)
+              eg_val[j] *= scale;
+          }
+
+          std::copy(eigen_vectors.begin(),
+                    eigen_vectors.begin() + n_mem * n_eigen_vectors, next_mem);
+        }
+
+        ++s;
+        next_mem += n_mem * n_mem;
+      }
+    }
   }
 
   inline void operator()
     (double const * __restrict__ draw, double * __restrict__ out,
-     int const *indices, bool const is_permutated) {
+     int const *, bool const) {
       *out = 1;
-      double * __restrict__ const d_mu      = get_wk_mem() + 2 * get_n_integrands(),
-             * __restrict__ const d_mu_perm = d_mu + n_mem,
-             * __restrict__ const d_fix     = out + 1,
-             * __restrict__ const d_sc      = d_fix + n_fix;
-
-      std::fill(d_mu   , d_mu + n_mem            , 0.);
-      std::fill(out + 1, out + get_n_integrands(), 0.);
-
-      // handle the derivatives w.r.t. the mean
-      {
-        double *sig_chov_inv_ele = sigma_chol_inv;
-        double const * d = draw;
-        for(int c = 0; c < n_mem; ++c, ++d){
-          double *rhs = d_mu;
-          for(int r = 0; r <= c; ++r, ++rhs, ++sig_chov_inv_ele)
-            *rhs += *d * *sig_chov_inv_ele;
-        }
-      }
-
-      // permute back
-      for(int i = 0; i < n_mem; ++i)
-        d_mu_perm[indices[i]] = d_mu[i];
+      double * __restrict__ const d_fix  = out + 1,
+             * __restrict__ const d_sc   = d_fix + n_fix;
 
       // derivatives w.r.t. the fixed effects
       {
-        double const *xij = X.begin();
+        double const *xij = d_fix_mat;
         for(int j = 0; j < n_fix; ++j, xij += n_mem){
+          double sum(0.);
           for(int i = 0; i < n_mem; ++i)
-            d_fix[j] += xij[i] * d_mu_perm[i];
+            sum += xij[i] * draw[i];
+          d_fix[j] = sum;
         }
       }
 
       // handle the derivatives w.r.t. the scale parameters
-      if(use_sparse){
-        for(int s = 0; s < n_scales; ++s){
-          arma::sp_mat::const_iterator it = scale_mats_sparse[s].begin();
-          arma::sp_mat::const_iterator const end = scale_mats_sparse[s].end();
-          for(; it != end; ++it)
-            d_sc[s] += d_mu_perm[it.col()] * d_mu_perm[it.row()] * *it;
+      double * next_mat = S_C_S_matrices;
+      for(int s = 0; s < n_scales; ++s, next_mat += n_mem * n_mem){
+        if(S_C_n_eigen[s] < 0){
+          // a Cholesky decomposition was used
+          double *chol_ele = next_mat;
+
+          double sum(0);
+          double const * d = draw;
+          for(int c = 0; c < n_mem; chol_ele += n_mem - c, ++d, ++c){
+            double sqrt_term(0);
+            for(int r = 0; r < n_mem - c; ++r)
+              sqrt_term += chol_ele[r] * d[r];
+
+            sum += sqrt_term * sqrt_term;
+          }
+
+          d_sc[s] = sum * .5;
+
+        } else {
+          // an Eigen decomposition was used
+          double *eig_vec_ele = next_mat;
+          int const n_eigen_vec = S_C_n_eigen[s];
+
+          double sum(0);
+          for(int r = 0; r < n_eigen_vec; ++r, eig_vec_ele += n_mem){
+            double sqrt_term(0);
+            for(int c = 0; c < n_mem; ++c)
+              sqrt_term += eig_vec_ele[c] * draw[c];
+
+            sum += sqrt_term * sqrt_term;
+          }
+
+          d_sc[s] = sum * .5;
+
         }
-
-        return;
-      }
-
-      for(int s = 0; s < n_scales; ++s)
-        scale_mats_ptr[s] = scale_mats.at(s).begin();
-
-      for(int c = 0; c < n_mem; ++c){
-        double * __restrict__ d_mu_prod = d_mu;
-        for(int r = 0; r < c; ++r)
-          d_mu_prod[r] = d_mu_perm[r] * d_mu_perm[c];
-        d_mu_prod[c] = .5 * d_mu_perm[c] * d_mu_perm[c];
-
-        for(int s = 0; s < n_scales; ++s)
-          for(int r = 0; r <= c; ++r)
-            d_sc[s] += d_mu_prod[r] * scale_mats_ptr[s][r];
-
-        for(int s = 0; s < n_scales; ++s)
-          scale_mats_ptr[s] += n_mem;
       }
     }
 
@@ -776,7 +880,7 @@ public:
                  d_lb = f_lb ? 0 : std::exp(log_dnrm(lw) - pnorm_std(lw, 1L, 1L)),
               d_ub_ub = f_ub ? 0 : ub * d_ub,
               d_lb_lb = f_lb ? 0 : lw * d_lb,
-               sd_inv = *sigma_chol_inv;
+               sd_inv = std::sqrt(*sig_inv);
 
     out[0L] = p_ub - p_lb;
     double const d_mu = -(d_ub - d_lb) * sd_inv;

@@ -24,7 +24,6 @@ public:
   pedigree_ll_term(arma::mat const &X_in, arma::vec const &y,
                    std::vector<arma::mat> const &scale_mats,
                    unsigned const max_threads,
-                   unsigned const min_sparse_len,
                    unsigned const max_n_sequences):
     X(([&](){
       if(X_in.n_rows != y.n_elem)
@@ -60,8 +59,7 @@ public:
           }
       }
 
-      return pedigree_l_factor(
-        out, max_threads, X.t(), y.size() >= min_sparse_len, max_n_sequences);
+      return pedigree_l_factor(out, max_threads, X.t(), max_n_sequences);
     })()) {
     // checks
     if(l_factor.n_mem != n_members)

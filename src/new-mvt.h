@@ -16,6 +16,10 @@ struct rand_Korobov_output {
   int inform;
 };
 
+constexpr int n_qmc_seqs() {
+  return 64;
+}
+
 template<class Func>
 class rand_Korobov {
   static cache_mem<double> dmem;
@@ -24,7 +28,8 @@ class rand_Korobov {
 public:
   static void alloc_mem
     (int const max_ndim, int const max_nf, int const max_threads) {
-    dmem.set_n_mem(6 * max_nf + 3 * max_ndim, max_threads);
+    dmem.set_n_mem(
+      (5 + n_qmc_seqs()) * max_nf + (n_qmc_seqs() + 2) * max_ndim, max_threads);
     imem.set_n_mem(max_ndim                 , max_threads);
   }
 
@@ -80,7 +85,7 @@ public:
            * const __restrict__ finest_var = M + nf,
            * const __restrict__ kahan_comp = finest_var + nf,
            * const __restrict__ x          = kahan_comp + nf,
-           * const __restrict__ r          = x + ndim,
+           * const __restrict__ r          = x + ndim * n_qmc_seqs(),
            * const __restrict__ vk         = r + ndim,
            * const __restrict__ values     = vk + ndim,
            * const __restrict__ fs         = values + nf;
@@ -157,34 +162,30 @@ public:
           }
 
           // apply lattice rule
-          for(int k = 0; k < prime; ++k){
-            {
-              double * rj = r,
-                     * xj = x;
-              int const * prj = pr;
-              for(int j = 0; j < ndim; ++j, ++rj, ++xj, ++prj){
-                *rj += vk[*prj];
-                if(*rj > 1.)
-                  *rj -= 1.;
-                *xj = std::abs(2 * *rj - 1);
+          for(int k = 0; k < prime; ){
+            // compute the points
+            int i = 0;
+            double * x_odd  = x,
+                   * x_even = x_odd + ndim;
+            for(; i < n_qmc_seqs() / 2 and k < prime;
+                ++i, ++k, x_odd += 2 * ndim, x_even += 2 * ndim){
+              for(int j = 0; j < ndim; ++j){
+                r[j] += vk[pr[j]];
+                if(r[j] > 1.)
+                  r[j] -= 1.;
+                x_odd [j] = std::abs(2 * r[j] - 1);
+                x_even[j] = 1 - x_odd[j];
               }
             }
 
-            f(&ndim, x, &nf, fs);
-            auto update_val = [&](){
-              double *vj = values,
-                    *fsj = fs,
-                    *cmp = kahan_comp;
-              for(int j = 0; j < nf; ++j, ++vj, ++fsj, ++cmp)
-                kahan(*vj, *cmp, *fsj);
-            };
-            update_val();
+            // evaluate the integrand
+            f(&ndim, x, &nf, fs, 2 * i);
 
-            double *xj = x;
-            for(int j = 0; j < ndim; ++j, ++xj)
-              *xj = 1. - *xj;
-            f(&ndim, x, &nf, fs);
-            update_val();
+            // update the sum (values)
+            double *fsk = fs;
+            for(int k = 0; k < 2 * i; ++k, fsk += nf)
+              for(int j = 0; j < nf; ++j)
+                kahan(values[j], kahan_comp[j], fsk[j]);
           }
           for(int j = 0; j < nf; ++j)
             values[j] /= static_cast<double>(2 * prime);
@@ -263,7 +264,9 @@ public:
   (int const max_ndim, int const max_nf, int const max_threads,
    unsigned const max_n_sequences_in) {
     max_n_sequences = std::max(max_n_sequences, max_n_sequences_in);
-    dmem.set_n_mem((1 + max_n_sequences) * max_nf, max_threads);
+    dmem.set_n_mem(
+      (n_qmc_seqs() + max_n_sequences) * max_nf +
+        n_qmc_seqs() * max_ndim, max_threads);
   }
 
   static rand_Korobov_output comp
@@ -295,7 +298,8 @@ public:
 
     // initialize the objects we need
     double * const __restrict__ integrand_vals = dmem.get_mem(),
-           * const __restrict__ seq_means      = integrand_vals + nf;
+           * const __restrict__ seq_means      = integrand_vals + nf * n_qmc_seqs(),
+           * const __restrict__ draws          = seq_means + nf * max_n_sequences;
     std::fill(seq_means, seq_means + nf * n_sequences, 0);
 
     // main loop where we compute the result
@@ -305,14 +309,30 @@ public:
       // update the estimator for each of the Sobol sequences
       for(unsigned i = 0; i < n_sequences; ++i){
         double denom(n_drawn_per_seq);
-        for(size_t k = 0; k < n_draw_next; ++k, ++intvls){
-          seqs[i].next();
-          f(&ndim, seqs[i].get_qausi(), &nf, integrand_vals);
-          denom += 1;
-          double *meas = seq_means + i * nf;
-          for(int j = 0; j < nf; ++j, ++meas)
-            *meas += (integrand_vals[j] - *meas) / denom;
+
+        for(size_t k = 0; k < n_draw_next;){
+          // get the next points
+          double * __restrict__ d = draws;
+          int const n_draw_j =  std::min<int>(n_qmc_seqs(), n_draw_next - k);
+          for(int j = 0; j <n_draw_j; ++j, ++k, d += ndim){
+            seqs[i].next();
+            std::copy(seqs[i].get_qausi(), seqs[i].get_qausi() + ndim, d);
+          }
+
+          // evaluate the integrands
+          f(&ndim, draws, &nf, integrand_vals, n_draw_j);
+
+          // update the estimates
+          double * int_val = integrand_vals;
+          for(int l = 0; l < n_draw_j; ++l, int_val += nf){
+            denom += 1;
+            double *meas = seq_means + i * nf;
+            for(int j = 0; j < nf; ++j)
+              meas[j] += (int_val[j] - meas[j]) / denom;
+          }
         }
+
+        intvls += n_draw_next;
       }
 
       // update the denominator counter

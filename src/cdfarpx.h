@@ -183,7 +183,7 @@ class cdf {
          * __restrict__ const sigma_chol = upper + ndim,
          * __restrict__ const draw       =
          sigma_chol + (ndim * (ndim + 1L)) / 2L,
-         * __restrict__ const dtmp_mem   = draw + ndim;
+         * __restrict__ const dtmp_mem   = draw + ndim * n_qmc_seqs();
 
   // memory that can be used
   int * const itmp_mem = indices.end();
@@ -198,8 +198,11 @@ public:
 
     imem.set_n_mem(3 * max_ndim                                 ,
                    max_threads);
-    dmem.set_n_mem(7 * max_ndim + n_up_tri + max_ndim * max_ndim,
-                   max_threads);
+    // TODO: this is wasteful
+    dmem.set_n_mem(
+      (6 + n_qmc_seqs()) * max_ndim + n_up_tri + max_ndim * max_ndim +
+        2 * n_qmc_seqs(),
+      max_threads);
   }
 
   cdf(T_Functor &functor, arma::vec const &lower_in,
@@ -342,7 +345,7 @@ public:
    */
   void operator()(
       int const *ndim_in, double const * unifs, int const *n_integrands_in,
-      double * __restrict__ integrand_val) PEDMOD_NOEXCEPT {
+      double * __restrict__ integrand_val, int const n_draws) PEDMOD_NOEXCEPT {
 #ifdef DO_CHECKS
     if(*ndim_in         != ndim)
       throw std::invalid_argument("cdf::eval_integrand: invalid 'ndim_in'");
@@ -351,60 +354,69 @@ public:
 #endif
 
     double * const __restrict__ out = integrand_val,
-           * const __restrict__ dr  = draw;
+           * const __restrict__ dr  = draw,
+           * const __restrict__ su = dtmp_mem,
+           * const __restrict__ w  = su + n_draws;
 
-    double w(1.);
+    std::fill(w, w + n_draws, 1);
+
     double const * __restrict__ sc   = sigma_chol,
                  * __restrict__ lw   = lower,
-                 * __restrict__ up   = upper,
-                 * __restrict__ unif = unifs;
+                 * __restrict__ up   = upper;
     int const *infin_j = infin.begin();
     /* loop over variables and transform them to truncated normal
      * variables */
-    for(int j = 0; j < ndim; ++j, ++sc, ++lw, ++up, ++infin_j, ++unif){
-      double su(0.);
-      for(int i = 0; i < j; ++i, sc++)
-        su += *sc * dr[i];
-
-      double lim_l(0.),
-             lim_u(1.);
-      if(*infin_j == 0L)
-        lim_u = pnorm_use(*up - su, use_aprx);
-      else if(*infin_j == 1L)
-        lim_l = pnorm_use(*lw - su, use_aprx);
-      else if(*infin_j == 2L){
-        lim_l = pnorm_use(*lw - su, use_aprx);
-        lim_u = pnorm_use(*up - su, use_aprx);
-
+    for(int j = 0; j < ndim; ++j, ++sc, ++lw, ++up, ++infin_j){
+      std::fill(su, su + n_draws, 0);
+      {
+        double * dri = dr;
+        for(int i = 0; i < j; ++i, sc++, dri += n_draws)
+          for(int k = 0; k < n_draws; ++k)
+            su[k] += *sc * dri[k];
       }
 
-      if(lim_l < lim_u){
-        double const l_diff = lim_u - lim_l;
-        w *= l_diff;
+      int const offset = j * n_draws;
+      for(int k = 0; k < n_draws; ++k){
+        double lim_l(0.),
+               lim_u(1.);
+        if(*infin_j == 0L)
+          lim_u = pnorm_use(*up - su[k], use_aprx);
+        else if(*infin_j == 1L)
+          lim_l = pnorm_use(*lw - su[k], use_aprx);
+        else if(*infin_j == 2L){
+          lim_l = pnorm_use(*lw - su[k], use_aprx);
+          lim_u = pnorm_use(*up - su[k], use_aprx);
 
-        if(needs_last_unif or j + 1 < ndim){
-          double const quant_val = lim_l + *unif * l_diff;
-          dr[j] =
-            use_aprx ?
-            safe_qnorm_aprx(quant_val) :
-            safe_qnorm_w   (quant_val);
         }
 
-      } else {
-        w = 0;
-        std::fill(dr + j, dr + ndim, 0.);
-        break;
+        if(lim_l < lim_u){
+          double const l_diff = lim_u - lim_l;
+          w[k] *= l_diff;
+
+          if(needs_last_unif or j + 1 < ndim){
+            double const quant_val = lim_l + unifs[k * ndim + j] * l_diff;
+            dr[offset + k] =
+              use_aprx ?
+              safe_qnorm_aprx(quant_val) :
+              safe_qnorm_w   (quant_val);
+          }
+
+        } else
+          w[k] = 0;
 
       }
     }
 
     /* evaluate the integrand and weight the result. */
-    functor(dr, out, indices.begin(), is_permutated);
+    functor(dr, out, indices.begin(), is_permutated, n_draws);
 
-    w /= functor.get_norm_constant();
-    double * o = out;
-    for(int i = 0; i < n_integrands; ++i, ++o)
-      *o *= w;
+    // multiply by the density
+    for(int k = 0; k < n_draws; ++k){
+      w[k] /= functor.get_norm_constant();
+      double * o = out + k * n_integrands;
+      for(int i = 0; i < n_integrands; ++i)
+        o[i] *= w[k];
+    }
   }
 
   /**
@@ -496,13 +508,13 @@ public:
   }
 
   inline void operator()
-    (double const *, double * out, int const *, bool const)
+    (double const *, double * out, int const *, bool const, int const n_draws)
     PEDMOD_NOEXCEPT {
 #ifdef DO_CHECKS
     if(!out)
       throw std::invalid_argument("likelihood::operator(): invalid out");
 #endif
-    *out = 1;
+    std::fill(out, out + n_draws, 1);
   }
 
   constexpr static bool needs_last_unif() {
@@ -564,8 +576,8 @@ public:
   arma::mat const X;
   /// the number of fixed effects
   int const n_fix = X.n_cols,
-     n_integrands = 1 + n_fix + scale_mats.size(),
-         n_scales = scale_mats.size();
+         n_scales = scale_mats.size(),
+     n_integrands = 1 + n_fix + n_scales;
   /// scale free constant to check that a matrix is positive semi definite
   static constexpr double const eps_pos_def =
     10 * std::numeric_limits<double>::epsilon();
@@ -607,6 +619,9 @@ private:
   /// working memory to be used by cdf
   double * cdf_mem;
 
+  /// working memory that can be used for anything
+  double * interal_mem;
+
   /// array of pointer to the scale matrices' element which we will need.
   std::unique_ptr<double const *[]> scale_mats_ptr =
     std::unique_ptr<double const *[]>(new double const *[n_scales]);
@@ -635,10 +650,18 @@ public:
         n_mem, get_n_integrands(), max_threads);
     sobol_wrapper<cdf<pedigree_l_factor> >::alloc_mem(
         n_mem, get_n_integrands(), max_threads, max_n_sequences);
+    size_t const working_memory =
+      std::max(
+        // for prep_permutated
+        3 * n_mem * n_mem + n_mem + n_fix * n_mem,
+        // for operator()
+        2 * n_qmc_seqs());
     dmem.set_n_mem(
-      3 * n_mem * n_mem + (n_mem * (n_mem + 1)) / 2 +
-        n_mem + n_mem * n_mem * scale_mats.size() +
-        2 * n_fix * n_mem + 2 * get_n_integrands(),
+       (n_mem * (n_mem + 1)) / 2 +
+        n_mem * n_mem * scale_mats.size() +
+        n_fix * n_mem +
+        2 * get_n_integrands() +
+        working_memory,
       max_threads);
     imem.set_n_mem(n_scales, max_threads);
 
@@ -718,29 +741,29 @@ public:
 
     // create the objects we need. We have to account for the memory used by
     // setup
-    double * to_use =
-      dmem.get_mem() + (n_mem * (n_mem + 1)) / 2 + 2 * get_n_integrands();
-    arma::vec dum_vec(to_use  , n_mem, false);
+    double * next_mem = cdf_mem + 2 * get_n_integrands();
+    interal_mem = next_mem + n_fix * n_mem + n_mem * n_mem * n_scales;
+
+    arma::vec dum_vec(interal_mem  , n_mem, false);
     arma::mat t1(dum_vec.end(), n_mem, n_mem, false),
               t2(t1.end()     , n_mem, n_mem, false),
               t3(t2.end()     , n_mem, n_mem, false),
-         X_permu(t3.end()     , n_mem, n_fix, false),
-       d_fix_obj(X_permu.end(), n_mem, n_fix, false);
+         X_permu(t3.end()     , n_mem, n_fix, false);
     if(!arma::chol(t1, sig, "lower"))
       throw std::runtime_error("pedigree_ll_factor::setup: chol failed");
-
-    d_fix_mat = d_fix_obj.begin();
 
     // permute X
     for(int j = 0; j < n_fix; ++j)
       for(int i = 0; i < n_mem; ++i)
         X_permu(i, j) = X(indices[i], j);
 
+    d_fix_mat = next_mem;
+    arma::mat d_fix_obj(d_fix_mat, n_mem, n_fix, false);
+    next_mem += n_mem * n_fix;
     arma::solve(d_fix_obj, arma::trimatl(t1), X_permu);
 
     // set up the array we need
     S_C_n_eigen = imem.get_mem();
-    double * next_mem = d_fix_obj.end();
     S_C_S_matrices = next_mem;
     {
       unsigned s(0);
@@ -756,7 +779,8 @@ public:
 
         if(arma::chol(t3, t2)){
           S_C_n_eigen[s] = -1;
-          copy_upper_tri(t3, next_mem);
+          arma::inplace_trans(t3);
+          copy_lower_tri(t3, next_mem);
 
         } else {
           arma::mat &eigen_vectors = t3;
@@ -791,11 +815,8 @@ public:
               eg_val[j] *= scale;
           }
 
-          // copy the transpose of the eigen vectors
-          double *next_memij = next_mem;
-          for(int j = 0; j < n_mem; ++j)
-            for(int i = 0; i < n_eigen_vectors; ++i, ++next_memij)
-              *next_memij = eigen_vectors.at(j, i);
+          std::copy(eigen_vectors.begin(),
+                    eigen_vectors.begin() + n_mem * n_eigen_vectors, next_mem);
         }
 
         ++s;
@@ -806,52 +827,70 @@ public:
 
   inline void operator()
     (double const * __restrict__ draw, double * __restrict__ out,
-     int const *, bool const) {
-      *out = 1;
-      double * __restrict__       dum_vec = cdf_mem + 2 * get_n_integrands(),
-             * __restrict__ const d_fix   = out + 1,
-             * __restrict__ const d_sc    = d_fix + n_fix;
+     int const *, bool const, int const n_draws) {
+      for(int k = 0; k < n_draws; ++k)
+        out[k * n_integrands] = 1;
+
+      double * __restrict__ sum       = interal_mem,
+             * __restrict__ sqrt_term = sum + n_draws;
 
       // derivatives w.r.t. the fixed effects
       {
         double const *xij = d_fix_mat;
         for(int j = 0; j < n_fix; ++j, xij += n_mem){
-          double sum(0.);
-          for(int i = 0; i < n_mem; ++i)
-            sum += xij[i] * draw[i];
-          d_fix[j] = sum;
+          double const *d = draw;
+          std::fill(sum, sum + n_draws, 0);
+
+          for(int i = 0; i < n_mem; ++i, d += n_draws)
+            for(int k = 0; k < n_draws; ++k)
+              sum[k] += xij[i] * d[k];
+
+          int const offset = j + 1;
+          for(int k = 0; k < n_draws; ++k)
+            out[offset + k * n_integrands] = sum[k];
         }
       }
 
       // handle the derivatives w.r.t. the scale parameters
       double * next_mat = S_C_S_matrices;
       for(int s = 0; s < n_scales; ++s, next_mat += n_mem * n_mem){
-        std::fill(dum_vec, dum_vec + n_mem, 0.);
+        std::fill(sum, sum + n_draws, 0);
 
         if(S_C_n_eigen[s] < 0){
           // a Cholesky decomposition was used
           double *chol_ele = next_mat;
 
-          for(int c = 0; c < n_mem; ++c, chol_ele += c)
-            for(int r = 0; r <= c; ++r)
-              dum_vec[r] += chol_ele[r] * draw[c];
+          for(int c = 0; c < n_mem; chol_ele += n_mem - c, ++c){
+            std::fill(sqrt_term, sqrt_term + n_draws, 0);
+            double const * d = draw + c * n_draws;
+            for(int r = 0; r < n_mem - c; ++r, d += n_draws)
+              for(int k = 0; k < n_draws; ++k)
+                sqrt_term[k] += chol_ele[r] * d[k];
+
+            for(int k = 0; k < n_draws; ++k)
+              sum[k] += sqrt_term[k] * sqrt_term[k];
+          }
 
         } else {
           // an Eigen decomposition was used
           double *eig_vec_ele = next_mat;
           int const n_eigen_vec = S_C_n_eigen[s];
 
-          for(int c = 0; c < n_mem; ++c, eig_vec_ele += n_eigen_vec)
-            for(int r = 0; r < n_eigen_vec; ++r)
-              dum_vec[r] += eig_vec_ele[r] * draw[c];
+          for(int r = 0; r < n_eigen_vec; ++r, eig_vec_ele += n_mem){
+            std::fill(sqrt_term, sqrt_term + n_draws, 0);
+            double const * d = draw;
+            for(int c = 0; c < n_mem; ++c, d += n_draws)
+              for(int k = 0; k < n_draws; ++k)
+                sqrt_term[k] += eig_vec_ele[c] * d[k];
 
+            for(int k = 0; k < n_draws; ++k)
+              sum[k] += sqrt_term[k] * sqrt_term[k];
+          }
         }
 
-        double sum(0.);
-        for(int r = 0; r < n_mem; ++r)
-          sum += dum_vec[r] * dum_vec[r];
-
-        d_sc[s] = sum * .5;
+        int const offset = 1 + n_fix + s;
+        for(int k = 0; k < n_draws; ++k)
+          out[offset + k * n_integrands] = sum[k] * .5;
       }
     }
 

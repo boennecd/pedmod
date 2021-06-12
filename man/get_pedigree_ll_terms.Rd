@@ -20,7 +20,8 @@ scale/correlation matrix for a particular type of effect.}
 
 \item{n_sequences}{number of randomized quasi-Monte Carlo sequences to use.
 More samples yields a better estimate of the error but a worse
-approximation. Eight is used in the original Fortran code.}
+approximation. Eight is used in the original Fortran code. If one is
+used then the error will be set to zero because it cannot be estimated.}
 }
 \description{
 Constructs an object needed for \code{\link{eval_pedigree_ll}} and

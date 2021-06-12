@@ -994,7 +994,7 @@ res <- sapply(setNames(n_samp, n_samp), function(maxvls){
 
 # compute the errors with fewer randomized quasi-Monte Carlo sequences
 ll_terms_few_sequences <- get_pedigree_ll_terms(dat, max_threads = 4L, 
-                                                n_sequences = 2L)
+                                                n_sequences = 1L)
 res_few_seqs <- sapply(setNames(n_samp, n_samp), function(maxvls){
   sapply(c(Korobov = 0, Sobol = 1), function(method){
     # estimate the gradient
@@ -1016,19 +1016,27 @@ res_few_seqs <- sapply(setNames(n_samp, n_samp), function(maxvls){
 # we scale up the figures by 1000!
 precise_est <- mean(res["mean", , length(n_samp)])
 round(1000 * res["sd", "Korobov", ] / abs(precise_est), 6)
-#>     1000     2000     4000     8000    16000    32000    64000   128000   256000   512000 
-#> 0.063582 0.011445 0.013834 0.004873 0.002329 0.000949 0.000855 0.000219 0.000160 0.000245
+#>     1000     2000     4000     8000    16000    32000    64000   128000 
+#> 0.063582 0.011445 0.013834 0.004873 0.002329 0.000949 0.000855 0.000219 
+#>   256000   512000 
+#> 0.000160 0.000245
 round(1000 * res["sd", "Sobol"  , ] / abs(precise_est), 6)
-#>     1000     2000     4000     8000    16000    32000    64000   128000   256000   512000 
-#> 0.109163 0.046504 0.024819 0.011072 0.006090 0.003202 0.001260 0.000630 0.000336 0.000167
+#>     1000     2000     4000     8000    16000    32000    64000   128000 
+#> 0.109163 0.046504 0.024819 0.011072 0.006090 0.003202 0.001260 0.000630 
+#>   256000   512000 
+#> 0.000336 0.000167
 
 # with fewer sequences
 round(1000 * res_few_seqs["sd", "Korobov", ] / abs(precise_est), 6)
-#>     1000     2000     4000     8000    16000    32000    64000   128000   256000   512000 
-#> 0.026319 0.012389 0.003913 0.001982 0.001221 0.000437 0.000301 0.000523 0.000125 0.000034
+#>     1000     2000     4000     8000    16000    32000    64000   128000 
+#> 0.013899 0.004954 0.003055 0.002181 0.000653 0.000439 0.000625 0.000190 
+#>   256000   512000 
+#> 0.000051 0.000053
 round(1000 * res_few_seqs["sd", "Sobol"  , ] / abs(precise_est), 6)
-#>     1000     2000     4000     8000    16000    32000    64000   128000   256000   512000 
-#> 0.051360 0.021503 0.014061 0.005755 0.002830 0.001294 0.000703 0.000306 0.000160 0.000081
+#>     1000     2000     4000     8000    16000    32000    64000   128000 
+#> 0.033697 0.016389 0.007411 0.004601 0.001951 0.000921 0.000505 0.000208 
+#>   256000   512000 
+#> 0.000109 0.000063
 
 # look at log-log regressions
 coef(lm(log(res["sd", "Korobov", ]) ~ log(n_samp)))
@@ -1039,10 +1047,10 @@ coef(lm(log(res["sd", "Sobol", ]) ~ log(n_samp)))
 #>       1.609      -1.035
 coef(lm(log(res_few_seqs["sd", "Korobov", ]) ~ log(n_samp)))
 #> (Intercept) log(n_samp) 
-#>     -0.6534     -0.9502
+#>     -1.7043     -0.8761
 coef(lm(log(res_few_seqs["sd", "Sobol", ]) ~ log(n_samp)))
 #> (Intercept) log(n_samp) 
-#>      0.9099     -1.0373
+#>      0.3902     -1.0215
 
 # plot the two standard deviation estimates. Dashed lines are with fewer 
 # sequences
@@ -1057,7 +1065,11 @@ matplot(n_samp, sds, pch = c(1, 16), col = c("black", "darkgray"),
 
 <img src="man/figures/README-show_rqmc_likelihood-1.png" width="100%" />
 
-Again the randomized Korobov rules seems preferable. We fit the model
+Again the randomized Korobov rules seems preferable. In general, a
+strategy can be to use only one randomized quasi-Monte Carlo sequence as
+above and set `minvls` and `maxvls` to the desired number of samples.
+This will though imply the method cannot stop early if it is easy to
+approximate the log likelihood and its derivative. We fit the model
 again below as example of using the scrambled Sobol sequences:
 
 ``` r
@@ -1068,7 +1080,7 @@ system.time(
     n_threads = 4L, 
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L, method = 1L))
 #>    user  system elapsed 
-#>  65.572   0.117  16.626
+#>   65.85    0.00   16.60
 
 # compare the result. We start with the log likelihood
 print(-opt_out_sobol$value, digits = 8)
@@ -2434,8 +2446,10 @@ They have about the same average relative error as expected:
 
 ``` r
 rowMeans(sim_res[, "SE", ])
-#>          mvtnorm no aprx; Korobov   no aprx; Sobol w/ aprx; Korobov   w/ aprx; Sobol 
-#>        2.651e-05        3.128e-05        3.015e-05        3.062e-05        2.922e-05
+#>          mvtnorm no aprx; Korobov   no aprx; Sobol w/ aprx; Korobov 
+#>        2.651e-05        3.128e-05        3.015e-05        3.062e-05 
+#>   w/ aprx; Sobol 
+#>        2.922e-05
 par(mar = c(9, 4, 1, 1), bty = "l")
 boxplot(t(sim_res[, "SE", ]), las = 2)
 grid()
@@ -2447,8 +2461,10 @@ The new implementation is faster when the approximation is used:
 
 ``` r
 rowMeans(sim_res[, "time", ])
-#>          mvtnorm no aprx; Korobov   no aprx; Sobol w/ aprx; Korobov   w/ aprx; Sobol 
-#>         0.020799         0.017677         0.019987         0.008923         0.010396
+#>          mvtnorm no aprx; Korobov   no aprx; Sobol w/ aprx; Korobov 
+#>         0.020799         0.017677         0.019987         0.008923 
+#>   w/ aprx; Sobol 
+#>         0.010396
 par(mar = c(9, 4, 1, 1), bty = "l")
 boxplot(t(sim_res[, "time", ]), log = "y", las = 2)
 grid()

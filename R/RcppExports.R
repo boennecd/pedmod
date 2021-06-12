@@ -40,7 +40,8 @@
 #' lattice rules while one yields scrambled Sobol sequences.
 #' @param n_sequences number of randomized quasi-Monte Carlo sequences to use.
 #' More samples yields a better estimate of the error but a worse
-#' approximation. Eight is used in the original Fortran code.
+#' approximation. Eight is used in the original Fortran code. If one is
+#' used then the error will be set to zero because it cannot be estimated.
 #'
 #' @return
 #' An approximation of the CDF. The \code{"n_it"} attribute shows the number of
@@ -94,7 +95,8 @@ mvndst <- function(lower, upper, mu, sigma, maxvls = 25000L, abs_eps = .001, rel
 #' @param max_threads maximum number of threads to use.
 #' @param n_sequences number of randomized quasi-Monte Carlo sequences to use.
 #' More samples yields a better estimate of the error but a worse
-#' approximation. Eight is used in the original Fortran code.
+#' approximation. Eight is used in the original Fortran code. If one is
+#' used then the error will be set to zero because it cannot be estimated.
 #'
 #' @details
 #' An intercept column is not added to the \code{X} matrices

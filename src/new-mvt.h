@@ -39,8 +39,8 @@ public:
      double * const __restrict__ finest,
      double * const __restrict__ sdest, parallelrng::unif_drawer &sampler,
      unsigned const n_sequences){
-    if(n_sequences < 2)
-      throw std::invalid_argument("n_sequences is less than two");
+    if(n_sequences < 1)
+      throw std::invalid_argument("n_sequences is less than one");
 
     /* constants */
     constexpr int const plim(28L),
@@ -206,7 +206,7 @@ public:
       for(int k = 0; k < nf; ++k){
         // update the mean estimator and variance estimator
         double const sig_new =
-          M[k] / (sampls - 1.) / static_cast<double>(sampls);
+          sampls < 2 ? 0 : M[k] / (sampls - 1.) / static_cast<double>(sampls);
         if(finest_var[k] <= 0){
           // no prior term or deterministic
           finest[k]     = finval[k];
@@ -275,8 +275,8 @@ public:
    double * const __restrict__ finest,
    double * const __restrict__ sdest, parallelrng::unif_drawer &sampler,
    sobol::scrambling_type const method, unsigned const n_sequences){
-    if(n_sequences < 2)
-      throw std::invalid_argument("n_sequences is less than two");
+    if(n_sequences < 1)
+      throw std::invalid_argument("n_sequences is less than one");
     if(n_sequences > max_n_sequences)
       throw std::invalid_argument("n_sequences is larger then the set max_n_sequences");
     if(method == sobol::scrambling_type::none)
@@ -357,7 +357,8 @@ public:
       bool passes_conv_check = true;
       for(int j = 0; j < nf; ++j){
         double const sigma =
-          M[j] / (n_sequences - 1.) / static_cast<double>(n_sequences);
+          n_sequences < 2 ?
+          0 : M[j] / (n_sequences - 1.) / static_cast<double>(n_sequences);
         sdest[j] = std::sqrt(sigma);
         abserr = 7 / 2 * sdest[j];
         passes_conv_check &=

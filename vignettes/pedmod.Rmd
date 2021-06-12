@@ -694,7 +694,7 @@ res <- sapply(setNames(n_samp, n_samp), function(maxvls){
 
 # compute the errors with fewer randomized quasi-Monte Carlo sequences
 ll_terms_few_sequences <- get_pedigree_ll_terms(dat, max_threads = 4L, 
-                                                n_sequences = 2L)
+                                                n_sequences = 1L)
 res_few_seqs <- sapply(setNames(n_samp, n_samp), function(maxvls){
   sapply(c(Korobov = 0, Sobol = 1), function(method){
     # estimate the gradient
@@ -739,7 +739,11 @@ matplot(n_samp, sds, pch = c(1, 16), col = c("black", "darkgray"),
         add = TRUE)
 ```
 
-Again the randomized Korobov rules seems preferable.
+Again the randomized Korobov rules seems preferable. 
+In general, a strategy can be to use only one 
+randomized quasi-Monte Carlo sequence as above and set `minvls` and `maxvls` 
+to the desired number of samples. This will though imply the method cannot stop 
+early if it is easy to approximate the log likelihood and its derivative. 
 We fit the model again below as example of using the scrambled Sobol sequences:
 
 ```{r rqmc_est_simple, cache = 1}

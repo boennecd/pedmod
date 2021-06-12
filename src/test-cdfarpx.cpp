@@ -85,11 +85,29 @@ context("restrictcdf unit tests") {
     {
       auto res = pedmod::cdf<pedmod::likelihood>(
         func, lower, upper, mean, sigma, true, true).approximate(
+            100000L, abs_eps / 100, 100000L, pedmod::cdf_methods::Korobov, 0, 1);
+
+      expect_true(res.inform == 0L);
+      expect_true(res.abserr                        < 1000. * abs_eps);
+      expect_true(std::abs(res.likelihood - E_prop) < 1000. * abs_eps);
+    }
+    {
+      auto res = pedmod::cdf<pedmod::likelihood>(
+        func, lower, upper, mean, sigma, true, true).approximate(
             1000000L, abs_eps, -1, pedmod::cdf_methods::Sobol, 0, 8);
 
       expect_true(res.inform == 0L);
       expect_true(res.abserr                        < 100. * abs_eps);
       expect_true(std::abs(res.likelihood - E_prop) < 100. * abs_eps);
+    }
+    {
+      auto res = pedmod::cdf<pedmod::likelihood>(
+        func, lower, upper, mean, sigma, true, true).approximate(
+            100000L, abs_eps / 100, 100000L, pedmod::cdf_methods::Sobol, 0, 1);
+
+      expect_true(res.inform == 0L);
+      expect_true(res.abserr                        < 1000. * abs_eps);
+      expect_true(std::abs(res.likelihood - E_prop) < 1000. * abs_eps);
     }
   }
 
@@ -331,6 +349,16 @@ context("restrictcdf unit tests") {
       expect_true(res.derivs.n_elem == n_deriv);
       for(unsigned i = 0; i < n_deriv; ++i)
         expect_true(std::abs(res.derivs[i] - expect[i + 1] / expect[0]) <  eps);
+    }
+    {
+      auto const res = pedmod::cdf<pedmod::pedigree_l_factor>(
+        func, lbs, ubs, mu, sig, true, true).approximate(
+            1000000L, eps / 1000, 1000000L, pedmod::cdf_methods::Korobov, 0, 1);
+
+      expect_true(std::abs(res.likelihood - expect[0]) <  100 * eps);
+      expect_true(res.derivs.n_elem == n_deriv);
+      for(unsigned i = 0; i < n_deriv; ++i)
+        expect_true(std::abs(res.derivs[i] - expect[i + 1] / expect[0]) < 100 * eps);
     }
     {
       auto const res = pedmod::cdf<pedmod::pedigree_l_factor>(

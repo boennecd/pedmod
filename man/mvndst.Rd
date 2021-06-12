@@ -49,7 +49,8 @@ lattice rules while one yields scrambled Sobol sequences.}
 
 \item{n_sequences}{number of randomized quasi-Monte Carlo sequences to use.
 More samples yields a better estimate of the error but a worse
-approximation. Eight is used in the original Fortran code.}
+approximation. Eight is used in the original Fortran code. If one is
+used then the error will be set to zero because it cannot be estimated.}
 }
 \value{
 An approximation of the CDF. The \code{"n_it"} attribute shows the number of

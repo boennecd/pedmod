@@ -15,6 +15,8 @@ pedmod_profile(
   rel_eps,
   which_prof,
   indices = NULL,
+  maxvls_start = max(100L, as.integer(ceiling(maxvls/5))),
+  minvls_start = if (minvls < 0) minvls else minvls/5,
   do_reorder = TRUE,
   use_aprx = FALSE,
   n_threads = 1L,
@@ -58,6 +60,9 @@ profile likelihood curve should be computed for.}
 \item{indices}{zero-based vector with indices of which log marginal
 likelihood terms to include. Use \code{NULL} if all indices should be
 used.}
+
+\item{maxvls_start, minvls_start}{number of samples to use when finding the
+initial values for the optimization.}
 
 \item{do_reorder}{\code{TRUE} if a heuristic variable reordering should
 be used. \code{TRUE} is likely the best value.}

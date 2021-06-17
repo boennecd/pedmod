@@ -581,6 +581,8 @@ pedmod_sqn <- function(ptr, par, maxvls, abs_eps, rel_eps, step_factor,
 #' @param verbose logical for whether output should be printed to the console
 #' during the estimation of the profile likelihood curve.
 #' @param ... arguments passed on to \code{\link{pedmod_opt}}.
+#' @param maxvls_start,minvls_start number of samples to use when finding the
+#' initial values for the optimization.
 #'
 #' @seealso
 #' \code{\link{pedmod_opt}} and \code{\link{pedmod_sqn}}.
@@ -599,6 +601,9 @@ pedmod_sqn <- function(ptr, par, maxvls, abs_eps, rel_eps, step_factor,
 pedmod_profile <- function(ptr, par, delta, maxvls, minvls = -1L,
                            alpha = .05, abs_eps,
                            rel_eps, which_prof, indices = NULL,
+                           maxvls_start = max(100L,
+                                              as.integer(ceiling(maxvls / 5))),
+                           minvls_start = if(minvls < 0) minvls else minvls / 5,
                            do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L,
                            cluster_weights = NULL, method = 0L, seed = 1L,
                            verbose = FALSE, max_step = 15L,
@@ -651,6 +656,20 @@ pedmod_profile <- function(ptr, par, delta, maxvls, minvls = -1L,
       par[seq_along(beta_0)] <- beta_0 * sqrt(total_var)
     }
 
+    if(maxvls > maxvls_start){
+      opt_quick <- pedmod_opt(
+        ptr = ptr, par = par, maxvls = maxvls_start, abs_eps = abs_eps,
+        rel_eps = rel_eps, seed = seed, indices = indices,
+        minvls = minvls_start, do_reorder = do_reorder, use_aprx = use_aprx,
+        n_threads = n_threads, fix = which_prof,
+        cluster_weights = cluster_weights, standardized = standardized,
+        method = method, ...)
+
+      par[-which_prof] <- opt_quick$par
+      opt_quick <- wrap_optim(x, opt_quick, dir)
+    } else
+      opt_quick <- NULL
+
     opt_out <- pedmod_opt(
       ptr = ptr, par = par, maxvls = maxvls, abs_eps = abs_eps, rel_eps = rel_eps,
       seed = seed, indices = indices, minvls = minvls, do_reorder = do_reorder,
@@ -658,7 +677,8 @@ pedmod_profile <- function(ptr, par, delta, maxvls, minvls = -1L,
       cluster_weights = cluster_weights, standardized = standardized,
       method = method, ...)
 
-    wrap_optim(x, opt_out, dir)
+    structure(wrap_optim(x, opt_out, dir),
+              opt_quick = opt_quick)
   }
 
   # find points on the profile likelihood curve in either direction

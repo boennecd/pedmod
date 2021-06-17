@@ -7,75 +7,70 @@ The pedmod package provides functions to estimate models for pedigree
 data. Particularly, the package provides functions to estimate mixed
 models of the form:
 
-  
-![\\begin{align\*}&#10;Y\_{ij} \\mid \\epsilon\_{ij} = e &#10; &\\sim
-\\text{Bin}(\\Phi(\\vec\\beta^\\top\\vec x\_{ij} + e), 1)
-\\\\&#10;\\vec\\epsilon\_i = (\\epsilon\_{i1}, \\dots,
-\\epsilon\_{in\_i})^\\top &\\sim&#10; N^{(n\_i)}\\left(\\vec 0,
-\\sum\_{l = 1}^K\\sigma\_l^2 C\_{il}&#10;
-\\right)&#10;\\end{align\*}](https://render.githubusercontent.com/render/math?math=%5Cbegin%7Balign%2A%7D%0AY_%7Bij%7D%20%5Cmid%20%5Cepsilon_%7Bij%7D%20%3D%20e%20%0A%20%20%26%5Csim%20%5Ctext%7BBin%7D%28%5CPhi%28%5Cvec%5Cbeta%5E%5Ctop%5Cvec%20x_%7Bij%7D%20%2B%20e%29%2C%201%29%20%5C%5C%0A%5Cvec%5Cepsilon_i%20%3D%20%28%5Cepsilon_%7Bi1%7D%2C%20%5Cdots%2C%20%5Cepsilon_%7Bin_i%7D%29%5E%5Ctop%20%26%5Csim%0A%20%20N%5E%7B%28n_i%29%7D%5Cleft%28%5Cvec%200%2C%20%5Csum_%7Bl%20%3D%201%7D%5EK%5Csigma_l%5E2%20C_%7Bil%7D%0A%20%20%5Cright%29%0A%5Cend%7Balign%2A%7D
-"\\begin{align*}
-Y_{ij} \\mid \\epsilon_{ij} = e 
-  &\\sim \\text{Bin}(\\Phi(\\vec\\beta^\\top\\vec x_{ij} + e), 1) \\\\
-\\vec\\epsilon_i = (\\epsilon_{i1}, \\dots, \\epsilon_{in_i})^\\top &\\sim
-  N^{(n_i)}\\left(\\vec 0, \\sum_{l = 1}^K\\sigma_l^2 C_{il}
+![\\begin{align\*}
+Y\_{ij} \\mid \\epsilon\_{ij} = e 
+  &\\sim \\text{Bin}(\\Phi(\\vec\\beta^\\top\\vec x\_{ij} + e), 1) \\\\
+\\vec\\epsilon\_i = (\\epsilon\_{i1}, \\dots, \\epsilon\_{in\_i})^\\top &\\sim
+  N^{(n\_i)}\\left(\\vec 0, \\sum\_{l = 1}^K\\sigma\_l^2 C\_{il}
   \\right)
-\\end{align*}")  
+\\end{align\*}](https://render.githubusercontent.com/render/math?math=%5Cbegin%7Balign%2A%7D%0AY_%7Bij%7D%20%5Cmid%20%5Cepsilon_%7Bij%7D%20%3D%20e%20%0A%20%20%26%5Csim%20%5Ctext%7BBin%7D%28%5CPhi%28%5Cvec%5Cbeta%5E%5Ctop%5Cvec%20x_%7Bij%7D%20%2B%20e%29%2C%201%29%20%5C%5C%0A%5Cvec%5Cepsilon_i%20%3D%20%28%5Cepsilon_%7Bi1%7D%2C%20%5Cdots%2C%20%5Cepsilon_%7Bin_i%7D%29%5E%5Ctop%20%26%5Csim%0A%20%20N%5E%7B%28n_i%29%7D%5Cleft%28%5Cvec%200%2C%20%5Csum_%7Bl%20%3D%201%7D%5EK%5Csigma_l%5E2%20C_%7Bil%7D%0A%20%20%5Cright%29%0A%5Cend%7Balign%2A%7D "\begin{align*}
+Y_{ij} \mid \epsilon_{ij} = e 
+  &\sim \text{Bin}(\Phi(\vec\beta^\top\vec x_{ij} + e), 1) \\
+\vec\epsilon_i = (\epsilon_{i1}, \dots, \epsilon_{in_i})^\top &\sim
+  N^{(n_i)}\left(\vec 0, \sum_{l = 1}^K\sigma_l^2 C_{il}
+  \right)
+\end{align*}")
 
 where
-![Y\_{ij}](https://render.githubusercontent.com/render/math?math=Y_%7Bij%7D
-"Y_{ij}") is the binary outcome of interest for individual
+![Y\_{ij}](https://render.githubusercontent.com/render/math?math=Y_%7Bij%7D "Y_{ij}")
+is the binary outcome of interest for individual
 ![j](https://render.githubusercontent.com/render/math?math=j "j") in
 family/cluster
 ![i](https://render.githubusercontent.com/render/math?math=i "i"),
-![\\vec
-x\_{ij}](https://render.githubusercontent.com/render/math?math=%5Cvec%20x_%7Bij%7D
-"\\vec x_{ij}") is the individual’s known covariates,
-![\\Phi](https://render.githubusercontent.com/render/math?math=%5CPhi
-"\\Phi") is the standard normal distribution’s CDF, and
-![\\text{Bin}](https://render.githubusercontent.com/render/math?math=%5Ctext%7BBin%7D
-"\\text{Bin}") implies a binomial distribution such if ![z\\sim
-\\text{Bin}(p,
-n)](https://render.githubusercontent.com/render/math?math=z%5Csim%20%5Ctext%7BBin%7D%28p%2C%20n%29
-"z\\sim \\text{Bin}(p, n)") then the density of
+![\\vec x\_{ij}](https://render.githubusercontent.com/render/math?math=%5Cvec%20x_%7Bij%7D "\vec x_{ij}")
+is the individual’s known covariates,
+![\\Phi](https://render.githubusercontent.com/render/math?math=%5CPhi "\Phi")
+is the standard normal distribution’s CDF, and
+![\\text{Bin}](https://render.githubusercontent.com/render/math?math=%5Ctext%7BBin%7D "\text{Bin}")
+implies a binomial distribution such if
+![z\\sim \\text{Bin}(p, n)](https://render.githubusercontent.com/render/math?math=z%5Csim%20%5Ctext%7BBin%7D%28p%2C%20n%29 "z\sim \text{Bin}(p, n)")
+then the density of
 ![z](https://render.githubusercontent.com/render/math?math=z "z") is:
 
-  
-![f(z) = \\begin{pmatrix} n \\\\ z \\end{pmatrix}p^z(1 -
-p)^{n-z}](https://render.githubusercontent.com/render/math?math=f%28z%29%20%3D%20%5Cbegin%7Bpmatrix%7D%20n%20%5C%5C%20z%20%5Cend%7Bpmatrix%7Dp%5Ez%281%20-%20p%29%5E%7Bn-z%7D
-"f(z) = \\begin{pmatrix} n \\\\ z \\end{pmatrix}p^z(1 - p)^{n-z}")  
+![f(z) = \\begin{pmatrix} n \\\\ z \\end{pmatrix}p^z(1 - p)^{n-z}](https://render.githubusercontent.com/render/math?math=f%28z%29%20%3D%20%5Cbegin%7Bpmatrix%7D%20n%20%5C%5C%20z%20%5Cend%7Bpmatrix%7Dp%5Ez%281%20-%20p%29%5E%7Bn-z%7D "f(z) = \begin{pmatrix} n \\ z \end{pmatrix}p^z(1 - p)^{n-z}")
 
 A different and equivalent way of writing the model is as:
 
-  
-![\\begin{align\*}&#10;Y\_{ij} \\mid \\epsilon\_{ij} = e &#10; &=
-\\begin{cases}&#10; 1 & \\vec\\beta^\\top\\vec x\_{ij} + e \> 0
-\\\\&#10; 0 & \\text{otherwise}&#10; \\end{cases}
-\\\\&#10;\\vec\\epsilon\_i = (\\epsilon\_{i1}, \\dots,
-\\epsilon\_{in\_i})^\\top &\\sim&#10; N^{(n\_i)}\\left(\\vec 0,
-I\_{n\_i} + \\sum\_{l = 1}^K\\sigma\_l^2 C\_{il}&#10;
-\\right)&#10;\\end{align\*}](https://render.githubusercontent.com/render/math?math=%5Cbegin%7Balign%2A%7D%0AY_%7Bij%7D%20%5Cmid%20%5Cepsilon_%7Bij%7D%20%3D%20e%20%0A%20%20%26%3D%20%5Cbegin%7Bcases%7D%0A%20%20%20%201%20%26%20%5Cvec%5Cbeta%5E%5Ctop%5Cvec%20x_%7Bij%7D%20%2B%20e%20%3E%200%20%5C%5C%0A%20%20%20%200%20%26%20%5Ctext%7Botherwise%7D%0A%20%20%20%20%5Cend%7Bcases%7D%20%5C%5C%0A%5Cvec%5Cepsilon_i%20%3D%20%28%5Cepsilon_%7Bi1%7D%2C%20%5Cdots%2C%20%5Cepsilon_%7Bin_i%7D%29%5E%5Ctop%20%26%5Csim%0A%20%20N%5E%7B%28n_i%29%7D%5Cleft%28%5Cvec%200%2C%20I_%7Bn_i%7D%20%2B%20%5Csum_%7Bl%20%3D%201%7D%5EK%5Csigma_l%5E2%20C_%7Bil%7D%0A%20%20%5Cright%29%0A%5Cend%7Balign%2A%7D
-"\\begin{align*}
-Y_{ij} \\mid \\epsilon_{ij} = e 
+![\\begin{align\*}
+Y\_{ij} \\mid \\epsilon\_{ij} = e 
   &= \\begin{cases}
-    1 & \\vec\\beta^\\top\\vec x_{ij} + e \> 0 \\\\
+    1 & \\vec\\beta^\\top\\vec x\_{ij} + e &gt; 0 \\\\
     0 & \\text{otherwise}
     \\end{cases} \\\\
-\\vec\\epsilon_i = (\\epsilon_{i1}, \\dots, \\epsilon_{in_i})^\\top &\\sim
-  N^{(n_i)}\\left(\\vec 0, I_{n_i} + \\sum_{l = 1}^K\\sigma_l^2 C_{il}
+\\vec\\epsilon\_i = (\\epsilon\_{i1}, \\dots, \\epsilon\_{in\_i})^\\top &\\sim
+  N^{(n\_i)}\\left(\\vec 0, I\_{n\_i} + \\sum\_{l = 1}^K\\sigma\_l^2 C\_{il}
   \\right)
-\\end{align*}")  
+\\end{align\*}](https://render.githubusercontent.com/render/math?math=%5Cbegin%7Balign%2A%7D%0AY_%7Bij%7D%20%5Cmid%20%5Cepsilon_%7Bij%7D%20%3D%20e%20%0A%20%20%26%3D%20%5Cbegin%7Bcases%7D%0A%20%20%20%201%20%26%20%5Cvec%5Cbeta%5E%5Ctop%5Cvec%20x_%7Bij%7D%20%2B%20e%20%3E%200%20%5C%5C%0A%20%20%20%200%20%26%20%5Ctext%7Botherwise%7D%0A%20%20%20%20%5Cend%7Bcases%7D%20%5C%5C%0A%5Cvec%5Cepsilon_i%20%3D%20%28%5Cepsilon_%7Bi1%7D%2C%20%5Cdots%2C%20%5Cepsilon_%7Bin_i%7D%29%5E%5Ctop%20%26%5Csim%0A%20%20N%5E%7B%28n_i%29%7D%5Cleft%28%5Cvec%200%2C%20I_%7Bn_i%7D%20%2B%20%5Csum_%7Bl%20%3D%201%7D%5EK%5Csigma_l%5E2%20C_%7Bil%7D%0A%20%20%5Cright%29%0A%5Cend%7Balign%2A%7D "\begin{align*}
+Y_{ij} \mid \epsilon_{ij} = e 
+  &= \begin{cases}
+    1 & \vec\beta^\top\vec x_{ij} + e > 0 \\
+    0 & \text{otherwise}
+    \end{cases} \\
+\vec\epsilon_i = (\epsilon_{i1}, \dots, \epsilon_{in_i})^\top &\sim
+  N^{(n_i)}\left(\vec 0, I_{n_i} + \sum_{l = 1}^K\sigma_l^2 C_{il}
+  \right)
+\end{align*}")
 
 where
-![I\_{n\_i}](https://render.githubusercontent.com/render/math?math=I_%7Bn_i%7D
-"I_{n_i}") is the
+![I\_{n\_i}](https://render.githubusercontent.com/render/math?math=I_%7Bn_i%7D "I_{n_i}")
+is the
 ![n\_i](https://render.githubusercontent.com/render/math?math=n_i "n_i")
 dimensional identity matrix which comes from the unshared/individual
 specific random effect. This effect is always included.
 
 The
-![C\_{il}](https://render.githubusercontent.com/render/math?math=C_%7Bil%7D
-"C_{il}")s are known scale/correlation matrices where each of the
+![C\_{il}](https://render.githubusercontent.com/render/math?math=C_%7Bil%7D "C_{il}")s
+are known scale/correlation matrices where each of the
 ![l](https://render.githubusercontent.com/render/math?math=l "l")’th
 types correspond to a type of effect. An arbitrary number of such
 matrices can be passed to include e.g. a genetic effect, a maternal
@@ -83,131 +78,116 @@ effect, a paternal, an effect of a shared adult environment etc.
 Usually, these matrices are correlation matrices as this simplifies
 later interpretation and we will assume that all the matrices are
 correlation matrices. A typical example is that
-![C\_{il}](https://render.githubusercontent.com/render/math?math=C_%7Bil%7D
-"C_{il}") is two times the kinship matrix in which case we call:
+![C\_{il}](https://render.githubusercontent.com/render/math?math=C_%7Bil%7D "C_{il}")
+is two times the kinship matrix in which case we call:
 
-  
-![\\frac{\\sigma\_l^2}{1 + \\sum\_{k
-= 1}^K\\sigma\_k^2}](https://render.githubusercontent.com/render/math?math=%5Cfrac%7B%5Csigma_l%5E2%7D%7B1%20%2B%20%5Csum_%7Bk%20%3D%201%7D%5EK%5Csigma_k%5E2%7D
-"\\frac{\\sigma_l^2}{1 + \\sum_{k = 1}^K\\sigma_k^2}")  
+![\\frac{\\sigma\_l^2}{1 + \\sum\_{k = 1}^K\\sigma\_k^2}](https://render.githubusercontent.com/render/math?math=%5Cfrac%7B%5Csigma_l%5E2%7D%7B1%20%2B%20%5Csum_%7Bk%20%3D%201%7D%5EK%5Csigma_k%5E2%7D "\frac{\sigma_l^2}{1 + \sum_{k = 1}^K\sigma_k^2}")
 
 the heritability. That is, the proportion of the variance attributable
-to the the ![l](https://render.githubusercontent.com/render/math?math=l
-"l")’th effect which in this case is the direct genetic effect. The
-scale parameters, the
-![\\sigma\_k^2](https://render.githubusercontent.com/render/math?math=%5Csigma_k%5E2
-"\\sigma_k^2")s, may be the primary interest in an analysis. The scale
-in the model cannot be identified. That is, an equivalent model is:
+to the the
+![l](https://render.githubusercontent.com/render/math?math=l "l")’th
+effect which in this case is the direct genetic effect. The scale
+parameters, the
+![\\sigma\_k^2](https://render.githubusercontent.com/render/math?math=%5Csigma_k%5E2 "\sigma_k^2")s,
+may be the primary interest in an analysis. The scale in the model
+cannot be identified. That is, an equivalent model is:
 
-  
-![\\begin{align\*}&#10;Y\_{ij} \\mid \\epsilon\_{ij} = e &#10; &=
-\\begin{cases}&#10; 1 & \\sqrt\\phi\\vec\\beta^\\top\\vec x\_{ij} + e
-\> 0 \\\\&#10; 0 & \\text{otherwise}&#10; \\end{cases}
-\\\\&#10;\\vec\\epsilon\_i = (\\epsilon\_{i1}, \\dots,
-\\epsilon\_{in\_i})^\\top &\\sim&#10; N^{(n\_i)}\\left(\\vec 0, &#10;
-\\phi\\left(I\_{n\_i} + \\sum\_{l = 1}^K\\sigma\_l^2
-C\_{il}\\right)&#10;
-\\right)&#10;\\end{align\*}](https://render.githubusercontent.com/render/math?math=%5Cbegin%7Balign%2A%7D%0AY_%7Bij%7D%20%5Cmid%20%5Cepsilon_%7Bij%7D%20%3D%20e%20%0A%20%20%26%3D%20%5Cbegin%7Bcases%7D%0A%20%20%20%201%20%26%20%5Csqrt%5Cphi%5Cvec%5Cbeta%5E%5Ctop%5Cvec%20x_%7Bij%7D%20%2B%20e%20%3E%200%20%5C%5C%0A%20%20%20%200%20%26%20%5Ctext%7Botherwise%7D%0A%20%20%20%20%5Cend%7Bcases%7D%20%5C%5C%0A%5Cvec%5Cepsilon_i%20%3D%20%28%5Cepsilon_%7Bi1%7D%2C%20%5Cdots%2C%20%5Cepsilon_%7Bin_i%7D%29%5E%5Ctop%20%26%5Csim%0A%20%20N%5E%7B%28n_i%29%7D%5Cleft%28%5Cvec%200%2C%20%0A%20%20%5Cphi%5Cleft%28I_%7Bn_i%7D%20%2B%20%5Csum_%7Bl%20%3D%201%7D%5EK%5Csigma_l%5E2%20C_%7Bil%7D%5Cright%29%0A%20%20%5Cright%29%0A%5Cend%7Balign%2A%7D
-"\\begin{align*}
-Y_{ij} \\mid \\epsilon_{ij} = e 
+![\\begin{align\*}
+Y\_{ij} \\mid \\epsilon\_{ij} = e 
   &= \\begin{cases}
-    1 & \\sqrt\\phi\\vec\\beta^\\top\\vec x_{ij} + e \> 0 \\\\
+    1 & \\sqrt\\phi\\vec\\beta^\\top\\vec x\_{ij} + e &gt; 0 \\\\
     0 & \\text{otherwise}
     \\end{cases} \\\\
-\\vec\\epsilon_i = (\\epsilon_{i1}, \\dots, \\epsilon_{in_i})^\\top &\\sim
-  N^{(n_i)}\\left(\\vec 0, 
-  \\phi\\left(I_{n_i} + \\sum_{l = 1}^K\\sigma_l^2 C_{il}\\right)
+\\vec\\epsilon\_i = (\\epsilon\_{i1}, \\dots, \\epsilon\_{in\_i})^\\top &\\sim
+  N^{(n\_i)}\\left(\\vec 0, 
+  \\phi\\left(I\_{n\_i} + \\sum\_{l = 1}^K\\sigma\_l^2 C\_{il}\\right)
   \\right)
-\\end{align*}")  
+\\end{align\*}](https://render.githubusercontent.com/render/math?math=%5Cbegin%7Balign%2A%7D%0AY_%7Bij%7D%20%5Cmid%20%5Cepsilon_%7Bij%7D%20%3D%20e%20%0A%20%20%26%3D%20%5Cbegin%7Bcases%7D%0A%20%20%20%201%20%26%20%5Csqrt%5Cphi%5Cvec%5Cbeta%5E%5Ctop%5Cvec%20x_%7Bij%7D%20%2B%20e%20%3E%200%20%5C%5C%0A%20%20%20%200%20%26%20%5Ctext%7Botherwise%7D%0A%20%20%20%20%5Cend%7Bcases%7D%20%5C%5C%0A%5Cvec%5Cepsilon_i%20%3D%20%28%5Cepsilon_%7Bi1%7D%2C%20%5Cdots%2C%20%5Cepsilon_%7Bin_i%7D%29%5E%5Ctop%20%26%5Csim%0A%20%20N%5E%7B%28n_i%29%7D%5Cleft%28%5Cvec%200%2C%20%0A%20%20%5Cphi%5Cleft%28I_%7Bn_i%7D%20%2B%20%5Csum_%7Bl%20%3D%201%7D%5EK%5Csigma_l%5E2%20C_%7Bil%7D%5Cright%29%0A%20%20%5Cright%29%0A%5Cend%7Balign%2A%7D "\begin{align*}
+Y_{ij} \mid \epsilon_{ij} = e 
+  &= \begin{cases}
+    1 & \sqrt\phi\vec\beta^\top\vec x_{ij} + e > 0 \\
+    0 & \text{otherwise}
+    \end{cases} \\
+\vec\epsilon_i = (\epsilon_{i1}, \dots, \epsilon_{in_i})^\top &\sim
+  N^{(n_i)}\left(\vec 0, 
+  \phi\left(I_{n_i} + \sum_{l = 1}^K\sigma_l^2 C_{il}\right)
+  \right)
+\end{align*}")
 
-for any ![\\phi
-\> 0](https://render.githubusercontent.com/render/math?math=%5Cphi%20%3E%200
-"\\phi \> 0"). A common option other than ![\\phi
-= 1](https://render.githubusercontent.com/render/math?math=%5Cphi%20%3D%201
-"\\phi = 1") is to set ![\\phi = (1 + \\sum\_{l = 1}^K
-\\sigma\_l^2)^{-1}](https://render.githubusercontent.com/render/math?math=%5Cphi%20%3D%20%281%20%2B%20%5Csum_%7Bl%20%3D%201%7D%5EK%20%5Csigma_l%5E2%29%5E%7B-1%7D
-"\\phi = (1 + \\sum_{l = 1}^K \\sigma_l^2)^{-1}"). This has the effect
-that
+for any
+![\\phi &gt; 0](https://render.githubusercontent.com/render/math?math=%5Cphi%20%3E%200 "\phi > 0").
+A common option other than
+![\\phi = 1](https://render.githubusercontent.com/render/math?math=%5Cphi%20%3D%201 "\phi = 1")
+is to set
+![\\phi = (1 + \\sum\_{l = 1}^K \\sigma\_l^2)^{-1}](https://render.githubusercontent.com/render/math?math=%5Cphi%20%3D%20%281%20%2B%20%5Csum_%7Bl%20%3D%201%7D%5EK%20%5Csigma_l%5E2%29%5E%7B-1%7D "\phi = (1 + \sum_{l = 1}^K \sigma_l^2)^{-1}").
+This has the effect that
 
-  
-![\\frac{\\sigma\_l^2}{1 + \\sum\_{k = 1}^K\\sigma\_k^2} =
-\\phi\\sigma\_l^2](https://render.githubusercontent.com/render/math?math=%5Cfrac%7B%5Csigma_l%5E2%7D%7B1%20%2B%20%5Csum_%7Bk%20%3D%201%7D%5EK%5Csigma_k%5E2%7D%20%3D%20%5Cphi%5Csigma_l%5E2
-"\\frac{\\sigma_l^2}{1 + \\sum_{k = 1}^K\\sigma_k^2} = \\phi\\sigma_l^2")  
+![\\frac{\\sigma\_l^2}{1 + \\sum\_{k = 1}^K\\sigma\_k^2} = \\phi\\sigma\_l^2](https://render.githubusercontent.com/render/math?math=%5Cfrac%7B%5Csigma_l%5E2%7D%7B1%20%2B%20%5Csum_%7Bk%20%3D%201%7D%5EK%5Csigma_k%5E2%7D%20%3D%20%5Cphi%5Csigma_l%5E2 "\frac{\sigma_l^2}{1 + \sum_{k = 1}^K\sigma_k^2} = \phi\sigma_l^2")
 
 is the proportion of variance attributable to the
 ![l](https://render.githubusercontent.com/render/math?math=l "l")’th
 effect (assuming all
-![C\_{il}](https://render.githubusercontent.com/render/math?math=C_%7Bil%7D
-"C_{il}") matrices are correlation matrices). Moreover,
-![\\phi](https://render.githubusercontent.com/render/math?math=%5Cphi
-"\\phi") is the proportion of variance attributable the individual
-specific effect.
+![C\_{il}](https://render.githubusercontent.com/render/math?math=C_%7Bil%7D "C_{il}")
+matrices are correlation matrices). Moreover,
+![\\phi](https://render.githubusercontent.com/render/math?math=%5Cphi "\phi")
+is the proportion of variance attributable the individual specific
+effect.
 
-The parameterizations used in the package are ![\\phi
-= 1](https://render.githubusercontent.com/render/math?math=%5Cphi%20%3D%201
-"\\phi = 1") which we call the direct parameterizations and ![(1 +
-\\sum\_{l = 1}^K
-\\sigma\_l^2)^{-1}](https://render.githubusercontent.com/render/math?math=%281%20%2B%20%5Csum_%7Bl%20%3D%201%7D%5EK%20%5Csigma_l%5E2%29%5E%7B-1%7D
-"(1 + \\sum_{l = 1}^K \\sigma_l^2)^{-1}") which we call the standardized
-parameterizations. The latter have the advantage that it is easier to
-interpret as the scale parameters are the proportion of variance
-attributable to each effect (assuming that only correlation matrices are
-used) and the
-![\\sqrt\\phi\\vec\\beta](https://render.githubusercontent.com/render/math?math=%5Csqrt%5Cphi%5Cvec%5Cbeta
-"\\sqrt\\phi\\vec\\beta") are often very close the estimate from a GLM
-(that is, the model without the other random effects) when the
-covariates are unrelated to random effects that are added to the model.
-The latter makes it easy to find starting values.
+The parameterizations used in the package are
+![\\phi = 1](https://render.githubusercontent.com/render/math?math=%5Cphi%20%3D%201 "\phi = 1")
+which we call the direct parameterizations and
+![(1 + \\sum\_{l = 1}^K \\sigma\_l^2)^{-1}](https://render.githubusercontent.com/render/math?math=%281%20%2B%20%5Csum_%7Bl%20%3D%201%7D%5EK%20%5Csigma_l%5E2%29%5E%7B-1%7D "(1 + \sum_{l = 1}^K \sigma_l^2)^{-1}")
+which we call the standardized parameterizations. The latter have the
+advantage that it is easier to interpret as the scale parameters are the
+proportion of variance attributable to each effect (assuming that only
+correlation matrices are used) and the
+![\\sqrt\\phi\\vec\\beta](https://render.githubusercontent.com/render/math?math=%5Csqrt%5Cphi%5Cvec%5Cbeta "\sqrt\phi\vec\beta")
+are often very close the estimate from a GLM (that is, the model without
+the other random effects) when the covariates are unrelated to random
+effects that are added to the model. The latter makes it easy to find
+starting values.
 
 For the above reason, two parameterization are used. For the direct
-parameterization where ![\\phi
-= 1](https://render.githubusercontent.com/render/math?math=%5Cphi%20%3D%201
-"\\phi = 1"), we work directly with
-![\\vec\\beta](https://render.githubusercontent.com/render/math?math=%5Cvec%5Cbeta
-"\\vec\\beta"), and we use ![\\theta\_l =
-\\log\\sigma\_l^2](https://render.githubusercontent.com/render/math?math=%5Ctheta_l%20%3D%20%5Clog%5Csigma_l%5E2
-"\\theta_l = \\log\\sigma_l^2"). For the standardized parameterization
-where ![\\phi = (1 + \\sum\_{l = 1}^K
-\\sigma\_l^2)^{-1}](https://render.githubusercontent.com/render/math?math=%5Cphi%20%3D%20%281%20%2B%20%5Csum_%7Bl%20%3D%201%7D%5EK%20%5Csigma_l%5E2%29%5E%7B-1%7D
-"\\phi = (1 + \\sum_{l = 1}^K \\sigma_l^2)^{-1}"), we work with ![\\phi
-= (1 + \\sum\_{l = 1}^K
-\\sigma\_l^2)^{-1}](https://render.githubusercontent.com/render/math?math=%5Cphi%20%3D%20%281%20%2B%20%5Csum_%7Bl%20%3D%201%7D%5EK%20%5Csigma_l%5E2%29%5E%7B-1%7D
-"\\phi = (1 + \\sum_{l = 1}^K \\sigma_l^2)^{-1}"), ![\\vec\\gamma =
-\\sqrt\\phi\\vec\\beta](https://render.githubusercontent.com/render/math?math=%5Cvec%5Cgamma%20%3D%20%5Csqrt%5Cphi%5Cvec%5Cbeta
-"\\vec\\gamma = \\sqrt\\phi\\vec\\beta"), and
+parameterization where
+![\\phi = 1](https://render.githubusercontent.com/render/math?math=%5Cphi%20%3D%201 "\phi = 1"),
+we work directly with
+![\\vec\\beta](https://render.githubusercontent.com/render/math?math=%5Cvec%5Cbeta "\vec\beta"),
+and we use
+![\\theta\_l = \\log\\sigma\_l^2](https://render.githubusercontent.com/render/math?math=%5Ctheta_l%20%3D%20%5Clog%5Csigma_l%5E2 "\theta_l = \log\sigma_l^2").
+For the standardized parameterization where
+![\\phi = (1 + \\sum\_{l = 1}^K \\sigma\_l^2)^{-1}](https://render.githubusercontent.com/render/math?math=%5Cphi%20%3D%20%281%20%2B%20%5Csum_%7Bl%20%3D%201%7D%5EK%20%5Csigma_l%5E2%29%5E%7B-1%7D "\phi = (1 + \sum_{l = 1}^K \sigma_l^2)^{-1}"),
+we work with
+![\\phi = (1 + \\sum\_{l = 1}^K \\sigma\_l^2)^{-1}](https://render.githubusercontent.com/render/math?math=%5Cphi%20%3D%20%281%20%2B%20%5Csum_%7Bl%20%3D%201%7D%5EK%20%5Csigma_l%5E2%29%5E%7B-1%7D "\phi = (1 + \sum_{l = 1}^K \sigma_l^2)^{-1}"),
+![\\vec\\gamma = \\sqrt\\phi\\vec\\beta](https://render.githubusercontent.com/render/math?math=%5Cvec%5Cgamma%20%3D%20%5Csqrt%5Cphi%5Cvec%5Cbeta "\vec\gamma = \sqrt\phi\vec\beta"),
+and
 
-  
-![&#10;\\phi\\sigma\_l^2 = \\frac{\\exp(\\psi\_l)}{1 +\\sum\_{l
-= 1}^k\\exp(\\psi\_l)}\\Leftrightarrow\\sigma\_l^2 =
-\\exp(\\psi\_l).&#10;](https://render.githubusercontent.com/render/math?math=%0A%5Cphi%5Csigma_l%5E2%20%3D%20%5Cfrac%7B%5Cexp%28%5Cpsi_l%29%7D%7B1%20%2B%5Csum_%7Bl%20%3D%201%7D%5Ek%5Cexp%28%5Cpsi_l%29%7D%5CLeftrightarrow%5Csigma_l%5E2%20%3D%20%5Cexp%28%5Cpsi_l%29.%0A
-"
-\\phi\\sigma_l^2 = \\frac{\\exp(\\psi_l)}{1 +\\sum_{l = 1}^k\\exp(\\psi_l)}\\Leftrightarrow\\sigma_l^2 = \\exp(\\psi_l).
-")  
+![
+\\phi\\sigma\_l^2 = \\frac{\\exp(\\psi\_l)}{1 +\\sum\_{l = 1}^k\\exp(\\psi\_l)}\\Leftrightarrow\\sigma\_l^2 = \\exp(\\psi\_l).
+](https://render.githubusercontent.com/render/math?math=%0A%5Cphi%5Csigma_l%5E2%20%3D%20%5Cfrac%7B%5Cexp%28%5Cpsi_l%29%7D%7B1%20%2B%5Csum_%7Bl%20%3D%201%7D%5Ek%5Cexp%28%5Cpsi_l%29%7D%5CLeftrightarrow%5Csigma_l%5E2%20%3D%20%5Cexp%28%5Cpsi_l%29.%0A "
+\phi\sigma_l^2 = \frac{\exp(\psi_l)}{1 +\sum_{l = 1}^k\exp(\psi_l)}\Leftrightarrow\sigma_l^2 = \exp(\psi_l).
+")
 
 This package provides randomized quasi-Monte Carlo methods to
 approximate the log marginal likelihood for these types of models with
 an arbitrary number scale matrices,
 ![K](https://render.githubusercontent.com/render/math?math=K "K"), and
 the derivatives with respect to
-![(\\vec\\beta^\\top, 2\\log\\sigma\_1,\\dots, 2\\log\\sigma\_K)^\\top](https://render.githubusercontent.com/render/math?math=%28%5Cvec%5Cbeta%5E%5Ctop%2C%202%5Clog%5Csigma_1%2C%5Cdots%2C%202%5Clog%5Csigma_K%29%5E%5Ctop
-"(\\vec\\beta^\\top, 2\\log\\sigma_1,\\dots, 2\\log\\sigma_K)^\\top")
-(that is, we work with ![\\psi\_k
-= 2\\log\\sigma\_k](https://render.githubusercontent.com/render/math?math=%5Cpsi_k%20%3D%202%5Clog%5Csigma_k
-"\\psi_k = 2\\log\\sigma_k")) or ![(\\vec\\gamma^\\top, \\psi\_1,
-\\dots,
-\\psi\_K)](https://render.githubusercontent.com/render/math?math=%28%5Cvec%5Cgamma%5E%5Ctop%2C%20%5Cpsi_1%2C%20%5Cdots%2C%20%5Cpsi_K%29
-"(\\vec\\gamma^\\top, \\psi_1, \\dots, \\psi_K)").
+![(\\vec\\beta^\\top, 2\\log\\sigma\_1,\\dots, 2\\log\\sigma\_K)^\\top](https://render.githubusercontent.com/render/math?math=%28%5Cvec%5Cbeta%5E%5Ctop%2C%202%5Clog%5Csigma_1%2C%5Cdots%2C%202%5Clog%5Csigma_K%29%5E%5Ctop "(\vec\beta^\top, 2\log\sigma_1,\dots, 2\log\sigma_K)^\top")
+(that is, we work with
+![\\psi\_k = 2\\log\\sigma\_k](https://render.githubusercontent.com/render/math?math=%5Cpsi_k%20%3D%202%5Clog%5Csigma_k "\psi_k = 2\log\sigma_k"))
+or
+![(\\vec\\gamma^\\top, \\psi\_1, \\dots, \\psi\_K)](https://render.githubusercontent.com/render/math?math=%28%5Cvec%5Cgamma%5E%5Ctop%2C%20%5Cpsi_1%2C%20%5Cdots%2C%20%5Cpsi_K%29 "(\vec\gamma^\top, \psi_1, \dots, \psi_K)").
 
 We have re-written the Fortran code by Genz and Bretz (2002) in C++,
 made it easy to extend from a log marginal likelihood approximation to
 other approximations such as the derivatives, and added less precise but
 faster approximations of the
-![\\Phi](https://render.githubusercontent.com/render/math?math=%5CPhi
-"\\Phi") and
-![\\Phi^{-1}](https://render.githubusercontent.com/render/math?math=%5CPhi%5E%7B-1%7D
-"\\Phi^{-1}"). Our own experience suggests that using the latter has a
-small effect on the precision of the result but can yield substantial
-reduction in computation times for moderate sized families/clusters.
+![\\Phi](https://render.githubusercontent.com/render/math?math=%5CPhi "\Phi")
+and
+![\\Phi^{-1}](https://render.githubusercontent.com/render/math?math=%5CPhi%5E%7B-1%7D "\Phi^{-1}").
+Our own experience suggests that using the latter has a small effect on
+the precision of the result but can yield substantial reduction in
+computation times for moderate sized families/clusters.
 
 The approximation by Genz and Bretz (2002) have already been used to
 estimate these types of models (Pawitan et al. 2004). However, not
@@ -300,29 +280,26 @@ sim_dat <- function(n_fams, beta = c(-3, 1, 2), sig_sq = 3){
 
 The model is
 
-  
-![\\begin{align\*}&#10; Y\_{ij} &= \\begin{cases} 1 & \\beta\_0 +
-\\beta\_1 X\_{ij} + \\beta\_2 B\_{ij} + G\_{ij} + R\_{ij} \> 0 \\\\ 0 &
-\\text{otherwise} \\end{cases} \\\\&#10; X\_{ij} &\\sim N(0, 1)
-\\\\&#10; B\_{ij} &\\sim \\text{Bin}(0.5, 1) \\\\&#10; (G\_{i1}, \\dots
-G\_{in\_{i}})^\\top &\\sim N^{(n\_i)}(\\vec 0, \\sigma^2 C\_{i1})
-\\\\&#10; R\_{ij} &\\sim
-N(0, 1)\\end{align\*}](https://render.githubusercontent.com/render/math?math=%5Cbegin%7Balign%2A%7D%0A%20Y_%7Bij%7D%20%26%3D%20%5Cbegin%7Bcases%7D%201%20%26%20%5Cbeta_0%20%2B%20%5Cbeta_1%20X_%7Bij%7D%20%2B%20%5Cbeta_2%20B_%7Bij%7D%20%2B%20G_%7Bij%7D%20%2B%20R_%7Bij%7D%20%3E%200%20%5C%5C%200%20%26%20%5Ctext%7Botherwise%7D%20%5Cend%7Bcases%7D%20%5C%5C%0A%20X_%7Bij%7D%20%26%5Csim%20N%280%2C%201%29%20%5C%5C%0A%20B_%7Bij%7D%20%26%5Csim%20%5Ctext%7BBin%7D%280.5%2C%201%29%20%5C%5C%0A%20%28G_%7Bi1%7D%2C%20%5Cdots%20G_%7Bin_%7Bi%7D%7D%29%5E%5Ctop%20%26%5Csim%20N%5E%7B%28n_i%29%7D%28%5Cvec%200%2C%20%5Csigma%5E2%20C_%7Bi1%7D%29%20%5C%5C%0A%20R_%7Bij%7D%20%26%5Csim%20N%280%2C%201%29%5Cend%7Balign%2A%7D
-"\\begin{align*}
- Y_{ij} &= \\begin{cases} 1 & \\beta_0 + \\beta_1 X_{ij} + \\beta_2 B_{ij} + G_{ij} + R_{ij} \> 0 \\\\ 0 & \\text{otherwise} \\end{cases} \\\\
- X_{ij} &\\sim N(0, 1) \\\\
- B_{ij} &\\sim \\text{Bin}(0.5, 1) \\\\
- (G_{i1}, \\dots G_{in_{i}})^\\top &\\sim N^{(n_i)}(\\vec 0, \\sigma^2 C_{i1}) \\\\
- R_{ij} &\\sim N(0, 1)\\end{align*}")  
+![\\begin{align\*}
+ Y\_{ij} &= \\begin{cases} 1 & \\beta\_0 + \\beta\_1 X\_{ij} + \\beta\_2 B\_{ij} + G\_{ij} + R\_{ij} &gt; 0 \\\\ 0 & \\text{otherwise} \\end{cases} \\\\
+ X\_{ij} &\\sim N(0, 1) \\\\
+ B\_{ij} &\\sim \\text{Bin}(0.5, 1) \\\\
+ (G\_{i1}, \\dots G\_{in\_{i}})^\\top &\\sim N^{(n\_i)}(\\vec 0, \\sigma^2 C\_{i1}) \\\\
+ R\_{ij} &\\sim N(0, 1)\\end{align\*}](https://render.githubusercontent.com/render/math?math=%5Cbegin%7Balign%2A%7D%0A%20Y_%7Bij%7D%20%26%3D%20%5Cbegin%7Bcases%7D%201%20%26%20%5Cbeta_0%20%2B%20%5Cbeta_1%20X_%7Bij%7D%20%2B%20%5Cbeta_2%20B_%7Bij%7D%20%2B%20G_%7Bij%7D%20%2B%20R_%7Bij%7D%20%3E%200%20%5C%5C%200%20%26%20%5Ctext%7Botherwise%7D%20%5Cend%7Bcases%7D%20%5C%5C%0A%20X_%7Bij%7D%20%26%5Csim%20N%280%2C%201%29%20%5C%5C%0A%20B_%7Bij%7D%20%26%5Csim%20%5Ctext%7BBin%7D%280.5%2C%201%29%20%5C%5C%0A%20%28G_%7Bi1%7D%2C%20%5Cdots%20G_%7Bin_%7Bi%7D%7D%29%5E%5Ctop%20%26%5Csim%20N%5E%7B%28n_i%29%7D%28%5Cvec%200%2C%20%5Csigma%5E2%20C_%7Bi1%7D%29%20%5C%5C%0A%20R_%7Bij%7D%20%26%5Csim%20N%280%2C%201%29%5Cend%7Balign%2A%7D "\begin{align*}
+ Y_{ij} &= \begin{cases} 1 & \beta_0 + \beta_1 X_{ij} + \beta_2 B_{ij} + G_{ij} + R_{ij} > 0 \\ 0 & \text{otherwise} \end{cases} \\
+ X_{ij} &\sim N(0, 1) \\
+ B_{ij} &\sim \text{Bin}(0.5, 1) \\
+ (G_{i1}, \dots G_{in_{i}})^\top &\sim N^{(n_i)}(\vec 0, \sigma^2 C_{i1}) \\
+ R_{ij} &\sim N(0, 1)\end{align*}")
 
 where
-![C\_{i1}](https://render.githubusercontent.com/render/math?math=C_%7Bi1%7D
-"C_{i1}") is two times the kinship matrix and
-![X\_{ij}](https://render.githubusercontent.com/render/math?math=X_%7Bij%7D
-"X_{ij}") and
-![B\_{ij}](https://render.githubusercontent.com/render/math?math=B_%7Bij%7D
-"B_{ij}") are observed covariates. We can now estimate the model with a
-simulated data set as follows:
+![C\_{i1}](https://render.githubusercontent.com/render/math?math=C_%7Bi1%7D "C_{i1}")
+is two times the kinship matrix and
+![X\_{ij}](https://render.githubusercontent.com/render/math?math=X_%7Bij%7D "X_{ij}")
+and
+![B\_{ij}](https://render.githubusercontent.com/render/math?math=B_%7Bij%7D "B_{ij}")
+are observed covariates. We can now estimate the model with a simulated
+data set as follows:
 
 ``` r
 # simulate a data set
@@ -378,22 +355,22 @@ print(-opt_out$value     , digits = 8)
 
 We emphasize that we set the `rel_eps` parameter to `1e-3` above which
 perhaps is fine for this size of a data set but may not be fine for
-larger data sets for the following reason. Suppose that we have ![i
-= 1,\\dots,m](https://render.githubusercontent.com/render/math?math=i%20%3D%201%2C%5Cdots%2Cm
-"i = 1,\\dots,m") families/clusters and suppose that we estimate the log
-likelihood term for each family with a variance of
-![\\zeta](https://render.githubusercontent.com/render/math?math=%5Czeta
-"\\zeta"). This implies that the variance of the log likelihood for all
-the families is ![\\zeta
-m](https://render.githubusercontent.com/render/math?math=%5Czeta%20m
-"\\zeta m"). Thus, the precision we require for each family’s log
-likelihood term needs to be proportional to ![\\mathcal
-O(m^{-1/2})](https://render.githubusercontent.com/render/math?math=%5Cmathcal%20O%28m%5E%7B-1%2F2%7D%29
-"\\mathcal O(m^{-1/2})") if we want a fixed number of precise digits for
-the log likelihood for all the families. The latter is important e.g. 
-for the profile likelihood curve we compute later and also for the line
-search used by some optimization methods. Thus, one may need to reduce
-`rel_eps` and increase `maxvls` when there are many families.
+larger data sets for the following reason. Suppose that we have
+![i = 1,\\dots,m](https://render.githubusercontent.com/render/math?math=i%20%3D%201%2C%5Cdots%2Cm "i = 1,\dots,m")
+families/clusters and suppose that we estimate the log likelihood term
+for each family with a variance of
+![\\zeta](https://render.githubusercontent.com/render/math?math=%5Czeta "\zeta").
+This implies that the variance of the log likelihood for all the
+families is
+![\\zeta m](https://render.githubusercontent.com/render/math?math=%5Czeta%20m "\zeta m").
+Thus, the precision we require for each family’s log likelihood term
+needs to be proportional to
+![\\mathcal O(m^{-1/2})](https://render.githubusercontent.com/render/math?math=%5Cmathcal%20O%28m%5E%7B-1%2F2%7D%29 "\mathcal O(m^{-1/2})")
+if we want a fixed number of precise digits for the log likelihood for
+all the families. The latter is important e.g.  for the profile
+likelihood curve we compute later and also for the line search used by
+some optimization methods. Thus, one may need to reduce `rel_eps` and
+increase `maxvls` when there are many families.
 
 As an alternative to the direct parameterization we use above, we can
 also use the standardized parameterization. Below are some illustrations
@@ -683,14 +660,13 @@ c(lb, ub)^2 # on the variance scale
 ```
 
 A caveat is that issues with the
-![\\chi^2](https://render.githubusercontent.com/render/math?math=%5Cchi%5E2
-"\\chi^2") approximation may arise on the boundary of the scale
-parameter (![\\sigma
-= 0](https://render.githubusercontent.com/render/math?math=%5Csigma%20%3D%200
-"\\sigma = 0"); see <https://stats.stackexchange.com/a/4894/81865>).
-Notice that the above may fail if the estimated profile likelihood is
-not smooth e.g. because of convergence issues. We can plot the profile
-likelihood and highlight the critical value as follows:
+![\\chi^2](https://render.githubusercontent.com/render/math?math=%5Cchi%5E2 "\chi^2")
+approximation may arise on the boundary of the scale parameter
+(![\\sigma = 0](https://render.githubusercontent.com/render/math?math=%5Csigma%20%3D%200 "\sigma = 0");
+see <https://stats.stackexchange.com/a/4894/81865>). Notice that the
+above may fail if the estimated profile likelihood is not smooth
+e.g. because of convergence issues. We can plot the profile likelihood
+and highlight the critical value as follows:
 
 ``` r
 par(mar = c(5, 5, 1, 1))
@@ -720,16 +696,24 @@ prof_res <- pedmod_profile(
 #> The estimate of the standard error of the log likelihood is 0.00264089. Preferably this should be below 0.001
 #> 
 #> Finding the lower limit of the profile likelihood curve
+#> Log likelihood is -1619.7619 at 0.567300 (critical value is -1620.3315)
 #> Log likelihood is -1619.7602 at 0.567300 (critical value is -1620.3315)
+#> Log likelihood is -1624.4396 at 0.067300 (critical value is -1620.3315)
 #> Log likelihood is -1624.4340 at 0.067300 (critical value is -1620.3315)
-#> Log likelihood is -1620.8729 at 0.405927 (critical value is -1620.3315)
-#> Log likelihood is -1620.3374 at 0.477020 (critical value is -1620.3315)
+#> Log likelihood is -1620.8786 at 0.405931 (critical value is -1620.3315)
+#> Log likelihood is -1620.8729 at 0.405931 (critical value is -1620.3315)
+#> Log likelihood is -1620.3400 at 0.477023 (critical value is -1620.3315)
+#> Log likelihood is -1620.3378 at 0.477023 (critical value is -1620.3315)
 #> 
 #> Finding the upper limit of the profile likelihood curve
+#> Log likelihood is -1619.3169 at 1.567300 (critical value is -1620.3315)
 #> Log likelihood is -1619.3037 at 1.567300 (critical value is -1620.3315)
+#> Log likelihood is -1621.2055 at 2.067300 (critical value is -1620.3315)
 #> Log likelihood is -1621.1781 at 2.067300 (critical value is -1620.3315)
-#> Log likelihood is -1620.2674 at 1.838322 (critical value is -1620.3315)
-#> Log likelihood is -1620.4244 at 1.878811 (critical value is -1620.3315)
+#> Log likelihood is -1620.2903 at 1.838320 (critical value is -1620.3315)
+#> Log likelihood is -1620.2683 at 1.838320 (critical value is -1620.3315)
+#> Log likelihood is -1620.4497 at 1.878615 (critical value is -1620.3315)
+#> Log likelihood is -1620.4236 at 1.878615 (critical value is -1620.3315)
 #> Log likelihood is -1618.4107 at 1.067300 (critical value is -1620.3315)
 
 # the confidence interval for the scale parameter
@@ -763,17 +747,25 @@ prof_res <- pedmod_profile(
 #> The estimate of the standard error of the log likelihood is 0.00264089. Preferably this should be below 0.001
 #> 
 #> Finding the lower limit of the profile likelihood curve
-#> Log likelihood is -1622.3590 at 1.378256 (critical value is -1620.3315)
+#> Log likelihood is -1622.3662 at 1.378256 (critical value is -1620.3315)
+#> Log likelihood is -1622.3591 at 1.378256 (critical value is -1620.3315)
 #> Log likelihood is -1618.4107 at 1.878256 (critical value is -1620.3315)
-#> Log likelihood is -1619.2917 at 1.606488 (critical value is -1620.3315)
-#> Log likelihood is -1620.4759 at 1.490487 (critical value is -1620.3315)
-#> Log likelihood is -1620.1972 at 1.512580 (critical value is -1620.3315)
+#> Log likelihood is -1619.2925 at 1.606492 (critical value is -1620.3315)
+#> Log likelihood is -1619.2884 at 1.606492 (critical value is -1620.3315)
+#> Log likelihood is -1620.4844 at 1.490049 (critical value is -1620.3315)
+#> Log likelihood is -1620.4816 at 1.490049 (critical value is -1620.3315)
+#> Log likelihood is -1620.1984 at 1.512492 (critical value is -1620.3315)
+#> Log likelihood is -1620.1982 at 1.512492 (critical value is -1620.3315)
 #> 
 #> Finding the upper limit of the profile likelihood curve
-#> Log likelihood is -1619.5992 at 2.378256 (critical value is -1620.3315)
+#> Log likelihood is -1619.6178 at 2.378256 (critical value is -1620.3315)
+#> Log likelihood is -1619.5991 at 2.378256 (critical value is -1620.3315)
+#> Log likelihood is -1621.3787 at 2.878256 (critical value is -1620.3315)
 #> Log likelihood is -1621.3504 at 2.878256 (critical value is -1620.3315)
-#> Log likelihood is -1620.5160 at 2.634541 (critical value is -1620.3315)
-#> Log likelihood is -1620.2558 at 2.561432 (critical value is -1620.3315)
+#> Log likelihood is -1620.5401 at 2.634563 (critical value is -1620.3315)
+#> Log likelihood is -1620.5161 at 2.634563 (critical value is -1620.3315)
+#> Log likelihood is -1620.2801 at 2.561453 (critical value is -1620.3315)
+#> Log likelihood is -1620.2571 at 2.561453 (critical value is -1620.3315)
 #> Log likelihood is -1618.4107 at 1.878256 (critical value is -1620.3315)
 
 # the confidence interval for the slope of the binary covariate
@@ -818,11 +810,11 @@ below:
 # the profile likelihood based confidence intervals
 print(exp(t(sapply(pl_curve_res, `[[`, "confs"))), digits = 8)
 #>      2.50 pct. 97.50 pct.
-#> [1,] 1.6128424  6.3933552
-#> [2,] 1.6113412  6.4126894
-#> [3,] 1.6126150  6.3939883
-#> [4,] 1.6124613  6.3913291
-#> [5,] 1.6124794  6.4165491
+#> [1,] 1.6129060  6.3925594
+#> [2,] 1.6113411  6.4126763
+#> [3,] 1.6126743  6.3943564
+#> [4,] 1.6125941  6.3911922
+#> [5,] 1.6124628  6.4165030
 ```
 
 ### Randomized Quasi-Monte Carlo
@@ -956,14 +948,13 @@ matlines(n_samp, t(res["sd", , "Sobol", ]), col = "darkgray", lty = 3)
 <img src="man/figures/README-show_res_rqmc-1.png" width="100%" />
 
 The above seems to suggest that the randomized Korobov rules a
-preferable and that both method achieve close to a ![O(n^{-1 +
-\\epsilon})](https://render.githubusercontent.com/render/math?math=O%28n%5E%7B-1%20%2B%20%5Cepsilon%7D%29
-"O(n^{-1 + \\epsilon})") rate for some small
-![\\epsilon](https://render.githubusercontent.com/render/math?math=%5Cepsilon
-"\\epsilon"). Notice that we have to set `minvls` equal to `maxvls` to
-achieve the ![O(n^{-1 +
-\\epsilon})](https://render.githubusercontent.com/render/math?math=O%28n%5E%7B-1%20%2B%20%5Cepsilon%7D%29
-"O(n^{-1 + \\epsilon})") rate with randomized Korobov rules.
+preferable and that both method achieve close to a
+![O(n^{-1 + \\epsilon})](https://render.githubusercontent.com/render/math?math=O%28n%5E%7B-1%20%2B%20%5Cepsilon%7D%29 "O(n^{-1 + \epsilon})")
+rate for some small
+![\\epsilon](https://render.githubusercontent.com/render/math?math=%5Cepsilon "\epsilon").
+Notice that we have to set `minvls` equal to `maxvls` to achieve the
+![O(n^{-1 + \\epsilon})](https://render.githubusercontent.com/render/math?math=O%28n%5E%7B-1%20%2B%20%5Cepsilon%7D%29 "O(n^{-1 + \epsilon})")
+rate with randomized Korobov rules.
 
 We can also consider the convergence rate for the log likelihood. We
 also show how the error can be reduced by using fewer randomized
@@ -1016,27 +1007,19 @@ res_few_seqs <- sapply(setNames(n_samp, n_samp), function(maxvls){
 # we scale up the figures by 1000!
 precise_est <- mean(res["mean", , length(n_samp)])
 round(1000 * res["sd", "Korobov", ] / abs(precise_est), 6)
-#>     1000     2000     4000     8000    16000    32000    64000   128000 
-#> 0.063582 0.011445 0.013834 0.004873 0.002329 0.000949 0.000855 0.000219 
-#>   256000   512000 
-#> 0.000160 0.000245
+#>     1000     2000     4000     8000    16000    32000    64000   128000   256000   512000 
+#> 0.063582 0.011445 0.013834 0.004873 0.002329 0.000949 0.000855 0.000219 0.000160 0.000245
 round(1000 * res["sd", "Sobol"  , ] / abs(precise_est), 6)
-#>     1000     2000     4000     8000    16000    32000    64000   128000 
-#> 0.109163 0.046504 0.024819 0.011072 0.006090 0.003202 0.001260 0.000630 
-#>   256000   512000 
-#> 0.000336 0.000167
+#>     1000     2000     4000     8000    16000    32000    64000   128000   256000   512000 
+#> 0.109163 0.046504 0.024819 0.011072 0.006090 0.003202 0.001260 0.000630 0.000336 0.000167
 
 # with fewer sequences
 round(1000 * res_few_seqs["sd", "Korobov", ] / abs(precise_est), 6)
-#>     1000     2000     4000     8000    16000    32000    64000   128000 
-#> 0.013899 0.004954 0.003055 0.002181 0.000653 0.000439 0.000625 0.000190 
-#>   256000   512000 
-#> 0.000051 0.000053
+#>     1000     2000     4000     8000    16000    32000    64000   128000   256000   512000 
+#> 0.013899 0.004954 0.003055 0.002181 0.000653 0.000439 0.000625 0.000190 0.000051 0.000053
 round(1000 * res_few_seqs["sd", "Sobol"  , ] / abs(precise_est), 6)
-#>     1000     2000     4000     8000    16000    32000    64000   128000 
-#> 0.033697 0.016389 0.007411 0.004601 0.001951 0.000921 0.000505 0.000208 
-#>   256000   512000 
-#> 0.000109 0.000063
+#>     1000     2000     4000     8000    16000    32000    64000   128000   256000   512000 
+#> 0.033697 0.016389 0.007411 0.004601 0.001951 0.000921 0.000505 0.000208 0.000109 0.000063
 
 # look at log-log regressions
 coef(lm(log(res["sd", "Korobov", ]) ~ log(n_samp)))
@@ -1271,8 +1254,8 @@ apply(time_vals, 1:2, quantile)
 
 As an extension, we can add a child environmental effect. The new scale
 matrix, the
-![C\_{i2}](https://render.githubusercontent.com/render/math?math=C_%7Bi2%7D
-"C_{i2}")’s, can be written as:
+![C\_{i2}](https://render.githubusercontent.com/render/math?math=C_%7Bi2%7D "C_{i2}")’s,
+can be written as:
 
 ``` r
 C_env <- diag(1, NROW(fam))
@@ -1334,31 +1317,28 @@ sim_dat <- function(n_fams, beta = c(-3, 4), sig_sq = c(2, 1)){
 
 The model is
 
-  
-![\\begin{align\*}&#10; Y\_{ij} &= \\begin{cases} 1 & \\beta\_0 +
-\\beta\_1 B\_{ij} + E\_{ij} + G\_{ij} + R\_{ij} \> 0 \\\\ 0 &
-\\text{otherwise} \\end{cases} \\\\&#10; X\_{ij} &\\sim N(0, 1)
-\\\\&#10; B\_{ij} &\\sim \\text{Bin}(0.5, 1) \\\\&#10; (G\_{i1}, \\dots
-G\_{in\_{i}})^\\top &\\sim N^{(n\_i)}(\\vec 0, \\sigma^2\_G C\_{i1})
-\\\\&#10;(E\_{i1}, \\dots E\_{in\_{i}})^\\top &\\sim N^{(n\_i)}(\\vec 0,
-\\sigma^2\_E C\_{i2}) \\\\&#10; R\_{ij} &\\sim
-N(0, 1)\\end{align\*}](https://render.githubusercontent.com/render/math?math=%5Cbegin%7Balign%2A%7D%0A%20Y_%7Bij%7D%20%26%3D%20%5Cbegin%7Bcases%7D%201%20%26%20%5Cbeta_0%20%2B%20%5Cbeta_1%20B_%7Bij%7D%20%2B%20E_%7Bij%7D%20%2B%20G_%7Bij%7D%20%2B%20R_%7Bij%7D%20%3E%200%20%5C%5C%200%20%26%20%5Ctext%7Botherwise%7D%20%5Cend%7Bcases%7D%20%5C%5C%0A%20X_%7Bij%7D%20%26%5Csim%20N%280%2C%201%29%20%5C%5C%0A%20B_%7Bij%7D%20%26%5Csim%20%5Ctext%7BBin%7D%280.5%2C%201%29%20%5C%5C%0A%20%28G_%7Bi1%7D%2C%20%5Cdots%20G_%7Bin_%7Bi%7D%7D%29%5E%5Ctop%20%26%5Csim%20N%5E%7B%28n_i%29%7D%28%5Cvec%200%2C%20%5Csigma%5E2_G%20C_%7Bi1%7D%29%20%5C%5C%0A%28E_%7Bi1%7D%2C%20%5Cdots%20E_%7Bin_%7Bi%7D%7D%29%5E%5Ctop%20%26%5Csim%20N%5E%7B%28n_i%29%7D%28%5Cvec%200%2C%20%5Csigma%5E2_E%20C_%7Bi2%7D%29%20%5C%5C%0A%20R_%7Bij%7D%20%26%5Csim%20N%280%2C%201%29%5Cend%7Balign%2A%7D
-"\\begin{align*}
- Y_{ij} &= \\begin{cases} 1 & \\beta_0 + \\beta_1 B_{ij} + E_{ij} + G_{ij} + R_{ij} \> 0 \\\\ 0 & \\text{otherwise} \\end{cases} \\\\
- X_{ij} &\\sim N(0, 1) \\\\
- B_{ij} &\\sim \\text{Bin}(0.5, 1) \\\\
- (G_{i1}, \\dots G_{in_{i}})^\\top &\\sim N^{(n_i)}(\\vec 0, \\sigma^2_G C_{i1}) \\\\
-(E_{i1}, \\dots E_{in_{i}})^\\top &\\sim N^{(n_i)}(\\vec 0, \\sigma^2_E C_{i2}) \\\\
- R_{ij} &\\sim N(0, 1)\\end{align*}")  
+![\\begin{align\*}
+ Y\_{ij} &= \\begin{cases} 1 & \\beta\_0 + \\beta\_1 B\_{ij} + E\_{ij} + G\_{ij} + R\_{ij} &gt; 0 \\\\ 0 & \\text{otherwise} \\end{cases} \\\\
+ X\_{ij} &\\sim N(0, 1) \\\\
+ B\_{ij} &\\sim \\text{Bin}(0.5, 1) \\\\
+ (G\_{i1}, \\dots G\_{in\_{i}})^\\top &\\sim N^{(n\_i)}(\\vec 0, \\sigma^2\_G C\_{i1}) \\\\
+(E\_{i1}, \\dots E\_{in\_{i}})^\\top &\\sim N^{(n\_i)}(\\vec 0, \\sigma^2\_E C\_{i2}) \\\\
+ R\_{ij} &\\sim N(0, 1)\\end{align\*}](https://render.githubusercontent.com/render/math?math=%5Cbegin%7Balign%2A%7D%0A%20Y_%7Bij%7D%20%26%3D%20%5Cbegin%7Bcases%7D%201%20%26%20%5Cbeta_0%20%2B%20%5Cbeta_1%20B_%7Bij%7D%20%2B%20E_%7Bij%7D%20%2B%20G_%7Bij%7D%20%2B%20R_%7Bij%7D%20%3E%200%20%5C%5C%200%20%26%20%5Ctext%7Botherwise%7D%20%5Cend%7Bcases%7D%20%5C%5C%0A%20X_%7Bij%7D%20%26%5Csim%20N%280%2C%201%29%20%5C%5C%0A%20B_%7Bij%7D%20%26%5Csim%20%5Ctext%7BBin%7D%280.5%2C%201%29%20%5C%5C%0A%20%28G_%7Bi1%7D%2C%20%5Cdots%20G_%7Bin_%7Bi%7D%7D%29%5E%5Ctop%20%26%5Csim%20N%5E%7B%28n_i%29%7D%28%5Cvec%200%2C%20%5Csigma%5E2_G%20C_%7Bi1%7D%29%20%5C%5C%0A%28E_%7Bi1%7D%2C%20%5Cdots%20E_%7Bin_%7Bi%7D%7D%29%5E%5Ctop%20%26%5Csim%20N%5E%7B%28n_i%29%7D%28%5Cvec%200%2C%20%5Csigma%5E2_E%20C_%7Bi2%7D%29%20%5C%5C%0A%20R_%7Bij%7D%20%26%5Csim%20N%280%2C%201%29%5Cend%7Balign%2A%7D "\begin{align*}
+ Y_{ij} &= \begin{cases} 1 & \beta_0 + \beta_1 B_{ij} + E_{ij} + G_{ij} + R_{ij} > 0 \\ 0 & \text{otherwise} \end{cases} \\
+ X_{ij} &\sim N(0, 1) \\
+ B_{ij} &\sim \text{Bin}(0.5, 1) \\
+ (G_{i1}, \dots G_{in_{i}})^\top &\sim N^{(n_i)}(\vec 0, \sigma^2_G C_{i1}) \\
+(E_{i1}, \dots E_{in_{i}})^\top &\sim N^{(n_i)}(\vec 0, \sigma^2_E C_{i2}) \\
+ R_{ij} &\sim N(0, 1)\end{align*}")
 
 where
-![C\_{i1}](https://render.githubusercontent.com/render/math?math=C_%7Bi1%7D
-"C_{i1}") is two times the kinship matrix,
-![C\_{i2}](https://render.githubusercontent.com/render/math?math=C_%7Bi2%7D
-"C_{i2}") is singular matrix for the environment effect, and
-![B\_{ij}](https://render.githubusercontent.com/render/math?math=B_%7Bij%7D
-"B_{ij}") is an observed covariate. In this case, we exploit that some
-of log marginal likelihood terms are identical. That is, some of the
+![C\_{i1}](https://render.githubusercontent.com/render/math?math=C_%7Bi1%7D "C_{i1}")
+is two times the kinship matrix,
+![C\_{i2}](https://render.githubusercontent.com/render/math?math=C_%7Bi2%7D "C_{i2}")
+is singular matrix for the environment effect, and
+![B\_{ij}](https://render.githubusercontent.com/render/math?math=B_%7Bij%7D "B_{ij}")
+is an observed covariate. In this case, we exploit that some of log
+marginal likelihood terms are identical. That is, some of the
 combinations of pedigrees, covariates, and outcomes match. Therefor, we
 can use the `cluster_weights` arguments to reduce the computation time
 as shown below:
@@ -1717,15 +1697,22 @@ pl_genetic <- pedmod_profile(
 #> The estimate of the standard error of the log likelihood is 0.00796661. Preferably this should be below 0.001
 #> 
 #> Finding the lower limit of the profile likelihood curve
-#> Log likelihood is -2697.1218 at 0.196047 (critical value is -2698.0519)
-#> Log likelihood is -2700.2095 at -0.203953 (critical value is -2698.0519)
-#> Log likelihood is -2698.4584 at -0.010803 (critical value is -2698.0519)
-#> Log likelihood is -2697.9700 at 0.054707 (critical value is -2698.0519)
+#> Log likelihood is -2697.1606 at 0.196047 (critical value is -2698.0519)
+#> Log likelihood is -2697.1191 at 0.196047 (critical value is -2698.0519)
+#> Log likelihood is -2700.2574 at -0.203953 (critical value is -2698.0519)
+#> Log likelihood is -2700.2299 at -0.203953 (critical value is -2698.0519)
+#> Log likelihood is -2698.5037 at -0.011106 (critical value is -2698.0519)
+#> Log likelihood is -2698.4569 at -0.011106 (critical value is -2698.0519)
+#> Log likelihood is -2698.0674 at 0.054138 (critical value is -2698.0519)
+#> Log likelihood is -2697.9735 at 0.054138 (critical value is -2698.0519)
 #> 
 #> Finding the upper limit of the profile likelihood curve
+#> Log likelihood is -2696.8713 at 0.996047 (critical value is -2698.0519)
 #> Log likelihood is -2696.7918 at 0.996047 (critical value is -2698.0519)
-#> Log likelihood is -2698.4218 at 1.396047 (critical value is -2698.0519)
-#> Log likelihood is -2697.8991 at 1.281305 (critical value is -2698.0519)
+#> Log likelihood is -2698.5228 at 1.396047 (critical value is -2698.0519)
+#> Log likelihood is -2698.4226 at 1.396047 (critical value is -2698.0519)
+#> Log likelihood is -2697.9916 at 1.281210 (critical value is -2698.0519)
+#> Log likelihood is -2697.8986 at 1.281210 (critical value is -2698.0519)
 #> Log likelihood is -2696.1311 at 0.596047 (critical value is -2698.0519)
 exp(pl_genetic$confs) # the confidence interval
 #>  2.50 pct. 97.50 pct. 
@@ -1739,20 +1726,28 @@ pl_env <- pedmod_profile(
 #> The estimate of the standard error of the log likelihood is 0.00796661. Preferably this should be below 0.001
 #> 
 #> Finding the lower limit of the profile likelihood curve
-#> Log likelihood is -2697.2090 at -0.812885 (critical value is -2698.0519)
+#> Log likelihood is -2697.2884 at -0.812885 (critical value is -2698.0519)
+#> Log likelihood is -2697.2150 at -0.812885 (critical value is -2698.0519)
+#> Log likelihood is -2699.3877 at -1.412885 (critical value is -2698.0519)
 #> Log likelihood is -2699.3365 at -1.412885 (critical value is -2698.0519)
-#> Log likelihood is -2698.2859 at -1.128323 (critical value is -2698.0519)
-#> Log likelihood is -2697.9653 at -1.038420 (critical value is -2698.0519)
+#> Log likelihood is -2698.3506 at -1.126819 (critical value is -2698.0519)
+#> Log likelihood is -2698.2814 at -1.126819 (critical value is -2698.0519)
+#> Log likelihood is -2698.0293 at -1.037812 (critical value is -2698.0519)
+#> Log likelihood is -2697.9637 at -1.037812 (critical value is -2698.0519)
 #> 
 #> Finding the upper limit of the profile likelihood curve
-#> Log likelihood is -2697.1774 at 0.387115 (critical value is -2698.0519)
-#> Log likelihood is -2699.9222 at 0.987115 (critical value is -2698.0519)
-#> Log likelihood is -2698.4396 at 0.687705 (critical value is -2698.0519)
-#> Log likelihood is -2697.9801 at 0.587516 (critical value is -2698.0519)
+#> Log likelihood is -2697.2930 at 0.387115 (critical value is -2698.0519)
+#> Log likelihood is -2697.1768 at 0.387115 (critical value is -2698.0519)
+#> Log likelihood is -2700.0477 at 0.987115 (critical value is -2698.0519)
+#> Log likelihood is -2699.9166 at 0.987115 (critical value is -2698.0519)
+#> Log likelihood is -2698.5364 at 0.688023 (critical value is -2698.0519)
+#> Log likelihood is -2698.4407 at 0.688023 (critical value is -2698.0519)
+#> Log likelihood is -2698.0739 at 0.587595 (critical value is -2698.0519)
+#> Log likelihood is -2697.9821 at 0.587595 (critical value is -2698.0519)
 #> Log likelihood is -2696.1311 at -0.212885 (critical value is -2698.0519)
 exp(pl_env$confs) # the confidence interval
 #>  2.50 pct. 97.50 pct. 
-#>     0.3453     1.8291
+#>     0.3454     1.8286
 ```
 
 We plot the two profile likelihood curves below:
@@ -2062,7 +2057,6 @@ str(fam1[c("X", "y")])
 Then we perform the model estimation:
 
 <!-- knitr::opts_knit$set(output.dir = ".") -->
-
 <!-- knitr::load_cache("est_mod", path = "cache/README-") -->
 
 ``` r
@@ -2240,7 +2234,6 @@ We use stochastic gradient descent with the ADAM method (Kingma and Ba
 it to estimate the model.
 
 <!-- knitr::opts_knit$set(output.dir = ".") -->
-
 <!-- knitr::load_cache("use_adam", path = "cache/README-") -->
 
 ``` r
@@ -2446,10 +2439,8 @@ They have about the same average relative error as expected:
 
 ``` r
 rowMeans(sim_res[, "SE", ])
-#>          mvtnorm no aprx; Korobov   no aprx; Sobol w/ aprx; Korobov 
-#>        2.651e-05        3.128e-05        3.015e-05        3.062e-05 
-#>   w/ aprx; Sobol 
-#>        2.922e-05
+#>          mvtnorm no aprx; Korobov   no aprx; Sobol w/ aprx; Korobov   w/ aprx; Sobol 
+#>        2.651e-05        3.128e-05        3.015e-05        3.062e-05        2.922e-05
 par(mar = c(9, 4, 1, 1), bty = "l")
 boxplot(t(sim_res[, "SE", ]), las = 2)
 grid()
@@ -2461,10 +2452,8 @@ The new implementation is faster when the approximation is used:
 
 ``` r
 rowMeans(sim_res[, "time", ])
-#>          mvtnorm no aprx; Korobov   no aprx; Sobol w/ aprx; Korobov 
-#>         0.020799         0.017677         0.019987         0.008923 
-#>   w/ aprx; Sobol 
-#>         0.010396
+#>          mvtnorm no aprx; Korobov   no aprx; Sobol w/ aprx; Korobov   w/ aprx; Sobol 
+#>         0.020799         0.017677         0.019987         0.008923         0.010396
 par(mar = c(9, 4, 1, 1), bty = "l")
 boxplot(t(sim_res[, "time", ]), log = "y", las = 2)
 grid()
@@ -2474,49 +2463,49 @@ grid()
 
 ## References
 
-<div id="refs" class="references">
+<div id="refs" class="references csl-bib-body hanging-indent">
 
-<div id="ref-Genz02">
+<div id="ref-Genz02" class="csl-entry">
 
 Genz, Alan, and Frank Bretz. 2002. “Comparison of Methods for the
-Computation of Multivariate T Probabilities.” *Journal of Computational
+Computation of Multivariate t Probabilities.” *Journal of Computational
 and Graphical Statistics* 11 (4): 950–71.
 <https://doi.org/10.1198/106186002394>.
 
 </div>
 
-<div id="ref-Kingma15">
+<div id="ref-Kingma15" class="csl-entry">
 
 Kingma, Diederik P., and Jimmy Ba. 2015. “Adam: A Method for Stochastic
 Optimization.” *CoRR* abs/1412.6980.
 
 </div>
 
-<div id="ref-Liu17">
+<div id="ref-Liu17" class="csl-entry">
 
 Liu, Xing-Rong, Yudi Pawitan, and Mark S. Clements. 2017. “Generalized
 Survival Models for Correlated Time-to-Event Data.” *Statistics in
 Medicine* 36 (29): 4743–62.
-<https://doi.org/https://doi.org/10.1002/sim.7451>.
+https://doi.org/<https://doi.org/10.1002/sim.7451>.
 
 </div>
 
-<div id="ref-Mahjani20">
+<div id="ref-Mahjani20" class="csl-entry">
 
 Mahjani, Behrang, Lambertus Klei, Christina M. Hultman, Henrik Larsson,
 Bernie Devlin, Joseph D. Buxbaum, Sven Sandin, and Dorothy E. Grice.
 2020. “Maternal Effects as Causes of Risk for Obsessive-Compulsive
 Disorder.” *Biological Psychiatry* 87 (12): 1045–51.
-<https://doi.org/https://doi.org/10.1016/j.biopsych.2020.01.006>.
+https://doi.org/<https://doi.org/10.1016/j.biopsych.2020.01.006>.
 
 </div>
 
-<div id="ref-Pawitan04">
+<div id="ref-Pawitan04" class="csl-entry">
 
 Pawitan, Y., M. Reilly, E. Nilsson, S. Cnattingius, and P. Lichtenstein.
 2004. “Estimation of Genetic and Environmental Factors for Binary Traits
 Using Family Data.” *Statistics in Medicine* 23 (3): 449–65.
-<https://doi.org/https://doi.org/10.1002/sim.1603>.
+https://doi.org/<https://doi.org/10.1002/sim.1603>.
 
 </div>
 

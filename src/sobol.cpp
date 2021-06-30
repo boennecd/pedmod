@@ -1089,7 +1089,7 @@ sobol::sobol(unsigned const dimen_arg, scrambling_type const scrambling_method,
 #ifdef _OPENMP
 #pragma omp threadprivate(includ)
 #endif
-  for(int i = 1; i < dimen; ++i){
+  for(size_t i = 1; i < dimen; ++i){
     int const m = find_n_bits(poly[i - 1]);
 
     {
@@ -1120,7 +1120,7 @@ sobol::sobol(unsigned const dimen_arg, scrambling_type const scrambling_method,
     int l(1);
     for(unsigned j = max_col - 1; j-- > 0; ){
       l *= 2;
-      for(int i = 0; i < dimen; ++i)
+      for(size_t i = 0; i < dimen; ++i)
         v(i, j) *= l;
     }
   }
@@ -1178,7 +1178,7 @@ sobol::sobol(unsigned const dimen_arg, scrambling_type const scrambling_method,
 #pragma omp threadprivate(lsm_ibits, v_ibits)
 #endif
 
-    for(int i = 0; i < dimen; ++i){
+    for(size_t i = 0; i < dimen; ++i){
       // pre-compute ibits values
       for(unsigned p = maxv; p-- > 0;)
         for(int k = 0; k < max_col; ++k)
@@ -1211,7 +1211,7 @@ sobol::sobol(unsigned const dimen_arg, scrambling_type const scrambling_method,
     throw std::runtime_error("scrambling method is not implemented");
 
   double const recipd = 1. / static_cast<double>(ll);
-  for(int i = 0; i < dimen; ++i)
+  for(size_t i = 0; i < dimen; ++i)
     quasi[i] = shift[i] * recipd;
 }
 

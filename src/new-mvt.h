@@ -16,7 +16,7 @@ struct rand_Korobov_output {
   int inform;
 };
 
-constexpr int n_qmc_seqs() {
+constexpr unsigned n_qmc_seqs() {
   return 64;
 }
 
@@ -27,15 +27,15 @@ class rand_Korobov {
 
 public:
   static void alloc_mem
-    (int const max_ndim, int const max_nf, int const max_threads) {
+    (unsigned const max_ndim, unsigned const max_nf, unsigned const max_threads) {
     dmem.set_n_mem(
       (5 + n_qmc_seqs()) * max_nf + (n_qmc_seqs() + 2) * max_ndim, max_threads);
     imem.set_n_mem(max_ndim                 , max_threads);
   }
 
   static rand_Korobov_output comp
-    (Func &f, int const ndim, size_t const minvls, size_t const maxvls,
-     int const nf, double const abseps, double const releps,
+    (Func &f, unsigned const ndim, size_t const minvls, size_t const maxvls,
+     unsigned const nf, double const abseps, double const releps,
      double * const __restrict__ finest,
      double * const __restrict__ sdest, parallelrng::unif_drawer &sampler,
      unsigned const n_sequences){
@@ -43,8 +43,8 @@ public:
       throw std::invalid_argument("n_sequences is less than one");
 
     /* constants */
-    constexpr int const plim(28L),
-                        klim(100L);
+    constexpr unsigned const plim(28L),
+                             klim(100L);
     constexpr int const p[plim] = { 31L, 47L, 73L, 113L, 173L, 263L, 397L, 593L, 907L, 1361L, 2053L, 3079L, 4621L, 6947L, 10427L, 15641L, 23473L, 35221L, 52837L, 79259L, 118891L, 178349L, 267523L, 401287L, 601943L, 902933L, 1354471L, 2031713L };
     constexpr int const C[plim][klim - 1L] = {
       { 12L, 9L, 9L, 13L, 12L, 12L, 12L, 12L, 12L, 12L, 12L, 12L, 3L, 3L, 3L, 12L, 7L, 7L, 12L, 12L, 12L, 12L, 12L, 12L, 12L, 12L, 12L, 3L, 3L, 3L, 12L, 7L, 7L, 12L, 12L, 12L, 12L, 12L, 12L, 12L, 12L, 12L, 3L, 3L, 3L, 12L, 7L, 7L, 12L, 12L, 12L, 12L, 12L, 12L, 12L, 12L, 12L, 3L, 3L, 3L, 12L, 7L, 7L, 12L, 12L, 12L, 12L, 12L, 12L, 12L, 12L, 7L, 3L, 3L, 3L, 7L, 7L, 7L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L },
@@ -93,18 +93,18 @@ public:
     // initialize
     std::fill(finest    , finest     + nf, 0);
     std::fill(finest_var, finest_var + nf, 0);
-    int sampls = n_sequences;
-    int np(0L);
+    unsigned sampls = n_sequences;
+    unsigned np(0L);
     {
-      int i = 0L;
+      unsigned i = 0L;
       for(; i < plim; ++i){
         np = i;
         if(minvls < static_cast<size_t>(2L * sampls * p[i]))
           break;
       }
       if(i >= plim)
-        sampls = std::max<int>(
-          n_sequences, static_cast<int>(minvls / (2L * p[np])));
+        sampls = std::max<unsigned>(
+          n_sequences, minvls / (2L * static_cast<unsigned>(p[np])));
     }
 
     constexpr size_t const maxit(1000L);
@@ -115,11 +115,11 @@ public:
     for(size_t nit = 0; nit < maxit; nit++){
       *vk = 1. / static_cast<double>(p[np]);
       int k(1L);
-      for(int i = 1; i < ndim; ++i){
+      for(unsigned i = 1; i < ndim; ++i){
         if(i < klim){
-          k = fmod(
+          k = static_cast<int>(fmod(
             C[np][std::min(ndim, klim) - 2L] *
-              static_cast<double>(k), static_cast<double>(p[np]));
+              static_cast<double>(k), static_cast<double>(p[np])));
           vk[i] = k * vk[0];
 
         } else {
@@ -149,10 +149,10 @@ public:
           {
             double * rj = r;
             int * prj = pr;
-            for(int j = 0; j < ndim; ++j, ++rj, ++prj){
+            for(int j = 0; j < static_cast<int>(ndim); ++j, ++rj, ++prj){
               *rj = sampler();
               if(j < klim - 1L){
-                int const jp = (j + 1) * *rj;
+                int const jp = static_cast<int>((j + 1) * *rj);
                 if(jp < j)
                   *prj = pr[jp];
                 pr[jp] = j;
@@ -164,12 +164,12 @@ public:
           // apply lattice rule
           for(int k = 0; k < prime; ){
             // compute the points
-            int i = 0;
+            unsigned i = 0;
             double * x_odd  = x,
                    * x_even = x_odd + ndim;
             for(; i < n_qmc_seqs() / 2 and k < prime;
                 ++i, ++k, x_odd += 2 * ndim, x_even += 2 * ndim){
-              for(int j = 0; j < ndim; ++j){
+              for(unsigned j = 0; j < ndim; ++j){
                 r[j] += vk[pr[j]];
                 if(r[j] > 1.)
                   r[j] -= 1.;
@@ -183,27 +183,27 @@ public:
 
             // update the sum (values)
             double *fsk = fs;
-            for(int k = 0; k < 2 * i; ++k, fsk += nf)
-              for(int j = 0; j < nf; ++j)
+            for(unsigned k = 0; k < 2 * i; ++k, fsk += nf)
+              for(unsigned j = 0; j < nf; ++j)
                 kahan(values[j], kahan_comp[j], fsk[j]);
           }
-          for(int j = 0; j < nf; ++j)
+          for(unsigned j = 0; j < nf; ++j)
             values[j] /= static_cast<double>(2 * prime);
         };
 
-      for(int i = 0; i < sampls; ++i){
+      for(unsigned i = 0; i < sampls; ++i){
         mvkrsv(values, p[np], vk, x, r, pr, fs);
         // stable version of Welford's online algorithm
-        for(int k = 0; k < nf; ++k){
+        for(unsigned k = 0; k < nf; ++k){
           double const term_diff = values[k] - finval[k];
           finval[k] +=  term_diff / (i + 1.);
           M     [k] += term_diff * (values[k] - finval[k]);
         }
       }
 
-      intvls += 2 * sampls * p[np];
+      intvls += 2 * sampls * static_cast<unsigned>(p[np]);
       bool passes_conv_check = true;
-      for(int k = 0; k < nf; ++k){
+      for(unsigned k = 0; k < nf; ++k){
         // update the mean estimator and variance estimator
         double const sig_new =
           sampls < 2 ? 0 : M[k] / (sampls - 1.) / static_cast<double>(sampls);
@@ -230,12 +230,12 @@ public:
       }
 
       if(!passes_conv_check){
-        if(np < plim - 1)
+        if(np < static_cast<int>(plim) - 1)
           ++np;
         else {
-          sampls = std::min(3 * sampls / 2,
-                            static_cast<int>((maxvls - intvls) / (2 * p[np])));
-          sampls = std::max<int>(n_sequences, sampls);
+          sampls = std::min<unsigned>(3 * sampls / 2,
+                                      (maxvls - intvls) / (2 * p[np]));
+          sampls = std::max<unsigned>(n_sequences, sampls);
         }
         if(intvls + 2 * sampls * p[np] > maxvls)
           break;
@@ -261,7 +261,7 @@ class sobol_wrapper {
 
 public:
   static void alloc_mem
-  (int const max_ndim, int const max_nf, int const max_threads,
+  (unsigned const max_ndim, unsigned const max_nf, unsigned const max_threads,
    unsigned const max_n_sequences_in) {
     max_n_sequences = std::max(max_n_sequences, max_n_sequences_in);
     dmem.set_n_mem(
@@ -270,8 +270,8 @@ public:
   }
 
   static rand_Korobov_output comp
-  (Func &f, int const ndim, size_t const minvls, size_t const maxvls,
-   int const nf, double const abseps, double const releps,
+  (Func &f, unsigned const ndim, size_t const minvls, size_t const maxvls,
+   unsigned const nf, double const abseps, double const releps,
    double * const __restrict__ finest,
    double * const __restrict__ sdest, parallelrng::unif_drawer &sampler,
    sobol::scrambling_type const method, unsigned const n_sequences){
@@ -313,8 +313,9 @@ public:
         for(size_t k = 0; k < n_draw_next;){
           // get the next points
           double * __restrict__ d = draws;
-          int const n_draw_j =  std::min<int>(n_qmc_seqs(), n_draw_next - k);
-          for(int j = 0; j <n_draw_j; ++j, ++k, d += ndim){
+          unsigned const n_draw_j =
+            std::min<unsigned>(n_qmc_seqs(), n_draw_next - k);
+          for(unsigned j = 0; j <n_draw_j; ++j, ++k, d += ndim){
             seqs[i].next();
             std::copy(seqs[i].get_qausi(), seqs[i].get_qausi() + ndim, d);
           }
@@ -324,10 +325,10 @@ public:
 
           // update the estimates
           double * int_val = integrand_vals;
-          for(int l = 0; l < n_draw_j; ++l, int_val += nf){
+          for(unsigned l = 0; l < n_draw_j; ++l, int_val += nf){
             denom += 1;
             double *meas = seq_means + i * nf;
-            for(int j = 0; j < nf; ++j)
+            for(unsigned j = 0; j < nf; ++j)
               meas[j] += (int_val[j] - meas[j]) / denom;
           }
         }
@@ -346,7 +347,7 @@ public:
       for(unsigned i = 0; i < n_sequences; ++i){
         // stable version of Welford's online algorithm
         double *values = seq_means + i * nf;
-        for(int j = 0; j < nf; ++j){
+        for(unsigned j = 0; j < nf; ++j){
           double const term_diff = values[j] - finest[j];
           finest[j] +=  term_diff / (i + 1.);
           M     [j] += term_diff * (values[j] - finest[j]);
@@ -355,7 +356,7 @@ public:
 
       // check if we can exit early
       bool passes_conv_check = true;
-      for(int j = 0; j < nf; ++j){
+      for(unsigned j = 0; j < nf; ++j){
         double const sigma =
           n_sequences < 2 ?
           0 : M[j] / (n_sequences - 1.) / static_cast<double>(n_sequences);

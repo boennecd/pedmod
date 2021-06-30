@@ -59,10 +59,10 @@ namespace pedmod {
 template<typename T>
 class simple_matrix {
   std::unique_ptr<T[]> dat;
-  unsigned const n_rows = 0;
+  size_t const n_rows = 0;
 
 public:
-  simple_matrix(unsigned const n_rows, unsigned const n_cols):
+  simple_matrix(size_t const n_rows, size_t const n_cols):
   dat(new T[n_rows * n_cols]), n_rows(n_rows)  { }
 
   /// initialize an 0x0 matrix
@@ -74,12 +74,12 @@ public:
   }
 
   /// returns a pointer to the column. Zero-based indices are used
-  inline T * col_ptr(unsigned const col) noexcept {
+  inline T * col_ptr(size_t const col) noexcept {
     return data() + col * n_rows;
   }
 
   /// returns the element at a given index. Zero-based indices are used
-  inline T& operator()(unsigned const row, unsigned const col) noexcept {
+  inline T& operator()(size_t const row, size_t const col) noexcept {
     return *(data() + row + col * n_rows);
   }
 };
@@ -88,12 +88,12 @@ public:
 class sobol {
 public:
   /// dimension of the variable
-  int const dimen = 0;
+  size_t const dimen = 0;
 
 private:
-  static constexpr int const max_dim = 1111,
-                             max_deg = 13,
-                             max_bit = 30;
+  static constexpr size_t const max_dim = 1111,
+                                max_deg = 13,
+                                max_bit = 30;
 
   std::unique_ptr<double[]> quasi;
   unsigned count = 0;
@@ -129,8 +129,8 @@ public:
 
   /// computes the next quasi random number
   inline void next() noexcept {
-    int const l = ([](unsigned count) -> int {
-      int out(0);
+    size_t const l = ([](unsigned count) -> size_t {
+      size_t out(0);
       while((count % 2L) == 1L){
         count /= 2L;
         ++out;
@@ -139,7 +139,7 @@ public:
       return out;
     })(count);
 
-    for(int i = 0; i < dimen; ++i){
+    for(size_t i = 0; i < dimen; ++i){
       int const tmp = static_cast<int>(quasi[i] * ll);
       quasi[i] = static_cast<double>(tmp ^ sv(i, l)) /
         static_cast<double>(ll);

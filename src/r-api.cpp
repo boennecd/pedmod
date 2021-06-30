@@ -132,8 +132,8 @@ struct pedigree_terms {
     // checks
     if(terms.size() < 1)
       throw std::invalid_argument("pedigree_terms: no terms");
-    int const n_fix = terms[0].n_fix_effect,
-           n_scales = terms[0].l_factor.scale_mats.size();
+    unsigned const n_fix = terms[0].n_fix_effect,
+                n_scales = terms[0].l_factor.scale_mats.size();
     for(auto &tr : terms){
       if(tr.n_fix_effect != n_fix)
         throw std::invalid_argument("pedigree_terms: number of fixed effects do not match");

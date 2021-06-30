@@ -18,8 +18,8 @@ public:
   /// object to compute the likelihood factor
   pedigree_l_factor l_factor;
 
-  int const n_members = X.n_rows,
-         n_fix_effect = X.n_cols;
+  unsigned const n_members = X.n_rows,
+              n_fix_effect = X.n_cols;
 
   pedigree_ll_term(arma::mat const &X_in, arma::vec const &y,
                    std::vector<arma::mat> const &scale_mats,
@@ -80,7 +80,7 @@ public:
    * Approximates the log-likelihood term.
    */
   fn_res fn
-    (double const * par, int const maxvls, double const abs_eps,
+    (double const * par, unsigned const maxvls, double const abs_eps,
      double const rel_eps, int minvls, bool const do_reorder,
      bool const use_aprx, bool &did_fail, cdf_methods const method){
     did_fail = true;
@@ -92,7 +92,7 @@ public:
     upper.zeros();
 
     arma::vec beta(const_cast<double *>(par), n_fix_effect, false);
-    for(int i = 0; i < n_members; ++i)
+    for(unsigned i = 0; i < n_members; ++i)
       mu[i] = arma::dot(beta, X.row(i));
 
     arma::mat sig(upper.end(), n_members, n_members, false);
@@ -100,7 +100,7 @@ public:
 
     likelihood func;
     if(minvls < 0)
-      minvls = std::min(1000, 100 * n_members);
+      minvls = std::min<int>(1000, 100 * n_members);
     auto const res = cdf<likelihood>(
       func, lower, upper, mu, sig, do_reorder, use_aprx).approximate(
           maxvls, abs_eps, rel_eps, method, minvls, max_n_sequences);
@@ -120,7 +120,7 @@ public:
    * Approximates the log-likelihood term and the derivative.
    */
   double gr
-    (double const * par, double * d_par, double * var_est, int const maxvls,
+    (double const * par, double * d_par, double * var_est, unsigned const maxvls,
      double const abs_eps, double const rel_eps, int minvls,
      bool const do_reorder, bool const use_aprx, bool &did_fail,
      double const weight, cdf_methods const method){
@@ -133,7 +133,7 @@ public:
     upper.zeros();
 
     arma::vec beta(const_cast<double *>(par), n_fix_effect, false);
-    for(int i = 0; i < n_members; ++i)
+    for(unsigned i = 0; i < n_members; ++i)
       mu[i] = arma::dot(beta, X.row(i));
 
     arma::mat sig(upper.end(), n_members, n_members, false);
@@ -149,7 +149,7 @@ public:
     }
 
     if(minvls < 0)
-      minvls = std::min(1000, 100 * n_members);
+      minvls = std::min<unsigned>(1000, 100 * n_members);
     auto const res = cdf<pedigree_l_factor>(
       l_factor, lower, upper, mu, sig, do_reorder, use_aprx).approximate(
           maxvls, abs_eps, rel_eps, method, minvls,
@@ -157,14 +157,14 @@ public:
 
     // derivatives for the slopes and the scale parameters
     int const n_scales = l_factor.scale_mats.size();
-    for(int i = 0; i < n_fix_effect + n_scales; ++i)
+    for(unsigned i = 0; i < n_fix_effect + n_scales; ++i)
       d_par[i] += weight * res.derivs[i];
 
     // add variance terms to var_est. The first one for the log likelihood is an
     // application of the delta rule
     var_est[0] += weight * weight * res.sd_errs[0] * res.sd_errs[0] /
       (res.likelihood * res.likelihood);
-    for(int i = 1; i < n_fix_effect + n_scales + 1; ++i)
+    for(unsigned i = 1; i < n_fix_effect + n_scales + 1; ++i)
       var_est[i] += weight * weight * res.sd_errs[i] * res.sd_errs[i];
 
     did_fail = res.inform > 0;

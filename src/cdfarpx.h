@@ -126,9 +126,9 @@ inline double pnorm_use(double const x, bool const use_aprx) {
  */
 inline void copy_upper_tri
   (arma::mat const &X, double * __restrict__ x) noexcept {
-  int const p = X.n_cols;
-  for(int c = 0; c < p; c++)
-    for(int r = 0; r <= c; r++, x++)
+  arma::uword const p = X.n_cols;
+  for(arma::uword c = 0; c < p; c++)
+    for(arma::uword r = 0; r <= c; r++, x++)
       *x = X.at(r, c);
 }
 
@@ -140,9 +140,9 @@ inline void copy_upper_tri
  */
 inline void copy_lower_tri
   (arma::mat const &X, double * __restrict__ x) noexcept {
-  int const p = X.n_cols;
-  for(int c = 0; c < p; c++)
-    for(int r = c; r < p; r++, x++)
+  arma::uword const p = X.n_cols;
+  for(arma::uword c = 0; c < p; c++)
+    for(arma::uword r = c; r < p; r++, x++)
       *x = X.at(r, c);
 }
 
@@ -163,8 +163,8 @@ inline cdf_methods get_cdf_methods(int const x){
 template<class T_Functor, class out_type = typename T_Functor::out_type>
 class cdf {
   T_Functor &functor;
-  const int ndim,
-            n_integrands;
+  const arma::uword ndim,
+                    n_integrands;
   const bool use_aprx;
   bool is_permutated = false;
 
@@ -193,11 +193,10 @@ public:
    * must be called prior to calling the constructor or any member
    * functions.
    */
-  static void alloc_mem(int const max_ndim, int const max_threads) {
-    int const n_up_tri = (max_ndim * (max_ndim + 1)) / 2;
+  static void alloc_mem(unsigned const max_ndim, unsigned const max_threads) {
+    unsigned const n_up_tri = (max_ndim * (max_ndim + 1)) / 2;
 
-    imem.set_n_mem(3 * max_ndim                                 ,
-                   max_threads);
+    imem.set_n_mem(3 * max_ndim, max_threads);
     // TODO: this is wasteful
     dmem.set_n_mem(
       (6 + n_qmc_seqs()) * max_ndim + n_up_tri + max_ndim * max_ndim +
@@ -237,14 +236,14 @@ public:
 
     /* re-scale */
     double * cur_dtmp_mem = dtmp_mem;
-    auto get_dmem = [&](int const n_ele) -> double * {
+    auto get_dmem = [&](unsigned const n_ele) -> double * {
       double * out = cur_dtmp_mem;
       cur_dtmp_mem += n_ele;
       return out;
     };
 
     double * sds = get_dmem(ndim);
-    for(int i = 0; i < ndim; ++i){
+    for(arma::uword i = 0; i < ndim; ++i){
       sds[i] = std::sqrt(sigma_in.at(i, i));
       lower[i] = (lower_in[i] - mu_in[i]) / sds[i];
       upper[i] = (upper_in[i] - mu_in[i]) / sds[i];
@@ -253,8 +252,8 @@ public:
     is_permutated = false;
     {
       int *idx = indices.begin();
-      for(int i = 0; i < ndim; ++i, ++idx)
-        *idx = i;
+      for(arma::uword i = 0; i < ndim; ++i, ++idx)
+        *idx = static_cast<int>(i);
     }
 
     if(do_reorder and ndim > 1L){
@@ -268,43 +267,46 @@ public:
       auto const correl = get_cor_vec(sigma_in);
       int const pivot = 1L, doscale = 1L;
       int F_inform = 0L,
-             nddim = ndim;
+             nddim = static_cast<int>(ndim);
       std::fill(delta, delta + ndim, 0.);
       arma::ivec infi(itmp_mem, ndim, false);
 
-      F77_CALL(mvsort)(
-        &ndim, lower, upper, delta,
-        correl.cor_vec.memptr(), infin.begin(), y, &pivot, &nddim, A, B,
-        DL, sigma_chol, infi.memptr(), &F_inform, indices.begin(),
-        &doscale);
+      {
+        int ndim_int(static_cast<int>(ndim));
+        F77_CALL(mvsort)(
+          &ndim_int, lower, upper, delta,
+          correl.cor_vec.memptr(), infin.begin(), y, &pivot, &nddim, A, B,
+          DL, sigma_chol, infi.memptr(), &F_inform, indices.begin(),
+          &doscale);
+      }
 
       if(F_inform != 0)
         throw std::runtime_error("cdf::cdf: error in mvsort");
 
-      for(int i = 0; i < ndim; ++i){
-        if(indices[i] != i){
+      for(arma::uword i = 0; i < ndim; ++i){
+        if(indices[i] != static_cast<int>(i)){
           is_permutated = true;
           break;
         }
       }
 
       if(is_permutated){
-        for(int i = 0; i < ndim; ++i){
+        for(arma::uword i = 0; i < ndim; ++i){
           lower[i] = A[i];
           upper[i] = B[i];
           infin[i] = infi[i];
         }
 
         arma::mat sigma_permu(get_dmem(ndim * ndim), ndim, ndim, false);
-        for(int j = 0; j < ndim; ++j)
-          for(int i = 0; i < ndim; ++i)
+        for(arma::uword j = 0; j < ndim; ++j)
+          for(arma::uword i = 0; i < ndim; ++i)
             sigma_permu.at(i, j) = sigma_in.at(indices[i], indices[j]);
         functor.prep_permutated(sigma_permu, indices.begin());
 
         return;
 
       } else
-        for(int i = 0; i < ndim; ++i){
+        for(arma::uword i = 0; i < ndim; ++i){
           lower[i] = A[i];
           upper[i] = B[i];
         }
@@ -312,8 +314,8 @@ public:
     } else if(!do_reorder and ndim > 1L) {
       arma::mat tmp(get_dmem(ndim * ndim), ndim, ndim, false);
       tmp = sigma_in;
-      for(int i = 0; i < ndim; ++i)
-        for(int j = 0; j <ndim; ++j)
+      for(arma::uword i = 0; i < ndim; ++i)
+        for(arma::uword j = 0; j < ndim; ++j)
           tmp.at(i, j) /= sds[i] * sds[j];
 
       if(!arma::chol(tmp, tmp)) // TODO: memory allocation
@@ -325,7 +327,7 @@ public:
       if(ndim > 1L){
         /* rescale such that Choleksy decomposition has ones in the diagonal */
         double * sc = sigma_chol;
-        for(int i = 0; i < ndim; ++i){
+        for(arma::uword i = 0; i < ndim; ++i){
           double const scal = sc[i];
           lower[i] /= scal;
           upper[i] /= scal;
@@ -344,8 +346,9 @@ public:
    TODO: add description.
    */
   void operator()(
-      int const *ndim_in, double const * unifs, int const *n_integrands_in,
-      double * __restrict__ integrand_val, int const n_draws) PEDMOD_NOEXCEPT {
+      unsigned const *ndim_in, double const * unifs,
+      unsigned const *n_integrands_in,
+      double * __restrict__ integrand_val, unsigned const n_draws) PEDMOD_NOEXCEPT {
 #ifdef DO_CHECKS
     if(*ndim_in         != ndim)
       throw std::invalid_argument("cdf::eval_integrand: invalid 'ndim_in'");
@@ -366,17 +369,17 @@ public:
     int const *infin_j = infin.begin();
     /* loop over variables and transform them to truncated normal
      * variables */
-    for(int j = 0; j < ndim; ++j, ++sc, ++lw, ++up, ++infin_j){
+    for(arma::uword j = 0; j < ndim; ++j, ++sc, ++lw, ++up, ++infin_j){
       std::fill(su, su + n_draws, 0);
       {
         double * dri = dr;
-        for(int i = 0; i < j; ++i, sc++, dri += n_draws)
-          for(int k = 0; k < n_draws; ++k)
+        for(arma::uword i = 0; i < j; ++i, sc++, dri += n_draws)
+          for(unsigned k = 0; k < n_draws; ++k)
             su[k] += *sc * dri[k];
       }
 
-      int const offset = j * n_draws;
-      for(int k = 0; k < n_draws; ++k){
+      unsigned const offset = j * n_draws;
+      for(unsigned k = 0; k < n_draws; ++k){
         double lim_l(0.),
                lim_u(1.);
         if(*infin_j == 0L)
@@ -411,10 +414,10 @@ public:
     functor(dr, out, indices.begin(), is_permutated, n_draws);
 
     // multiply by the density
-    for(int k = 0; k < n_draws; ++k){
+    for(unsigned k = 0; k < n_draws; ++k){
       w[k] /= functor.get_norm_constant();
       double * o = out + k * n_integrands;
-      for(int i = 0; i < n_integrands; ++i)
+      for(unsigned i = 0; i < n_integrands; ++i)
         o[i] *= w[k];
     }
   }
@@ -428,8 +431,8 @@ public:
    * @param minvls Minimum number of samples.
    */
   out_type approximate
-  (int const maxvls, double const abs_eps, double const rel_eps,
-   cdf_methods const method, int const minvls, unsigned const n_sequences){
+  (size_t const maxvls, double const abs_eps, double const rel_eps,
+   cdf_methods const method, size_t const minvls, unsigned const n_sequences){
 #ifdef DO_CHECKS
     if(abs_eps <= 0 and rel_eps <= 0)
       throw std::invalid_argument("cdf::approximate: no valid convergence threshold");
@@ -503,12 +506,13 @@ public:
     return dmen.get_mem();
   }
 
-  constexpr static int get_n_integrands() {
-    return 1L;
+  constexpr static unsigned get_n_integrands() {
+    return 1;
   }
 
   inline void operator()
-    (double const *, double * out, int const *, bool const, int const n_draws)
+    (double const *, double * out, int const *, bool const,
+     unsigned const n_draws)
     PEDMOD_NOEXCEPT {
 #ifdef DO_CHECKS
     if(!out)
@@ -542,7 +546,8 @@ public:
      *        INFORM = 1 If MAXVLS was too small to obtain the required
      *        accuracy. In this case a value finest is returned with
      *        estimated absolute accuracy ABSERR. */
-    int minvls, inform;
+    size_t minvls;
+    int inform;
     /// maximum norm of estimated absolute accuracy of finest
     double abserr;
     /// likelihood approximation
@@ -550,7 +555,7 @@ public:
   };
 
   out_type get_output(double const * res, double const * sdest,
-                      int const minvls, int const inform, double const abserr,
+                      size_t const minvls, int const inform, double const abserr,
                       int const *){
     return out_type { minvls, inform, abserr, *res };
   }
@@ -571,13 +576,13 @@ public:
   /// the scale matrices for the different effects
   std::vector<arma::mat> const scale_mats;
   /// the number of members in this family
-  int const n_mem = scale_mats[0].n_rows;
+  arma::uword const n_mem = scale_mats[0].n_rows;
   /// design matrix for the fixed effects
   arma::mat const X;
   /// the number of fixed effects
-  int const n_fix = X.n_cols,
-         n_scales = scale_mats.size(),
-     n_integrands = 1 + n_fix + n_scales;
+  arma::uword const n_fix = X.n_cols,
+                 n_scales = scale_mats.size(),
+             n_integrands = 1 + n_fix + n_scales;
   /// scale free constant to check that a matrix is positive semi definite
   static constexpr double const eps_pos_def =
     10 * std::numeric_limits<double>::epsilon();
@@ -651,7 +656,7 @@ public:
     sobol_wrapper<cdf<pedigree_l_factor> >::alloc_mem(
         n_mem, get_n_integrands(), max_threads, max_n_sequences);
     size_t const working_memory =
-      std::max(
+      std::max<size_t>(
         // for prep_permutated
         3 * n_mem * n_mem + n_mem + n_fix * n_mem,
         // for operator()
@@ -676,7 +681,7 @@ public:
         throw std::invalid_argument  ("None positive definite scale matrix. The largest eigen value is " +
                                       std::to_string(vdum[0]));
       double const eps = eps_pos_def * n_mem * vdum[0];
-      for(int i = 1; i < n_mem; ++i)
+      for(arma::uword i = 1; i < n_mem; ++i)
         if(vdum[i] < -eps)
           throw std::invalid_argument(
               "None positive definite scale matrix. Largest eigen value is " +
@@ -685,7 +690,7 @@ public:
     }
   }
 
-  inline int get_n_integrands() PEDMOD_NOEXCEPT {
+  inline unsigned get_n_integrands() PEDMOD_NOEXCEPT {
     return n_integrands;
   }
 
@@ -753,8 +758,8 @@ public:
       throw std::runtime_error("pedigree_ll_factor::setup: chol failed");
 
     // permute X
-    for(int j = 0; j < n_fix; ++j)
-      for(int i = 0; i < n_mem; ++i)
+    for(arma::uword j = 0; j < n_fix; ++j)
+      for(arma::uword i = 0; i < n_mem; ++i)
         X_permu(i, j) = X(indices[i], j);
 
     d_fix_mat = next_mem;
@@ -769,8 +774,8 @@ public:
       unsigned s(0);
       for(arma::mat const &m : scale_mats){
         // setup the permutation of the scale matrix
-        for(int j = 0; j < n_mem; ++j)
-          for(int i = 0; i < n_mem; ++i)
+        for(arma::uword j = 0; j < n_mem; ++j)
+          for(arma::uword i = 0; i < n_mem; ++i)
             t2(i, j) = m(indices[i], indices[j]);
 
         arma::solve(t3, arma::trimatl(t1), t2);
@@ -791,16 +796,16 @@ public:
 
           // count the number of Eigen values greater than zero
           double const eps = eps_pos_def * n_mem * dum_vec[n_mem - 1];
-          int j = n_mem - 1;
+          arma::uword j = n_mem - 1;
           for(; j > 0; --j)
             if(dum_vec[j - 1] < eps)
               break;
-          int const n_eigen_vectors = n_mem - j;
-          S_C_n_eigen[s] = n_eigen_vectors;
+          arma::uword const n_eigen_vectors = n_mem - j;
+          S_C_n_eigen[s] = static_cast<int>(n_eigen_vectors);
 
           // over write the first column
-          int const n_unused = n_mem - n_eigen_vectors;
-          for(int k = 0; k < n_eigen_vectors; ++k){
+          arma::uword const n_unused = n_mem - n_eigen_vectors;
+          for(arma::uword k = 0; k < n_eigen_vectors; ++k){
             dum_vec[k] = dum_vec[k + n_unused];
             std::copy(eigen_vectors.colptr(k + n_unused),
                       eigen_vectors.colptr(k + n_unused) + n_mem,
@@ -809,9 +814,9 @@ public:
 
           // scale the Eigen vectors
           double * eg_val = eigen_vectors.begin();
-          for(int k = 0; k < n_eigen_vectors; ++k, eg_val += n_mem){
+          for(arma::uword k = 0; k < n_eigen_vectors; ++k, eg_val += n_mem){
             double const scale = std::sqrt(dum_vec[k]);
-            for(int j = 0; j < n_mem; ++j)
+            for(arma::uword j = 0; j < n_mem; ++j)
               eg_val[j] *= scale;
           }
 
@@ -827,8 +832,8 @@ public:
 
   inline void operator()
     (double const * __restrict__ draw, double * __restrict__ out,
-     int const *, bool const, int const n_draws) {
-      for(int k = 0; k < n_draws; ++k)
+     int const *, bool const, unsigned const n_draws) {
+      for(unsigned k = 0; k < n_draws; ++k)
         out[k * n_integrands] = 1;
 
       double * __restrict__ sum       = interal_mem,
@@ -837,59 +842,59 @@ public:
       // derivatives w.r.t. the fixed effects
       {
         double const *xij = d_fix_mat;
-        for(int j = 0; j < n_fix; ++j, xij += n_mem){
+        for(unsigned j = 0; j < n_fix; ++j, xij += n_mem){
           double const *d = draw;
           std::fill(sum, sum + n_draws, 0);
 
-          for(int i = 0; i < n_mem; ++i, d += n_draws)
-            for(int k = 0; k < n_draws; ++k)
+          for(arma::uword i = 0; i < n_mem; ++i, d += n_draws)
+            for(unsigned k = 0; k < n_draws; ++k)
               sum[k] += xij[i] * d[k];
 
-          int const offset = j + 1;
-          for(int k = 0; k < n_draws; ++k)
+          unsigned const offset = j + 1;
+          for(unsigned k = 0; k < n_draws; ++k)
             out[offset + k * n_integrands] = sum[k];
         }
       }
 
       // handle the derivatives w.r.t. the scale parameters
       double * next_mat = S_C_S_matrices;
-      for(int s = 0; s < n_scales; ++s, next_mat += n_mem * n_mem){
+      for(arma::uword s = 0; s < n_scales; ++s, next_mat += n_mem * n_mem){
         std::fill(sum, sum + n_draws, 0);
 
         if(S_C_n_eigen[s] < 0){
           // a Cholesky decomposition was used
           double *chol_ele = next_mat;
 
-          for(int c = 0; c < n_mem; chol_ele += n_mem - c, ++c){
+          for(arma::uword c = 0; c < n_mem; chol_ele += n_mem - c, ++c){
             std::fill(sqrt_term, sqrt_term + n_draws, 0);
             double const * d = draw + c * n_draws;
-            for(int r = 0; r < n_mem - c; ++r, d += n_draws)
-              for(int k = 0; k < n_draws; ++k)
+            for(arma::uword r = 0; r < n_mem - c; ++r, d += n_draws)
+              for(unsigned k = 0; k < n_draws; ++k)
                 sqrt_term[k] += chol_ele[r] * d[k];
 
-            for(int k = 0; k < n_draws; ++k)
+            for(unsigned k = 0; k < n_draws; ++k)
               sum[k] += sqrt_term[k] * sqrt_term[k];
           }
 
         } else {
           // an Eigen decomposition was used
           double *eig_vec_ele = next_mat;
-          int const n_eigen_vec = S_C_n_eigen[s];
+          unsigned const n_eigen_vec = static_cast<unsigned>(S_C_n_eigen[s]);
 
-          for(int r = 0; r < n_eigen_vec; ++r, eig_vec_ele += n_mem){
+          for(unsigned r = 0; r < n_eigen_vec; ++r, eig_vec_ele += n_mem){
             std::fill(sqrt_term, sqrt_term + n_draws, 0);
             double const * d = draw;
-            for(int c = 0; c < n_mem; ++c, d += n_draws)
-              for(int k = 0; k < n_draws; ++k)
+            for(arma::uword c = 0; c < n_mem; ++c, d += n_draws)
+              for(unsigned k = 0; k < n_draws; ++k)
                 sqrt_term[k] += eig_vec_ele[c] * d[k];
 
-            for(int k = 0; k < n_draws; ++k)
+            for(unsigned k = 0; k < n_draws; ++k)
               sum[k] += sqrt_term[k] * sqrt_term[k];
           }
         }
 
-        int const offset = 1 + n_fix + s;
-        for(int k = 0; k < n_draws; ++k)
+        unsigned const offset = 1 + n_fix + s;
+        for(unsigned k = 0; k < n_draws; ++k)
           out[offset + k * n_integrands] = sum[k] * .5;
       }
     }
@@ -913,7 +918,7 @@ public:
 
     out[0L] = p_ub - p_lb;
     double const d_mu = -(d_ub - d_lb) * sd_inv;
-    for(int j = 0; j < n_fix; ++j)
+    for(arma::uword j = 0; j < n_fix; ++j)
       out[j + 1] = X.at(0, j) * d_mu;
 
     double const d_sig = -(d_ub_ub - d_lb_lb) / 2 * sd_inv * sd_inv;
@@ -931,7 +936,8 @@ public:
      *        INFORM = 1 If MAXVLS was too small to obtain the required
      *        accuracy. In this case a value finest is returned with
      *        estimated absolute accuracy ABSERR. */
-    int minvls, inform;
+    size_t minvls;
+    int inform;
     /// maximum estimated absolute accuracy of finest
     double abserr;
     /// likelihood approximation
@@ -942,7 +948,7 @@ public:
     arma::vec sd_errs;
   };
 
-  out_type get_output(double * res,  double const * sdest, int const minvls,
+  out_type get_output(double * res,  double const * sdest, size_t const minvls,
                       int const inform, double const abserr,
                       int const *indices){
     out_type out;
@@ -962,7 +968,7 @@ public:
       {
         // correct for the normalization constant
         double const rel_likelihood = norm_const / out.likelihood;
-        for(int i = 1; i <= n_fix + n_scales; ++i){
+        for(unsigned i = 1; i <= n_fix + n_scales; ++i){
           res        [i] *= rel_likelihood;
           // we ignore the uncertainty from the likelihood approximation.
           // This is typically quite small compared to that of the derivative
@@ -973,15 +979,15 @@ public:
 
       double * __restrict__ const d_sc = res + n_fix + 1L;
       double * sig_inv_ele = sig_inv;
-      for(int s = 0; s < n_scales; ++s)
+      for(size_t s = 0; s < n_scales; ++s)
         scale_mats_ptr[s] = scale_mats.at(s).begin();
 
-      for(int c = 0; c < n_mem; ++c){
-        for(int r = 0; r < c; ++r, ++sig_inv_ele)
-          for(int s = 0; s < n_scales; ++s)
+      for(arma::uword c = 0; c < n_mem; ++c){
+        for(arma::uword r = 0; r < c; ++r, ++sig_inv_ele)
+          for(size_t s = 0; s < n_scales; ++s)
             d_sc[s] -= *sig_inv_ele * *scale_mats_ptr[s]++;
 
-        for(int s = 0; s < n_scales; ++s){
+        for(size_t s = 0; s < n_scales; ++s){
           d_sc[s] -= .5 * *sig_inv_ele * *scale_mats_ptr[s];
           scale_mats_ptr[s] += n_mem - c;
         }
@@ -991,7 +997,7 @@ public:
 
     // set deriv elements
     arma::vec &derivs = out.derivs;
-    int const n_derivs = n_fix + n_scales;
+    arma::uword const n_derivs = n_fix + n_scales;
     derivs.set_size(n_derivs);
     std::copy(res + 1, res + 1 + n_derivs, derivs.begin());
     return out;

@@ -107,7 +107,7 @@ public:
           n_sequences, minvls / (2L * static_cast<unsigned>(p[np])));
     }
 
-    constexpr size_t const maxit(1000L);
+    constexpr size_t maxit(1000L);
     size_t intvls(0L);
     int inform(1L);
     double abserr(std::numeric_limits<double>::infinity());

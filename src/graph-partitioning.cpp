@@ -24,7 +24,7 @@ struct weighted_edge {
 
   weighted_edge(vertex const *v, double weight): v(v), weight(weight) { }
 
-  inline operator vertex const*() const noexcept {
+  operator vertex const*() const noexcept {
     return v;
   }
 };
@@ -43,23 +43,23 @@ public:
 
   vertex(unsigned const id, double const weight = 1): id(id), weight(weight) { }
 
-  inline const_iterator begin() const noexcept {
+  const_iterator begin() const noexcept {
     return edges.begin();
   }
 
-  inline const_iterator end() const noexcept {
+  const_iterator end() const noexcept {
     return edges.end();
   }
 
-  inline void reserve_edges(size_t const size){
+  void reserve_edges(size_t const size){
     edges.reserve(size);
   }
 
-  inline size_t n_edges() const noexcept {
+  size_t n_edges() const noexcept {
     return edges.size();
   }
 
-  inline void add_edge(vertex *other, double const weight){
+  void add_edge(vertex *other, double const weight){
     if(other != this and other){
       edges       .emplace_back(other, weight);
       other->edges.emplace_back(this , weight);
@@ -79,7 +79,7 @@ struct edge {
 
 /// check if x is almost equal y
 inline bool is_almost_equal(double const x, double const y){
-  constexpr double const eps = 1000 * std::numeric_limits<double>::epsilon();
+  constexpr double eps = 1000 * std::numeric_limits<double>::epsilon();
   return std::abs(x - y) < (std::abs(y) + eps) * eps;
 }
 
@@ -143,7 +143,7 @@ struct block {
   /// the cut vertices in the block
   std::unordered_set<vertex const*> cut_vertices;
 
-  inline bool has_vertex(vertex const *vertex){
+  bool has_vertex(vertex const *vertex){
     return vertices.count(vertex);
   }
 
@@ -264,15 +264,15 @@ class biconnected_components {
         edges.reserve(org_vertex->n_edges());
     }
 
-    inline const_iterator begin() const noexcept {
+    const_iterator begin() const noexcept {
       return edges.begin();
     }
 
-    inline const_iterator end() const noexcept {
+    const_iterator end() const noexcept {
       return edges.end();
     }
 
-    inline void add_edge(vertex_w_info *other){
+    void add_edge(vertex_w_info *other){
       if(other != this and other){
         edges       .push_back(other);
         other->edges.push_back(this);
@@ -568,7 +568,7 @@ struct mbcp_result {
 
 // from https://stackoverflow.com/a/9729747/5861244
 template <class T>
-inline void hash_combine(std::size_t &seed, T const &v)
+void hash_combine(std::size_t &seed, T const &v)
 {
   std::hash<T> hasher;
   seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
@@ -576,7 +576,7 @@ inline void hash_combine(std::size_t &seed, T const &v)
 
 template<typename T>
 struct pair_hash {
-  inline std::size_t operator()(std::pair<T, T> const &v) const
+  std::size_t operator()(std::pair<T, T> const &v) const
   {
     std::size_t seed(0);
     hash_combine(seed, v.first);
@@ -1377,7 +1377,7 @@ mbcp_result unconnected_partition
           bool const is_used = false):
       gain(gain), v(v), is_in_set_2(is_in_set_2), is_used(is_used) { }
 
-    inline bool operator<(score const &other) const noexcept {
+    bool operator<(score const &other) const noexcept {
       // we want the gains in descending order
       if(!is_used and other.is_used)
         return true;
@@ -1395,8 +1395,8 @@ mbcp_result unconnected_partition
     double gain = -std::numeric_limits<double>::max(),
          b_crit = 0;
 
-    inline void update(vertex const *new_v, double const balance_crit,
-                       score const &info){
+    void update(vertex const *new_v, double const balance_crit,
+                score const &info){
       if(!v or
            info.gain > gain or
            (is_almost_equal(info.gain, gain) and balance_crit > b_crit)){

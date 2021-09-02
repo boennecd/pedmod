@@ -168,7 +168,7 @@ class cdf {
   const bool use_aprx;
   bool is_permutated = false;
 
-  static constexpr bool const
+  static constexpr bool
     needs_last_unif = T_Functor::needs_last_unif();
 
   // cached memory to use
@@ -396,6 +396,7 @@ public:
           double const l_diff = lim_u - lim_l;
           w[k] *= l_diff;
 
+          // TODO: use that this is constexpr
           if(needs_last_unif or j + 1 < ndim){
             double const quant_val = lim_l + unifs[k * ndim + j] * l_diff;
             dr[offset + k] =
@@ -510,7 +511,7 @@ public:
     return 1;
   }
 
-  inline void operator()
+  void operator()
     (double const *, double * out, int const *, bool const,
      unsigned const n_draws)
     PEDMOD_NOEXCEPT {
@@ -560,7 +561,7 @@ public:
     return out_type { minvls, inform, abserr, *res };
   }
 
-  inline void prep_permutated(arma::mat const&, int const*) { }
+  void prep_permutated(arma::mat const&, int const*) { }
 };
 
 /**
@@ -584,7 +585,7 @@ public:
                  n_scales = scale_mats.size(),
              n_integrands = 1 + n_fix + n_scales;
   /// scale free constant to check that a matrix is positive semi definite
-  static constexpr double const eps_pos_def =
+  static constexpr double eps_pos_def =
     10 * std::numeric_limits<double>::epsilon();
 
 private:
@@ -690,11 +691,11 @@ public:
     }
   }
 
-  inline unsigned get_n_integrands() PEDMOD_NOEXCEPT {
+  unsigned get_n_integrands() PEDMOD_NOEXCEPT {
     return n_integrands;
   }
 
-  inline double * get_wk_mem() PEDMOD_NOEXCEPT {
+  double * get_wk_mem() PEDMOD_NOEXCEPT {
     return cdf_mem;
   }
 
@@ -702,7 +703,7 @@ public:
     return true;
   }
 
-  inline double get_norm_constant() PEDMOD_NOEXCEPT {
+  double get_norm_constant() PEDMOD_NOEXCEPT {
     return norm_const;
   }
 
@@ -830,7 +831,7 @@ public:
     }
   }
 
-  inline void operator()
+  void operator()
     (double const * __restrict__ draw, double * __restrict__ out,
      int const *, bool const, unsigned const n_draws) {
       for(unsigned k = 0; k < n_draws; ++k)
@@ -899,8 +900,8 @@ public:
       }
     }
 
-  inline void univariate(double * out, double const lw, double const ub) {
-    constexpr double const log_sqrt_2_pi_inv = 0.918938533204673;
+  void univariate(double * out, double const lw, double const ub) {
+    constexpr double log_sqrt_2_pi_inv = 0.918938533204673;
     auto log_dnrm = [&](double const x){
       return -x * x / 2. - log_sqrt_2_pi_inv;
     };

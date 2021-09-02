@@ -6,6 +6,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // get_biconnected_components
 Rcpp::List get_biconnected_components(Rcpp::IntegerVector const from, Rcpp::IntegerVector const to, Rcpp::IntegerVector const weights_ids, Rcpp::NumericVector const weights, Rcpp::NumericVector const edge_weights);
 RcppExport SEXP _pedmod_get_biconnected_components(SEXP fromSEXP, SEXP toSEXP, SEXP weights_idsSEXP, SEXP weightsSEXP, SEXP edge_weightsSEXP) {

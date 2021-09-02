@@ -69,17 +69,17 @@ public:
   simple_matrix() = default;
 
   /// returns a pointer to the data
-  inline T * data() noexcept {
+  T * data() noexcept {
     return dat.get();
   }
 
   /// returns a pointer to the column. Zero-based indices are used
-  inline T * col_ptr(size_t const col) noexcept {
+  T * col_ptr(size_t const col) noexcept {
     return data() + col * n_rows;
   }
 
   /// returns the element at a given index. Zero-based indices are used
-  inline T& operator()(size_t const row, size_t const col) noexcept {
+  T& operator()(size_t const row, size_t const col) noexcept {
     return *(data() + row + col * n_rows);
   }
 };
@@ -91,9 +91,9 @@ public:
   size_t const dimen = 0;
 
 private:
-  static constexpr size_t const max_dim = 1111,
-                                max_deg = 13,
-                                max_bit = 30;
+  static constexpr size_t max_dim = 1111,
+                          max_deg = 13,
+                          max_bit = 30;
 
   std::unique_ptr<double[]> quasi;
   unsigned count = 0;
@@ -113,7 +113,7 @@ public:
    * returns a pointer to the current qausi-random numbers. This is
    * beneficial as we can avoid a copy when one uses the C++ interface.
    */
-  inline double const * get_qausi() const noexcept {
+  double const * get_qausi() const noexcept {
     return quasi.get();
   }
 
@@ -128,7 +128,7 @@ public:
   sobol() = default;
 
   /// computes the next quasi random number
-  inline void next() noexcept {
+  void next() noexcept {
     size_t const l = ([](unsigned count) -> size_t {
       size_t out(0);
       while((count % 2L) == 1L){

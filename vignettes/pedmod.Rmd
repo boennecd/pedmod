@@ -111,9 +111,7 @@ where $\phi = (1 + \sum_{l = 1}^K \sigma_l^2)^{-1}$, we work with
 $\phi = (1 + \sum_{l = 1}^K \sigma_l^2)^{-1}$,
 $\vec\gamma = \sqrt\phi\vec\beta$, and 
 
-$$
-\phi\sigma_l^2 = \frac{\exp(\psi_l)}{1 +\sum_{l = 1}^k\exp(\psi_l)}\Leftrightarrow\sigma_l^2 = \exp(\psi_l).
-$$
+$$\phi\sigma_l^2 = \frac{\exp(\psi_l)}{1 +\sum_{l = 1}^k\exp(\psi_l)}\Leftrightarrow\sigma_l^2 = \exp(\psi_l).$$
 
 This package provides randomized quasi-Monte Carlo methods to approximate 
 the log marginal likelihood for these types of 
@@ -490,7 +488,7 @@ c(lb, ub)^2 # on the variance scale
 ```
 
 A caveat is that issues with the $\chi^2$ approximation may arise on the 
-boundary of the scale parameter ($\sigma = 0$; 
+boundary of the scale parameter ($\sigma = 0$; e.g. 
 see https://stats.stackexchange.com/a/4894/81865).
 Notice that the above may fail if the estimated profile likelihood is not 
 smooth e.g. because of convergence issues. We can plot the profile likelihood 
@@ -1146,7 +1144,7 @@ sigs <- expand.grid(sigma1 = sig_vals1,
 # function to compute the profile likelihood. 
 # 
 # Args:
-#   fix: indices óf parameters to fix. 
+#   fix: indices of parameters to fix. 
 #   fix_val: values of the fixed parameters.
 #   sig_start: starting values for the scale parameters.
 ll_terms <- get_pedigree_ll_terms(dat_unqiue, max_threads = 4L)
@@ -1243,19 +1241,133 @@ exp(pl_env$confs) # the confidence interval
 We plot the two profile likelihood curves below:
 
 ```{r plot_env_pl_curves}
-do_plot <- function(obj, xlab, estimate){
-  xs <- exp(obj$xs / 2)
+do_plot <- function(obj, xlab, estimate, trans = function(x) exp(x / 2), 
+                    max_diff = 8, add = FALSE, col = "black"){
+  xs <- trans(obj$xs)
   pls <- obj$p_log_Lik
-  par(mar = c(5, 5, 1, 1))
-  plot(xs, pls, bty = "l", pch = 16, xlab = xlab, ylab = "Profile likelihood")
-  grid()
-  lines(spline(xs, pls, n = 100L))
-  abline(v = estimate, lty = 2) # the estimate
-  abline(h = max(pls) - qchisq(.95, 1) / 2, lty = 3) # mark the critical value
+  keep <- pls > max(pls) - max_diff
+  xs <- xs[keep]
+  pls <- pls[keep]
+  if(add)
+    points(xs, pls, pch = 16, col = col)
+  else {
+    plot(xs, pls, bty = "l", pch = 16, xlab = xlab, ylab = "Profile likelihood", 
+         col = col)
+    grid()
+    abline(v = estimate, lty = 2, col = col) # the estimate
+    # mark the critical value
+    abline(h = max(pls) - qchisq(.95, 1) / 2, lty = 3, col = col) 
+  }
+  
+  lines(spline(xs, pls, n = 100L), col = col)
 }
 
+par(mar = c(5, 5, 1, 1))
 do_plot(pl_genetic, expression(sigma[G]), exp(opt_out$par[3] / 2))
 do_plot(pl_env, expression(sigma[E]), exp(opt_out$par[4] / 2))
+```
+
+#### Profile Likelihood Curve: Proportion of Variance
+Suppose that we want a profile likelihood curve for the proportion of variance 
+explained by each random effect. If $K = 1$ then we can use the profile 
+likelihood curve for $\sigma_1^2$ as the
+proportion of variance for the first effect when $K = 1$ is a monotone 
+transformation of this parameter only and thus we can 
+use the scale invariance of the likelihood ratio. However, this is not true for 
+more effects, $K > 1$. To see this, notice that proportion of variance is given 
+by
+
+$$h_i = \left(1 + \sum_{k = 1}^K\sigma_k^2\right)\sigma_i^2\Leftrightarrow 
+  \sigma_i^2 = 
+    \frac{h_i}{1 - h_i}\left(1 + \sum_{k \in \{1,\dots,K\}\setminus\{i\}}\sigma_k^2\right)$$
+
+Let $l(\vec\beta, \sigma_1^2,\dots,\sigma_K^2)$ be the log likelihood. Then the 
+profile likelihood in the proportion of variance explained by the $i$th effect 
+is 
+
+$$\tilde l_i(h_i) = \max_{\vec\beta,\sigma_1,\dots,\sigma_{k-1},\sigma_{k+1},\dots,\sigma_K}
+  l\left(\vec\beta,\sigma_1,\dots,\sigma_{k-1},
+  \frac{h_i}{1 - h_i}\left(1 + \sum_{k \in \{1,\dots,K\}\setminus\{i\}}\sigma_k^2\right),
+  \sigma_{k+1},\dots,\sigma_K\right)$$
+
+As these proportions are often the interest of the analysis, the 
+`pedmod_profile_prop` function is implemented to produce profile likelihood
+based confidence intervals for $K > 1$. We provide an example of using 
+`pedmod_profile_prop` below. 
+
+```{r pre_prop_var_conf, echo = FALSE}
+ll_terms <- get_pedigree_ll_terms(dat_unqiue, max_threads = 4L)
+```
+
+```{r prop_var_conf, cache = 1, message=TRUE}
+# confidence interval for the proportion of variance for the genetic effect
+pl_genetic_prop <- pedmod_profile_prop(
+  ptr = ll_terms, par = opt_out$par, maxvls = 20000L, 
+  minvls = 1000L, alpha = .05, abs_eps = 0, rel_eps = 1e-4, which_prof = 1L,
+  use_aprx = TRUE, n_threads = 4L, verbose = TRUE, cluster_weights = c_weights)
+pl_genetic_prop$confs # the confidence interval
+
+# confidence interval for the proportion of variance for the environmental 
+# effect
+pl_env_prop <- pedmod_profile_prop(
+  ptr = ll_terms, par = opt_out$par, maxvls = 20000L, 
+  minvls = 1000L, alpha = .05, abs_eps = 0, rel_eps = 1e-4, which_prof = 2L,
+  use_aprx = TRUE, n_threads = 4L, verbose = TRUE, cluster_weights = c_weights)
+pl_env_prop$confs # the confidence interval
+```
+
+A wrong approach is to use the confidence interval for $\sigma_i^2$ to attempt
+to construct a confidence interval for $h_i$. To see that this is wrong, let 
+
+$$\begin{align*}
+\vec v_{i}(\sigma_i^2) &= 
+  \text{arg max}_{\sigma_1^2,\dots,\sigma_{i  -1}^2, \sigma_{i + 1}^2,\dots,\sigma_K^2}
+  \max_{\vec\beta}
+  l\left(\vec\beta,\sigma_1^2,\dots,\sigma_K^2\right) \\
+\vec s_i(\sigma_i^2) &= 
+  \left(v_{i1}(\sigma_i^2),\dots,
+        v_{i,i-1}(\sigma_i^2), \sigma_i^2, 
+        v_{i,i+1}(\sigma_i^2),\dots,
+        v_{i,K-1}(\sigma_i^2)\right)^\top
+\end{align*}$$
+Now, suppose that exists a function $g:\,(0,1)\rightarrow(0,\infty)$ such that
+
+$$h_i = \frac{g_i(h_i)}{1+\sum_{k = 0}^K s_{ik}(g_i(h_i))}$$
+
+Then it follows that 
+
+$$\tilde l_i(h_i) \geq \max_{\vec\beta} l(\vec\beta, \vec s_i(g_i(h_i)))$$
+
+Thus, if one uses the profile likelihood curve of $\sigma_i^2$ to attempt to 
+construct a confidence interval for $h_i$ then the result is anti-conservative.
+This is illustrated below where the black curves are the proper profile 
+likelihoods and the gray curves are the invalid/attempted profile likelihood 
+curves.
+
+```{r plot_prop_var_conf}
+# using the right approach 
+estimate <- exp(tail(opt_out$par, 2))
+estimate <- estimate / (1 + sum(estimate))
+do_plot(pl_genetic_prop, expression(h[G]), estimate[1], identity)
+
+# create curve using the wrong approach
+dum_pl <- pl_genetic
+dum_pl$xs <- sapply(dum_pl$data, function(x) {
+  scales <- exp(c(x$x, tail(x$optim$par, 1)))
+  scales[1] / (1 + sum(scales))
+})
+do_plot(dum_pl, expression(h[G]), estimate[1], identity, col = "gray40", 
+        add = TRUE)
+# do the same for the environmental effect 
+do_plot(pl_env_prop, expression(h[E]), estimate[2], identity)
+
+dum_pl <- pl_env
+dum_pl$xs <- sapply(dum_pl$data, function(x) {
+  scales <- exp(c(x$x, tail(x$optim$par, 1)))
+  scales[1] / (1 + sum(scales))
+})
+do_plot(dum_pl, expression(h[E]), estimate[2], identity, col = "gray40", 
+        add = TRUE)
 ```
 
 ### Simulation Study

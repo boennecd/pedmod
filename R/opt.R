@@ -626,7 +626,7 @@ pedmod_profile <- function(ptr, par, delta, maxvls, minvls = -1L,
                      n_threads = n_threads, cluster_weights = cluster_weights,
                      standardized = standardized, method = method)
   }
-  optim_res <- list(par = par, value = -fn(par))
+  optim_res <- list(par = par[-which_prof], value = -fn(par))
 
   if(verbose)
     message(sprintf("The estimate of the standard error of the log likelihood is %.8f. Preferably this should be below 0.001",
@@ -640,15 +640,26 @@ pedmod_profile <- function(ptr, par, delta, maxvls, minvls = -1L,
   chi_val <- qchisq(1 - alpha, 1)
   crit_value <- -optim_res$value - chi_val / 2
 
-  wrap_optim <- function(x, optim_obj, dir){
-    if(verbose)
-      message(sprintf("Log likelihood is %.4f at %f (critical value is %.4f)",
-                      -optim_obj$value, x, crit_value))
+  wrap_optim <- function(x, optim_obj, dir, ub = NULL, lb = NULL){
+    if(verbose){
+      new_val <- -optim_obj$value
+      message(sprintf("LogLike: %.4f at %16f", new_val, x), appendLF = FALSE)
+      if(!is.null(ub) && !is.null(lb)){
+        if(new_val < crit_value)
+          lb$value <- new_val
+        else
+          ub$value <- new_val
+        message(sprintf(". Lb, target, ub: %.4f, %.4f, %.4f",
+                        lb$value, crit_value, ub$value))
+
+      } else
+        message() # line feed
+    }
     list(x = x, value = -optim_obj$value, optim = optim_obj,
          z_val = sign(dir) * sqrt((optim_obj$value - optim_res$value) * 2))
   }
 
-  do_fit <- function(x, dir){
+  do_fit <- function(x, dir, lb = NULL, ub = NULL){
     # get the starting value
     par[which_prof] <- x
     if(which_prof > length(beta_0) && !standardized){
@@ -666,7 +677,7 @@ pedmod_profile <- function(ptr, par, delta, maxvls, minvls = -1L,
         method = method, ...)
 
       par[-which_prof] <- opt_quick$par
-      opt_quick <- wrap_optim(x, opt_quick, dir)
+      opt_quick <- wrap_optim(x, opt_quick, dir, lb = lb, ub = ub)
     } else
       opt_quick <- NULL
 
@@ -677,7 +688,7 @@ pedmod_profile <- function(ptr, par, delta, maxvls, minvls = -1L,
       cluster_weights = cluster_weights, standardized = standardized,
       method = method, ...)
 
-    structure(wrap_optim(x, opt_out, dir),
+    structure(wrap_optim(x, opt_out, dir, lb = lb, ub = ub),
               opt_quick = opt_quick)
   }
 
@@ -725,6 +736,8 @@ pedmod_profile <- function(ptr, par, delta, maxvls, minvls = -1L,
       xs <- c(unlist(sapply(out, `[[`, "x"))    , par[which_prof])
       ys <- c(unlist(sapply(out, `[[`, "value")), -optim_res$value)
       sp <- splinefun(ys, xs, method = "monoH.FC")
+      # TODO: replace by
+      #    seq(lb$value, ub$value, length.out = 20)
       y <- seq(min(ys), max(ys), length.out = 4 * max_step)
       x <- sp(y)
       next_val <- approx(y, x, xout = crit_value)$y
@@ -733,7 +746,7 @@ pedmod_profile <- function(ptr, par, delta, maxvls, minvls = -1L,
       else
         next_val <- 8 / 9 * next_val + lb$x / 9
 
-      out[[step]] <- do_fit(next_val, dir = dir)
+      out[[step]] <- do_fit(next_val, dir = dir, lb = lb, ub = ub)
 
       if(out[[step]]$value > ub$value || out[[step]]$value < lb$value){
         warning("Log likelihood does not seem monotonic. Likely the precision needs to be increased")
@@ -755,6 +768,278 @@ pedmod_profile <- function(ptr, par, delta, maxvls, minvls = -1L,
   res_up   <- get_points( 1)
   out <- c(
     res_down, list(wrap_optim(par[which_prof], optim_res, dir = 0)), res_up)
+
+  # compute the confidence interval
+  xs  <- sapply(out, `[[`, "x")
+  zs  <- sapply(out, `[[`, "z_val")
+  pls <- sapply(out, `[[`, "value")
+  sp <- spline(xs, zs)
+  pvs <- c(alpha / 2, 1 - alpha/2)
+  confs <- setNames(approx(sp$y, sp$x, xout = qnorm(pvs))$y,
+                    sprintf("%.2f pct.", 100 * pvs))
+
+  # return
+  list(confs = confs, xs = xs, p_log_Lik = pls, data = out)
+}
+
+#' Compute Profile Likelihood Based Confidence Intervals for the Proportion
+#' of Variance
+#' @inheritParams pedmod_profile
+#' @param which_prof the index of the random effect which proportion of
+#' variance should be profiled.
+#' @param opt_func function to perform minimization with arguments like
+#' \code{\link{optim}}. BFGS is used with \code{\link{optim}} if this argument
+#' is \code{NULL}.
+#' @param ... arguments passed to \code{opt_func}.
+#'
+#' @details
+#' The function is only useful when there is more than one type of random
+#' effect. If not, then \code{\link{pedmod_profile}} can be used because of
+#' the scale invariance of the likelihood ratio.
+#'
+#' @return
+#' A list like \code{\link{pedmod_profile}}.
+#'
+#' @seealso
+#' \code{\link{pedmod_opt}}, \code{\link{pedmod_sqn}}, and
+#' \code{\link{pedmod_profile}}.
+#' @export
+pedmod_profile_prop <- function(
+  ptr, par, maxvls, minvls = -1L, alpha = .05, abs_eps,
+  rel_eps, which_prof, indices = NULL,
+  maxvls_start = max(100L, as.integer(ceiling(maxvls / 5))),
+  minvls_start = if(minvls < 0) minvls else minvls / 5,
+  do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L, cluster_weights = NULL,
+  method = 0L, seed = 1L, verbose = FALSE, max_step = 15L,
+  opt_func = NULL, ...){
+  # checks
+  standardized <- FALSE
+  n_scales <- get_n_scales(ptr)
+  stopifnot(
+    is.numeric(par),
+    length(which_prof) == 1L, is.integer(which_prof),
+    which_prof %in% 1:n_scales,
+    is.numeric(alpha), length(alpha) == 1, is.finite(alpha),
+    alpha > 0, alpha < 1)
+  if(n_scales < 2)
+    stop("pedmod_profile when there is just one scale parameter")
+
+  # assign function to evaluate the log likelihood
+  fn <- function(par, minv = minvls){
+    set.seed(seed)
+    eval_pedigree_ll(ptr = ptr, par = par, maxvls = maxvls, abs_eps = abs_eps,
+                     rel_eps = rel_eps, indices = indices, minvls = minv,
+                     do_reorder = do_reorder, use_aprx = use_aprx,
+                     n_threads = n_threads, cluster_weights = cluster_weights,
+                     method = method)
+  }
+  optim_res <- list(par = par, value = -fn(par))
+
+  if(verbose)
+    message(sprintf("The estimate of the standard error of the log likelihood is %.8f. Preferably this should be below 0.001",
+                    attr(optim_res$value, "std")))
+
+  # assign function to do the model fitting
+  total_var <- 1 + sum(exp(tail(par, n_scales)))
+  beta_0 <- head(par, -n_scales) / sqrt(total_var)
+
+  chi_val <- qchisq(1 - alpha, 1)
+  crit_value <- -optim_res$value - chi_val / 2
+
+  # function to compute the scale parameter from the other scales and the
+  # proportion of variance
+  is_beta <- seq_len(length(par) - n_scales)
+  is_scales <- (length(par) - n_scales + 1L):length(par)
+
+  scales <- exp(par[is_scales])
+  prop_var_max <- scales[which_prof] / (1 + sum(scales))
+
+  get_par <- function(x, prop_var){
+    scales <- exp(x[-is_beta])
+    scale_prof <- log(prop_var / (1 - prop_var) * (1 + sum(scales)))
+    c(x[is_beta], x[-is_beta], scale_prof)[
+      c(is_beta, is_scales[-which_prof], is_scales[which_prof])]
+  }
+
+  wrap_optim <- function(x, optim_obj, dir, lb = NULL, ub = NULL){
+    if(verbose){
+      new_val <- -optim_obj$value
+      message(sprintf("LogLike: %.4f at %16f", new_val, x), appendLF = FALSE)
+      if(!is.null(ub) && !is.null(lb)){
+        if(new_val < crit_value)
+          lb$value <- new_val
+        else
+          ub$value <- new_val
+        message(sprintf(". Lb, target, ub: %.4f, %.4f, %.4f",
+                        lb$value, crit_value, ub$value))
+
+      } else
+        message() # line feed
+    }
+    list(x = x, value = -optim_obj$value, optim = optim_obj,
+         z_val = sign(dir) * sqrt((optim_obj$value - optim_res$value) * 2))
+  }
+
+  do_fit <- function(x, dir, lb = NULL, ub = NULL){
+    # get the starting value
+    par <- par[-is_scales[which_prof]]
+
+    # handle defaults
+    if(is.null(opt_func)){
+      opt_func <- optim
+      formals(opt_func)$method <- "BFGS"
+      formals(opt_func)$control <- list(fnscale = get_n_terms(ptr))
+    }
+
+    # checks
+    stopifnot(is.function(opt_func))
+
+    # define the function and gradient to minimize
+    fn <- function(par, minvls, maxvls){
+      if(!is.null(seed))
+        set.seed(seed)
+
+      out <- try(-eval_pedigree_ll(
+        ptr = ptr, par = get_par(par, x), maxvls = maxvls, rel_eps = rel_eps,
+        indices = indices, minvls = minvls, abs_eps = abs_eps,
+        do_reorder = do_reorder, use_aprx = use_aprx, n_threads = n_threads,
+        cluster_weights = cluster_weights, standardized = standardized,
+        method = method),
+        silent = TRUE)
+      if(inherits(out, "try-error"))
+        return(NA_real_)
+      out
+    }
+    gr <- function(par, minvls, maxvls){
+      if(!is.null(seed))
+        set.seed(seed)
+      par_vec <- get_par(par, x)
+      out <- try(-eval_pedigree_grad(
+        ptr = ptr, par = par_vec, maxvls = maxvls, rel_eps = rel_eps,
+        indices = indices, minvls = minvls, abs_eps = abs_eps,
+        do_reorder = do_reorder, use_aprx = use_aprx, n_threads = n_threads,
+        cluster_weights = cluster_weights, standardized = standardized,
+        method = method),
+        silent = TRUE)
+      if(inherits(out, "try-error"))
+        return(NA_real_)
+
+      # have to add a gradient term
+      attrit <- attributes(out)
+      gr_which_prof <-
+        out[is_scales[which_prof]] / exp(par_vec[is_scales[which_prof]])
+      out <- out[-is_scales[which_prof]]
+      out[-is_beta] <- out[-is_beta] + x / (1 - x) *
+        exp(par_vec[is_scales[-which_prof]]) * gr_which_prof
+      attributes(out) <- attrit
+      out
+    }
+
+    if(maxvls > maxvls_start){
+      opt_quick <- opt_func(par, fn, gr, ..., minvls = minvls_start,
+                            maxvls = maxvls_start)
+
+      par <- opt_quick$par
+      tmp_opt <- opt_quick
+      tmp_opt$par <- get_par(par, x)
+      opt_quick <- wrap_optim(x, tmp_opt, dir, lb = lb, ub = ub)
+    } else
+      opt_quick <- NULL
+
+    opt_out <- opt_func(par, fn, gr, ..., minvls = minvls_start,
+                        maxvls = maxvls_start)
+
+    tmp_opt <- opt_out
+    tmp_opt$par <- get_par(par, x)
+    structure(wrap_optim(x, opt_out, dir, lb = lb, ub = ub),
+              opt_quick = opt_quick)
+  }
+
+  # find points on the profile likelihood curve in either direction
+  get_points <- function(dir){
+    dir <- sign(dir)
+    if(verbose)
+      message(sprintf(
+        "\nFinding the %s limit of the profile likelihood curve",
+        if(dir < 0) "lower" else "upper"))
+
+    step <- 0L
+    out <- vector("list", max_step)
+    prev <- -optim_res$value
+    did_fail <- FALSE
+
+    # check if the limit is ok
+    step <- step + 1L
+    if(dir < 0){
+      lb <- .01
+      if(prop_var_max < lb){
+        out[[step]] <- do_fit(prop_var_max / 2, dir = dir)
+        return(out[sapply(out, length) > 0])
+      }
+
+      out[[step]] <- do_fit(lb, dir = dir)
+      if(out[[step]]$value > crit_value)
+        return(out[sapply(out, length) > 0])
+
+    } else {
+      ub <- .99
+      if(prop_var_max > ub){
+        out[[step]] <- do_fit(1 - (1 - prop_var_max) / 2, dir = dir)
+        return(out[sapply(out, length) > 0])
+      }
+
+      out[[step]] <- do_fit(ub, dir = dir)
+      if(out[[step]]$value > crit_value)
+        return(out[sapply(out, length) > 0])
+
+    }
+
+    # perform search
+    .report_failed <- function()
+      if(verbose && step > max_step)
+        warning(sprintf(
+          "Failed to find the appropiate point in %d steps", max_step))
+
+    .report_failed()
+
+    ub <- wrap_optim(prop_var_max, optim_res, 1)
+    lb <- out[[step]]
+
+    while(ub$value - lb$value > chi_val / 6 && (step <- step + 1L) <= max_step){
+      # compute the next value
+      xs <- c(unlist(sapply(out, `[[`, "x"))    , prop_var_max)
+      ys <- c(unlist(sapply(out, `[[`, "value")), -optim_res$value)
+      sp <- splinefun(ys, xs, method = "monoH.FC")
+      y <- seq(lb$value, ub$value, length.out = 20)
+      x <- sp(y)
+      next_val <- approx(y, x, xout = crit_value)$y
+      if(abs(next_val - ub$x) > abs(next_val - lb$x))
+        next_val <- 8 / 9 * next_val + ub$x / 9
+      else
+        next_val <- 8 / 9 * next_val + lb$x / 9
+
+      out[[step]] <- do_fit(next_val, dir = dir, lb = lb, ub = ub)
+
+      if(out[[step]]$value > ub$value || out[[step]]$value < lb$value){
+        warning("Log likelihood does not seem monotonic. Likely the precision needs to be increased")
+        break
+      }
+
+      if(out[[step]]$value < crit_value)
+        lb <- out[[step]]
+      else
+        ub <- out[[step]]
+    }
+
+    .report_failed()
+    out <- out[sapply(out, length) > 0]
+    out[order(sapply(out, `[[`, "x"))]
+  }
+
+  res_up   <- get_points( 1)
+  res_down <- get_points(-1)
+  out <- c(
+    res_down, list(wrap_optim(prop_var_max, optim_res, dir = 0)), res_up)
 
   # compute the confidence interval
   xs  <- sapply(out, `[[`, "x")

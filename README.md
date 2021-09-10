@@ -161,11 +161,7 @@ we work with
 ![\\vec\\gamma = \\sqrt\\phi\\vec\\beta](https://render.githubusercontent.com/render/math?math=%5Cvec%5Cgamma%20%3D%20%5Csqrt%5Cphi%5Cvec%5Cbeta "\vec\gamma = \sqrt\phi\vec\beta"),
 and
 
-![
-\\phi\\sigma\_l^2 = \\frac{\\exp(\\psi\_l)}{1 +\\sum\_{l = 1}^k\\exp(\\psi\_l)}\\Leftrightarrow\\sigma\_l^2 = \\exp(\\psi\_l).
-](https://render.githubusercontent.com/render/math?math=%0A%5Cphi%5Csigma_l%5E2%20%3D%20%5Cfrac%7B%5Cexp%28%5Cpsi_l%29%7D%7B1%20%2B%5Csum_%7Bl%20%3D%201%7D%5Ek%5Cexp%28%5Cpsi_l%29%7D%5CLeftrightarrow%5Csigma_l%5E2%20%3D%20%5Cexp%28%5Cpsi_l%29.%0A "
-\phi\sigma_l^2 = \frac{\exp(\psi_l)}{1 +\sum_{l = 1}^k\exp(\psi_l)}\Leftrightarrow\sigma_l^2 = \exp(\psi_l).
-")
+![\\phi\\sigma\_l^2 = \\frac{\\exp(\\psi\_l)}{1 +\\sum\_{l = 1}^k\\exp(\\psi\_l)}\\Leftrightarrow\\sigma\_l^2 = \\exp(\\psi\_l).](https://render.githubusercontent.com/render/math?math=%5Cphi%5Csigma_l%5E2%20%3D%20%5Cfrac%7B%5Cexp%28%5Cpsi_l%29%7D%7B1%20%2B%5Csum_%7Bl%20%3D%201%7D%5Ek%5Cexp%28%5Cpsi_l%29%7D%5CLeftrightarrow%5Csigma_l%5E2%20%3D%20%5Cexp%28%5Cpsi_l%29. "\phi\sigma_l^2 = \frac{\exp(\psi_l)}{1 +\sum_{l = 1}^k\exp(\psi_l)}\Leftrightarrow\sigma_l^2 = \exp(\psi_l).")
 
 This package provides randomized quasi-Monte Carlo methods to
 approximate the log marginal likelihood for these types of models with
@@ -663,8 +659,8 @@ A caveat is that issues with the
 ![\\chi^2](https://render.githubusercontent.com/render/math?math=%5Cchi%5E2 "\chi^2")
 approximation may arise on the boundary of the scale parameter
 (![\\sigma = 0](https://render.githubusercontent.com/render/math?math=%5Csigma%20%3D%200 "\sigma = 0");
-see <https://stats.stackexchange.com/a/4894/81865>). Notice that the
-above may fail if the estimated profile likelihood is not smooth
+e.g.  see <https://stats.stackexchange.com/a/4894/81865>). Notice that
+the above may fail if the estimated profile likelihood is not smooth
 e.g. because of convergence issues. We can plot the profile likelihood
 and highlight the critical value as follows:
 
@@ -696,25 +692,25 @@ prof_res <- pedmod_profile(
 #> The estimate of the standard error of the log likelihood is 0.00264089. Preferably this should be below 0.001
 #> 
 #> Finding the lower limit of the profile likelihood curve
-#> Log likelihood is -1619.7619 at 0.567300 (critical value is -1620.3315)
-#> Log likelihood is -1619.7602 at 0.567300 (critical value is -1620.3315)
-#> Log likelihood is -1624.4396 at 0.067300 (critical value is -1620.3315)
-#> Log likelihood is -1624.4340 at 0.067300 (critical value is -1620.3315)
-#> Log likelihood is -1620.8786 at 0.405931 (critical value is -1620.3315)
-#> Log likelihood is -1620.8729 at 0.405931 (critical value is -1620.3315)
-#> Log likelihood is -1620.3400 at 0.477023 (critical value is -1620.3315)
-#> Log likelihood is -1620.3378 at 0.477023 (critical value is -1620.3315)
+#> LogLike: -1619.7619 at         0.567300
+#> LogLike: -1619.7602 at         0.567300
+#> LogLike: -1624.4396 at         0.067300
+#> LogLike: -1624.4340 at         0.067300
+#> LogLike: -1620.8786 at         0.405931. Lb, target, ub: -1620.8786, -1620.3315, -1619.7602
+#> LogLike: -1620.8729 at         0.405931. Lb, target, ub: -1620.8729, -1620.3315, -1619.7602
+#> LogLike: -1620.3400 at         0.477023. Lb, target, ub: -1620.3400, -1620.3315, -1619.7602
+#> LogLike: -1620.3378 at         0.477023. Lb, target, ub: -1620.3378, -1620.3315, -1619.7602
 #> 
 #> Finding the upper limit of the profile likelihood curve
-#> Log likelihood is -1619.3169 at 1.567300 (critical value is -1620.3315)
-#> Log likelihood is -1619.3037 at 1.567300 (critical value is -1620.3315)
-#> Log likelihood is -1621.2055 at 2.067300 (critical value is -1620.3315)
-#> Log likelihood is -1621.1781 at 2.067300 (critical value is -1620.3315)
-#> Log likelihood is -1620.2903 at 1.838320 (critical value is -1620.3315)
-#> Log likelihood is -1620.2683 at 1.838320 (critical value is -1620.3315)
-#> Log likelihood is -1620.4497 at 1.878615 (critical value is -1620.3315)
-#> Log likelihood is -1620.4236 at 1.878615 (critical value is -1620.3315)
-#> Log likelihood is -1618.4107 at 1.067300 (critical value is -1620.3315)
+#> LogLike: -1619.3169 at         1.567300
+#> LogLike: -1619.3037 at         1.567300
+#> LogLike: -1621.2055 at         2.067300
+#> LogLike: -1621.1781 at         2.067300
+#> LogLike: -1620.2903 at         1.838320. Lb, target, ub: -1621.1781, -1620.3315, -1620.2903
+#> LogLike: -1620.2683 at         1.838320. Lb, target, ub: -1621.1781, -1620.3315, -1620.2683
+#> LogLike: -1620.4497 at         1.878615. Lb, target, ub: -1620.4497, -1620.3315, -1620.2683
+#> LogLike: -1620.4236 at         1.878615. Lb, target, ub: -1620.4236, -1620.3315, -1620.2683
+#> LogLike: -1618.4107 at         1.067300
 
 # the confidence interval for the scale parameter
 exp(prof_res$confs)
@@ -747,26 +743,26 @@ prof_res <- pedmod_profile(
 #> The estimate of the standard error of the log likelihood is 0.00264089. Preferably this should be below 0.001
 #> 
 #> Finding the lower limit of the profile likelihood curve
-#> Log likelihood is -1622.3662 at 1.378256 (critical value is -1620.3315)
-#> Log likelihood is -1622.3591 at 1.378256 (critical value is -1620.3315)
-#> Log likelihood is -1618.4107 at 1.878256 (critical value is -1620.3315)
-#> Log likelihood is -1619.2925 at 1.606492 (critical value is -1620.3315)
-#> Log likelihood is -1619.2884 at 1.606492 (critical value is -1620.3315)
-#> Log likelihood is -1620.4844 at 1.490049 (critical value is -1620.3315)
-#> Log likelihood is -1620.4816 at 1.490049 (critical value is -1620.3315)
-#> Log likelihood is -1620.1984 at 1.512492 (critical value is -1620.3315)
-#> Log likelihood is -1620.1982 at 1.512492 (critical value is -1620.3315)
+#> LogLike: -1622.3662 at         1.378256
+#> LogLike: -1622.3591 at         1.378256
+#> LogLike: -1618.4107 at         1.878256
+#> LogLike: -1619.2925 at         1.606492. Lb, target, ub: -1622.3591, -1620.3315, -1619.2925
+#> LogLike: -1619.2884 at         1.606492. Lb, target, ub: -1622.3591, -1620.3315, -1619.2884
+#> LogLike: -1620.4844 at         1.490049. Lb, target, ub: -1620.4844, -1620.3315, -1619.2884
+#> LogLike: -1620.4816 at         1.490049. Lb, target, ub: -1620.4816, -1620.3315, -1619.2884
+#> LogLike: -1620.1984 at         1.512492. Lb, target, ub: -1620.4816, -1620.3315, -1620.1984
+#> LogLike: -1620.1982 at         1.512492. Lb, target, ub: -1620.4816, -1620.3315, -1620.1982
 #> 
 #> Finding the upper limit of the profile likelihood curve
-#> Log likelihood is -1619.6178 at 2.378256 (critical value is -1620.3315)
-#> Log likelihood is -1619.5991 at 2.378256 (critical value is -1620.3315)
-#> Log likelihood is -1621.3787 at 2.878256 (critical value is -1620.3315)
-#> Log likelihood is -1621.3504 at 2.878256 (critical value is -1620.3315)
-#> Log likelihood is -1620.5401 at 2.634563 (critical value is -1620.3315)
-#> Log likelihood is -1620.5161 at 2.634563 (critical value is -1620.3315)
-#> Log likelihood is -1620.2801 at 2.561453 (critical value is -1620.3315)
-#> Log likelihood is -1620.2571 at 2.561453 (critical value is -1620.3315)
-#> Log likelihood is -1618.4107 at 1.878256 (critical value is -1620.3315)
+#> LogLike: -1619.6178 at         2.378256
+#> LogLike: -1619.5991 at         2.378256
+#> LogLike: -1621.3787 at         2.878256
+#> LogLike: -1621.3504 at         2.878256
+#> LogLike: -1620.5401 at         2.634563. Lb, target, ub: -1620.5401, -1620.3315, -1619.5991
+#> LogLike: -1620.5161 at         2.634563. Lb, target, ub: -1620.5161, -1620.3315, -1619.5991
+#> LogLike: -1620.2801 at         2.561453. Lb, target, ub: -1620.5161, -1620.3315, -1620.2801
+#> LogLike: -1620.2571 at         2.561453. Lb, target, ub: -1620.5161, -1620.3315, -1620.2571
+#> LogLike: -1618.4107 at         1.878256
 
 # the confidence interval for the slope of the binary covariate
 prof_res$confs
@@ -1612,7 +1608,7 @@ sigs <- expand.grid(sigma1 = sig_vals1,
 # function to compute the profile likelihood. 
 # 
 # Args:
-#   fix: indices óf parameters to fix. 
+#   fix: indices of parameters to fix. 
 #   fix_val: values of the fixed parameters.
 #   sig_start: starting values for the scale parameters.
 ll_terms <- get_pedigree_ll_terms(dat_unqiue, max_threads = 4L)
@@ -1697,23 +1693,23 @@ pl_genetic <- pedmod_profile(
 #> The estimate of the standard error of the log likelihood is 0.00796661. Preferably this should be below 0.001
 #> 
 #> Finding the lower limit of the profile likelihood curve
-#> Log likelihood is -2697.1606 at 0.196047 (critical value is -2698.0519)
-#> Log likelihood is -2697.1191 at 0.196047 (critical value is -2698.0519)
-#> Log likelihood is -2700.2574 at -0.203953 (critical value is -2698.0519)
-#> Log likelihood is -2700.2299 at -0.203953 (critical value is -2698.0519)
-#> Log likelihood is -2698.5037 at -0.011106 (critical value is -2698.0519)
-#> Log likelihood is -2698.4569 at -0.011106 (critical value is -2698.0519)
-#> Log likelihood is -2698.0674 at 0.054138 (critical value is -2698.0519)
-#> Log likelihood is -2697.9735 at 0.054138 (critical value is -2698.0519)
+#> LogLike: -2697.1606 at         0.196047
+#> LogLike: -2697.1191 at         0.196047
+#> LogLike: -2700.2574 at        -0.203953
+#> LogLike: -2700.2299 at        -0.203953
+#> LogLike: -2698.5037 at        -0.011106. Lb, target, ub: -2698.5037, -2698.0519, -2697.1191
+#> LogLike: -2698.4569 at        -0.011106. Lb, target, ub: -2698.4569, -2698.0519, -2697.1191
+#> LogLike: -2698.0674 at         0.054138. Lb, target, ub: -2698.0674, -2698.0519, -2697.1191
+#> LogLike: -2697.9735 at         0.054138. Lb, target, ub: -2698.4569, -2698.0519, -2697.9735
 #> 
 #> Finding the upper limit of the profile likelihood curve
-#> Log likelihood is -2696.8713 at 0.996047 (critical value is -2698.0519)
-#> Log likelihood is -2696.7918 at 0.996047 (critical value is -2698.0519)
-#> Log likelihood is -2698.5228 at 1.396047 (critical value is -2698.0519)
-#> Log likelihood is -2698.4226 at 1.396047 (critical value is -2698.0519)
-#> Log likelihood is -2697.9914 at 1.281210 (critical value is -2698.0519)
-#> Log likelihood is -2697.8986 at 1.281210 (critical value is -2698.0519)
-#> Log likelihood is -2696.1311 at 0.596047 (critical value is -2698.0519)
+#> LogLike: -2696.8713 at         0.996047
+#> LogLike: -2696.7918 at         0.996047
+#> LogLike: -2698.5228 at         1.396047
+#> LogLike: -2698.4226 at         1.396047
+#> LogLike: -2697.9914 at         1.281210. Lb, target, ub: -2698.4226, -2698.0519, -2697.9914
+#> LogLike: -2697.8986 at         1.281210. Lb, target, ub: -2698.4226, -2698.0519, -2697.8986
+#> LogLike: -2696.1311 at         0.596047
 exp(pl_genetic$confs) # the confidence interval
 #>  2.50 pct. 97.50 pct. 
 #>      1.044      3.727
@@ -1726,25 +1722,25 @@ pl_env <- pedmod_profile(
 #> The estimate of the standard error of the log likelihood is 0.00796661. Preferably this should be below 0.001
 #> 
 #> Finding the lower limit of the profile likelihood curve
-#> Log likelihood is -2697.2884 at -0.812885 (critical value is -2698.0519)
-#> Log likelihood is -2697.2150 at -0.812885 (critical value is -2698.0519)
-#> Log likelihood is -2699.3877 at -1.412885 (critical value is -2698.0519)
-#> Log likelihood is -2699.3365 at -1.412885 (critical value is -2698.0519)
-#> Log likelihood is -2698.3506 at -1.126819 (critical value is -2698.0519)
-#> Log likelihood is -2698.2814 at -1.126819 (critical value is -2698.0519)
-#> Log likelihood is -2698.0293 at -1.037811 (critical value is -2698.0519)
-#> Log likelihood is -2697.9637 at -1.037811 (critical value is -2698.0519)
+#> LogLike: -2697.2884 at        -0.812885
+#> LogLike: -2697.2150 at        -0.812885
+#> LogLike: -2699.3877 at        -1.412885
+#> LogLike: -2699.3365 at        -1.412885
+#> LogLike: -2698.3506 at        -1.126819. Lb, target, ub: -2698.3506, -2698.0519, -2697.2150
+#> LogLike: -2698.2814 at        -1.126819. Lb, target, ub: -2698.2814, -2698.0519, -2697.2150
+#> LogLike: -2698.0293 at        -1.037811. Lb, target, ub: -2698.2814, -2698.0519, -2698.0293
+#> LogLike: -2697.9637 at        -1.037811. Lb, target, ub: -2698.2814, -2698.0519, -2697.9637
 #> 
 #> Finding the upper limit of the profile likelihood curve
-#> Log likelihood is -2697.2930 at 0.387115 (critical value is -2698.0519)
-#> Log likelihood is -2697.1768 at 0.387115 (critical value is -2698.0519)
-#> Log likelihood is -2700.0477 at 0.987115 (critical value is -2698.0519)
-#> Log likelihood is -2699.9166 at 0.987115 (critical value is -2698.0519)
-#> Log likelihood is -2698.5369 at 0.688023 (critical value is -2698.0519)
-#> Log likelihood is -2698.4407 at 0.688023 (critical value is -2698.0519)
-#> Log likelihood is -2698.0739 at 0.587586 (critical value is -2698.0519)
-#> Log likelihood is -2697.9821 at 0.587586 (critical value is -2698.0519)
-#> Log likelihood is -2696.1311 at -0.212885 (critical value is -2698.0519)
+#> LogLike: -2697.2930 at         0.387115
+#> LogLike: -2697.1768 at         0.387115
+#> LogLike: -2700.0477 at         0.987115
+#> LogLike: -2699.9166 at         0.987115
+#> LogLike: -2698.5369 at         0.688023. Lb, target, ub: -2698.5369, -2698.0519, -2697.1768
+#> LogLike: -2698.4407 at         0.688023. Lb, target, ub: -2698.4407, -2698.0519, -2697.1768
+#> LogLike: -2698.0739 at         0.587586. Lb, target, ub: -2698.0739, -2698.0519, -2697.1768
+#> LogLike: -2697.9821 at         0.587586. Lb, target, ub: -2698.4407, -2698.0519, -2697.9821
+#> LogLike: -2696.1311 at        -0.212885
 exp(pl_env$confs) # the confidence interval
 #>  2.50 pct. 97.50 pct. 
 #>     0.3454     1.8286
@@ -1753,17 +1749,28 @@ exp(pl_env$confs) # the confidence interval
 We plot the two profile likelihood curves below:
 
 ``` r
-do_plot <- function(obj, xlab, estimate){
-  xs <- exp(obj$xs / 2)
+do_plot <- function(obj, xlab, estimate, trans = function(x) exp(x / 2), 
+                    max_diff = 8, add = FALSE, col = "black"){
+  xs <- trans(obj$xs)
   pls <- obj$p_log_Lik
-  par(mar = c(5, 5, 1, 1))
-  plot(xs, pls, bty = "l", pch = 16, xlab = xlab, ylab = "Profile likelihood")
-  grid()
-  lines(spline(xs, pls, n = 100L))
-  abline(v = estimate, lty = 2) # the estimate
-  abline(h = max(pls) - qchisq(.95, 1) / 2, lty = 3) # mark the critical value
+  keep <- pls > max(pls) - max_diff
+  xs <- xs[keep]
+  pls <- pls[keep]
+  if(add)
+    points(xs, pls, pch = 16, col = col)
+  else {
+    plot(xs, pls, bty = "l", pch = 16, xlab = xlab, ylab = "Profile likelihood", 
+         col = col)
+    grid()
+    abline(v = estimate, lty = 2, col = col) # the estimate
+    # mark the critical value
+    abline(h = max(pls) - qchisq(.95, 1) / 2, lty = 3, col = col) 
+  }
+  
+  lines(spline(xs, pls, n = 100L), col = col)
 }
 
+par(mar = c(5, 5, 1, 1))
 do_plot(pl_genetic, expression(sigma[G]), exp(opt_out$par[3] / 2))
 ```
 
@@ -1774,6 +1781,204 @@ do_plot(pl_env, expression(sigma[E]), exp(opt_out$par[4] / 2))
 ```
 
 <img src="man/figures/README-plot_env_pl_curves-2.png" width="100%" />
+
+#### Profile Likelihood Curve: Proportion of Variance
+
+Suppose that we want a profile likelihood curve for the proportion of
+variance explained by each random effect. If
+![K = 1](https://render.githubusercontent.com/render/math?math=K%20%3D%201 "K = 1")
+then we can use the profile likelihood curve for
+![\\sigma\_1^2](https://render.githubusercontent.com/render/math?math=%5Csigma_1%5E2 "\sigma_1^2")
+as the proportion of variance for the first effect when
+![K = 1](https://render.githubusercontent.com/render/math?math=K%20%3D%201 "K = 1")
+is a monotone transformation of this parameter only and thus we can use
+the scale invariance of the likelihood ratio. However, this is not true
+for more effects,
+![K &gt; 1](https://render.githubusercontent.com/render/math?math=K%20%3E%201 "K > 1").
+To see this, notice that proportion of variance is given by
+
+![h\_i = \\left(1 + \\sum\_{k = 1}^K\\sigma\_k^2\\right)\\sigma\_i^2\\Leftrightarrow 
+  \\sigma\_i^2 = 
+    \\frac{h\_i}{1 - h\_i}\\left(1 + \\sum\_{k \\in \\{1,\\dots,K\\}\\setminus\\{i\\}}\\sigma\_k^2\\right)](https://render.githubusercontent.com/render/math?math=h_i%20%3D%20%5Cleft%281%20%2B%20%5Csum_%7Bk%20%3D%201%7D%5EK%5Csigma_k%5E2%5Cright%29%5Csigma_i%5E2%5CLeftrightarrow%20%0A%20%20%5Csigma_i%5E2%20%3D%20%0A%20%20%20%20%5Cfrac%7Bh_i%7D%7B1%20-%20h_i%7D%5Cleft%281%20%2B%20%5Csum_%7Bk%20%5Cin%20%5C%7B1%2C%5Cdots%2CK%5C%7D%5Csetminus%5C%7Bi%5C%7D%7D%5Csigma_k%5E2%5Cright%29 "h_i = \left(1 + \sum_{k = 1}^K\sigma_k^2\right)\sigma_i^2\Leftrightarrow 
+  \sigma_i^2 = 
+    \frac{h_i}{1 - h_i}\left(1 + \sum_{k \in \{1,\dots,K\}\setminus\{i\}}\sigma_k^2\right)")
+
+Let
+![l(\\vec\\beta, \\sigma\_1^2,\\dots,\\sigma\_K^2)](https://render.githubusercontent.com/render/math?math=l%28%5Cvec%5Cbeta%2C%20%5Csigma_1%5E2%2C%5Cdots%2C%5Csigma_K%5E2%29 "l(\vec\beta, \sigma_1^2,\dots,\sigma_K^2)")
+be the log likelihood. Then the profile likelihood in the proportion of
+variance explained by the
+![i](https://render.githubusercontent.com/render/math?math=i "i")th
+effect is
+
+![\\tilde l\_i(h\_i) = \\max\_{\\vec\\beta,\\sigma\_1,\\dots,\\sigma\_{k-1},\\sigma\_{k+1},\\dots,\\sigma\_K}
+  l\\left(\\vec\\beta,\\sigma\_1,\\dots,\\sigma\_{k-1},
+  \\frac{h\_i}{1 - h\_i}\\left(1 + \\sum\_{k \\in \\{1,\\dots,K\\}\\setminus\\{i\\}}\\sigma\_k^2\\right),
+  \\sigma\_{k+1},\\dots,\\sigma\_K\\right)](https://render.githubusercontent.com/render/math?math=%5Ctilde%20l_i%28h_i%29%20%3D%20%5Cmax_%7B%5Cvec%5Cbeta%2C%5Csigma_1%2C%5Cdots%2C%5Csigma_%7Bk-1%7D%2C%5Csigma_%7Bk%2B1%7D%2C%5Cdots%2C%5Csigma_K%7D%0A%20%20l%5Cleft%28%5Cvec%5Cbeta%2C%5Csigma_1%2C%5Cdots%2C%5Csigma_%7Bk-1%7D%2C%0A%20%20%5Cfrac%7Bh_i%7D%7B1%20-%20h_i%7D%5Cleft%281%20%2B%20%5Csum_%7Bk%20%5Cin%20%5C%7B1%2C%5Cdots%2CK%5C%7D%5Csetminus%5C%7Bi%5C%7D%7D%5Csigma_k%5E2%5Cright%29%2C%0A%20%20%5Csigma_%7Bk%2B1%7D%2C%5Cdots%2C%5Csigma_K%5Cright%29 "\tilde l_i(h_i) = \max_{\vec\beta,\sigma_1,\dots,\sigma_{k-1},\sigma_{k+1},\dots,\sigma_K}
+  l\left(\vec\beta,\sigma_1,\dots,\sigma_{k-1},
+  \frac{h_i}{1 - h_i}\left(1 + \sum_{k \in \{1,\dots,K\}\setminus\{i\}}\sigma_k^2\right),
+  \sigma_{k+1},\dots,\sigma_K\right)")
+
+As these proportions are often the interest of the analysis, the
+`pedmod_profile_prop` function is implemented to produce profile
+likelihood based confidence intervals for
+![K &gt; 1](https://render.githubusercontent.com/render/math?math=K%20%3E%201 "K > 1").
+We provide an example of using `pedmod_profile_prop` below.
+
+``` r
+# confidence interval for the proportion of variance for the genetic effect
+pl_genetic_prop <- pedmod_profile_prop(
+  ptr = ll_terms, par = opt_out$par, maxvls = 20000L, 
+  minvls = 1000L, alpha = .05, abs_eps = 0, rel_eps = 1e-4, which_prof = 1L,
+  use_aprx = TRUE, n_threads = 4L, verbose = TRUE, cluster_weights = c_weights)
+#> The estimate of the standard error of the log likelihood is 0.00796661. Preferably this should be below 0.001
+#> 
+#> Finding the upper limit of the profile likelihood curve
+#> LogLike: -2746.8503 at         0.990000
+#> LogLike: -2746.8503 at         0.990000
+#> LogLike: -2696.1311 at         0.500922
+#> LogLike: -2696.9552 at         0.571727. Lb, target, ub: -2746.8503, -2698.0519, -2696.9552
+#> LogLike: -2696.9552 at         0.571727. Lb, target, ub: -2746.8503, -2698.0519, -2696.9552
+#> LogLike: -2699.2118 at         0.640897. Lb, target, ub: -2699.2118, -2698.0519, -2696.9552
+#> LogLike: -2699.2118 at         0.640897. Lb, target, ub: -2699.2118, -2698.0519, -2696.9552
+#> LogLike: -2698.0610 at         0.611546. Lb, target, ub: -2698.0610, -2698.0519, -2696.9552
+#> LogLike: -2698.0610 at         0.611546. Lb, target, ub: -2698.0610, -2698.0519, -2696.9552
+#> LogLike: -2697.9092 at         0.606878. Lb, target, ub: -2698.0610, -2698.0519, -2697.9092
+#> LogLike: -2697.9092 at         0.606878. Lb, target, ub: -2698.0610, -2698.0519, -2697.9092
+#> 
+#> Finding the lower limit of the profile likelihood curve
+#> LogLike: -2730.9061 at         0.010000
+#> LogLike: -2730.9061 at         0.010000
+#> LogLike: -2696.1311 at         0.500922
+#> LogLike: -2697.0497 at         0.422273. Lb, target, ub: -2730.9061, -2698.0519, -2697.0497
+#> LogLike: -2697.0497 at         0.422273. Lb, target, ub: -2730.9061, -2698.0519, -2697.0497
+#> LogLike: -2699.5745 at         0.346861. Lb, target, ub: -2699.5745, -2698.0519, -2697.0497
+#> LogLike: -2699.5745 at         0.346861. Lb, target, ub: -2699.5745, -2698.0519, -2697.0497
+#> LogLike: -2698.0844 at         0.384632. Lb, target, ub: -2698.0844, -2698.0519, -2697.0497
+#> LogLike: -2698.0844 at         0.384632. Lb, target, ub: -2698.0844, -2698.0519, -2697.0497
+#> LogLike: -2697.9227 at         0.389686. Lb, target, ub: -2698.0844, -2698.0519, -2697.9227
+#> LogLike: -2697.9227 at         0.389686. Lb, target, ub: -2698.0844, -2698.0519, -2697.9227
+#> LogLike: -2696.1311 at         0.500922
+pl_genetic_prop$confs # the confidence interval
+#>  2.50 pct. 97.50 pct. 
+#>     0.3857     0.6111
+
+# confidence interval for the proportion of variance for the environmental 
+# effect
+pl_env_prop <- pedmod_profile_prop(
+  ptr = ll_terms, par = opt_out$par, maxvls = 20000L, 
+  minvls = 1000L, alpha = .05, abs_eps = 0, rel_eps = 1e-4, which_prof = 2L,
+  use_aprx = TRUE, n_threads = 4L, verbose = TRUE, cluster_weights = c_weights)
+#> The estimate of the standard error of the log likelihood is 0.00796661. Preferably this should be below 0.001
+#> 
+#> Finding the upper limit of the profile likelihood curve
+#> LogLike: -3045.2339 at         0.990000
+#> LogLike: -3045.2339 at         0.990000
+#> LogLike: -2696.1311 at         0.223077
+#> LogLike: -2697.5134 at         0.312042. Lb, target, ub: -3045.2339, -2698.0519, -2697.5134
+#> LogLike: -2697.5134 at         0.312042. Lb, target, ub: -3045.2339, -2698.0519, -2697.5134
+#> LogLike: -2701.1520 at         0.390013. Lb, target, ub: -2701.1520, -2698.0519, -2697.5134
+#> LogLike: -2701.1520 at         0.390013. Lb, target, ub: -2701.1520, -2698.0519, -2697.5134
+#> LogLike: -2698.5923 at         0.339369. Lb, target, ub: -2698.5923, -2698.0519, -2697.5134
+#> LogLike: -2698.5923 at         0.339369. Lb, target, ub: -2698.5923, -2698.0519, -2697.5134
+#> LogLike: -2698.0607 at         0.326834. Lb, target, ub: -2698.0607, -2698.0519, -2697.5134
+#> LogLike: -2698.0607 at         0.326834. Lb, target, ub: -2698.0607, -2698.0519, -2697.5134
+#> 
+#> Finding the lower limit of the profile likelihood curve
+#> LogLike: -2704.3012 at         0.010000
+#> LogLike: -2704.3012 at         0.010000
+#> LogLike: -2696.1311 at         0.223077
+#> LogLike: -2697.0834 at         0.154875. Lb, target, ub: -2704.3012, -2698.0519, -2697.0834
+#> LogLike: -2697.0834 at         0.154875. Lb, target, ub: -2704.3012, -2698.0519, -2697.0834
+#> LogLike: -2698.7664 at         0.105045. Lb, target, ub: -2698.7664, -2698.0519, -2697.0834
+#> LogLike: -2698.7664 at         0.105045. Lb, target, ub: -2698.7664, -2698.0519, -2697.0834
+#> LogLike: -2697.9866 at         0.124822. Lb, target, ub: -2698.7664, -2698.0519, -2697.9866
+#> LogLike: -2697.9866 at         0.124822. Lb, target, ub: -2698.7664, -2698.0519, -2697.9866
+#> LogLike: -2698.1254 at         0.120945. Lb, target, ub: -2698.1254, -2698.0519, -2697.9866
+#> LogLike: -2698.1254 at         0.120945. Lb, target, ub: -2698.1254, -2698.0519, -2697.9866
+#> LogLike: -2696.1311 at         0.223077
+pl_env_prop$confs # the confidence interval
+#>  2.50 pct. 97.50 pct. 
+#>     0.1232     0.3267
+```
+
+A wrong approach is to use the confidence interval for
+![\\sigma\_i^2](https://render.githubusercontent.com/render/math?math=%5Csigma_i%5E2 "\sigma_i^2")
+to attempt to construct a confidence interval for
+![h\_i](https://render.githubusercontent.com/render/math?math=h_i "h_i").
+To see that this is wrong, let
+
+![\\begin{align\*}
+\\vec v\_{i}(\\sigma\_i^2) &= 
+  \\text{arg max}\_{\\sigma\_1^2,\\dots,\\sigma\_{i  -1}^2, \\sigma\_{i + 1}^2,\\dots,\\sigma\_K^2}
+  \\max\_{\\vec\\beta}
+  l\\left(\\vec\\beta,\\sigma\_1^2,\\dots,\\sigma\_K^2\\right) \\\\
+\\vec s\_i(\\sigma\_i^2) &= 
+  \\left(v\_{i1}(\\sigma\_i^2),\\dots,
+        v\_{i,i-1}(\\sigma\_i^2), \\sigma\_i^2, 
+        v\_{i,i+1}(\\sigma\_i^2),\\dots,
+        v\_{i,K-1}(\\sigma\_i^2)\\right)^\\top
+\\end{align\*}](https://render.githubusercontent.com/render/math?math=%5Cbegin%7Balign%2A%7D%0A%5Cvec%20v_%7Bi%7D%28%5Csigma_i%5E2%29%20%26%3D%20%0A%20%20%5Ctext%7Barg%20max%7D_%7B%5Csigma_1%5E2%2C%5Cdots%2C%5Csigma_%7Bi%20%20-1%7D%5E2%2C%20%5Csigma_%7Bi%20%2B%201%7D%5E2%2C%5Cdots%2C%5Csigma_K%5E2%7D%0A%20%20%5Cmax_%7B%5Cvec%5Cbeta%7D%0A%20%20l%5Cleft%28%5Cvec%5Cbeta%2C%5Csigma_1%5E2%2C%5Cdots%2C%5Csigma_K%5E2%5Cright%29%20%5C%5C%0A%5Cvec%20s_i%28%5Csigma_i%5E2%29%20%26%3D%20%0A%20%20%5Cleft%28v_%7Bi1%7D%28%5Csigma_i%5E2%29%2C%5Cdots%2C%0A%20%20%20%20%20%20%20%20v_%7Bi%2Ci-1%7D%28%5Csigma_i%5E2%29%2C%20%5Csigma_i%5E2%2C%20%0A%20%20%20%20%20%20%20%20v_%7Bi%2Ci%2B1%7D%28%5Csigma_i%5E2%29%2C%5Cdots%2C%0A%20%20%20%20%20%20%20%20v_%7Bi%2CK-1%7D%28%5Csigma_i%5E2%29%5Cright%29%5E%5Ctop%0A%5Cend%7Balign%2A%7D "\begin{align*}
+\vec v_{i}(\sigma_i^2) &= 
+  \text{arg max}_{\sigma_1^2,\dots,\sigma_{i  -1}^2, \sigma_{i + 1}^2,\dots,\sigma_K^2}
+  \max_{\vec\beta}
+  l\left(\vec\beta,\sigma_1^2,\dots,\sigma_K^2\right) \\
+\vec s_i(\sigma_i^2) &= 
+  \left(v_{i1}(\sigma_i^2),\dots,
+        v_{i,i-1}(\sigma_i^2), \sigma_i^2, 
+        v_{i,i+1}(\sigma_i^2),\dots,
+        v_{i,K-1}(\sigma_i^2)\right)^\top
+\end{align*}")
+
+Now, suppose that exists a function
+![g:\\,(0,1)\\rightarrow(0,\\infty)](https://render.githubusercontent.com/render/math?math=g%3A%5C%2C%280%2C1%29%5Crightarrow%280%2C%5Cinfty%29 "g:\,(0,1)\rightarrow(0,\infty)")
+such that
+
+![h\_i = \\frac{g\_i(h\_i)}{1+\\sum\_{k = 0}^K s\_{ik}(g\_i(h\_i))}](https://render.githubusercontent.com/render/math?math=h_i%20%3D%20%5Cfrac%7Bg_i%28h_i%29%7D%7B1%2B%5Csum_%7Bk%20%3D%200%7D%5EK%20s_%7Bik%7D%28g_i%28h_i%29%29%7D "h_i = \frac{g_i(h_i)}{1+\sum_{k = 0}^K s_{ik}(g_i(h_i))}")
+
+Then it follows that
+
+![\\tilde l\_i(h\_i) \\geq \\max\_{\\vec\\beta} l(\\vec\\beta, \\vec s\_i(g\_i(h\_i)))](https://render.githubusercontent.com/render/math?math=%5Ctilde%20l_i%28h_i%29%20%5Cgeq%20%5Cmax_%7B%5Cvec%5Cbeta%7D%20l%28%5Cvec%5Cbeta%2C%20%5Cvec%20s_i%28g_i%28h_i%29%29%29 "\tilde l_i(h_i) \geq \max_{\vec\beta} l(\vec\beta, \vec s_i(g_i(h_i)))")
+
+Thus, if one uses the profile likelihood curve of
+![\\sigma\_i^2](https://render.githubusercontent.com/render/math?math=%5Csigma_i%5E2 "\sigma_i^2")
+to attempt to construct a confidence interval for
+![h\_i](https://render.githubusercontent.com/render/math?math=h_i "h_i")
+then the result is anti-conservative. This is illustrated below where
+the black curves are the proper profile likelihoods and the gray curves
+are the invalid/attempted profile likelihood curves.
+
+``` r
+# using the right approach 
+estimate <- exp(tail(opt_out$par, 2))
+estimate <- estimate / (1 + sum(estimate))
+do_plot(pl_genetic_prop, expression(h[G]), estimate[1], identity)
+
+# create curve using the wrong approach
+dum_pl <- pl_genetic
+dum_pl$xs <- sapply(dum_pl$data, function(x) {
+  scales <- exp(c(x$x, tail(x$optim$par, 1)))
+  scales[1] / (1 + sum(scales))
+})
+do_plot(dum_pl, expression(h[G]), estimate[1], identity, col = "gray40", 
+        add = TRUE)
+```
+
+<img src="man/figures/README-plot_prop_var_conf-1.png" width="100%" />
+
+``` r
+# do the same for the environmental effect 
+do_plot(pl_env_prop, expression(h[E]), estimate[2], identity)
+
+dum_pl <- pl_env
+dum_pl$xs <- sapply(dum_pl$data, function(x) {
+  scales <- exp(c(x$x, tail(x$optim$par, 1)))
+  scales[1] / (1 + sum(scales))
+})
+do_plot(dum_pl, expression(h[E]), estimate[2], identity, col = "gray40", 
+        add = TRUE)
+```
+
+<img src="man/figures/README-plot_prop_var_conf-2.png" width="100%" />
 
 ### Simulation Study
 

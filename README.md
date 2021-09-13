@@ -1871,7 +1871,7 @@ pl_env_prop <- pedmod_profile_prop(
 #> The estimate of the standard error of the log likelihood is 0.00796661. Preferably this should be below 0.001
 #> 
 #> Finding the upper limit of the profile likelihood curve
-#> LogLike: -3045.2339 at         0.990000
+#> LogLike: -3045.2340 at         0.990000
 #> LogLike: -3045.2339 at         0.990000
 #> LogLike: -2696.1311 at         0.223077
 #> LogLike: -2697.5134 at         0.312042. Lb, target, ub: -3045.2339, -2698.0519, -2697.5134
@@ -1887,18 +1887,18 @@ pl_env_prop <- pedmod_profile_prop(
 #> LogLike: -2704.3012 at         0.010000
 #> LogLike: -2704.3012 at         0.010000
 #> LogLike: -2696.1311 at         0.223077
-#> LogLike: -2697.0834 at         0.154875. Lb, target, ub: -2704.3012, -2698.0519, -2697.0834
-#> LogLike: -2697.0834 at         0.154875. Lb, target, ub: -2704.3012, -2698.0519, -2697.0834
-#> LogLike: -2698.7664 at         0.105045. Lb, target, ub: -2698.7664, -2698.0519, -2697.0834
-#> LogLike: -2698.7664 at         0.105045. Lb, target, ub: -2698.7664, -2698.0519, -2697.0834
-#> LogLike: -2697.9866 at         0.124822. Lb, target, ub: -2698.7664, -2698.0519, -2697.9866
-#> LogLike: -2697.9866 at         0.124822. Lb, target, ub: -2698.7664, -2698.0519, -2697.9866
-#> LogLike: -2698.1254 at         0.120945. Lb, target, ub: -2698.1254, -2698.0519, -2697.9866
-#> LogLike: -2698.1254 at         0.120945. Lb, target, ub: -2698.1254, -2698.0519, -2697.9866
+#> LogLike: -2697.0833 at         0.154875. Lb, target, ub: -2704.3012, -2698.0519, -2697.0833
+#> LogLike: -2697.0833 at         0.154875. Lb, target, ub: -2704.3012, -2698.0519, -2697.0833
+#> LogLike: -2698.7664 at         0.105044. Lb, target, ub: -2698.7664, -2698.0519, -2697.0833
+#> LogLike: -2698.7664 at         0.105044. Lb, target, ub: -2698.7664, -2698.0519, -2697.0833
+#> LogLike: -2697.9873 at         0.124821. Lb, target, ub: -2698.7664, -2698.0519, -2697.9873
+#> LogLike: -2697.9873 at         0.124821. Lb, target, ub: -2698.7664, -2698.0519, -2697.9873
+#> LogLike: -2698.1248 at         0.120960. Lb, target, ub: -2698.1248, -2698.0519, -2697.9873
+#> LogLike: -2698.1248 at         0.120960. Lb, target, ub: -2698.1248, -2698.0519, -2697.9873
 #> LogLike: -2696.1311 at         0.223077
 pl_env_prop$confs # the confidence interval
 #>  2.50 pct. 97.50 pct. 
-#>     0.1232     0.3267
+#>     0.1233     0.3267
 ```
 
 A wrong approach is to use the confidence interval for

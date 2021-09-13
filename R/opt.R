@@ -855,8 +855,11 @@ pedmod_profile_prop <- function(
   prop_var_max <- scales[which_prof] / (1 + sum(scales))
 
   get_par <- function(x, prop_var){
-    scales <- exp(x[-is_beta])
-    scale_prof <- log(prop_var / (1 - prop_var) * (1 + sum(scales)))
+    scales <- c(0, x[-is_beta])
+    scales_max <- max(scales)
+
+    scale_prof <- log(prop_var / (1 - prop_var)) + scales_max +
+      log(sum(exp(scales - scales_max)))
     c(x[is_beta], x[-is_beta], scale_prof)[
       c(is_beta, is_scales[-which_prof], is_scales[which_prof])]
   }
@@ -922,7 +925,7 @@ pedmod_profile_prop <- function(
         method = method),
         silent = TRUE)
       if(inherits(out, "try-error"))
-        return(NA_real_)
+        return(rep(NA_real_, length(par_vec) - 1L))
 
       # have to add a gradient term
       attrit <- attributes(out)

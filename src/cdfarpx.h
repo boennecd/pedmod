@@ -373,9 +373,9 @@ public:
       std::fill(su, su + n_draws, 0);
       {
         double * dri = dr;
-        for(arma::uword i = 0; i < j; ++i, sc++, dri += n_draws)
-          for(unsigned k = 0; k < n_draws; ++k)
-            su[k] += *sc * dri[k];
+        for(arma::uword i = 0; i < j; ++i, ++sc)
+          for(unsigned k = 0; k < n_draws; ++k, ++dri)
+            su[k] += *sc * *dri;
       }
 
       unsigned const offset = j * n_draws;
@@ -815,10 +815,10 @@ public:
 
           // scale the Eigen vectors
           double * eg_val = eigen_vectors.begin();
-          for(arma::uword k = 0; k < n_eigen_vectors; ++k, eg_val += n_mem){
+          for(arma::uword k = 0; k < n_eigen_vectors; ++k){
             double const scale = std::sqrt(dum_vec[k]);
-            for(arma::uword j = 0; j < n_mem; ++j)
-              eg_val[j] *= scale;
+            for(arma::uword j = 0; j < n_mem; ++j, ++eg_val)
+              *eg_val *= scale;
           }
 
           std::copy(eigen_vectors.begin(),
@@ -843,13 +843,14 @@ public:
       // derivatives w.r.t. the fixed effects
       {
         double const *xij = d_fix_mat;
-        for(unsigned j = 0; j < n_fix; ++j, xij += n_mem){
+        for(unsigned j = 0; j < n_fix; ++j){
           double const *d = draw;
+          // TODO: we can write to out directly?
           std::fill(sum, sum + n_draws, 0);
 
-          for(arma::uword i = 0; i < n_mem; ++i, d += n_draws)
-            for(unsigned k = 0; k < n_draws; ++k)
-              sum[k] += xij[i] * d[k];
+          for(arma::uword i = 0; i < n_mem; ++i, ++xij)
+            for(unsigned k = 0; k < n_draws; ++k, ++d)
+              sum[k] += *xij * *d;
 
           unsigned const offset = j + 1;
           for(unsigned k = 0; k < n_draws; ++k)
@@ -866,12 +867,12 @@ public:
           // a Cholesky decomposition was used
           double *chol_ele = next_mat;
 
-          for(arma::uword c = 0; c < n_mem; chol_ele += n_mem - c, ++c){
+          for(arma::uword c = 0; c < n_mem; ++c){
             std::fill(sqrt_term, sqrt_term + n_draws, 0);
             double const * d = draw + c * n_draws;
-            for(arma::uword r = 0; r < n_mem - c; ++r, d += n_draws)
-              for(unsigned k = 0; k < n_draws; ++k)
-                sqrt_term[k] += chol_ele[r] * d[k];
+            for(arma::uword r = 0; r < n_mem - c; ++r, ++chol_ele)
+              for(unsigned k = 0; k < n_draws; ++k, ++d)
+                sqrt_term[k] += *chol_ele * *d;
 
             for(unsigned k = 0; k < n_draws; ++k)
               sum[k] += sqrt_term[k] * sqrt_term[k];
@@ -882,12 +883,12 @@ public:
           double *eig_vec_ele = next_mat;
           unsigned const n_eigen_vec = static_cast<unsigned>(S_C_n_eigen[s]);
 
-          for(unsigned r = 0; r < n_eigen_vec; ++r, eig_vec_ele += n_mem){
+          for(unsigned r = 0; r < n_eigen_vec; ++r){
             std::fill(sqrt_term, sqrt_term + n_draws, 0);
             double const * d = draw;
-            for(arma::uword c = 0; c < n_mem; ++c, d += n_draws)
-              for(unsigned k = 0; k < n_draws; ++k)
-                sqrt_term[k] += eig_vec_ele[c] * d[k];
+            for(arma::uword c = 0; c < n_mem; ++c, ++eig_vec_ele)
+              for(unsigned k = 0; k < n_draws; ++k, ++d)
+                sqrt_term[k] += *eig_vec_ele * *d;
 
             for(unsigned k = 0; k < n_draws; ++k)
               sum[k] += sqrt_term[k] * sqrt_term[k];

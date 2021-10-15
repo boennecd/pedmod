@@ -197,10 +197,10 @@ public:
     unsigned const n_up_tri = (max_ndim * (max_ndim + 1)) / 2;
 
     imem.set_n_mem(3 * max_ndim, max_threads);
-    // TODO: this is wasteful
+    // TODO: this is wasteful. Look through this
     dmem.set_n_mem(
       (6 + n_qmc_seqs()) * max_ndim + n_up_tri + max_ndim * max_ndim +
-        2 * n_qmc_seqs(),
+        4 * n_qmc_seqs(),
       max_threads);
   }
 
@@ -356,10 +356,12 @@ public:
       throw std::invalid_argument("cdf::eval_integrand: invalid 'n_integrands_in'");
 #endif
 
-    double * const __restrict__ out = integrand_val,
-           * const __restrict__ dr  = draw,
-           * const __restrict__ su = dtmp_mem,
-           * const __restrict__ w  = su + n_draws;
+    double * const __restrict__ out   = integrand_val,
+           * const __restrict__ dr    = draw,
+           * const __restrict__ su    = dtmp_mem,
+           * const __restrict__ w     = su + n_draws,
+           * const __restrict__ lim_l = w + n_draws,
+           * const __restrict__ lim_u = lim_l + n_draws;
 
     std::fill(w, w + n_draws, 1);
 
@@ -373,53 +375,66 @@ public:
       std::fill(su, su + n_draws, 0);
       {
         double * dri = dr;
-        for(arma::uword i = 0; i < j; ++i, ++sc)
+        for(unsigned i = 0; i < j; ++i, ++sc)
           for(unsigned k = 0; k < n_draws; ++k, ++dri)
             su[k] += *sc * *dri;
       }
 
-      unsigned const offset = j * n_draws;
-      for(unsigned k = 0; k < n_draws; ++k){
-        double lim_l(0.),
-               lim_u(1.);
-        if(*infin_j == 0L)
-          lim_u = pnorm_use(*up - su[k], use_aprx);
-        else if(*infin_j == 1L)
-          lim_l = pnorm_use(*lw - su[k], use_aprx);
-        else if(*infin_j == 2L){
-          lim_l = pnorm_use(*lw - su[k], use_aprx);
-          lim_u = pnorm_use(*up - su[k], use_aprx);
-
+      if(*infin_j == 0L)
+        for(unsigned k = 0; k < n_draws; ++k){
+          lim_l[k] = 0;
+          lim_u[k] = pnorm_use(*up - su[k], use_aprx);
+        }
+      else if(*infin_j == 1L)
+        for(unsigned k = 0; k < n_draws; ++k){
+          lim_l[k] = pnorm_use(*lw - su[k], use_aprx);
+          lim_u[k] = 1;
+        }
+      else
+        for(unsigned k = 0; k < n_draws; ++k){
+          lim_l[k] = pnorm_use(*lw - su[k], use_aprx);
+          lim_u[k] = pnorm_use(*up - su[k], use_aprx);
         }
 
-        if(lim_l < lim_u){
-          double const l_diff = lim_u - lim_l;
-          w[k] *= l_diff;
+      // TODO: use that this is constexpr
+      if(needs_last_unif or j + 1 < ndim){
+        unsigned const offset = j * n_draws;
 
-          // TODO: use that this is constexpr
-          if(needs_last_unif or j + 1 < ndim){
-            double const quant_val = lim_l + unifs[k * ndim + j] * l_diff;
+        for(unsigned k = 0; k < n_draws; ++k){
+          if(lim_l[k] < lim_u[k]){
+            double const l_diff{lim_u[k] - lim_l[k]};
+            w[k] *= l_diff;
+
+            double const quant_val = lim_l[k] + unifs[k * ndim + j] * l_diff;
             dr[offset + k] =
               use_aprx ?
               safe_qnorm_aprx(quant_val) :
               safe_qnorm_w   (quant_val);
-          }
 
-        } else
-          w[k] = 0;
+          } else
+            w[k] = 0;
+        }
 
-      }
+      } else
+        for(unsigned k = 0; k < n_draws; ++k){
+          if(lim_l[k] < lim_u[k]){
+            double const l_diff{lim_u[k] - lim_l[k]};
+            w[k] *= l_diff;
+
+          } else
+            w[k] = 0;
+        }
     }
 
     /* evaluate the integrand and weight the result. */
     functor(dr, out, indices.begin(), is_permutated, n_draws);
 
     // multiply by the density
+    double *o{out};
     for(unsigned k = 0; k < n_draws; ++k){
       w[k] /= functor.get_norm_constant();
-      double * o = out + k * n_integrands;
-      for(unsigned i = 0; i < n_integrands; ++i)
-        o[i] *= w[k];
+      for(unsigned i = 0; i < n_integrands; ++i, ++o)
+        *o *= w[k];
     }
   }
 
@@ -845,7 +860,6 @@ public:
         double const *xij = d_fix_mat;
         for(unsigned j = 0; j < n_fix; ++j){
           double const *d = draw;
-          // TODO: we can write to out directly?
           std::fill(sum, sum + n_draws, 0);
 
           for(arma::uword i = 0; i < n_mem; ++i, ++xij)

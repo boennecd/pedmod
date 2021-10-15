@@ -75,7 +75,7 @@ struct cor_vec_res {
  */
 inline int default_minvls(int dim){
   dim = std::max(1, dim);
-  constexpr int const def_vals[10] =
+  constexpr int def_vals[10] =
     { 16L * 31L - 1L, 16L * 47L - 1L, 16L * 73L - 1L, 16L * 113L - 1L, 16L * 173L - 1L, 16L * 263L - 1L, 16L * 397L - 1L, 16L * 593L - 1L, 16L * 907L - 1L, 16L * 1361L - 1L };
   return def_vals[
     std::min(static_cast<int>(dim - 1L), 9)];

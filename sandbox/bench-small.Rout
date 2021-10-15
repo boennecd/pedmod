@@ -1,0 +1,53 @@
+
+R version 4.1.1 (2021-08-10) -- "Kick Things"
+Copyright (C) 2021 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> library(microbenchmark)
+> dat <- readRDS("dat-small.RDS")
+> par <- c(attr(dat, "beta"), log(attr(dat, "sig_sq")))
+> 
+> library(pedmod)
+> ll_terms <- get_pedigree_ll_terms(dat, max_threads = 4L)
+> 
+> do_eval <- function(n_threads, is_grad, use_aprx){
++   f <- if(is_grad) eval_pedigree_grad else eval_pedigree_ll
++   f(ptr = ll_terms, par = par, maxvls = 2500, minvls = 2500,
++     abs_eps = 0, rel_eps = 0, use_aprx = use_aprx, n_threads = n_threads)
++ }
+> 
+> set.seed(1)
+> bench <- microbenchmark(
++   `fn 1` = do_eval(1, FALSE, TRUE),
++   `fn 2` = do_eval(2, FALSE, TRUE),
++   `fn 4` = do_eval(4, FALSE, TRUE),
++   `gr 1` = do_eval(1, TRUE , TRUE),
++   `gr 2` = do_eval(2, TRUE , TRUE),
++   `gr 4` = do_eval(4, TRUE , TRUE),
++   times = 10)
+> summary(bench)[, c("expr", "lq", "median", "uq")]
+  expr        lq    median        uq
+1 fn 1  64.66831  65.05109  65.24027
+2 fn 2  32.86204  33.02379  33.32533
+3 fn 4  16.72607  16.85415  17.03664
+4 gr 1 149.63940 150.82235 152.69565
+5 gr 2  75.92941  76.24975  76.40933
+6 gr 4  38.96897  39.07028  39.21229
+> 
+> proc.time()
+   user  system elapsed 
+  7.133   0.019   4.064 

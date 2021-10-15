@@ -8,3 +8,4 @@
 ^vignettes/pedmod\.Rmd
 ^\.github$
 ^create-vignette\.R
+^sandbox/*

@@ -20,16 +20,16 @@ Type 'q()' to quit R.
 > library(microbenchmark)
 > dat <- readRDS("dat-small.RDS")
 > par <- c(attr(dat, "beta"), log(attr(dat, "sig_sq")))
-> 
+>
 > library(pedmod)
-> ll_terms <- get_pedigree_ll_terms(dat, max_threads = 4L)
-> 
+> ll_terms <- pedigree_ll_terms(dat, max_threads = 4L)
+>
 > do_eval <- function(n_threads, is_grad, use_aprx){
 +   f <- if(is_grad) eval_pedigree_grad else eval_pedigree_ll
 +   f(ptr = ll_terms, par = par, maxvls = 2500, minvls = 2500,
 +     abs_eps = 0, rel_eps = 0, use_aprx = use_aprx, n_threads = n_threads)
 + }
-> 
+>
 > set.seed(1)
 > bench <- microbenchmark(
 +   `fn 1` = do_eval(1, FALSE, TRUE),
@@ -47,7 +47,7 @@ Type 'q()' to quit R.
 4 gr 1 127.72104 127.84392 129.08521
 5 gr 2  64.00504  64.96218  66.17573
 6 gr 4  33.00839  33.08670  33.15084
-> 
+>
 > proc.time()
-   user  system elapsed 
-  6.090   0.029   3.458 
+   user  system elapsed
+  6.090   0.029   3.458

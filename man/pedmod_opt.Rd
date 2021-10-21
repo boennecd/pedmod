@@ -45,11 +45,12 @@ pedmod_start(
 )
 }
 \arguments{
-\item{ptr}{object from \code{\link{get_pedigree_ll_terms}}.}
+\item{ptr}{object from \code{\link{pedigree_ll_terms}}.}
 
 \item{par}{starting values passed to \code{opt_func}.}
 
-\item{maxvls}{maximum number of samples in the approximation.}
+\item{maxvls}{maximum number of samples in the approximation for each
+marginal likelihood term.}
 
 \item{abs_eps}{absolute convergence threshold for
 \code{\link{eval_pedigree_ll}} and \code{\link{eval_pedigree_grad}}.}
@@ -68,7 +69,8 @@ function evaluation. Use \code{NULL} if the seed should not be fixed.}
 likelihood terms to include. Use \code{NULL} if all indices should be
 used.}
 
-\item{minvls}{minimum number of samples. Negative values provides a
+\item{minvls}{minimum number of samples for each
+marginal likelihood term. Negative values provides a
 default which depends on the dimension of the integration.}
 
 \item{do_reorder}{\code{TRUE} if a heuristic variable reordering should
@@ -96,7 +98,7 @@ lattice rules while one yields scrambled Sobol sequences.}
 \item{...}{Arguments passed to \code{opt_func}.}
 
 \item{data}{the \code{\link{list}} that was passed to
-\code{\link{get_pedigree_ll_terms}}.}
+\code{\link{pedigree_ll_terms}}.}
 
 \item{scale_max}{the maximum value for the scale parameters. Sometimes, the
 optimization method tends to find large scale parameters and get stuck.

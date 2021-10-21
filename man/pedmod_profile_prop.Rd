@@ -30,14 +30,16 @@ pedmod_profile_prop(
 )
 }
 \arguments{
-\item{ptr}{object from \code{\link{get_pedigree_ll_terms}}.}
+\item{ptr}{object from \code{\link{pedigree_ll_terms}}.}
 
 \item{par}{numeric vector with the maximum likelihood estimator e.g. from
 \code{\link{pedmod_opt}}.}
 
-\item{maxvls}{maximum number of samples in the approximation.}
+\item{maxvls}{maximum number of samples in the approximation for each
+marginal likelihood term.}
 
-\item{minvls}{minimum number of samples. Negative values provides a
+\item{minvls}{minimum number of samples for each
+marginal likelihood term. Negative values provides a
 default which depends on the dimension of the integration.}
 
 \item{alpha}{numeric scalar with the confidence level required.}
@@ -89,7 +91,7 @@ either directions.}
 \code{\link{optim}}. BFGS is used with \code{\link{optim}} if this argument
 is \code{NULL}.}
 
-\item{...}{arguments passed to \code{\link{optim}}.}
+\item{...}{arguments passed to \code{opt_func}.}
 }
 \value{
 A list like \code{\link{pedmod_profile}}.

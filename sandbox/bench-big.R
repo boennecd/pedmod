@@ -3,7 +3,7 @@ dat <- readRDS("dat-big.RDS")
 par <- attr(dat, "par")
 
 library(pedmod)
-ll_terms <- get_pedigree_ll_terms(dat, max_threads = 4L)
+ll_terms <- pedigree_ll_terms(dat, max_threads = 4L)
 
 do_eval <- function(n_threads, is_grad, use_aprx){
   f <- if(is_grad) eval_pedigree_grad else eval_pedigree_ll

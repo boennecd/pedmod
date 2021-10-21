@@ -38,12 +38,13 @@ eval_pedigree_grad(
 )
 }
 \arguments{
-\item{ptr}{object from \code{\link{get_pedigree_ll_terms}}.}
+\item{ptr}{object from \code{\link{pedigree_ll_terms}}.}
 
 \item{par}{numeric vector with fixed effect coefficients and log scale
 parameters. The log scale parameters should be last.}
 
-\item{maxvls}{maximum number of samples in the approximation.}
+\item{maxvls}{maximum number of samples in the approximation for each
+marginal likelihood term.}
 
 \item{abs_eps}{absolute convergence threshold.}
 
@@ -53,7 +54,8 @@ parameters. The log scale parameters should be last.}
 likelihood terms to include. Use \code{NULL} if all indices should be
 used.}
 
-\item{minvls}{minimum number of samples. Negative values provides a
+\item{minvls}{minimum number of samples for each
+marginal likelihood term. Negative values provides a
 default which depends on the dimension of the integration.}
 
 \item{do_reorder}{\code{TRUE} if a heuristic variable reordering should
@@ -90,8 +92,7 @@ attribute like for \code{eval_pedigree_ll} and an attribute called
 \code{"std"} which first element is the standard error estimate of the
 log likelihood based on the delta method and the last elements are the
 standard error estimates of the gradient. The latter ignores the Monte Carlo
-error from the likelihood approximation but this is typically minor and it is
-for the parameterization with \code{standardized = FALSE}.
+error from the likelihood approximation.
 }
 \description{
 Approximate the log marginal likelihood and the derivatives with
@@ -141,7 +142,7 @@ dat_arg <- lapply(fam_dat, function(x){
 })
 
 # get a pointer to the C++ object
-ptr <- get_pedigree_ll_terms(dat_arg, max_threads = 1L)
+ptr <- pedigree_ll_terms(dat_arg, max_threads = 1L)
 
 # approximate the log marginal likelihood
 beta <- c(-1, 0.3, 0.2) # fixed effect coefficients
@@ -168,7 +169,7 @@ system.time(deriv_w_weight <- eval_pedigree_grad(
 
 # the same as manually repeating second cluster and not including the third
 dum_dat <- dat_arg[c(1, 2, 2, 2)]
-dum_ptr <- get_pedigree_ll_terms(dum_dat, 1L)
+dum_ptr <- pedigree_ll_terms(dum_dat, 1L)
 system.time(deriv_dum <- eval_pedigree_grad(
   ptr = dum_ptr, par = c(beta, log(scs)), abs_eps = -1, maxvls = 1e6,
   rel_eps = 1e-3, minvls = 2000, use_aprx = TRUE))

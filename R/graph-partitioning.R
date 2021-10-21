@@ -44,8 +44,8 @@
 #' @param to integer vector with one of the vertex ids.
 #'
 #' @seealso
-#' \code{\link{get_block_cut_tree}} and
-#' \code{\link{get_max_balanced_partition}}.
+#' \code{\link{block_cut_tree}} and
+#' \code{\link{max_balanced_partition}}.
 #'
 #' @references
 #' Hopcroft, J., & Tarjan, R. (1973).
@@ -53,12 +53,12 @@
 #' Communications of the ACM, 16(6), 372-378.
 #'
 #' @export
-get_biconnected_components <- function(from, to){
+biconnected_components <- function(from, to){
   dat <- .prep_edge_list(from = from, to = to, weight_data = NULL,
                          edge_weights = NULL)
   id <- dat$id
 
-  out <- with(dat, .get_biconnected_components(from, to, weights_ids,
+  out <- with(dat, .biconnected_components(from, to, weights_ids,
                                                weights, edge_weights))
   lapply(out, function(x)
     structure(sort(id[x]),
@@ -98,7 +98,7 @@ get_biconnected_components <- function(from, to){
        init = init)
 }
 
-#' @rdname get_biconnected_components
+#' @rdname biconnected_components
 #'
 #' @param id integer vector with the child id.
 #' @param father.id integer vector with the father id. May be \code{NA} if
@@ -107,11 +107,11 @@ get_biconnected_components <- function(from, to){
 #' it is missing.
 #'
 #' @export
-get_biconnected_components_pedigree <- function(id, father.id, mother.id){
+biconnected_components_pedigree <- function(id, father.id, mother.id){
   dat <- .pedigree_to_from_to(id = id, father.id = father.id,
                               mother.id = mother.id)
 
-  with(dat, get_biconnected_components(from = from, to = to))
+  with(dat, biconnected_components(from = from, to = to))
 }
 
 #' Creates a Block-cut Tree Like Object
@@ -120,11 +120,11 @@ get_biconnected_components_pedigree <- function(id, father.id, mother.id){
 #' Creates a block-cut tree like structure computed using the method suggested
 #' by Hopcroft et al. (1973).
 #'
-#' @inheritParams get_biconnected_components
+#' @inheritParams biconnected_components
 #'
 #' @seealso
-#' \code{\link{get_biconnected_components}} and
-#' \code{\link{get_max_balanced_partition}}.
+#' \code{\link{biconnected_components}} and
+#' \code{\link{max_balanced_partition}}.
 #'
 #' @references
 #' Hopcroft, J., & Tarjan, R. (1973).
@@ -132,13 +132,13 @@ get_biconnected_components_pedigree <- function(id, father.id, mother.id){
 #' Communications of the ACM, 16(6), 372-378.
 #'
 #' @export
-get_block_cut_tree <- function(from, to){
+block_cut_tree <- function(from, to){
   dat <- .prep_edge_list(from = from, to = to, weight_data = NULL,
                          edge_weights = NULL)
   id <- dat$id
 
-  out <- with(dat, .get_block_cut_tree(from, to, weights_ids,
-                                       weights, edge_weights))
+  out <- with(dat, .block_cut_tree(from, to, weights_ids,
+                                   weights, edge_weights))
   . <- function(x)
     list(vertices     = sort(id[x$vertices]),
          cut_vertices = sort(id[x$cut_vertices]),
@@ -146,13 +146,13 @@ get_block_cut_tree <- function(from, to){
   .(out)
 }
 
-#' @rdname get_block_cut_tree
+#' @rdname block_cut_tree
 #' @export
-get_block_cut_tree_pedigree <- function(id, father.id, mother.id){
+block_cut_tree_pedigree <- function(id, father.id, mother.id){
   dat <- .pedigree_to_from_to(id = id, father.id = father.id,
                               mother.id = mother.id)
 
-  with(dat, get_block_cut_tree(from = from, to = to))
+  with(dat, block_cut_tree(from = from, to = to))
 }
 
 .sort_partition_result <- function(out, id){
@@ -178,7 +178,7 @@ get_block_cut_tree_pedigree <- function(id, father.id, mother.id){
 #' \code{vignette("pedigree_partitioning", package = "pedmod")} for further
 #' details.
 #'
-#' @inheritParams get_biconnected_components
+#' @inheritParams biconnected_components
 #' @param weight_data list with two elements called \code{"id"} for the id and
 #' \code{"weight"} for the vertex weight. All vertices that are not in this list
 #' have a weight of one. Use \code{NULL} if all vertices have a weight of one.
@@ -204,9 +204,9 @@ get_block_cut_tree_pedigree <- function(id, father.id, mother.id){
 #' vertices. This may reduce the computation time for some data sets.
 #'
 #' @seealso
-#' \code{\link{get_biconnected_components}},
-#' \code{\link{get_block_cut_tree}}, and
-#' \code{\link{get_unconnected_partition}}.
+#' \code{\link{biconnected_components}},
+#' \code{\link{block_cut_tree}}, and
+#' \code{\link{unconnected_partition}}.
 #'
 #' @references
 #' Chlebíková, J. (1996).
@@ -224,17 +224,17 @@ get_block_cut_tree_pedigree <- function(id, father.id, mother.id){
 #'  \item{set_1,set_2}{The two sets in the partition.}
 #'
 #' @export
-get_max_balanced_partition <- function(from, to, weight_data = NULL,
-                                       edge_weights = NULL,
-                                       slack = 0., max_kl_it_inner = 50L,
-                                       max_kl_it = 10000L, trace = 0L,
-                                       check_weights = TRUE,
-                                       do_reorder = FALSE){
+max_balanced_partition <- function(from, to, weight_data = NULL,
+                                   edge_weights = NULL,
+                                   slack = 0., max_kl_it_inner = 50L,
+                                   max_kl_it = 10000L, trace = 0L,
+                                   check_weights = TRUE,
+                                   do_reorder = FALSE){
   dat <- .prep_edge_list(from = from, to = to, weight_data = weight_data,
                          edge_weights = edge_weights)
   id <- dat$id
 
-  out <- with(dat, .get_max_balanced_partition(
+  out <- with(dat, .max_balanced_partition(
     from, to, weights_ids,  weights, slack = slack, edge_weights = edge_weights,
     max_kl_it_inner = max_kl_it_inner, max_kl_it = max_kl_it, trace = trace,
     check_weights = check_weights, do_reorder = do_reorder))
@@ -243,7 +243,7 @@ get_max_balanced_partition <- function(from, to, weight_data = NULL,
   .sort_partition_result(out, id)
 }
 
-#' @rdname get_max_balanced_partition
+#' @rdname max_balanced_partition
 #'
 #' @param id_weight numeric vector with the weight to use for each vertex
 #' (individual). \code{NULL} yields a weight of one for all.
@@ -253,7 +253,7 @@ get_max_balanced_partition <- function(from, to, weight_data = NULL,
 #' and the children. Use \code{NULL} if all should have a weight of one.
 #'
 #' @export
-get_max_balanced_partition_pedigree <- function(
+max_balanced_partition_pedigree <- function(
   id, father.id, mother.id, id_weight = NULL, father_weight = NULL,
   mother_weight = NULL, slack = 0., max_kl_it_inner = 50L, max_kl_it = 10000L,
   trace = 0L, check_weights = TRUE, do_reorder = FALSE){
@@ -262,7 +262,7 @@ get_max_balanced_partition_pedigree <- function(
                               father_weight = father_weight,
                               mother_weight = mother_weight)
 
-  with(dat, get_max_balanced_partition(
+  with(dat, max_balanced_partition(
     from = from, to = to, weight_data = weight_data, slack = slack,
     max_kl_it_inner = max_kl_it_inner, max_kl_it = max_kl_it, trace = trace,
     edge_weights = edge_weights, do_reorder = do_reorder,
@@ -270,7 +270,7 @@ get_max_balanced_partition_pedigree <- function(
 }
 
 #' Finds an Approximately Balanced Partition
-#' @inheritParams get_max_balanced_partition
+#' @inheritParams max_balanced_partition
 #' @param init integer vector with ids that one of the two sets in the partition
 #' should start out with.
 #'
@@ -281,19 +281,19 @@ get_max_balanced_partition_pedigree <- function(
 #'  \item{set_1,set_2}{The two sets in the partition.}
 #'
 #' @seealso
-#' \code{\link{get_max_balanced_partition}}.
+#' \code{\link{max_balanced_partition}}.
 #'
 #' @export
-get_unconnected_partition <- function(from, to, weight_data = NULL,
-                                      edge_weights = NULL,
-                                      slack = 0., max_kl_it_inner = 50L,
-                                      max_kl_it = 10000L, trace = 0L,
-                                      init = integer()){
+unconnected_partition <- function(from, to, weight_data = NULL,
+                                  edge_weights = NULL,
+                                  slack = 0., max_kl_it_inner = 50L,
+                                  max_kl_it = 10000L, trace = 0L,
+                                  init = integer()){
   dat <- .prep_edge_list(from = from, to = to, weight_data = weight_data,
                          edge_weights = edge_weights, init = init)
   id <- dat$id
 
-  out <- with(dat, .get_unconnected_partition(
+  out <- with(dat, .unconnected_partition(
     from, to, weights_ids,  weights, slack = slack, edge_weights = edge_weights,
     max_kl_it_inner = max_kl_it_inner, max_kl_it = max_kl_it, trace = trace,
     init = init))
@@ -302,9 +302,9 @@ get_unconnected_partition <- function(from, to, weight_data = NULL,
   .sort_partition_result(out, id)
 }
 
-#' @rdname get_unconnected_partition
+#' @rdname unconnected_partition
 #' @export
-get_unconnected_partition_pedigree <- function(
+unconnected_partition_pedigree <- function(
   id, father.id, mother.id, id_weight = NULL, father_weight = NULL,
   mother_weight = NULL, slack = 0., max_kl_it_inner = 50L, max_kl_it = 10000L,
   trace = 0L, init = integer()){
@@ -313,7 +313,7 @@ get_unconnected_partition_pedigree <- function(
                               father_weight = father_weight,
                               mother_weight = mother_weight, init = init)
 
-  with(dat, get_unconnected_partition(
+  with(dat, unconnected_partition(
     from = from, to = to, weight_data = weight_data, slack = slack,
     max_kl_it_inner = max_kl_it_inner, max_kl_it = max_kl_it, trace = trace,
     edge_weights = edge_weights, init = init))

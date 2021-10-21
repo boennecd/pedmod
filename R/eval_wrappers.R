@@ -5,7 +5,12 @@
 #' Approximate the log marginal likelihood and the derivatives with
 #' respect to the model parameters.
 #'
-#' @param ptr object from \code{\link{get_pedigree_ll_terms}}.
+#' @param maxvls maximum number of samples in the approximation for each
+#' marginal likelihood term.
+#' @param minvls minimum number of samples for each
+#' marginal likelihood term. Negative values provides a
+#' default which depends on the dimension of the integration.
+#' @param ptr object from \code{\link{pedigree_ll_terms}}.
 #' @param par numeric vector with fixed effect coefficients and log scale
 #' parameters. The log scale parameters should be last.
 #' @param indices zero-based vector with indices of which log marginal
@@ -18,7 +23,7 @@
 #' parameterization. See \code{\link{standardized_to_direct}} and the vignette
 #' at \code{vignette("pedmod", package = "pedmod")}.
 #'
-#' @inheritParams get_pedigree_ll_terms
+#' @inheritParams pedigree_ll_terms
 #' @inheritParams mvndst
 #'
 #' @return \code{eval_pedigree_ll}:
@@ -72,7 +77,7 @@
 #' })
 #'
 #' # get a pointer to the C++ object
-#' ptr <- get_pedigree_ll_terms(dat_arg, max_threads = 1L)
+#' ptr <- pedigree_ll_terms(dat_arg, max_threads = 1L)
 #'
 #' # approximate the log marginal likelihood
 #' beta <- c(-1, 0.3, 0.2) # fixed effect coefficients
@@ -99,7 +104,7 @@
 #'
 #' # the same as manually repeating second cluster and not including the third
 #' dum_dat <- dat_arg[c(1, 2, 2, 2)]
-#' dum_ptr <- get_pedigree_ll_terms(dum_dat, 1L)
+#' dum_ptr <- pedigree_ll_terms(dum_dat, 1L)
 #' system.time(deriv_dum <- eval_pedigree_grad(
 #'   ptr = dum_ptr, par = c(beta, log(scs)), abs_eps = -1, maxvls = 1e6,
 #'   rel_eps = 1e-3, minvls = 2000, use_aprx = TRUE))
@@ -129,8 +134,7 @@ eval_pedigree_ll <- function(ptr, par, maxvls, abs_eps, rel_eps,
 #' \code{"std"} which first element is the standard error estimate of the
 #' log likelihood based on the delta method and the last elements are the
 #' standard error estimates of the gradient. The latter ignores the Monte Carlo
-#' error from the likelihood approximation but this is typically minor and it is
-#' for the parameterization with \code{standardized = FALSE}.
+#' error from the likelihood approximation.
 #'
 #' @export
 eval_pedigree_grad <- function(ptr, par, maxvls, abs_eps, rel_eps,

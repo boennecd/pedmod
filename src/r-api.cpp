@@ -248,8 +248,8 @@ inline unsigned eval_get_n_threads(unsigned const n_threads,
 //'
 //' @export
 // [[Rcpp::export]]
-SEXP get_pedigree_ll_terms(Rcpp::List data, unsigned const max_threads = 1,
-                           unsigned const n_sequences = 8){
+SEXP pedigree_ll_terms(Rcpp::List data, unsigned const max_threads = 1,
+                       unsigned const n_sequences = 8){
   return Rcpp::XPtr<pedigree_terms>(
     new pedigree_terms(data, max_threads, n_sequences));
 }

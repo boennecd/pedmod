@@ -1705,7 +1705,7 @@ Rcpp::List biconnected_components_to_rcpp_list
   return out;
 }
 
-// [[Rcpp::export(.get_biconnected_components, rng = false)]]
+// [[Rcpp::export(.biconnected_components, rng = false)]]
 Rcpp::List get_biconnected_components(
     Rcpp::IntegerVector const from, Rcpp::IntegerVector const to,
     Rcpp::IntegerVector const weights_ids, Rcpp::NumericVector const weights,
@@ -1761,7 +1761,7 @@ Rcpp::List block_cut_tree_to_rcpp_list
     Rcpp::Named("leafs") = leafs);
 }
 
-// [[Rcpp::export(.get_block_cut_tree, rng = false)]]
+// [[Rcpp::export(.block_cut_tree, rng = false)]]
 Rcpp::List get_block_cut_tree(
     Rcpp::IntegerVector const from, Rcpp::IntegerVector const to,
     Rcpp::IntegerVector const weights_ids, Rcpp::NumericVector const weights,
@@ -1811,7 +1811,7 @@ Rcpp::List mbcp_result_to_rcpp_list(mbcp_result const &res){
     Rcpp::Named("set_2")             = get_set(res.s2));
 }
 
-// [[Rcpp::export(.get_max_balanced_partition, rng = false)]]
+// [[Rcpp::export(.max_balanced_partition, rng = false)]]
 Rcpp::List get_max_balanced_partition(
     Rcpp::IntegerVector const from, Rcpp::IntegerVector const to,
     Rcpp::IntegerVector const weights_ids, Rcpp::NumericVector const weights,
@@ -1847,7 +1847,7 @@ Rcpp::List get_max_balanced_partition(
   return mbcp_result_to_rcpp_list(res);
 }
 
-// [[Rcpp::export(.get_unconnected_partition, rng = false)]]
+// [[Rcpp::export(.unconnected_partition, rng = false)]]
 Rcpp::List unconnected_partition_rcpp(
     Rcpp::IntegerVector const from, Rcpp::IntegerVector const to,
     Rcpp::IntegerVector const weights_ids, Rcpp::NumericVector const weights,

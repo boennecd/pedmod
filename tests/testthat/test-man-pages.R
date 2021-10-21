@@ -57,7 +57,7 @@ test_that("examples in manual pages gives the correct answer for eval_pedigree_[
   })
 
   # get a pointer to the C++ object
-  ptr <- get_pedigree_ll_terms(dat_arg, max_threads = 1L)
+  ptr <- pedigree_ll_terms(dat_arg, max_threads = 1L)
 
   # approximate the log marginal likelihood
   beta <- c(-1, 0.3, 0.2) # fixed effect coefficients
@@ -89,7 +89,7 @@ test_that("examples in manual pages gives the correct answer for eval_pedigree_[
 
   # w/ weights
   # truth_dat <- dat_arg[c(1, 2, 2, 2)]
-  # truth_ptr <- get_pedigree_ll_terms(truth_dat, 1L)
+  # truth_ptr <- pedigree_ll_terms(truth_dat, 1L)
   # deriv_truth <- eval_pedigree_grad(
   #   ptr = truth_ptr, par = c(beta, log(scs)), abs_eps = -1, maxvls = 1e8,
   #   rel_eps = 1e-6, minvls = 2000, use_aprx = FALSE)

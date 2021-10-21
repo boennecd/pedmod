@@ -99,7 +99,7 @@ pedmod_opt <- function(ptr, par, maxvls, abs_eps, rel_eps,
 
 #' @rdname pedmod_opt
 #' @param data the \code{\link{list}} that was passed to
-#' \code{\link{get_pedigree_ll_terms}}.
+#' \code{\link{pedigree_ll_terms}}.
 #' @param scale_max the maximum value for the scale parameters. Sometimes, the
 #' optimization method tends to find large scale parameters and get stuck.
 #' Setting a maximum solves this.

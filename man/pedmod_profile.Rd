@@ -30,7 +30,7 @@ pedmod_profile(
 )
 }
 \arguments{
-\item{ptr}{object from \code{\link{get_pedigree_ll_terms}}.}
+\item{ptr}{object from \code{\link{pedigree_ll_terms}}.}
 
 \item{par}{numeric vector with the maximum likelihood estimator e.g. from
 \code{\link{pedmod_opt}}.}
@@ -41,9 +41,11 @@ standard error is a good value or a guess thereof. Hessian approximations are
 not implemented as of this writing and therefore the user needs to provide
 some guess.}
 
-\item{maxvls}{maximum number of samples in the approximation.}
+\item{maxvls}{maximum number of samples in the approximation for each
+marginal likelihood term.}
 
-\item{minvls}{minimum number of samples. Negative values provides a
+\item{minvls}{minimum number of samples for each
+marginal likelihood term. Negative values provides a
 default which depends on the dimension of the integration.}
 
 \item{alpha}{numeric scalar with the confidence level required.}

@@ -304,10 +304,10 @@ dat <- sim_dat(n_fams = 400L)
 
 # perform the optimization. We start with finding the starting values
 library(pedmod)
-ll_terms <- get_pedigree_ll_terms(dat, max_threads = 4L)
+ll_terms <- pedigree_ll_terms(dat, max_threads = 4L)
 system.time(start <- pedmod_start(ptr = ll_terms, data = dat, n_threads = 4L))
 #>    user  system elapsed 
-#>  14.661   0.200   3.897
+#>  14.142   0.173   3.754
 
 # log likelihood without the random effects and at the starting values
 start$logLik_no_rng
@@ -322,7 +322,7 @@ system.time(
     n_threads = 4L, 
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 #>    user  system elapsed 
-#>  46.766   0.004  11.698
+#>   44.42    0.00   11.11
 ```
 
 The results of the estimation are shown below:
@@ -593,7 +593,7 @@ sigs <- seq(rg[1], rg[2], length.out = 10)
 sigs <- sort(c(sigs, exp(tail(opt_out$par, 1) / 2)))
 
 # compute the profile likelihood
-ll_terms <- get_pedigree_ll_terms(dat, max_threads = 4L)
+ll_terms <- pedigree_ll_terms(dat, max_threads = 4L)
 pl_curve_res <- lapply(sigs, function(sig){
   # set the parameters to pass
   beta <- start$beta_no_rng
@@ -980,8 +980,8 @@ res <- sapply(setNames(n_samp, n_samp), function(maxvls){
 }, simplify = "array")
 
 # compute the errors with fewer randomized quasi-Monte Carlo sequences
-ll_terms_few_sequences <- get_pedigree_ll_terms(dat, max_threads = 4L, 
-                                                n_sequences = 1L)
+ll_terms_few_sequences <- pedigree_ll_terms(dat, max_threads = 4L, 
+                                            n_sequences = 1L)
 res_few_seqs <- sapply(setNames(n_samp, n_samp), function(maxvls){
   sapply(c(Korobov = 0, Sobol = 1), function(method){
     # estimate the gradient
@@ -1106,7 +1106,7 @@ sim_study <- lapply(seeds, function(s){
     # get the starting values
     library(pedmod)
     do_fit <- function(standardized){
-      ll_terms <- get_pedigree_ll_terms(dat, max_threads = 4L)
+      ll_terms <- pedigree_ll_terms(dat, max_threads = 4L)
       ti_start <- system.time(start <- pedmod_start(
         ptr = ll_terms, data = dat, n_threads = 4L, 
         standardized = standardized))
@@ -1350,17 +1350,17 @@ beta_true   <- attr(dat, "beta")
 sig_sq_true <- attr(dat, "sig_sq")
 
 library(pedmod)
-ll_terms <- get_pedigree_ll_terms(dat, max_threads = 4L)
+ll_terms <- pedigree_ll_terms(dat, max_threads = 4L)
 system.time(ll_res <- eval_pedigree_ll(
   ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4))
 #>    user  system elapsed 
-#>   0.582   0.000   0.146
+#>   0.584   0.000   0.146
 system.time(grad_res <- eval_pedigree_grad(
   ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4))
 #>    user  system elapsed 
-#>  14.147   0.000   3.634
+#>  15.239   0.004   3.843
 
 # find the duplicated combinations of pedigrees, covariates, and outcomes. One 
 # likely needs to change this code if the pedigrees are not identical but are 
@@ -1376,20 +1376,20 @@ c_weights <- sapply(dat_unqiue, function(x)
   sum(sapply(dat, identical, y = x)))
 
 # get the C++ object and show that the computation time is reduced
-ll_terms <- get_pedigree_ll_terms(dat_unqiue, max_threads = 4L)
+ll_terms <- pedigree_ll_terms(dat_unqiue, max_threads = 4L)
 
 system.time(ll_res_fast <- eval_pedigree_ll(
   ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4, 
   cluster_weights = c_weights))
 #>    user  system elapsed 
-#>   0.241   0.000   0.063
+#>   0.245   0.000   0.062
 system.time(grad_res_fast <- eval_pedigree_grad(
   ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4, 
   cluster_weights = c_weights))
 #>    user  system elapsed 
-#>   6.118   0.000   1.626
+#>   6.536   0.000   1.695
 
 # show that we get the same (up to a Monte Carlo error)
 print(c(redundant = ll_res, fast = ll_res_fast), digits = 6)
@@ -1406,7 +1406,7 @@ system.time(
   start <- pedmod_start(ptr = ll_terms, data = dat_unqiue, 
                         cluster_weights = c_weights))
 #>    user  system elapsed 
-#>   5.426   0.000   5.426
+#>   5.462   0.000   5.461
 
 # optimize
 system.time(
@@ -1415,7 +1415,7 @@ system.time(
     n_threads = 4L,  cluster_weights = c_weights,
     maxvls = 5000L, rel_eps = 1e-2, minvls = 500L))
 #>    user  system elapsed 
-#>   8.079   0.000   2.022
+#>   8.652   0.000   2.165
 system.time(
   opt_out <- pedmod_opt(
     ptr = ll_terms, par = opt_out_quick$par, abs_eps = 0, use_aprx = TRUE, 
@@ -1423,7 +1423,7 @@ system.time(
     # we changed the parameters
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 #>    user  system elapsed 
-#>   59.51    0.00   14.88
+#>   64.72    0.00   16.19
 ```
 
 The results are shown below:
@@ -1611,7 +1611,7 @@ sigs <- expand.grid(sigma1 = sig_vals1,
 #   fix: indices of parameters to fix. 
 #   fix_val: values of the fixed parameters.
 #   sig_start: starting values for the scale parameters.
-ll_terms <- get_pedigree_ll_terms(dat_unqiue, max_threads = 4L)
+ll_terms <- pedigree_ll_terms(dat_unqiue, max_threads = 4L)
 pl_curve_func <- function(fix, fix_val, 
                           sig_start = exp(tail(opt_out$par, 2) / 2)){
   # get the fixed indices of the fixed parameters
@@ -2011,7 +2011,7 @@ sim_study <- lapply(seeds, function(s){
     # get the starting values
     library(pedmod)
     do_fit <- function(standardized){
-      ll_terms <- get_pedigree_ll_terms(dat_unqiue, max_threads = 4L)
+      ll_terms <- pedigree_ll_terms(dat_unqiue, max_threads = 4L)
       ti_start <- system.time(start <- pedmod_start(
         ptr = ll_terms, data = dat_unqiue, n_threads = 4L, 
         cluster_weights = c_weights, standardized = standardized))
@@ -2285,7 +2285,7 @@ dat_arg <- lapply(dat$sim_data, function(x){
 
 # create a C++ object
 library(pedmod)
-ll_terms <- get_pedigree_ll_terms(dat_arg, max_threads = 4L)
+ll_terms <- pedigree_ll_terms(dat_arg, max_threads = 4L)
 
 # get the starting values. This is very fast
 y <- unlist(lapply(dat_arg, `[[`, "y"))
@@ -2331,7 +2331,7 @@ gr <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE,
 # check output at the starting values
 system.time(ll <- -fn(c(beta, sc)))
 #>    user  system elapsed 
-#>   3.935   0.000   0.999
+#>   4.029   0.004   1.023
 ll # the log likelihood at the starting values
 #> [1] -26042
 #> attr(,"n_fails")
@@ -2340,7 +2340,7 @@ ll # the log likelihood at the starting values
 #> [1] 0.05963
 system.time(gr_val <- gr(c(beta, sc)))
 #>    user  system elapsed 
-#>   37.54    0.00    9.46
+#>  38.862   0.001   9.738
 gr_val # the gradient at the starting values
 #> [1] 1894.83 -549.43 -235.73   47.21  -47.84
 #> attr(,"value")
@@ -2381,7 +2381,7 @@ rbind(numDeriv = numDeriv::grad(fn, c(beta, sc), indices = 0:10),
 # optimize the log likelihood approximation
 system.time(opt <- optim(c(beta, sc), fn, gr, method = "BFGS"))
 #>     user   system  elapsed 
-#> 1577.556    0.024  400.504
+#> 1608.698    0.049  408.717
 ```
 
 The output from the optimization is shown below:

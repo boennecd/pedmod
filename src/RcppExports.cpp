@@ -100,16 +100,16 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// get_pedigree_ll_terms
-SEXP get_pedigree_ll_terms(Rcpp::List data, unsigned const max_threads, unsigned const n_sequences);
-RcppExport SEXP _pedmod_get_pedigree_ll_terms(SEXP dataSEXP, SEXP max_threadsSEXP, SEXP n_sequencesSEXP) {
+// pedigree_ll_terms
+SEXP pedigree_ll_terms(Rcpp::List data, unsigned const max_threads, unsigned const n_sequences);
+RcppExport SEXP _pedmod_pedigree_ll_terms(SEXP dataSEXP, SEXP max_threadsSEXP, SEXP n_sequencesSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::List >::type data(dataSEXP);
     Rcpp::traits::input_parameter< unsigned const >::type max_threads(max_threadsSEXP);
     Rcpp::traits::input_parameter< unsigned const >::type n_sequences(n_sequencesSEXP);
-    rcpp_result_gen = Rcpp::wrap(get_pedigree_ll_terms(data, max_threads, n_sequences));
+    rcpp_result_gen = Rcpp::wrap(pedigree_ll_terms(data, max_threads, n_sequences));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -188,7 +188,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_pedmod_get_max_balanced_partition", (DL_FUNC) &_pedmod_get_max_balanced_partition, 11},
     {"_pedmod_unconnected_partition_rcpp", (DL_FUNC) &_pedmod_unconnected_partition_rcpp, 10},
     {"_pedmod_mvndst", (DL_FUNC) &_pedmod_mvndst, 12},
-    {"_pedmod_get_pedigree_ll_terms", (DL_FUNC) &_pedmod_get_pedigree_ll_terms, 3},
+    {"_pedmod_pedigree_ll_terms", (DL_FUNC) &_pedmod_pedigree_ll_terms, 3},
     {"_pedmod_get_n_scales", (DL_FUNC) &_pedmod_get_n_scales, 1},
     {"_pedmod_get_n_terms", (DL_FUNC) &_pedmod_get_n_terms, 1},
     {"_pedmod_eval_pedigree_ll", (DL_FUNC) &_pedmod_eval_pedigree_ll, 12},

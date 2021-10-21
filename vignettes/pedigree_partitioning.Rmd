@@ -177,7 +177,7 @@ above family in way that only satisfies 1.:
 ```{r only_balanced}
 # get the partition 
 library(pedmod)
-only_balanced <- get_max_balanced_partition_pedigree(
+only_balanced <- max_balanced_partition_pedigree(
   id = dat$id, father.id = dat$dad, mother.id = dat$mom, trace = 2L)
 only_balanced$balance_criterion # the smallest of the two sets
 removed_edges <- only_balanced$removed_edges
@@ -240,7 +240,7 @@ Next, we use the `slack` argument to reduce the number of relationships we
 remove (the number of edges we cut):
 
 ```{r also_reduce_cost}
-also_cut <- get_max_balanced_partition_pedigree(
+also_cut <- max_balanced_partition_pedigree(
   id = dat$id, father.id = dat$dad, mother.id = dat$mom, trace = 2L, 
   slack = .1)
 also_cut$balance_criterion # the smallest of the two sets
@@ -268,7 +268,7 @@ number (say $10^{-5}$):
 is_final <- c(16:17, 11:14, 24:27, 33:34, 40:41, 47:48, 19L)
 dat$id_weight <- ifelse(dat$id %in% is_final, 1., 1e-5)
 
-weighted_partition <- get_max_balanced_partition_pedigree(
+weighted_partition <- max_balanced_partition_pedigree(
   id = dat$id, father.id = dat$dad, mother.id = dat$mom, trace = 2L, 
   slack = .1, id_weight = dat$id_weight)
 weighted_partition$balance_criterion # the smallest of the two sets
@@ -311,7 +311,7 @@ dat$id_weight <- ifelse(dat$id %in% is_final, 1., 1e-5)
 dat$father_weight <- dat$mother_weight <- ifelse(dat$id %in% is_final, 10., 1.)
 
 # find the partition
-weighted_partition <- get_max_balanced_partition_pedigree(
+weighted_partition <- max_balanced_partition_pedigree(
   id = dat$id, father.id = dat$dad, mother.id = dat$mom, trace = 2L, 
   slack = .1, id_weight = dat$id_weight, father_weight = dat$father_weight, 
   mother_weight = dat$mother_weight)
@@ -329,12 +329,12 @@ We end up cutting the link to the grandparents instead.
 ### Potentially Unconnected Partition
 
 We may not require that the two sets in the partition is connected. The 
-`get_unconnected_partition_pedigree` function does not impose this constraint. 
+`unconnected_partition_pedigree` function does not impose this constraint. 
 An example is given below:
 
 ```{r pedigree_unconnected}
 # without weights
-partition <- get_unconnected_partition_pedigree(
+partition <- unconnected_partition_pedigree(
   id = dat$id, father.id = dat$dad, mother.id = dat$mom, trace = 2L, 
   slack = .1)
 partition$removed_edges # the relationships we have removed
@@ -342,7 +342,7 @@ partition$removed_edges # the relationships we have removed
 # show the partition
 show_split(dat, partition)
 # with weights
-weighted_partition <- get_unconnected_partition_pedigree(
+weighted_partition <- unconnected_partition_pedigree(
   id = dat$id, father.id = dat$dad, mother.id = dat$mom, trace = 2L, 
   slack = .1, id_weight = dat$id_weight, father_weight = dat$father_weight, 
   mother_weight = dat$mother_weight)
@@ -357,13 +357,13 @@ We can also start from a connected partition like below:
 
 ```{r connected_start_pedigree_unconnected}
 # get the connected partition
-connected_partition <- get_max_balanced_partition_pedigree(
+connected_partition <- max_balanced_partition_pedigree(
   id = dat$id, father.id = dat$dad, mother.id = dat$mom, trace = 2L, 
   slack = .1, id_weight = dat$id_weight, father_weight = dat$father_weight, 
   mother_weight = dat$mother_weight)
 
 # get the passably unconnected partition
-partition <- get_unconnected_partition_pedigree(
+partition <- unconnected_partition_pedigree(
   id = dat$id, father.id = dat$dad, mother.id = dat$mom, trace = 2L, 
   slack = .1, id_weight = dat$id_weight, father_weight = dat$father_weight, 
   mother_weight = dat$mother_weight, init = connected_partition$set_2)
@@ -389,7 +389,7 @@ We have implemented the method suggested by
 (articulation points) and can construct the block-cut tree. 
 Thus, we have implemented the method suggested by @Hopcroft73. The method 
 suggested by @Hopcroft73 can be accessed through the 
-`get_biconnected_components` and `get_block_cut_tree` function. 
+`biconnected_components` and `block_cut_tree` function. 
 We illustrate this below on a simulated graph:
 
 ```{r assign_sim_graph}
@@ -422,17 +422,17 @@ par(mar = c(1, 1, 1, 1))
 plot(graph.data.frame(sim_dat, directed = FALSE), layout = layout_with_kk,
      vertex.size = 12, vertex.color = "gray", vertex.label.cex = .75)
 # get the biconnected components
-cut_pts <- get_biconnected_components(from = sim_dat$from, to = sim_dat$to)
+cut_pts <- biconnected_components(from = sim_dat$from, to = sim_dat$to)
 length(cut_pts) # number of biconnected components
 ```
 
 The algorithm suggested by @Chlebíková96 can be used through the 
-`get_max_balanced_partition` function with `slack == 0`:
+`max_balanced_partition` function with `slack == 0`:
 
 ```{r find_partition_simulate_small_graph}
 # find the approximately balanced connected partition
-max_part <- get_max_balanced_partition(from = sim_dat$from, to = sim_dat$to, 
-                                       trace = 2L)
+max_part <- max_balanced_partition(from = sim_dat$from, to = sim_dat$to, 
+                                   trace = 2L)
 max_part$balance_criterion # the balance criterion 
 
 # the removed edges
@@ -512,18 +512,18 @@ connected, that we only move one vertex in every move [like @Fiduccia82],
 and that the partition is only approximately balanced [like @Fiduccia82]. 
 We also limit the number of moves we make as @Karypis98. Our implementations
 to find a potentially unconnected partition 
-(`get_unconnected_partition` and `get_unconnected_partition_pedigree`) 
+(`unconnected_partition` and `unconnected_partition_pedigree`) 
 proceeds in a similar manner as above except that we do not require that the
 sets are connected. This substantially simplifies the algorithm.
 
 $\epsilon$ is set with the `slack` argument of 
-`get_max_balanced_partition` and the maximum number of moves to 
+`max_balanced_partition` and the maximum number of moves to 
 make in each iteration is set by the `max_kl_it_inner` argument of
-`get_max_balanced_partition`. We illustrate the method below:
+`max_balanced_partition`. We illustrate the method below:
 
 ```{r partion_w_cut_simulate_small_graph}
 # do the same but with also with the refinement step 
-max_part <- get_max_balanced_partition(
+max_part <- max_balanced_partition(
   from = sim_dat$from, to = sim_dat$to, slack = .1, max_kl_it_inner = 50L, 
   max_kl_it = 1000L, trace = 1L)
 max_part$balance_criterion # the balance criterion 
@@ -545,21 +545,21 @@ set.seed(45L)
 sim_dat <- sim_graph(1000L)
 
 # get the biconnected components
-cut_pts <- get_biconnected_components(from = sim_dat$from, to = sim_dat$to)
+cut_pts <- biconnected_components(from = sim_dat$from, to = sim_dat$to)
 length(cut_pts) # number of biconnected components
 
 # find the approximately balanced connected partition
 system.time(
-  max_part <- get_max_balanced_partition(from = sim_dat$from, to = sim_dat$to, 
-                                         trace = 1L))
+  max_part <- max_balanced_partition(from = sim_dat$from, to = sim_dat$to, 
+                                     trace = 1L))
 max_part$balance_criterion # the balance criterion
 NROW(max_part$removed_edges) # number of removed edges
 
 # improve on the number of cut vertices
 system.time(
-  max_part <- get_max_balanced_partition(from = sim_dat$from, to = sim_dat$to, 
-                                         trace = 1L, slack = .1, 
-                                         max_kl_it_inner = 1000L))
+  max_part <- max_balanced_partition(from = sim_dat$from, to = sim_dat$to, 
+                                     trace = 1L, slack = .1, 
+                                     max_kl_it_inner = 1000L))
 max_part$balance_criterion # the balance criterion
 NROW(max_part$removed_edges) # number of removed edges
 
@@ -575,9 +575,9 @@ connected_partition <- max_part
 
 # get the partition which may be unconnected
 system.time(
-  max_part <- get_unconnected_partition(from = sim_dat$from, to = sim_dat$to, 
-                                        trace = 1L, slack = .1, 
-                                        max_kl_it_inner = 1000L))
+  max_part <- unconnected_partition(from = sim_dat$from, to = sim_dat$to, 
+                                    trace = 1L, slack = .1, 
+                                    max_kl_it_inner = 1000L))
 max_part$balance_criterion # the balance criterion
 NROW(max_part$removed_edges) # number of removed edges
 
@@ -588,10 +588,10 @@ init <- unique(c(sim_dat$from, sim_dat$to))
 init <- sample(init, ceiling(length(init) / 2))
 
 system.time(
-  max_part <- get_unconnected_partition(from = sim_dat$from, to = sim_dat$to, 
-                                        trace = 1L, slack = .1, 
-                                        max_kl_it_inner = 1000L, 
-                                        init = init))
+  max_part <- unconnected_partition(from = sim_dat$from, to = sim_dat$to, 
+                                    trace = 1L, slack = .1, 
+                                    max_kl_it_inner = 1000L, 
+                                    init = init))
 max_part$balance_criterion # the balance criterion
 NROW(max_part$removed_edges) # number of removed edges
 
@@ -599,10 +599,10 @@ NROW(max_part$removed_edges) # number of removed edges
 show_split(sim_dat, max_part, vertex.size = 3, vertex.label = NA)
 # we can also start from the connected partition
 system.time(
-  max_part <- get_unconnected_partition(from = sim_dat$from, to = sim_dat$to, 
-                                        trace = 1L, slack = .1, 
-                                        max_kl_it_inner = 1000L, 
-                                        init = connected_partition$set_1))
+  max_part <- unconnected_partition(from = sim_dat$from, to = sim_dat$to, 
+                                    trace = 1L, slack = .1, 
+                                    max_kl_it_inner = 1000L, 
+                                    init = connected_partition$set_1))
 max_part$balance_criterion # the balance criterion
 NROW(max_part$removed_edges) # number of removed edges
 # compare with 
@@ -622,21 +622,21 @@ set.seed(45L)
 sim_dat <- sim_graph(100000L)
 
 # get the biconnected components
-cut_pts <- get_biconnected_components(from = sim_dat$from, to = sim_dat$to)
+cut_pts <- biconnected_components(from = sim_dat$from, to = sim_dat$to)
 length(cut_pts) # number of biconnected components
 
 # find the approximately balanced connected partition
 system.time(
-  max_part <- get_max_balanced_partition(from = sim_dat$from, to = sim_dat$to, 
-                                         trace = 1L))
+  max_part <- max_balanced_partition(from = sim_dat$from, to = sim_dat$to, 
+                                     trace = 1L))
 max_part$balance_criterion # the balance criterion
 NROW(max_part$removed_edges) # number of removed edges
 
 # improve on the number of cut vertices
 system.time(
-  max_part <- get_max_balanced_partition(from = sim_dat$from, to = sim_dat$to, 
-                                         trace = 1L, slack = .1, 
-                                         max_kl_it_inner = 1000L))
+  max_part <- max_balanced_partition(from = sim_dat$from, to = sim_dat$to, 
+                                     trace = 1L, slack = .1, 
+                                     max_kl_it_inner = 1000L))
 max_part$balance_criterion # the balance criterion
 NROW(max_part$removed_edges) # number of removed edges
 ```
@@ -652,7 +652,7 @@ sim_dat <- sim_dat[sample.int(NROW(sim_dat)), ]
 
 # re-compute the partition without re-ordering the vertices
 system.time(
-  max_part_shuffled <- get_max_balanced_partition(
+  max_part_shuffled <- max_balanced_partition(
     from = sim_dat$from, to = sim_dat$to, trace = 1L, slack = .1, 
     max_kl_it_inner = 1000L, do_reorder = FALSE))
 max_part_shuffled$balance_criterion # the balance criterion
@@ -660,7 +660,7 @@ NROW(max_part_shuffled$removed_edges) # number of removed edges
 
 # re-compute the partition with re-ordering the vertices
 system.time(
-  max_part_shuffled_and_ordered <- get_max_balanced_partition(
+  max_part_shuffled_and_ordered <- max_balanced_partition(
     from = sim_dat$from, to = sim_dat$to, trace = 1L, slack = .1, 
     max_kl_it_inner = 1000L, do_reorder = TRUE))
 
@@ -672,7 +672,7 @@ all.equal(max_part, max_part_shuffled)
 ```
 
 The solution will possibly not match when you reorder the data you pass to 
-`get_max_balanced_partition`.
+`max_balanced_partition`.
 
 We can also compare the above with what we would have gotten if we had not 
 required that the partition is connected.
@@ -683,18 +683,18 @@ connected_partition <- max_part_shuffled
 
 # get potentially unconnected partition
 system.time(
-  max_part <- get_unconnected_partition(from = sim_dat$from, to = sim_dat$to, 
-                                        trace = 1L, slack = .1, 
-                                        max_kl_it_inner = 1000L))
+  max_part <- unconnected_partition(from = sim_dat$from, to = sim_dat$to, 
+                                    trace = 1L, slack = .1, 
+                                    max_kl_it_inner = 1000L))
 max_part$balance_criterion # the balance criterion
 NROW(max_part$removed_edges) # number of removed edges
 
 # improve on the connected partition 
 system.time(
-  max_part <- get_unconnected_partition(from = sim_dat$from, to = sim_dat$to, 
-                                        trace = 1L, slack = .1, 
-                                        max_kl_it_inner = 1000L, 
-                                        init = connected_partition$set_1))
+  max_part <- unconnected_partition(from = sim_dat$from, to = sim_dat$to, 
+                                    trace = 1L, slack = .1, 
+                                    max_kl_it_inner = 1000L, 
+                                    init = connected_partition$set_1))
 max_part$balance_criterion # the balance criterion
 NROW(max_part$removed_edges) # number of removed edges
 ```

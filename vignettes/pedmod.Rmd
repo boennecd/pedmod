@@ -232,7 +232,7 @@ dat <- sim_dat(n_fams = 400L)
 
 # perform the optimization. We start with finding the starting values
 library(pedmod)
-ll_terms <- get_pedigree_ll_terms(dat, max_threads = 4L)
+ll_terms <- pedigree_ll_terms(dat, max_threads = 4L)
 system.time(start <- pedmod_start(ptr = ll_terms, data = dat, n_threads = 4L))
 
 # log likelihood without the random effects and at the starting values
@@ -364,7 +364,7 @@ of how to use the stochastic quasi-Newton method provided through the
 `pedmod_sqn` function.
 
 ```{r pre_use_pedmod_psqn, echo=FALSE}
-ll_terms <- get_pedigree_ll_terms(dat, max_threads = 4L)
+ll_terms <- pedigree_ll_terms(dat, max_threads = 4L)
 ```
 
 ```{r use_pedmod_sqn, cache = 1, fig.keep = "last"}
@@ -428,7 +428,7 @@ sigs <- seq(rg[1], rg[2], length.out = 10)
 sigs <- sort(c(sigs, exp(tail(opt_out$par, 1) / 2)))
 
 # compute the profile likelihood
-ll_terms <- get_pedigree_ll_terms(dat, max_threads = 4L)
+ll_terms <- pedigree_ll_terms(dat, max_threads = 4L)
 pl_curve_res <- lapply(sigs, function(sig){
   # set the parameters to pass
   beta <- start$beta_no_rng
@@ -511,7 +511,7 @@ The `pedmod_profile` function is a convenience function to do like above. An
 example of using the `pedmod_profile` function is provided below:
 
 ```{r pre_simple_pedmod_profile, echo = FALSE}
-ll_terms <- get_pedigree_ll_terms(dat, max_threads = 4L)
+ll_terms <- pedigree_ll_terms(dat, max_threads = 4L)
 ```
 
 ```{r simple_pedmod_profile, cache = 1, message = TRUE, fig.keep="last"}
@@ -591,7 +591,7 @@ methods and see how this effects the error for the gradient of the log
 likelihood from the first couple of families. We do this below:
 
 ```{r pre_rqmc, echo=FALSE}
-ll_terms <- get_pedigree_ll_terms(dat, max_threads = 4L)
+ll_terms <- pedigree_ll_terms(dat, max_threads = 4L)
 ```
 
 ```{r rqmc, cache = 1}
@@ -691,8 +691,8 @@ res <- sapply(setNames(n_samp, n_samp), function(maxvls){
 }, simplify = "array")
 
 # compute the errors with fewer randomized quasi-Monte Carlo sequences
-ll_terms_few_sequences <- get_pedigree_ll_terms(dat, max_threads = 4L, 
-                                                n_sequences = 1L)
+ll_terms_few_sequences <- pedigree_ll_terms(dat, max_threads = 4L, 
+                                            n_sequences = 1L)
 res_few_seqs <- sapply(setNames(n_samp, n_samp), function(maxvls){
   sapply(c(Korobov = 0, Sobol = 1), function(method){
     # estimate the gradient
@@ -792,7 +792,7 @@ sim_study <- lapply(seeds, function(s){
     # get the starting values
     library(pedmod)
     do_fit <- function(standardized){
-      ll_terms <- get_pedigree_ll_terms(dat, max_threads = 4L)
+      ll_terms <- pedigree_ll_terms(dat, max_threads = 4L)
       ti_start <- system.time(start <- pedmod_start(
         ptr = ll_terms, data = dat, n_threads = 4L, 
         standardized = standardized))
@@ -969,7 +969,7 @@ beta_true   <- attr(dat, "beta")
 sig_sq_true <- attr(dat, "sig_sq")
 
 library(pedmod)
-ll_terms <- get_pedigree_ll_terms(dat, max_threads = 4L)
+ll_terms <- pedigree_ll_terms(dat, max_threads = 4L)
 system.time(ll_res <- eval_pedigree_ll(
   ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4))
@@ -990,7 +990,7 @@ c_weights <- sapply(dat_unqiue, function(x)
   sum(sapply(dat, identical, y = x)))
 
 # get the C++ object and show that the computation time is reduced
-ll_terms <- get_pedigree_ll_terms(dat_unqiue, max_threads = 4L)
+ll_terms <- pedigree_ll_terms(dat_unqiue, max_threads = 4L)
 
 system.time(ll_res_fast <- eval_pedigree_ll(
   ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
@@ -1147,7 +1147,7 @@ sigs <- expand.grid(sigma1 = sig_vals1,
 #   fix: indices of parameters to fix. 
 #   fix_val: values of the fixed parameters.
 #   sig_start: starting values for the scale parameters.
-ll_terms <- get_pedigree_ll_terms(dat_unqiue, max_threads = 4L)
+ll_terms <- pedigree_ll_terms(dat_unqiue, max_threads = 4L)
 pl_curve_func <- function(fix, fix_val, 
                           sig_start = exp(tail(opt_out$par, 2) / 2)){
   # get the fixed indices of the fixed parameters
@@ -1218,7 +1218,7 @@ We may just be interested in creating two profile likelihood curves for each of 
 scale parameters. This can be done as follows:
 
 ```{r pre_env_pl_curves, echo = FALSE}
-ll_terms <- get_pedigree_ll_terms(dat_unqiue, max_threads = 4L)
+ll_terms <- pedigree_ll_terms(dat_unqiue, max_threads = 4L)
 ```
 
 ```{r env_pl_curves, cache = 1, message=TRUE}
@@ -1296,7 +1296,7 @@ based confidence intervals for $K > 1$. We provide an example of using
 `pedmod_profile_prop` below. 
 
 ```{r pre_prop_var_conf, echo = FALSE}
-ll_terms <- get_pedigree_ll_terms(dat_unqiue, max_threads = 4L)
+ll_terms <- pedigree_ll_terms(dat_unqiue, max_threads = 4L)
 ```
 
 ```{r prop_var_conf, cache = 1, message=TRUE}
@@ -1405,7 +1405,7 @@ sim_study <- lapply(seeds, function(s){
     # get the starting values
     library(pedmod)
     do_fit <- function(standardized){
-      ll_terms <- get_pedigree_ll_terms(dat_unqiue, max_threads = 4L)
+      ll_terms <- pedigree_ll_terms(dat_unqiue, max_threads = 4L)
       ti_start <- system.time(start <- pedmod_start(
         ptr = ll_terms, data = dat_unqiue, n_threads = 4L, 
         cluster_weights = c_weights, standardized = standardized))
@@ -1592,7 +1592,7 @@ dat_arg <- lapply(dat$sim_data, function(x){
 
 # create a C++ object
 library(pedmod)
-ll_terms <- get_pedigree_ll_terms(dat_arg, max_threads = 4L)
+ll_terms <- pedigree_ll_terms(dat_arg, max_threads = 4L)
 
 # get the starting values. This is very fast
 y <- unlist(lapply(dat_arg, `[[`, "y"))
@@ -1752,7 +1752,7 @@ svrg_res <- svrg(c(beta, sc), gr = gr, n_clust = length(dat_arg),
 
 ```{r pre_comp_par, echo = FALSE}
 library(pedmod)
-ll_terms <- get_pedigree_ll_terms(dat_arg, max_threads = 4L)
+ll_terms <- pedigree_ll_terms(dat_arg, max_threads = 4L)
 ```
 
 The method scales reasonably well in the number of threads as 
@@ -1780,7 +1780,7 @@ to estimate the model.
 
 ```{r re_create_ptr, echo = FALSE}
 library(pedmod)
-ll_terms <- get_pedigree_ll_terms(dat_arg, max_threads = 4L)
+ll_terms <- pedigree_ll_terms(dat_arg, max_threads = 4L)
 ```
 
 ```{r use_adam, cache = 1}
@@ -1872,7 +1872,7 @@ The result is shown below.
 
 ```{r adam_re_create_ptr, echo = FALSE}
 library(pedmod)
-ll_terms <- get_pedigree_ll_terms(dat_arg, max_threads = 4L)
+ll_terms <- pedigree_ll_terms(dat_arg, max_threads = 4L)
 fn <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE, 
                n_threads = 4L, indices = NULL, maxvls = 25000L){
   set.seed(seed)

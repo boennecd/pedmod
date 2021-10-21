@@ -3,7 +3,7 @@ context("testing eval functions")
 test_that("A previous problematic case gives the correct result", {
   dat <- list(list(y = 1L, X = matrix(c(1, 1, 34), 1L),
                    scale_mats = list(matrix(1, 1, 1))))
-  ptr <- get_pedigree_ll_terms(dat, 1L)
+  ptr <- pedigree_ll_terms(dat, 1L)
 
   par <- c(-3.64537483404081, 0.06815334989362926, 0.0162241770644372,
            -.487601434379729)

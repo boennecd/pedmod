@@ -2,7 +2,7 @@
 % Please edit documentation in R/opt.R
 \name{pedmod_profile}
 \alias{pedmod_profile}
-\title{Compute Profile Likelihood Based Confidence Intervals}
+\title{Computes Profile Likelihood Based Confidence Intervals}
 \usage{
 pedmod_profile(
   ptr,
@@ -97,7 +97,7 @@ at \code{vignette("pedmod", package = "pedmod")}.}
 \item{...}{arguments passed on to \code{\link{pedmod_opt}}.}
 }
 \value{
-A list with the following elements
+A list with the following elements:
   \item{confs}{2D numeric vector with the profile likelihood based confidence
                interval.}
   \item{xs}{the points at which the profile likelihood is evaluated.}
@@ -105,7 +105,82 @@ A list with the following elements
   \item{data}{list with the returned objects from \code{\link{pedmod_opt}}.}
 }
 \description{
-Compute Profile Likelihood Based Confidence Intervals
+Computes likelihood ratio based confidence intervals for one the parameters
+in the model.
+}
+\examples{
+\donttest{
+# we simulate outcomes with an additive genetic effect. The kinship matrix is
+# the same for all families and given by
+K <- matrix(c(
+  0.5  , 0    , 0.25 , 0   , 0.25 , 0   , 0.125 , 0.125 , 0.125 , 0.125 ,
+  0    , 0.5  , 0.25 , 0   , 0.25 , 0   , 0.125 , 0.125 , 0.125 , 0.125 ,
+  0.25 , 0.25 , 0.5  , 0   , 0.25 , 0   , 0.25  , 0.25  , 0.125 , 0.125 ,
+  0    , 0    , 0    , 0.5 , 0    , 0   , 0.25  , 0.25  , 0     , 0     ,
+  0.25 , 0.25 , 0.25 , 0   , 0.5  , 0   , 0.125 , 0.125 , 0.25  , 0.25  ,
+  0    , 0    , 0    , 0   , 0    , 0.5 , 0     , 0     , 0.25  , 0.25  ,
+  0.125, 0.125, 0.25 , 0.25, 0.125, 0   , 0.5   , 0.25  , 0.0625, 0.0625,
+  0.125, 0.125, 0.25 , 0.25, 0.125, 0   , 0.25  , 0.5   , 0.0625, 0.0625,
+  0.125, 0.125, 0.125, 0   , 0.25 , 0.25, 0.0625, 0.0625, 0.5   , 0.25  ,
+  0.125, 0.125, 0.125, 0   , 0.25 , 0.25, 0.0625, 0.0625, 0.25  , 0.5
+), 10)
+
+# simulates a data set.
+#
+# Args:
+#   n_fams: number of families.
+#   beta: the fixed effect coefficients.
+#   sig_sq: the scale parameter.
+sim_dat <- function(n_fams, beta = c(-1, 1, 2), sig_sq = 3){
+  # setup before the simulations
+  Cmat <- 2 * K
+  n_obs <- NROW(K)
+  Sig <- diag(n_obs) + sig_sq * Cmat
+  Sig_chol <- chol(Sig)
+
+  # simulate the data
+  out <- replicate(
+    n_fams, {
+      # simulate covariates
+      X <- cbind(`(Intercept)` = 1, Continuous = rnorm(n_obs),
+                 Binary = runif(n_obs) > .5)
+
+      # assign the linear predictor + noise
+      eta <- drop(X \%*\% beta) + drop(rnorm(n_obs) \%*\% Sig_chol)
+
+      # return the list in the format needed for the package
+      list(y = as.numeric(eta > 0), X = X, scale_mats = list(Cmat))
+    }, simplify = FALSE)
+
+  # add attributes with the true values and return
+  attributes(out) <- list(beta = beta, sig_sq = sig_sq)
+  out
+}
+
+# simulate the data
+set.seed(1)
+dat <- sim_dat(100L)
+
+# fit the model
+ptr <- pedigree_ll_terms(dat, max_threads = 1L)
+start <- pedmod_start(ptr = ptr, data = dat, n_threads = 1L)
+fit <- pedmod_opt(ptr = ptr, par = start$par, n_threads = 1L, use_aprx = TRUE,
+                  maxvls = 5000L, minvls = 1000L, abs_eps = 0, rel_eps = 1e-3)
+fit$par # the estimate
+
+# 90\% likelihood ratio based confidence interval for the log of the scale
+# parameter
+prof_out <- pedmod_profile(ptr = ptr, fit$par, delta = .4, maxvls = 5000L,
+                           minvls = 1000L, alpha = .1, which_prof = 4L,
+                           abs_eps = 0, rel_eps = 1e-3, verbose = TRUE)
+exp(prof_out$confs) # the confidence interval
+
+# plot the log profile likelihood
+plot(exp(prof_out$xs), prof_out$p_log_Lik, pch = 16,
+     xlab = expression(sigma), ylab = "log profile likelihood")
+abline(v = exp(prof_out$confs), lty = 2)
+}
+
 }
 \seealso{
 \code{\link{pedmod_opt}} and \code{\link{pedmod_sqn}}.

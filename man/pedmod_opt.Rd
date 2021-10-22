@@ -127,10 +127,73 @@ Optimizes \code{\link{eval_pedigree_ll}} and \code{\link{eval_pedigree_grad}}
 using a passed optimization function.
 }
 \details{
-\code{pedmod_start} yield starting values which can be used for
+\code{pedmod_start} yields starting values which can be used for
 \code{pedmod_opt}. The method is based on a heuristic where we make the
 assumption that the fixed effects are unrelated to the random effects.
 }
+\examples{
+\donttest{
+# we simulate outcomes with an additive genetic effect. The kinship matrix is
+# the same for all families and given by
+K <- matrix(c(
+  0.5  , 0    , 0.25 , 0   , 0.25 , 0   , 0.125 , 0.125 , 0.125 , 0.125 ,
+  0    , 0.5  , 0.25 , 0   , 0.25 , 0   , 0.125 , 0.125 , 0.125 , 0.125 ,
+  0.25 , 0.25 , 0.5  , 0   , 0.25 , 0   , 0.25  , 0.25  , 0.125 , 0.125 ,
+  0    , 0    , 0    , 0.5 , 0    , 0   , 0.25  , 0.25  , 0     , 0     ,
+  0.25 , 0.25 , 0.25 , 0   , 0.5  , 0   , 0.125 , 0.125 , 0.25  , 0.25  ,
+  0    , 0    , 0    , 0   , 0    , 0.5 , 0     , 0     , 0.25  , 0.25  ,
+  0.125, 0.125, 0.25 , 0.25, 0.125, 0   , 0.5   , 0.25  , 0.0625, 0.0625,
+  0.125, 0.125, 0.25 , 0.25, 0.125, 0   , 0.25  , 0.5   , 0.0625, 0.0625,
+  0.125, 0.125, 0.125, 0   , 0.25 , 0.25, 0.0625, 0.0625, 0.5   , 0.25  ,
+  0.125, 0.125, 0.125, 0   , 0.25 , 0.25, 0.0625, 0.0625, 0.25  , 0.5
+), 10)
+
+# simulates a data set.
+#
+# Args:
+#   n_fams: number of families.
+#   beta: the fixed effect coefficients.
+#   sig_sq: the scale parameter.
+sim_dat <- function(n_fams, beta = c(-1, 1, 2), sig_sq = 3){
+  # setup before the simulations
+  Cmat <- 2 * K
+  n_obs <- NROW(K)
+  Sig <- diag(n_obs) + sig_sq * Cmat
+  Sig_chol <- chol(Sig)
+
+  # simulate the data
+  out <- replicate(
+    n_fams, {
+      # simulate covariates
+      X <- cbind(`(Intercept)` = 1, Continuous = rnorm(n_obs),
+                 Binary = runif(n_obs) > .5)
+
+      # assign the linear predictor + noise
+      eta <- drop(X \%*\% beta) + drop(rnorm(n_obs) \%*\% Sig_chol)
+
+      # return the list in the format needed for the package
+      list(y = as.numeric(eta > 0), X = X, scale_mats = list(Cmat))
+    }, simplify = FALSE)
+
+  # add attributes with the true values and return
+  attributes(out) <- list(beta = beta, sig_sq = sig_sq)
+  out
+}
+
+# simulate the data
+set.seed(1)
+dat <- sim_dat(100L)
+
+# fit the model
+ptr <- pedigree_ll_terms(dat, max_threads = 1L)
+start <- pedmod_start(ptr = ptr, data = dat, n_threads = 1L)
+fit <- pedmod_opt(ptr = ptr, par = start$par, n_threads = 1L, use_aprx = TRUE,
+                  maxvls = 5000L, minvls = 1000L, abs_eps = 0, rel_eps = 1e-3)
+fit$par # the estimate
+-fit$value # the log maximum likelihood
+start$logLik_no_rng # the log maximum likelihood without the random effects
+}
+}
 \seealso{
-\code{\link{pedmod_sqn}} and \code{\link{pedmod_start}}.
+\code{\link{pedmod_sqn}}.
 }

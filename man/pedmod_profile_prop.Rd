@@ -2,7 +2,7 @@
 % Please edit documentation in R/opt.R
 \name{pedmod_profile_prop}
 \alias{pedmod_profile_prop}
-\title{Compute Profile Likelihood Based Confidence Intervals for the Proportion
+\title{Computes Profile Likelihood Based Confidence Intervals for the Proportion
 of Variance}
 \usage{
 pedmod_profile_prop(
@@ -97,13 +97,105 @@ is \code{NULL}.}
 A list like \code{\link{pedmod_profile}}.
 }
 \description{
-Compute Profile Likelihood Based Confidence Intervals for the Proportion
-of Variance
+Constructs a likelihood ratio based confidence intervals for the
+proportion of variance for one of the effects.
 }
 \details{
 The function is only useful when there is more than one type of random
 effect. If not, then \code{\link{pedmod_profile}} can be used because of
 the scale invariance of the likelihood ratio.
+}
+\examples{
+\donttest{
+# we simulate outcomes with an additive genetic effect and a childhood
+# environment effect. The kinship matrix is the same for all families and
+# given by
+K <- matrix(c(
+  0.5  , 0    , 0.25 , 0   , 0.25 , 0   , 0.125 , 0.125 , 0.125 , 0.125 ,
+  0    , 0.5  , 0.25 , 0   , 0.25 , 0   , 0.125 , 0.125 , 0.125 , 0.125 ,
+  0.25 , 0.25 , 0.5  , 0   , 0.25 , 0   , 0.25  , 0.25  , 0.125 , 0.125 ,
+  0    , 0    , 0    , 0.5 , 0    , 0   , 0.25  , 0.25  , 0     , 0     ,
+  0.25 , 0.25 , 0.25 , 0   , 0.5  , 0   , 0.125 , 0.125 , 0.25  , 0.25  ,
+  0    , 0    , 0    , 0   , 0    , 0.5 , 0     , 0     , 0.25  , 0.25  ,
+  0.125, 0.125, 0.25 , 0.25, 0.125, 0   , 0.5   , 0.25  , 0.0625, 0.0625,
+  0.125, 0.125, 0.25 , 0.25, 0.125, 0   , 0.25  , 0.5   , 0.0625, 0.0625,
+  0.125, 0.125, 0.125, 0   , 0.25 , 0.25, 0.0625, 0.0625, 0.5   , 0.25  ,
+  0.125, 0.125, 0.125, 0   , 0.25 , 0.25, 0.0625, 0.0625, 0.25  , 0.5
+), 10)
+
+# the scale matrix for the childhood environment effect is also the same and
+# given by
+C <- matrix(c(
+  1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 1, 0, 1, 0, 0, 0, 0, 0,
+  0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
+  0, 0, 1, 0, 1, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 1, 1, 0, 0,
+  0, 0, 0, 0, 0, 0, 1, 1, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 1, 1,
+  0, 0, 0, 0, 0, 0, 0, 0, 1, 1
+), 10L)
+
+# simulates a data set.
+#
+# Args:
+#   n_fams: number of families.
+#   beta: the fixed effect coefficients.
+#   sig_sq: the scale parameters.
+sim_dat <- function(n_fams, beta = c(-1, 1, 2), sig_sq = c(3, 1)){
+  # setup before the simulations
+  Cmat <- 2 * K
+  n_obs <- NROW(K)
+  Sig <- diag(n_obs) + sig_sq[1] * Cmat + sig_sq[2] * C
+  Sig_chol <- chol(Sig)
+
+  # simulate the data
+  out <- replicate(
+    n_fams, {
+      # simulate covariates
+      X <- cbind(`(Intercept)` = 1, Continuous = rnorm(n_obs),
+                 Binary = runif(n_obs) > .5)
+
+      # assign the linear predictor + noise
+      eta <- drop(X \%*\% beta) + drop(rnorm(n_obs) \%*\% Sig_chol)
+
+      # return the list in the format needed for the package
+      list(y = as.numeric(eta > 0), X = X,
+           scale_mats = list(genetic = Cmat, environment = C))
+    }, simplify = FALSE)
+
+  # add attributes with the true values and return
+  attributes(out) <- list(beta = beta, sig_sq = sig_sq)
+  out
+}
+
+# simulate the data
+set.seed(1)
+dat <- sim_dat(200L)
+
+# fit the model
+ptr <- pedigree_ll_terms(dat, max_threads = 1L)
+start <- pedmod_start(ptr = ptr, data = dat, n_threads = 1L)
+fit <- pedmod_opt(ptr = ptr, par = start$par, n_threads = 1L, use_aprx = TRUE,
+                  maxvls = 5000L, minvls = 1000L, abs_eps = 0, rel_eps = 1e-3)
+fit$par # the estimate
+
+# 90\% likelihood ratio based confidence interval for the proportion of variance
+# of the genetic effect
+prof_out <- pedmod_profile_prop(
+  ptr = ptr, fit$par, maxvls = 5000L, minvls = 1000L, alpha = .1,
+  which_prof = 1L, abs_eps = 0, rel_eps = 1e-3, verbose = TRUE)
+prof_out$confs # the confidence interval for the proportion
+
+# plot the log profile likelihood
+keep <- c(-1L, -length(prof_out$xs))
+plot(prof_out$xs[keep], prof_out$p_log_Lik[keep], pch = 16,
+     xlab = "proportion of variance", ylab = "log profile likelihood")
+abline(v = prof_out$confs, lty = 2)
+}
+
 }
 \seealso{
 \code{\link{pedmod_opt}}, \code{\link{pedmod_sqn}}, and

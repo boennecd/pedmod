@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{pedigree_ll_terms}
 \alias{pedigree_ll_terms}
-\title{Get C++ Object for Log Marginal Likelihood Approximations}
+\title{Get a C++ Object for Log Marginal Likelihood Approximations}
 \usage{
 pedigree_ll_terms(data, max_threads = 1L, n_sequences = 8L)
 }
@@ -79,6 +79,6 @@ dat_arg <- lapply(fam_dat, function(x){
 })
 
 # get a pointer to the C++ object
-ptr <- get_pedigree_ll_terms(dat_arg, max_threads = 1L)
+ptr <- pedigree_ll_terms(dat_arg, max_threads = 1L)
 
 }

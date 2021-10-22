@@ -47,10 +47,53 @@
 #' \code{\link{block_cut_tree}} and
 #' \code{\link{max_balanced_partition}}.
 #'
+#' @return
+#' A list with vectors of vertices in each biconnected component. An
+#' attribute called \code{"cut_verices"} contains the cut vertices in each
+#' biconnected component.
+#'
 #' @references
 #' Hopcroft, J., & Tarjan, R. (1973).
 #' \emph{Algorithm 447: efficient algorithms for graph manipulation}.
 #' Communications of the ACM, 16(6), 372-378.
+#'
+#' @examples
+#' # example of a data set in pedigree and graph form
+#' library(pedmod)
+#' dat_pedigree <- data.frame(
+#'   id = 1:48,
+#'   mom = c(
+#'     NA, NA, 2L, 2L, 2L, NA, NA, 7L, 7L, 7L, 3L, 3L, 3L, 3L, NA, 15L, 15L, 43L,
+#'     18L, NA, NA, 21L, 21L, 9L, 9L, 9L, 9L, NA, NA, 29L, 29L, 29L, 30L, 30L, NA,
+#'     NA, 36L, 36L, 36L, 38L, 38L, NA, NA, 43L, 43L, 43L, 32L, 32L),
+#'   dad = c(NA, NA, 1L, 1L, 1L, NA, NA, 6L, 6L, 6L, 8L, 8L, 8L, 8L, NA, 4L, 4L,
+#'           42L, 5L, NA, NA, 20L, 20L, 22L, 22L, 22L, 22L, NA, NA, 28L, 28L, 28L,
+#'           23L, 23L, NA, NA, 35L, 35L, 35L, 31L, 31L, NA, NA, 42L, 42L, 42L,
+#'           45L, 45L),
+#'   sex = c(1L, 2L, 2L, 1L, 1L, 1L, 2L, 1L, 2L, 2L, 2L, 1L, 1L, 1L, 2L, 2L, 2L,
+#'           2L, 1L, 1L, 2L, 1L, 1L, 2L, 1L, 1L, 2L, 1L, 2L, 2L, 1L, 2L, 2L, 2L,
+#'           1L, 2L, 1L, 2L, 1L, 2L, 1L, 1L, 2L, 2L, 1L, 1L, 2L, 2L))
+#'
+#' dat <- list(
+#'   to = c(
+#'     3L, 4L, 5L, 8L, 9L, 10L, 11L, 12L, 13L, 14L, 16L, 17L, 18L, 19L, 22L, 23L,
+#'     24L, 25L, 26L, 27L, 30L, 31L, 32L, 33L, 34L, 37L, 38L, 39L, 40L, 41L, 44L,
+#'     45L, 46L, 47L, 48L, 3L, 4L, 5L, 8L, 9L, 10L, 11L, 12L, 13L, 14L, 16L, 17L,
+#'     18L, 19L, 22L, 23L, 24L, 25L, 26L, 27L, 30L, 31L, 32L, 33L, 34L, 37L, 38L,
+#'     39L, 40L, 41L, 44L, 45L, 46L, 47L, 48L),
+#'   from = c(
+#'     1L, 1L, 1L, 6L, 6L, 6L, 8L, 8L, 8L, 8L, 4L, 4L, 42L, 5L, 20L, 20L, 22L, 22L,
+#'     22L, 22L, 28L, 28L, 28L, 23L, 23L, 35L, 35L, 35L, 31L, 31L, 42L, 42L, 42L,
+#'     45L, 45L, 2L, 2L, 2L, 7L, 7L, 7L, 3L, 3L, 3L, 3L, 15L, 15L, 43L, 18L, 21L,
+#'     21L, 9L, 9L, 9L, 9L, 29L, 29L, 29L, 30L, 30L, 36L, 36L, 36L, 38L, 38L, 43L,
+#'     43L, 43L, 32L, 32L))
+#'
+#' # they give the same
+#' out_pedigree <- biconnected_components_pedigree(
+#'   id = dat_pedigree$id, father.id = dat_pedigree$dad,
+#'   mother.id = dat_pedigree$mom)
+#' out <- biconnected_components(dat$to, dat$from)
+#' all.equal(out_pedigree, out)
 #'
 #' @export
 biconnected_components <- function(from, to){
@@ -130,6 +173,49 @@ biconnected_components_pedigree <- function(id, father.id, mother.id){
 #' Hopcroft, J., & Tarjan, R. (1973).
 #' \emph{Algorithm 447: efficient algorithms for graph manipulation}.
 #' Communications of the ACM, 16(6), 372-378.
+#'
+#' @return
+#' A tree structure where each node is represented as list that
+#' contains the vertices in the biconnected component, the cut_vertices,
+#' and the node's leafs.
+#'
+#' @examples
+#' # example of a data set in pedigree and graph form
+#' library(pedmod)
+#' dat_pedigree <- data.frame(
+#'   id = 1:48,
+#'   mom = c(
+#'     NA, NA, 2L, 2L, 2L, NA, NA, 7L, 7L, 7L, 3L, 3L, 3L, 3L, NA, 15L, 15L, 43L,
+#'     18L, NA, NA, 21L, 21L, 9L, 9L, 9L, 9L, NA, NA, 29L, 29L, 29L, 30L, 30L, NA,
+#'     NA, 36L, 36L, 36L, 38L, 38L, NA, NA, 43L, 43L, 43L, 32L, 32L),
+#'   dad = c(NA, NA, 1L, 1L, 1L, NA, NA, 6L, 6L, 6L, 8L, 8L, 8L, 8L, NA, 4L, 4L,
+#'           42L, 5L, NA, NA, 20L, 20L, 22L, 22L, 22L, 22L, NA, NA, 28L, 28L, 28L,
+#'           23L, 23L, NA, NA, 35L, 35L, 35L, 31L, 31L, NA, NA, 42L, 42L, 42L,
+#'           45L, 45L),
+#'   sex = c(1L, 2L, 2L, 1L, 1L, 1L, 2L, 1L, 2L, 2L, 2L, 1L, 1L, 1L, 2L, 2L, 2L,
+#'           2L, 1L, 1L, 2L, 1L, 1L, 2L, 1L, 1L, 2L, 1L, 2L, 2L, 1L, 2L, 2L, 2L,
+#'           1L, 2L, 1L, 2L, 1L, 2L, 1L, 1L, 2L, 2L, 1L, 1L, 2L, 2L))
+#'
+#' dat <- list(
+#'   to = c(
+#'     3L, 4L, 5L, 8L, 9L, 10L, 11L, 12L, 13L, 14L, 16L, 17L, 18L, 19L, 22L, 23L,
+#'     24L, 25L, 26L, 27L, 30L, 31L, 32L, 33L, 34L, 37L, 38L, 39L, 40L, 41L, 44L,
+#'     45L, 46L, 47L, 48L, 3L, 4L, 5L, 8L, 9L, 10L, 11L, 12L, 13L, 14L, 16L, 17L,
+#'     18L, 19L, 22L, 23L, 24L, 25L, 26L, 27L, 30L, 31L, 32L, 33L, 34L, 37L, 38L,
+#'     39L, 40L, 41L, 44L, 45L, 46L, 47L, 48L),
+#'   from = c(
+#'     1L, 1L, 1L, 6L, 6L, 6L, 8L, 8L, 8L, 8L, 4L, 4L, 42L, 5L, 20L, 20L, 22L, 22L,
+#'     22L, 22L, 28L, 28L, 28L, 23L, 23L, 35L, 35L, 35L, 31L, 31L, 42L, 42L, 42L,
+#'     45L, 45L, 2L, 2L, 2L, 7L, 7L, 7L, 3L, 3L, 3L, 3L, 15L, 15L, 43L, 18L, 21L,
+#'     21L, 9L, 9L, 9L, 9L, 29L, 29L, 29L, 30L, 30L, 36L, 36L, 36L, 38L, 38L, 43L,
+#'     43L, 43L, 32L, 32L))
+#'
+#' # they give the same
+#' out_pedigree <- block_cut_tree_pedigree(
+#'   id = dat_pedigree$id, father.id = dat_pedigree$dad,
+#'   mother.id = dat_pedigree$mom)
+#' out <- block_cut_tree(dat$to, dat$from)
+#' all.equal(out_pedigree, out)
 #'
 #' @export
 block_cut_tree <- function(from, to){
@@ -223,6 +309,46 @@ block_cut_tree_pedigree <- function(id, father.id, mother.id){
 #'  \item{removed_edges}{2D integer matrix with the removed edges.}
 #'  \item{set_1,set_2}{The two sets in the partition.}
 #'
+#' @examples
+#' # example of a data set in pedigree and graph form
+#' library(pedmod)
+#' dat_pedigree <- data.frame(
+#'   id = 1:48,
+#'   mom = c(
+#'     NA, NA, 2L, 2L, 2L, NA, NA, 7L, 7L, 7L, 3L, 3L, 3L, 3L, NA, 15L, 15L, 43L,
+#'     18L, NA, NA, 21L, 21L, 9L, 9L, 9L, 9L, NA, NA, 29L, 29L, 29L, 30L, 30L, NA,
+#'     NA, 36L, 36L, 36L, 38L, 38L, NA, NA, 43L, 43L, 43L, 32L, 32L),
+#'   dad = c(NA, NA, 1L, 1L, 1L, NA, NA, 6L, 6L, 6L, 8L, 8L, 8L, 8L, NA, 4L, 4L,
+#'           42L, 5L, NA, NA, 20L, 20L, 22L, 22L, 22L, 22L, NA, NA, 28L, 28L, 28L,
+#'           23L, 23L, NA, NA, 35L, 35L, 35L, 31L, 31L, NA, NA, 42L, 42L, 42L,
+#'           45L, 45L),
+#'   sex = c(1L, 2L, 2L, 1L, 1L, 1L, 2L, 1L, 2L, 2L, 2L, 1L, 1L, 1L, 2L, 2L, 2L,
+#'           2L, 1L, 1L, 2L, 1L, 1L, 2L, 1L, 1L, 2L, 1L, 2L, 2L, 1L, 2L, 2L, 2L,
+#'           1L, 2L, 1L, 2L, 1L, 2L, 1L, 1L, 2L, 2L, 1L, 1L, 2L, 2L))
+#'
+#' dat <- list(
+#'   to = c(
+#'     3L, 4L, 5L, 8L, 9L, 10L, 11L, 12L, 13L, 14L, 16L, 17L, 18L, 19L, 22L, 23L,
+#'     24L, 25L, 26L, 27L, 30L, 31L, 32L, 33L, 34L, 37L, 38L, 39L, 40L, 41L, 44L,
+#'     45L, 46L, 47L, 48L, 3L, 4L, 5L, 8L, 9L, 10L, 11L, 12L, 13L, 14L, 16L, 17L,
+#'     18L, 19L, 22L, 23L, 24L, 25L, 26L, 27L, 30L, 31L, 32L, 33L, 34L, 37L, 38L,
+#'     39L, 40L, 41L, 44L, 45L, 46L, 47L, 48L),
+#'   from = c(
+#'     1L, 1L, 1L, 6L, 6L, 6L, 8L, 8L, 8L, 8L, 4L, 4L, 42L, 5L, 20L, 20L, 22L, 22L,
+#'     22L, 22L, 28L, 28L, 28L, 23L, 23L, 35L, 35L, 35L, 31L, 31L, 42L, 42L, 42L,
+#'     45L, 45L, 2L, 2L, 2L, 7L, 7L, 7L, 3L, 3L, 3L, 3L, 15L, 15L, 43L, 18L, 21L,
+#'     21L, 9L, 9L, 9L, 9L, 29L, 29L, 29L, 30L, 30L, 36L, 36L, 36L, 38L, 38L, 43L,
+#'     43L, 43L, 32L, 32L))
+#'
+#' # the results may be different because of different orders!
+#' out_pedigree <- max_balanced_partition_pedigree(
+#'   id = dat_pedigree$id, father.id = dat_pedigree$dad,
+#'   mother.id = dat_pedigree$mom)
+#' out <- max_balanced_partition(dat$to, dat$from)
+#'
+#' all.equal(out_pedigree$balance_criterion, out$balance_criterion)
+#' all.equal(out_pedigree$removed_edges, out$removed_edges)
+#'
 #' @export
 max_balanced_partition <- function(from, to, weight_data = NULL,
                                    edge_weights = NULL,
@@ -282,6 +408,46 @@ max_balanced_partition_pedigree <- function(
 #'
 #' @seealso
 #' \code{\link{max_balanced_partition}}.
+#'
+#' @examples
+#' # example of a data set in pedigree and graph form
+#' library(pedmod)
+#' dat_pedigree <- data.frame(
+#'   id = 1:48,
+#'   mom = c(
+#'     NA, NA, 2L, 2L, 2L, NA, NA, 7L, 7L, 7L, 3L, 3L, 3L, 3L, NA, 15L, 15L, 43L,
+#'     18L, NA, NA, 21L, 21L, 9L, 9L, 9L, 9L, NA, NA, 29L, 29L, 29L, 30L, 30L, NA,
+#'     NA, 36L, 36L, 36L, 38L, 38L, NA, NA, 43L, 43L, 43L, 32L, 32L),
+#'   dad = c(NA, NA, 1L, 1L, 1L, NA, NA, 6L, 6L, 6L, 8L, 8L, 8L, 8L, NA, 4L, 4L,
+#'           42L, 5L, NA, NA, 20L, 20L, 22L, 22L, 22L, 22L, NA, NA, 28L, 28L, 28L,
+#'           23L, 23L, NA, NA, 35L, 35L, 35L, 31L, 31L, NA, NA, 42L, 42L, 42L,
+#'           45L, 45L),
+#'   sex = c(1L, 2L, 2L, 1L, 1L, 1L, 2L, 1L, 2L, 2L, 2L, 1L, 1L, 1L, 2L, 2L, 2L,
+#'           2L, 1L, 1L, 2L, 1L, 1L, 2L, 1L, 1L, 2L, 1L, 2L, 2L, 1L, 2L, 2L, 2L,
+#'           1L, 2L, 1L, 2L, 1L, 2L, 1L, 1L, 2L, 2L, 1L, 1L, 2L, 2L))
+#'
+#' dat <- list(
+#'   to = c(
+#'     3L, 4L, 5L, 8L, 9L, 10L, 11L, 12L, 13L, 14L, 16L, 17L, 18L, 19L, 22L, 23L,
+#'     24L, 25L, 26L, 27L, 30L, 31L, 32L, 33L, 34L, 37L, 38L, 39L, 40L, 41L, 44L,
+#'     45L, 46L, 47L, 48L, 3L, 4L, 5L, 8L, 9L, 10L, 11L, 12L, 13L, 14L, 16L, 17L,
+#'     18L, 19L, 22L, 23L, 24L, 25L, 26L, 27L, 30L, 31L, 32L, 33L, 34L, 37L, 38L,
+#'     39L, 40L, 41L, 44L, 45L, 46L, 47L, 48L),
+#'   from = c(
+#'     1L, 1L, 1L, 6L, 6L, 6L, 8L, 8L, 8L, 8L, 4L, 4L, 42L, 5L, 20L, 20L, 22L, 22L,
+#'     22L, 22L, 28L, 28L, 28L, 23L, 23L, 35L, 35L, 35L, 31L, 31L, 42L, 42L, 42L,
+#'     45L, 45L, 2L, 2L, 2L, 7L, 7L, 7L, 3L, 3L, 3L, 3L, 15L, 15L, 43L, 18L, 21L,
+#'     21L, 9L, 9L, 9L, 9L, 29L, 29L, 29L, 30L, 30L, 36L, 36L, 36L, 38L, 38L, 43L,
+#'     43L, 43L, 32L, 32L))
+#'
+#' # the results may be different because of different orders!
+#' out_pedigree <- unconnected_partition_pedigree(
+#'   id = dat_pedigree$id, father.id = dat_pedigree$dad,
+#'   mother.id = dat_pedigree$mom)
+#' out <- unconnected_partition(dat$to, dat$from)
+#'
+#' all.equal(out_pedigree$balance_criterion, out$balance_criterion)
+#' all.equal(out_pedigree$removed_edges, out$removed_edges)
 #'
 #' @export
 unconnected_partition <- function(from, to, weight_data = NULL,

@@ -110,6 +110,14 @@ lattice rules while one yields scrambled Sobol sequences.}
 that the likelihood did increase. If not, the iterations are reset and the
 step-size is halved.}
 }
+\value{
+A list with the following elements:
+
+\item{par}{estiamted parameters.}
+\item{omegas}{parameter estimates after each iteration.}
+\item{H}{Hessian approximation in the quasi-Newton method. It should not
+be treated as the Hessian.}
+}
 \description{
 Optimizes \code{\link{eval_pedigree_ll}} and \code{\link{eval_pedigree_grad}}
 using a stochastic quasi-Newton method.
@@ -125,6 +133,72 @@ Separate arguments for the gradient approximation in the Hessian update are
 provided as one may want a more precise approximation for these gradients.
 \code{step_factor} likely depends on the other parameters and the data set
 and should be altered.
+}
+\examples{
+\donttest{
+# we simulate outcomes with an additive genetic effect. The kinship matrix is
+# the same for all families and given by
+K <- matrix(c(
+  0.5  , 0    , 0.25 , 0   , 0.25 , 0   , 0.125 , 0.125 , 0.125 , 0.125 ,
+  0    , 0.5  , 0.25 , 0   , 0.25 , 0   , 0.125 , 0.125 , 0.125 , 0.125 ,
+  0.25 , 0.25 , 0.5  , 0   , 0.25 , 0   , 0.25  , 0.25  , 0.125 , 0.125 ,
+  0    , 0    , 0    , 0.5 , 0    , 0   , 0.25  , 0.25  , 0     , 0     ,
+  0.25 , 0.25 , 0.25 , 0   , 0.5  , 0   , 0.125 , 0.125 , 0.25  , 0.25  ,
+  0    , 0    , 0    , 0   , 0    , 0.5 , 0     , 0     , 0.25  , 0.25  ,
+  0.125, 0.125, 0.25 , 0.25, 0.125, 0   , 0.5   , 0.25  , 0.0625, 0.0625,
+  0.125, 0.125, 0.25 , 0.25, 0.125, 0   , 0.25  , 0.5   , 0.0625, 0.0625,
+  0.125, 0.125, 0.125, 0   , 0.25 , 0.25, 0.0625, 0.0625, 0.5   , 0.25  ,
+  0.125, 0.125, 0.125, 0   , 0.25 , 0.25, 0.0625, 0.0625, 0.25  , 0.5
+), 10)
+
+# simulates a data set.
+#
+# Args:
+#   n_fams: number of families.
+#   beta: the fixed effect coefficients.
+#   sig_sq: the scale parameter.
+sim_dat <- function(n_fams, beta = c(-1, 1, 2), sig_sq = 3){
+  # setup before the simulations
+  Cmat <- 2 * K
+  n_obs <- NROW(K)
+  Sig <- diag(n_obs) + sig_sq * Cmat
+  Sig_chol <- chol(Sig)
+
+  # simulate the data
+  out <- replicate(
+    n_fams, {
+      # simulate covariates
+      X <- cbind(`(Intercept)` = 1, Continuous = rnorm(n_obs),
+                 Binary = runif(n_obs) > .5)
+
+      # assign the linear predictor + noise
+      eta <- drop(X \%*\% beta) + drop(rnorm(n_obs) \%*\% Sig_chol)
+
+      # return the list in the format needed for the package
+      list(y = as.numeric(eta > 0), X = X, scale_mats = list(Cmat))
+    }, simplify = FALSE)
+
+  # add attributes with the true values and return
+  attributes(out) <- list(beta = beta, sig_sq = sig_sq)
+  out
+}
+
+# simulate the data
+set.seed(1)
+dat <- sim_dat(100L)
+
+# fit the model
+ptr <- pedigree_ll_terms(dat, max_threads = 1L)
+start <- pedmod_start(ptr = ptr, data = dat, n_threads = 1L)
+fit <- pedmod_sqn(ptr = ptr, par = start$par, n_threads = 1L, use_aprx = TRUE,
+                  maxvls = 5000L, minvls = 1000L, abs_eps = 0, rel_eps = 1e-3,
+                  n_grad_steps = 20L, step_factor = 1, n_grad = 10L,
+                  n_hess = 50L, check_every = 50L, n_it = 1000L)
+fit$par # maximum likelihood estimate
+# the maximum likelihood
+eval_pedigree_ll(ptr = ptr, fit$par, maxvls = 5000L, abs_eps = 0,
+                 rel_eps = 1e-3, minvls = 1000L)
+}
 }
 \references{
 Byrd, R. H., Hansen, S. L., Nocedal, J., & Singer, Y. (2016).

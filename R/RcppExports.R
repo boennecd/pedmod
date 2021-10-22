@@ -78,7 +78,7 @@ mvndst <- function(lower, upper, mu, sigma, maxvls = 25000L, abs_eps = .001, rel
     .Call(`_pedmod_mvndst`, lower, upper, mu, sigma, maxvls, abs_eps, rel_eps, minvls, do_reorder, use_aprx, method, n_sequences)
 }
 
-#' Get C++ Object for Log Marginal Likelihood Approximations
+#' Get a C++ Object for Log Marginal Likelihood Approximations
 #'
 #' @description
 #' Constructs an object needed for \code{\link{eval_pedigree_ll}} and
@@ -150,7 +150,7 @@ mvndst <- function(lower, upper, mu, sigma, maxvls = 25000L, abs_eps = .001, rel
 #' })
 #'
 #' # get a pointer to the C++ object
-#' ptr <- get_pedigree_ll_terms(dat_arg, max_threads = 1L)
+#' ptr <- pedigree_ll_terms(dat_arg, max_threads = 1L)
 #'
 #' @export
 pedigree_ll_terms <- function(data, max_threads = 1L, n_sequences = 8L) {

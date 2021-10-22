@@ -172,7 +172,7 @@ inline unsigned eval_get_n_threads(unsigned const n_threads,
 }
 } // namespace
 
-//' Get C++ Object for Log Marginal Likelihood Approximations
+//' Get a C++ Object for Log Marginal Likelihood Approximations
 //'
 //' @description
 //' Constructs an object needed for \code{\link{eval_pedigree_ll}} and
@@ -244,7 +244,7 @@ inline unsigned eval_get_n_threads(unsigned const n_threads,
 //' })
 //'
 //' # get a pointer to the C++ object
-//' ptr <- get_pedigree_ll_terms(dat_arg, max_threads = 1L)
+//' ptr <- pedigree_ll_terms(dat_arg, max_threads = 1L)
 //'
 //' @export
 // [[Rcpp::export]]

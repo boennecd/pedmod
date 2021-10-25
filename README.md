@@ -66,7 +66,8 @@ where
 is the
 ![n\_i](https://render.githubusercontent.com/render/math?math=n_i "n_i")
 dimensional identity matrix which comes from the unshared/individual
-specific random effect. This effect is always included.
+specific random effect. This effect is always included. The models are
+commonly known as liability threshold models or mixed probit models.
 
 The
 ![C\_{il}](https://render.githubusercontent.com/render/math?math=C_%7Bil%7D "C_{il}")s
@@ -130,7 +131,7 @@ effect (assuming all
 ![C\_{il}](https://render.githubusercontent.com/render/math?math=C_%7Bil%7D "C_{il}")
 matrices are correlation matrices). Moreover,
 ![\\phi](https://render.githubusercontent.com/render/math?math=%5Cphi "\phi")
-is the proportion of variance attributable the individual specific
+is the proportion of variance attributable to the individual specific
 effect.
 
 The parameterizations used in the package are
@@ -212,7 +213,7 @@ remotes::install_github("boennecd/pedmod", build_vignettes = TRUE)
 ```
 
 The code benefits from being build with automatic vectorization so
-having e.g.  `-O3` in the `CXX11FLAGS` flags in your Makevars file may
+having e.g.  `-O3` in the `CXX14FLAGS` flags in your Makevars file may
 be useful.
 
 ## Example
@@ -236,7 +237,7 @@ plot(ped)
 <img src="man/figures/README-setup_simple-1.png" width="100%" />
 
 We set the scale matrix to be two times the kinship matrix to model the
-direct genetic effect. Each individual also have a standard normally
+direct genetic effect. Each individual also has a standard normally
 distributed covariate and a binary covariate. Thus, we can simulate a
 data set with a function like:
 
@@ -943,7 +944,7 @@ matlines(n_samp, t(res["sd", , "Sobol", ]), col = "darkgray", lty = 3)
 
 <img src="man/figures/README-show_res_rqmc-1.png" width="100%" />
 
-The above seems to suggest that the randomized Korobov rules a
+The above seems to suggest that the randomized Korobov rules are
 preferable and that both method achieve close to a
 ![O(n^{-1 + \\epsilon})](https://render.githubusercontent.com/render/math?math=O%28n%5E%7B-1%20%2B%20%5Cepsilon%7D%29 "O(n^{-1 + \epsilon})")
 rate for some small
@@ -1797,9 +1798,9 @@ for more effects,
 ![K &gt; 1](https://render.githubusercontent.com/render/math?math=K%20%3E%201 "K > 1").
 To see this, notice that proportion of variance is given by
 
-![h\_i = \\left(1 + \\sum\_{k = 1}^K\\sigma\_k^2\\right)\\sigma\_i^2\\Leftrightarrow 
+![h\_i = \\left(1 + \\sum\_{k = 1}^K\\sigma\_k^2\\right)^{-1}\\sigma\_i^2\\Leftrightarrow 
   \\sigma\_i^2 = 
-    \\frac{h\_i}{1 - h\_i}\\left(1 + \\sum\_{k \\in \\{1,\\dots,K\\}\\setminus\\{i\\}}\\sigma\_k^2\\right)](https://render.githubusercontent.com/render/math?math=h_i%20%3D%20%5Cleft%281%20%2B%20%5Csum_%7Bk%20%3D%201%7D%5EK%5Csigma_k%5E2%5Cright%29%5Csigma_i%5E2%5CLeftrightarrow%20%0A%20%20%5Csigma_i%5E2%20%3D%20%0A%20%20%20%20%5Cfrac%7Bh_i%7D%7B1%20-%20h_i%7D%5Cleft%281%20%2B%20%5Csum_%7Bk%20%5Cin%20%5C%7B1%2C%5Cdots%2CK%5C%7D%5Csetminus%5C%7Bi%5C%7D%7D%5Csigma_k%5E2%5Cright%29 "h_i = \left(1 + \sum_{k = 1}^K\sigma_k^2\right)\sigma_i^2\Leftrightarrow 
+    \\frac{h\_i}{1 - h\_i}\\left(1 + \\sum\_{k \\in \\{1,\\dots,K\\}\\setminus\\{i\\}}\\sigma\_k^2\\right)](https://render.githubusercontent.com/render/math?math=h_i%20%3D%20%5Cleft%281%20%2B%20%5Csum_%7Bk%20%3D%201%7D%5EK%5Csigma_k%5E2%5Cright%29%5E%7B-1%7D%5Csigma_i%5E2%5CLeftrightarrow%20%0A%20%20%5Csigma_i%5E2%20%3D%20%0A%20%20%20%20%5Cfrac%7Bh_i%7D%7B1%20-%20h_i%7D%5Cleft%281%20%2B%20%5Csum_%7Bk%20%5Cin%20%5C%7B1%2C%5Cdots%2CK%5C%7D%5Csetminus%5C%7Bi%5C%7D%7D%5Csigma_k%5E2%5Cright%29 "h_i = \left(1 + \sum_{k = 1}^K\sigma_k^2\right)^{-1}\sigma_i^2\Leftrightarrow 
   \sigma_i^2 = 
     \frac{h_i}{1 - h_i}\left(1 + \sum_{k \in \{1,\dots,K\}\setminus\{i\}}\sigma_k^2\right)")
 
@@ -2225,19 +2226,22 @@ rev_img(fam1$rel_mat, xaxt = "n", yaxt = "n", col = cl,
 
 ``` r
 # the first part of the matrix is given below
-with(fam1, rel_mat[seq_len(min(10, NROW(rel_mat))), 
-                   seq_len(min(10, NROW(rel_mat)))])
-#>        9    10    15    16    17    21    22    28    29    36
-#> 9  1.000 0.500 0.125 0.125 0.125 0.000 0.000 0.125 0.125 0.000
-#> 10 0.500 1.000 0.125 0.125 0.125 0.000 0.000 0.125 0.125 0.000
-#> 15 0.125 0.125 1.000 0.500 0.500 0.125 0.125 0.000 0.000 0.000
-#> 16 0.125 0.125 0.500 1.000 0.500 0.125 0.125 0.000 0.000 0.000
-#> 17 0.125 0.125 0.500 0.500 1.000 0.125 0.125 0.000 0.000 0.000
-#> 21 0.000 0.000 0.125 0.125 0.125 1.000 0.500 0.000 0.000 0.000
-#> 22 0.000 0.000 0.125 0.125 0.125 0.500 1.000 0.000 0.000 0.000
-#> 28 0.125 0.125 0.000 0.000 0.000 0.000 0.000 1.000 0.500 0.125
-#> 29 0.125 0.125 0.000 0.000 0.000 0.000 0.000 0.500 1.000 0.125
-#> 36 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.125 0.125 1.000
+with(fam1, 
+     Matrix::Matrix(rel_mat[seq_len(min(10, NROW(rel_mat))), 
+                            seq_len(min(10, NROW(rel_mat)))],
+                    sparse = TRUE))
+#> 10 x 10 sparse Matrix of class "dsCMatrix"
+#>                                                               
+#> 9  1.000 0.500 0.125 0.125 0.125 .     .     0.125 0.125 .    
+#> 10 0.500 1.000 0.125 0.125 0.125 .     .     0.125 0.125 .    
+#> 15 0.125 0.125 1.000 0.500 0.500 0.125 0.125 .     .     .    
+#> 16 0.125 0.125 0.500 1.000 0.500 0.125 0.125 .     .     .    
+#> 17 0.125 0.125 0.500 0.500 1.000 0.125 0.125 .     .     .    
+#> 21 .     .     0.125 0.125 0.125 1.000 0.500 .     .     .    
+#> 22 .     .     0.125 0.125 0.125 0.500 1.000 .     .     .    
+#> 28 0.125 0.125 .     .     .     .     .     1.000 0.500 0.125
+#> 29 0.125 0.125 .     .     .     .     .     0.500 1.000 0.125
+#> 36 .     .     .     .     .     .     .     0.125 0.125 1.000
 
 # here is the C matrix for the maternal effect
 rev_img(fam1$met_mat, xaxt = "n", yaxt = "n", col = cl, 
@@ -2247,6 +2251,24 @@ rev_img(fam1$met_mat, xaxt = "n", yaxt = "n", col = cl,
 <img src="man/figures/README-one_family-3.png" width="100%" />
 
 ``` r
+# the first part of the matrix is given below
+with(fam1, 
+     Matrix::Matrix(met_mat[seq_len(min(10, NROW(met_mat))), 
+                            seq_len(min(10, NROW(met_mat)))],
+                    sparse = TRUE))
+#> 10 x 10 sparse Matrix of class "dsCMatrix"
+#>                             
+#> 9  1 1 . . . . . .   .   .  
+#> 10 1 1 . . . . . .   .   .  
+#> 15 . . 1 1 1 . . .   .   .  
+#> 16 . . 1 1 1 . . .   .   .  
+#> 17 . . 1 1 1 . . .   .   .  
+#> 21 . . . . . 1 1 .   .   .  
+#> 22 . . . . . 1 1 .   .   .  
+#> 28 . . . . . . . 1.0 1.0 0.5
+#> 29 . . . . . . . 1.0 1.0 0.5
+#> 36 . . . . . . . 0.5 0.5 1.0
+
 # each simulated family has such two matrices in addition to a design matrix
 # for the fixed effects, X, and a vector with outcomes, y
 str(fam1[c("X", "y")])

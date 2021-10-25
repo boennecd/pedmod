@@ -15,9 +15,10 @@
 *	Original source available from
 *	http://www.math.wsu.edu/faculty/genz/software/fort77/mvtdstpack.f
 *
-      SUBROUTINE MVSORT( N, LOWER, UPPER, DELTA, CORREL, INFIN, Y,PIVOT,
+      SUBROUTINE MVSORT( N, LOWER, UPPER, DELTA, CORREL, INFIN, Y,
+     &                  PIVOTIN,
      &                  ND,     A,     B,    DL,    COV,  INFI, INFORM,
-     &                  IDX, DOSCALE  )
+     &                  IDX, DOSCALEIN  )
 *
 *     Subroutine to sort integration limits and determine Cholesky factor.
 *
@@ -25,7 +26,7 @@
 *     original indices. The DOSCALE argument is added to determine whether
 *     to scale the composition to have ones in the diagonal.
 *
-      INTEGER N, ND, INFIN(*), INFI(*), INFORM
+      INTEGER N, ND, INFIN(*), INFI(*), INFORM, PIVOTIN, DOSCALEIN
       LOGICAL PIVOT, DOSCALE
       DOUBLE PRECISION     A(*),     B(*),    DL(*),    COV(*),
      &                 LOWER(*), UPPER(*), DELTA(*), CORREL(*), Y(*)
@@ -33,6 +34,8 @@
       DOUBLE PRECISION SUMSQ, AJ, BJ, SUM, EPS, EPSI, D, E
       DOUBLE PRECISION CVDIAG, AMIN, BMIN, DEMIN, MVTDNS
       PARAMETER ( EPS = 1D-10 )
+      PIVOT = PIVOTIN .NE. 0
+      DOSCALE = DOSCALEIN .NE. 0
       INFORM = 0
       IJ = 0
       II = 0

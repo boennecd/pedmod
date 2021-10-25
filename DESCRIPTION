@@ -21,11 +21,13 @@ Authors@R: c(
   person("R-core", email = "R-core@R-project.org",
          role = "cph"))
 Maintainer: Benjamin Christoffersen <boennecd@gmail.com>
-Description: Provides functions to estimate models for mixed models using, for 
-    instance, pedigree data like in <doi:10.1002/sim.1603>. The approximation is 
+Description: Provides functions to estimate mixed probit models using, for 
+    instance, pedigree data like in <doi:10.1002/sim.1603>. The models are also 
+    commonly called liability threshold models. The approximation is 
     based on direct log marginal likelihood approximations like the randomized 
     Quasi-Monte Carlo suggested by <doi:10.1198/106186002394> with a similar 
-    procedure to approximate the derivatives. 
+    procedure to approximate the derivatives. Graph-based methods are also 
+    provided that can be used to simplify pedigrees.
 License: GPL-2
 Encoding: UTF-8
 LazyData: true

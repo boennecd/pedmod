@@ -52,6 +52,8 @@ Y_{ij} \mid \epsilon_{ij} = e
 
 where $I_{n_i}$ is the $n_i$ dimensional identity matrix which comes from the 
 unshared/individual specific random effect. This effect is always included. 
+The models are commonly known as liability threshold models or mixed probit 
+models.
 
 The $C_{il}$s are known scale/correlation matrices where each of the $l$'th 
 types correspond to a type of effect. An arbitrary number of such matrices can 
@@ -89,7 +91,7 @@ $$\frac{\sigma_l^2}{1 + \sum_{k = 1}^K\sigma_k^2} = \phi\sigma_l^2$$
 
 is the proportion of variance attributable to the $l$'th effect (assuming all 
 $C_{il}$ matrices are correlation matrices). Moreover, $\phi$ is the proportion 
-of variance attributable the individual specific effect. 
+of variance attributable to the individual specific effect. 
 
 The parameterizations used in the package are $\phi = 1$
 which we call the direct parameterizations and 
@@ -153,7 +155,7 @@ remotes::install_github("boennecd/pedmod", build_vignettes = TRUE)
 ```
 
 The code benefits from being build with automatic vectorization so having e.g. 
-`-O3` in the `CXX11FLAGS` flags in your Makevars file may be useful.
+`-O3` in the `CXX14FLAGS` flags in your Makevars file may be useful.
 
 ## Example
 
@@ -174,7 +176,7 @@ plot(ped)
 ```
 
 We set the scale matrix to be two times the kinship matrix to model the direct
-genetic effect. Each individual also have a standard normally distributed 
+genetic effect. Each individual also has a standard normally distributed 
 covariate and a binary covariate. Thus, we can simulate a data set with a 
 function like:
 
@@ -658,7 +660,7 @@ matplot(n_samp, t(res["sd", , "Sobol", ]), type = "p", pch = 15:18,
 matlines(n_samp, t(res["sd", , "Sobol", ]), col = "darkgray", lty = 3)
 ```
 
-The above seems to suggest that the randomized Korobov rules a preferable and 
+The above seems to suggest that the randomized Korobov rules are preferable and 
 that both method achieve close to a
 $O(n^{-1 + \epsilon})$ rate for some small $\epsilon$. Notice that we have to 
 set `minvls` equal to `maxvls` to achieve the $O(n^{-1 + \epsilon})$ rate with 
@@ -1277,7 +1279,7 @@ use the scale invariance of the likelihood ratio. However, this is not true for
 more effects, $K > 1$. To see this, notice that proportion of variance is given 
 by
 
-$$h_i = \left(1 + \sum_{k = 1}^K\sigma_k^2\right)\sigma_i^2\Leftrightarrow 
+$$h_i = \left(1 + \sum_{k = 1}^K\sigma_k^2\right)^{-1}\sigma_i^2\Leftrightarrow 
   \sigma_i^2 = 
     \frac{h_i}{1 - h_i}\left(1 + \sum_{k \in \{1,\dots,K\}\setminus\{i\}}\sigma_k^2\right)$$
 
@@ -1559,12 +1561,20 @@ par(mar = c(2, 2, 1, 1))
 rev_img(fam1$rel_mat, xaxt = "n", yaxt = "n", col = cl, 
         zlim = c(-1, 1))
 # the first part of the matrix is given below
-with(fam1, rel_mat[seq_len(min(10, NROW(rel_mat))), 
-                   seq_len(min(10, NROW(rel_mat)))])
+with(fam1, 
+     Matrix::Matrix(rel_mat[seq_len(min(10, NROW(rel_mat))), 
+                            seq_len(min(10, NROW(rel_mat)))],
+                    sparse = TRUE))
 
 # here is the C matrix for the maternal effect
 rev_img(fam1$met_mat, xaxt = "n", yaxt = "n", col = cl, 
         zlim = c(-1, 1))
+# the first part of the matrix is given below
+with(fam1, 
+     Matrix::Matrix(met_mat[seq_len(min(10, NROW(met_mat))), 
+                            seq_len(min(10, NROW(met_mat)))],
+                    sparse = TRUE))
+
 # each simulated family has such two matrices in addition to a design matrix
 # for the fixed effects, X, and a vector with outcomes, y
 str(fam1[c("X", "y")])

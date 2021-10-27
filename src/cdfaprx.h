@@ -17,6 +17,7 @@
 #include <stdexcept>
 #include "ped-mem.h"
 #include "string"
+#include "config.h"
 
 namespace pedmod {
 extern "C"
@@ -125,7 +126,7 @@ inline double pnorm_use(double const x, bool const use_aprx) {
  * @param x Pointer to copy to.
  */
 inline void copy_upper_tri
-  (arma::mat const &X, double * __restrict__ x) noexcept {
+  (arma::mat const &X, double * PEDMOD_RESTRICT x) noexcept {
   arma::uword const p = X.n_cols;
   for(arma::uword c = 0; c < p; c++)
     for(arma::uword r = 0; r <= c; r++, x++)
@@ -139,7 +140,7 @@ inline void copy_upper_tri
  * @param x Pointer to copy to.
  */
 inline void copy_lower_tri
-  (arma::mat const &X, double * __restrict__ x) noexcept {
+  (arma::mat const &X, double * PEDMOD_RESTRICT x) noexcept {
   arma::uword const p = X.n_cols;
   for(arma::uword c = 0; c < p; c++)
     for(arma::uword r = c; r < p; r++, x++)
@@ -178,12 +179,12 @@ class cdf {
   arma::ivec infin;
   arma::ivec indices;
 
-  double * __restrict__ const lower      = dmem.get_mem(),
-         * __restrict__ const upper      = lower + ndim,
-         * __restrict__ const sigma_chol = upper + ndim,
-         * __restrict__ const draw       =
+  double * PEDMOD_RESTRICT const lower      = dmem.get_mem(),
+         * PEDMOD_RESTRICT const upper      = lower + ndim,
+         * PEDMOD_RESTRICT const sigma_chol = upper + ndim,
+         * PEDMOD_RESTRICT const draw       =
          sigma_chol + (ndim * (ndim + 1L)) / 2L,
-         * __restrict__ const dtmp_mem   = draw + ndim * n_qmc_seqs();
+         * PEDMOD_RESTRICT const dtmp_mem   = draw + ndim * n_qmc_seqs();
 
   // memory that can be used
   int * const itmp_mem = indices.end();
@@ -348,7 +349,7 @@ public:
   void operator()(
       unsigned const *ndim_in, double const * unifs,
       unsigned const *n_integrands_in,
-      double * __restrict__ integrand_val, unsigned const n_draws) PEDMOD_NOEXCEPT {
+      double * PEDMOD_RESTRICT integrand_val, unsigned const n_draws) PEDMOD_NOEXCEPT {
 #ifdef DO_CHECKS
     if(*ndim_in         != ndim)
       throw std::invalid_argument("cdf::eval_integrand: invalid 'ndim_in'");
@@ -356,18 +357,18 @@ public:
       throw std::invalid_argument("cdf::eval_integrand: invalid 'n_integrands_in'");
 #endif
 
-    double * const __restrict__ out   = integrand_val,
-           * const __restrict__ dr    = draw,
-           * const __restrict__ su    = dtmp_mem,
-           * const __restrict__ w     = su + n_draws,
-           * const __restrict__ lim_l = w + n_draws,
-           * const __restrict__ lim_u = lim_l + n_draws;
+    double * const PEDMOD_RESTRICT out   = integrand_val,
+           * const PEDMOD_RESTRICT dr    = draw,
+           * const PEDMOD_RESTRICT su    = dtmp_mem,
+           * const PEDMOD_RESTRICT w     = su + n_draws,
+           * const PEDMOD_RESTRICT lim_l = w + n_draws,
+           * const PEDMOD_RESTRICT lim_u = lim_l + n_draws;
 
     std::fill(w, w + n_draws, 1);
 
-    double const * __restrict__ sc   = sigma_chol,
-                 * __restrict__ lw   = lower,
-                 * __restrict__ up   = upper;
+    double const * PEDMOD_RESTRICT sc   = sigma_chol,
+                 * PEDMOD_RESTRICT lw   = lower,
+                 * PEDMOD_RESTRICT up   = upper;
     int const *infin_j = infin.begin();
     /* loop over variables and transform them to truncated normal
      * variables */
@@ -847,13 +848,13 @@ public:
   }
 
   void operator()
-    (double const * __restrict__ draw, double * __restrict__ out,
+    (double const * PEDMOD_RESTRICT draw, double * PEDMOD_RESTRICT out,
      int const *, bool const, unsigned const n_draws) {
       for(unsigned k = 0; k < n_draws; ++k)
         out[k * n_integrands] = 1;
 
-      double * __restrict__ sum       = interal_mem,
-             * __restrict__ sqrt_term = sum + n_draws;
+      double * PEDMOD_RESTRICT sum       = interal_mem,
+             * PEDMOD_RESTRICT sqrt_term = sum + n_draws;
 
       // derivatives w.r.t. the fixed effects
       {
@@ -993,7 +994,7 @@ public:
         }
       }
 
-      double * __restrict__ const d_sc = res + n_fix + 1L;
+      double * PEDMOD_RESTRICT const d_sc = res + n_fix + 1L;
       double * sig_inv_ele = sig_inv;
       for(size_t s = 0; s < n_scales; ++s)
         scale_mats_ptr[s] = scale_mats.at(s).begin();

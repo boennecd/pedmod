@@ -1,4 +1,4 @@
-#include "cdfarpx.h"
+#include "cdfaprx.h"
 #include <testthat.h>
 #include <limits>
 #include "threat-safe-random.h"

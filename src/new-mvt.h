@@ -8,6 +8,7 @@
 #include "kahan.h"
 #include "sobol.h"
 #include <vector>
+#include "config.h"
 
 namespace pedmod {
 struct rand_Korobov_output {
@@ -36,8 +37,8 @@ public:
   static rand_Korobov_output comp
     (Func &f, unsigned const ndim, size_t const minvls, size_t const maxvls,
      unsigned const nf, double const abseps, double const releps,
-     double * const __restrict__ finest,
-     double * const __restrict__ sdest, parallelrng::unif_drawer &sampler,
+     double * const PEDMOD_RESTRICT finest,
+     double * const PEDMOD_RESTRICT sdest, parallelrng::unif_drawer &sampler,
      unsigned const n_sequences){
     if(n_sequences < 1)
       throw std::invalid_argument("n_sequences is less than one");
@@ -80,15 +81,15 @@ public:
     // working objects.
     int * const pr = imem.get_mem();
 
-    double * const __restrict__ finval     = dmem.get_mem(),
-           * const __restrict__ M          = finval + nf,
-           * const __restrict__ finest_var = M + nf,
-           * const __restrict__ kahan_comp = finest_var + nf,
-           * const __restrict__ x          = kahan_comp + nf,
-           * const __restrict__ r          = x + ndim * n_qmc_seqs(),
-           * const __restrict__ vk         = r + ndim,
-           * const __restrict__ values     = vk + ndim,
-           * const __restrict__ fs         = values + nf;
+    double * const PEDMOD_RESTRICT finval     = dmem.get_mem(),
+           * const PEDMOD_RESTRICT M          = finval + nf,
+           * const PEDMOD_RESTRICT finest_var = M + nf,
+           * const PEDMOD_RESTRICT kahan_comp = finest_var + nf,
+           * const PEDMOD_RESTRICT x          = kahan_comp + nf,
+           * const PEDMOD_RESTRICT r          = x + ndim * n_qmc_seqs(),
+           * const PEDMOD_RESTRICT vk         = r + ndim,
+           * const PEDMOD_RESTRICT values     = vk + ndim,
+           * const PEDMOD_RESTRICT fs         = values + nf;
 
     // initialize
     std::fill(finest    , finest     + nf, 0);
@@ -136,12 +137,12 @@ public:
       std::fill(M     , M      + nf, 0.);
 
       auto mvkrsv =
-        [&](double * __restrict__ const values, int const prime,
-            double const * __restrict__ const vk,
-            double * __restrict__ const x,
-            double * __restrict__ const r,
-            int * __restrict__  const pr,
-            double * __restrict__  const fs){
+        [&](double * PEDMOD_RESTRICT const values, int const prime,
+            double const * PEDMOD_RESTRICT const vk,
+            double * PEDMOD_RESTRICT const x,
+            double * PEDMOD_RESTRICT const r,
+            int * PEDMOD_RESTRICT  const pr,
+            double * PEDMOD_RESTRICT  const fs){
           std::fill(values, values + nf, 0.);
           std::fill(kahan_comp, kahan_comp + nf, 0.);
 
@@ -272,8 +273,8 @@ public:
   static rand_Korobov_output comp
   (Func &f, unsigned const ndim, size_t const minvls, size_t const maxvls,
    unsigned const nf, double const abseps, double const releps,
-   double * const __restrict__ finest,
-   double * const __restrict__ sdest, parallelrng::unif_drawer &sampler,
+   double * const PEDMOD_RESTRICT finest,
+   double * const PEDMOD_RESTRICT sdest, parallelrng::unif_drawer &sampler,
    sobol::scrambling_type const method, unsigned const n_sequences){
     if(n_sequences < 1)
       throw std::invalid_argument("n_sequences is less than one");
@@ -297,9 +298,9 @@ public:
     }
 
     // initialize the objects we need
-    double * const __restrict__ integrand_vals = dmem.get_mem(),
-           * const __restrict__ seq_means      = integrand_vals + nf * n_qmc_seqs(),
-           * const __restrict__ draws          = seq_means + nf * max_n_sequences;
+    double * const PEDMOD_RESTRICT integrand_vals = dmem.get_mem(),
+           * const PEDMOD_RESTRICT seq_means      = integrand_vals + nf * n_qmc_seqs(),
+           * const PEDMOD_RESTRICT draws          = seq_means + nf * max_n_sequences;
     std::fill(seq_means, seq_means + nf * n_sequences, 0);
 
     // main loop where we compute the result
@@ -312,7 +313,7 @@ public:
 
         for(size_t k = 0; k < n_draw_next;){
           // get the next points
-          double * __restrict__ d = draws;
+          double * PEDMOD_RESTRICT d = draws;
           unsigned const n_draw_j =
             std::min<unsigned>(n_qmc_seqs(), n_draw_next - k);
           for(unsigned j = 0; j <n_draw_j; ++j, ++k, d += ndim){
@@ -340,7 +341,7 @@ public:
       n_drawn_per_seq += n_draw_next;
 
       // compute the mean estimator and the metric to compute the standard error
-      double * const __restrict__ M = integrand_vals;
+      double * const PEDMOD_RESTRICT M = integrand_vals;
       std::fill(finest, finest + nf, 0);
       std::fill(M     , M      + nf, 0);
 

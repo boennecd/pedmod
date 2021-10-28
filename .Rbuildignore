@@ -6,7 +6,9 @@
 ^ref\.bib$
 ^vignettes/cache
 ^vignettes/pedmod\.Rmd
+^vignettes/pedigree_partitioning\.Rmd
 ^\.github$
 ^create-vignette\.R
 ^sandbox/*
 ^cran-comments\.md
+^CRAN-RELEASE$

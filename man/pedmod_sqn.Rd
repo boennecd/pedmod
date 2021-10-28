@@ -113,7 +113,7 @@ step-size is halved.}
 \value{
 A list with the following elements:
 
-\item{par}{estiamted parameters.}
+\item{par}{estimated parameters.}
 \item{omegas}{parameter estimates after each iteration.}
 \item{H}{Hessian approximation in the quasi-Newton method. It should not
 be treated as the Hessian.}

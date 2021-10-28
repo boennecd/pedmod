@@ -424,7 +424,7 @@ pedmod_start <- function(ptr, data, maxvls = 1000L, abs_eps = 0, rel_eps = 1e-2,
 #' @return
 #' A list with the following elements:
 #'
-#' \item{par}{estiamted parameters.}
+#' \item{par}{estimated parameters.}
 #' \item{omegas}{parameter estimates after each iteration.}
 #' \item{H}{Hessian approximation in the quasi-Newton method. It should not
 #' be treated as the Hessian.}

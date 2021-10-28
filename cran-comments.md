@@ -11,7 +11,7 @@
   ubuntu-20.04 (release), and ubuntu-20.04 (devel)
 * win-builder (devel, oldrelease, and release)
 * `rhub::check_for_cran()`
-* `rhub::check(platform = c("macos-highsierra-release-cran"))`
+* `rhub::check(platform = c("fedora-clang-devel", "macos-highsierra-release-cran"))`
 * `rhub::check_on_solaris()`
   
 ## R CMD check results

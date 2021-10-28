@@ -9,3 +9,4 @@
 ^\.github$
 ^create-vignette\.R
 ^sandbox/*
+^cran-comments\.md

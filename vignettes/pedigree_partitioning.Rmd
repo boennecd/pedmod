@@ -36,16 +36,13 @@ plot(ped)
 In the plot, circles are females and squares are males. An individual may be 
 repeated in which case duplicate entries are illustrated by a dashed line. 
 If we observe outcomes for all 48 members of the family then we have to 
-do 48 dimensional as everybody is connected
-under the assumption that the random effects that we 
-specify are such that if individuals are assumed to be independent 
-genetically then they are also independent with respect to any other random 
-effect we may include (e.g. maternal effect or environmental effect). We assume 
+do 48 dimensional as everybody are marginally dependent if we have an 
+additive genetic effect or similar effects. We assume 
 that this is true in the rest of this vignette. Though it is possible also 
 use the same method we describe here in other cases if one specifies a suitable 
 graph, like the one we will get to soon, for the random effect structure.
 
-To see that everybody is connected, notice that 
+To see that everybody are connected, notice that 
 
  - Child 16 is cousins with child 19 through her father. 
  - Child 19 is cousins with child 47 through his mom. 
@@ -152,7 +149,7 @@ do_graph_plot(dat)
 
 A node/vertex in the graph represents an individual and an edge indicates
 a parent-child relation. The graph have the property that if we split 
-(find a connected partition) 
+(find a connected partition of) 
 the above into two sub-families (subgraphs) by removing child-parent relations
 (removing edges) then we only have to do two smaller integrals rather than 
 one large. Having said that, the 48 dimensional integral that we show here is 
@@ -216,7 +213,7 @@ do_graph_plot(new_dat)
 The above shows the family after we remove the `r NROW(removed_edges)` 
 relationships (edges) that our algorithm finds.
 To illustrate where the cut is in the original graph,
-we can color the vertices near the cut in the original graph:
+we can color the vertices according to which set they are in:
 
 ```{r more_clear_only_balanced}
 # assign function to show the split in the original graph
@@ -362,7 +359,7 @@ connected_partition <- max_balanced_partition_pedigree(
   slack = .1, id_weight = dat$id_weight, father_weight = dat$father_weight, 
   mother_weight = dat$mother_weight)
 
-# get the passably unconnected partition
+# get the plausibly unconnected partition
 partition <- unconnected_partition_pedigree(
   id = dat$id, father.id = dat$dad, mother.id = dat$mom, trace = 2L, 
   slack = .1, id_weight = dat$id_weight, father_weight = dat$father_weight, 
@@ -375,7 +372,7 @@ show_split(dat, partition)
 ## Details
 
 We will go through the details of the implemented methods in this section. 
-All method we have implemented are for general graphs so we will will cast the 
+All the methods we have implemented are for general graphs so we will cast the 
 problem for a general graph $G = (V, E)$ with vertices $V$ and edges $E$ 
 with some vertex weight function $w$.
 The first problem we need to solve is to implement a method to approximately 
@@ -389,7 +386,7 @@ We have implemented the method suggested by
 (articulation points) and can construct the block-cut tree. 
 Thus, we have implemented the method suggested by @Hopcroft73. The method 
 suggested by @Hopcroft73 can be accessed through the 
-`biconnected_components` and `block_cut_tree` function. 
+`biconnected_components` and `block_cut_tree` functions. 
 We illustrate this below on a simulated graph:
 
 ```{r assign_sim_graph}
@@ -482,7 +479,8 @@ $\tilde V_1 = V_1 \cap B$ and $\tilde V_2 = V_2 \cap B$, and let
 $I_1 \subseteq \tilde V_2$ be the vertices that are connected with any vertex 
 in $\tilde V_1$ and define $I_2$ similarly. Then
 
- 0. Compute $D$ as in the Kernighan–Lin algorithm [@Kernighan70].
+ 0. Compute the internal less external cost 
+    $D$ as in the Kernighan–Lin algorithm [@Kernighan70].
  1. Clear the set of used vertices.
  2. For $i = 1,\dots,\min(\text{max moves},\text{vertices in }B)$:
     * Find the cut vertices $C_1$ of $\tilde V_1$ and $C_2$ of $\tilde V_2$.
@@ -540,7 +538,7 @@ We will take a larger example where we also focus on the computation time.
 The example is shown below:
 
 ```{r larger_ex, fig.width=7, fig.height=7}
-# simulate a data set with 500 observations
+# simulate a data set with 1000 observations
 set.seed(45L)
 sim_dat <- sim_graph(1000L)
 

@@ -80,6 +80,7 @@ test_that("the _pedigree methods give the same", {
   expect_equal(partition, partition_reordered)
 
   # unconnected
+  skip_on_os("solaris")
   connected_partition <- partition
   partition <- with(
     dat, unconnected_partition_pedigree(
@@ -161,6 +162,7 @@ test_that("the partitioning functions for graphs give the same", {
   expect_equal(partition, partition_reordered)
 
   # unconnected
+  skip_on_os("solaris")
   partition <- with(
     dat, unconnected_partition(
       from = from, to = to, slack = .1, max_kl_it = 50L,

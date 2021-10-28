@@ -274,7 +274,7 @@ log likelihood for all the families is $\zeta m$. Thus, the
 precision we require for each family's log likelihood term needs to be
 proportional to $\mathcal O(m^{-1/2})$ if we want a fixed number of precise 
 digits
-for the log likelihood for all the families. The latter is important e.g. 
+for the log likelihood for all number of families. The latter is important e.g. 
 for the profile likelihood curve we compute later and also for the line search
 used by some optimization methods. Thus, one may need to reduce
 `rel_eps` and increase `maxvls` when there are many families.
@@ -324,7 +324,7 @@ g2 <- eval_pedigree_grad(ptr = ll_terms, par = std_par, maxvls = 10000L,
 all.equal(drop(g1 %*% jac), g2, check.attributes = FALSE)
 ```
 
-The model can also be estimated with the the standardized parameterization:
+The model can also be estimated with the standardized parameterization:
 
 ```{r continued_std_est_simple, cache = 1}
 # perform the optimization. We start with finding the starting values
@@ -445,7 +445,7 @@ pl_curve_res <- lapply(sigs, function(sig){
   opt_out <- pedmod_opt(
     ptr = ll_terms, par = c(opt_out_quick$par, sig_sq_log), abs_eps = 0, 
     use_aprx = TRUE, n_threads = 4L, fix = length(beta) + 1L,
-    # we changed the parameters
+    # we changed these parameters
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L)
   
   # report to console and return
@@ -460,7 +460,7 @@ pl_curve_res <- lapply(sigs, function(sig){
 
 We can construct an approximate 95% confidence interval using an estimated 
 cubic smoothing spline for the profile likelihood (more `sigs` points may be 
-needed to get a good estimate of the cubic smoothing spline):
+needed to get a good estimate of the smoothing spline):
 
 ```{r conf_int_simple_ex}
 # get the critical values
@@ -887,13 +887,13 @@ apply(time_vals, 1:2, sd)
 apply(time_vals, 1:2, quantile)
 ```
 
-## Example: Adding Environmental Effects 
+## Example: Adding Child Environment Effects 
 
 ```{r clean_pre_simple_w_ev, echo = FALSE}
 rm(list = setdiff(ls(), c("ped", "fam")))
 ```
 
-As an extension, we can add a child environmental effect. The new scale matrix, 
+As an extension, we can add a child environment effect. The new scale matrix, 
 the $C_{i2}$'s, can be written as:
 
 ```{r xtra_mat_simple_w_ev}
@@ -1023,7 +1023,7 @@ system.time(
   opt_out <- pedmod_opt(
     ptr = ll_terms, par = opt_out_quick$par, abs_eps = 0, use_aprx = TRUE, 
     n_threads = 4L,  cluster_weights = c_weights,
-    # we changed the parameters
+    # we changed these parameters
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 ```
 
@@ -1113,7 +1113,7 @@ system.time(
   opt_out_std <- pedmod_opt(
     ptr = ll_terms, par = opt_out_quick_std$par, abs_eps = 0, use_aprx = TRUE, 
     n_threads = 4L,  cluster_weights = c_weights, standardized = TRUE,
-    # we changed the parameters
+    # we changed these parameters
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 
 # we get the same
@@ -1187,7 +1187,7 @@ pl_curve_func <- function(fix, fix_val,
     ptr = ll_terms, par = par_new, abs_eps = 0, 
     use_aprx = TRUE, n_threads = 4L, fix = fix,
     cluster_weights = c_weights,
-    # we changed the parameters
+    # we changed these parameters
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L)
   
   # report to console and return
@@ -1224,7 +1224,7 @@ ll_terms <- pedigree_ll_terms(dat_unqiue, max_threads = 4L)
 ```
 
 ```{r env_pl_curves, cache = 1, message=TRUE}
-# First we compute data for the two profile likelihood curves staring with the
+# first we compute data for the two profile likelihood curves staring with the
 # curve for the additive genetic effect
 pl_genetic <- pedmod_profile(
   ptr = ll_terms, par = opt_out$par, delta = .4, maxvls = 20000L, 
@@ -1232,7 +1232,7 @@ pl_genetic <- pedmod_profile(
   use_aprx = TRUE, n_threads = 4L, verbose = TRUE, cluster_weights = c_weights)
 exp(pl_genetic$confs) # the confidence interval
 
-# then we compute the curve for the environmental effect
+# then we compute the curve for the environment effect
 pl_env <- pedmod_profile(
   ptr = ll_terms, par = opt_out$par, delta = .6, maxvls = 20000L, 
   minvls = 1000L, alpha = .05, abs_eps = 0, rel_eps = 1e-4, which_prof = 4L,
@@ -1309,7 +1309,7 @@ pl_genetic_prop <- pedmod_profile_prop(
   use_aprx = TRUE, n_threads = 4L, verbose = TRUE, cluster_weights = c_weights)
 pl_genetic_prop$confs # the confidence interval
 
-# confidence interval for the proportion of variance for the environmental 
+# confidence interval for the proportion of variance for the environment
 # effect
 pl_env_prop <- pedmod_profile_prop(
   ptr = ll_terms, par = opt_out$par, maxvls = 20000L, 
@@ -1360,7 +1360,7 @@ dum_pl$xs <- sapply(dum_pl$data, function(x) {
 })
 do_plot(dum_pl, expression(h[G]), estimate[1], identity, col = "gray40", 
         add = TRUE)
-# do the same for the environmental effect 
+# do the same for the environment effect 
 do_plot(pl_env_prop, expression(h[E]), estimate[2], identity)
 
 dum_pl <- pl_env
@@ -1426,7 +1426,7 @@ sim_study <- lapply(seeds, function(s){
           ptr = ll_terms, par = opt_out_quick$par, abs_eps = 0, use_aprx = TRUE, 
           n_threads = 4L, cluster_weights = c_weights,
            standardized = standardized,
-          # we changed the parameters
+          # we changed these parameters
           maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
       opt_out$time <- ti_slow
       

@@ -2,6 +2,9 @@
 # pedmod: Pedigree Models
 
 [![R-CMD-check](https://github.com/boennecd/pedmod/workflows/R-CMD-check/badge.svg)](https://github.com/boennecd/pedmod/actions)
+[![](https://www.r-pkg.org/badges/version/pedmod)](https://CRAN.R-project.org/package=pedmod)
+[![CRAN RStudio mirror
+downloads](http://cranlogs.r-pkg.org/badges/pedmod)](https://CRAN.R-project.org/package=pedmod)
 
 The pedmod package provides functions to estimate models for pedigree
 data. Particularly, the package provides functions to estimate mixed

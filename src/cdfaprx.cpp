@@ -53,6 +53,7 @@ cor_vec_res get_cor_vec(const arma::mat &cov){
 
 cache_mem<double> likelihood::dmen;
 cache_mem<double> pedigree_l_factor::dmem;
+cache_mem<double> generic_l_factor::dmem;
 cache_mem<int> pedigree_l_factor::imem;
 
 } // namespace pedmod {

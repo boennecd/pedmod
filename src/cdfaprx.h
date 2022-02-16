@@ -19,6 +19,8 @@
 #include "string"
 #include "config.h"
 
+#include <R_ext/RS.h> // F77_NAME and F77_CALL
+
 namespace pedmod {
 extern "C"
 {
@@ -57,6 +59,15 @@ extern "C"
       int* /* ND */, double* /* A */, double* /* B */, double* /* DL */,
       double* /* cov */, int* /* infi */, int* /* inform */,
       int* /* idx */, int const* /* doscale */);
+
+  void F77_NAME(dtpsv)
+    (const char * /* uplo */, const char * /* trans */, const char * /* diag */,
+     const int * /* n */, const double * /* ap */, double * /* x */,
+     const int* /* incx */, size_t, size_t, size_t);
+
+  void F77_NAME(dpptri)
+    (const char * /* uplo */, const int * /* n */, double *ap,
+     int * /* info */, size_t);
 }
 
 /**
@@ -582,11 +593,16 @@ public:
 
 /**
  * functor classes used as template argument for cdf used to approximate the
- * derivatives of the likelihood factors for each family.
+ * derivatives of the likelihood factors for each family. That is, the
+ * likelihood
+ *
+ *   int_B phi(u;X.beta, I + sum_k sigma[k] * C[k]) du
+ *
+ * For given matrices C and a design matrix X.
  *
  * The returned approximations is a) the likelihood factor, b) the
- * derivative of log likelihood w.r.t. the mean vector, and w.r.t. each of the
- * scale parameters.
+ * derivative of log likelihood w.r.t. the fixed effect coefficients and w.r.t.
+ * each of the scale parameters.
  */
 class pedigree_l_factor {
 public:
@@ -625,7 +641,7 @@ private:
    *  b. the transpose of the Eigen vectors Q scaled by the square root of the
    *     Eigen values where QDQ^top = S^-top C_{i1}S^-1.
    *
-   * These objects can be found increaments of n_mem * n_mem
+   * These objects can be found increments of n_mem * n_mem
    */
   double * S_C_S_matrices;
 
@@ -917,7 +933,7 @@ public:
     }
 
   void univariate(double * out, double const lw, double const ub) {
-    constexpr double log_sqrt_2_pi_inv = 0.918938533204673;
+    constexpr double log_sqrt_2_pi_inv{0.918938533204673};
     auto log_dnrm = [&](double const x){
       return -x * x / 2. - log_sqrt_2_pi_inv;
     };
@@ -1020,6 +1036,244 @@ public:
     return out;
   }
 };
+
+/**
+ * Computes the derivatives for the integral
+ *
+ *   int_B phi(u; mu, Sigma) du
+ *
+ * The first element of the returned object is the likelihood factor. The
+ * additional elements are the derivatives w.r.t. mu and Sigma with the latter
+ * stored as the full k x k matrix ignoring the symmetry.
+ */
+class generic_l_factor {
+  unsigned const n_vars,
+           n_integrands = get_n_integrands(n_vars);
+
+  /// working memory
+  static cache_mem<double> dmem;
+
+  double * cdf_mem() const { return dmem.get_mem(); }
+
+  double * Sig_chol_tri() { return cdf_mem() + 2 * n_integrands; }
+
+  double * internal_mem() {
+    return Sig_chol_tri() + (n_vars * (n_vars + 1)) / 2;
+  }
+
+  /// the normalization constant
+  double const norm_const;
+
+  static unsigned get_n_integrands(unsigned const max_dim){
+    return 1 + (max_dim * (max_dim + 3)) / 2;
+  }
+
+public:
+  /// must be called prior to calling the member functions in the class
+  static void alloc_mem
+    (unsigned const max_dim, unsigned const max_threads,
+     unsigned const max_n_sequences){
+    rand_Korobov<cdf<generic_l_factor> >::alloc_mem(
+        max_dim, get_n_integrands(max_dim), max_threads);
+    sobol_wrapper<cdf<generic_l_factor> >::alloc_mem(
+        max_dim, get_n_integrands(max_dim), max_threads, max_n_sequences);
+
+    size_t n_mem = 2 * get_n_integrands(max_dim);
+    n_mem += (max_dim * (max_dim + 1)) / 2;
+    n_mem += max_dim * n_qmc_seqs();
+    dmem.set_n_mem(n_mem, max_threads);
+  }
+
+  generic_l_factor(arma::vec const &mu, arma::mat const &Sig,
+                   double const norm_const):
+    n_vars{mu.n_elem}, norm_const{norm_const} {
+      if(mu.n_elem != Sig.n_rows)
+        throw std::invalid_argument("mu.n_elem != Sig.n_rows");
+      else if(Sig.n_cols != Sig.n_rows)
+        throw std::invalid_argument("Sig.n_cols != Sig.n_rows");
+    }
+
+  void prep_permutated(arma::mat const &Sig, int const *indices) {
+    arma::mat Sig_chol = arma::chol(Sig);
+    copy_upper_tri(Sig_chol, Sig_chol_tri());
+  }
+
+  unsigned get_n_integrands() PEDMOD_NOEXCEPT {
+    return n_integrands;
+  }
+
+  double * get_wk_mem() PEDMOD_NOEXCEPT {
+    return cdf_mem();
+  }
+
+  constexpr static bool needs_last_unif() PEDMOD_NOEXCEPT {
+    return true;
+  }
+
+  double get_norm_constant() PEDMOD_NOEXCEPT {
+    return norm_const;
+  }
+
+  void operator()
+  (double const * PEDMOD_RESTRICT draw, double * PEDMOD_RESTRICT out,
+   int const *, bool const, unsigned const n_draws){
+    for(unsigned k = 0; k < n_draws; ++k)
+      out[k * n_integrands] = 1;
+
+    double * PEDMOD_RESTRICT const draw_scaled = internal_mem();
+    for(unsigned v = 0; v < n_vars; ++v)
+      for(unsigned k = 0; k < n_draws; ++k)
+        draw_scaled[v + k * n_vars] = draw[k + v * n_draws];
+
+    constexpr char uplo{'U'}, trans{'N'}, diag{'N'};
+    constexpr int incx{1};
+    int const int_n_vars = n_vars;
+    for(unsigned k = 0; k < n_draws; ++k)
+      F77_CALL(dtpsv)
+        (&uplo, &trans, &diag, &int_n_vars, Sig_chol_tri(),
+         draw_scaled + k * n_vars, &incx, 1, 1, 1);
+
+    {
+      double * PEDMOD_RESTRICT const d_mean{out + 1};
+      for(unsigned k = 0; k < n_draws; ++k)
+        std::copy(draw_scaled + k * n_vars, draw_scaled + (k + 1) * n_vars,
+                  d_mean + k * n_integrands);
+    }
+
+    double * PEDMOD_RESTRICT const d_vcov{out + 1 + n_vars};
+    for(unsigned k = 0; k < n_draws; ++k){
+      size_t upper_idx{};
+      for(unsigned v1 = 0; v1 < n_vars; ++v1)
+        for(unsigned v2 = 0; v2 <= v1; ++v2, ++upper_idx)
+          d_vcov[upper_idx + k * n_integrands] =
+            draw_scaled[v1 + k * n_vars] * draw_scaled[v2 + k * n_vars];
+    }
+  }
+
+  void univariate(double * out, double const lw, double const ub){
+    constexpr double log_sqrt_2_pi_inv{0.918938533204673};
+    auto log_dnrm = [&](double const x){
+      return -x * x / 2. - log_sqrt_2_pi_inv;
+    };
+
+    bool const f_ub = std::isinf(ub),
+               f_lb = std::isinf(lw);
+
+    double const p_ub = f_ub ? 1 : pnorm_std(ub, 1L, 0L),
+                 p_lb = f_lb ? 0 : pnorm_std(lw, 1L, 0L),
+                 d_ub = f_ub ? 0 : std::exp(log_dnrm(ub) - pnorm_std(ub, 1L, 1L)),
+                 d_lb = f_lb ? 0 : std::exp(log_dnrm(lw) - pnorm_std(lw, 1L, 1L)),
+                 d_ub_ub = f_ub ? 0 : ub * d_ub,
+                 d_lb_lb = f_lb ? 0 : lw * d_lb,
+                 sd_inv = 1 / *Sig_chol_tri();
+
+    out[0] = p_ub - p_lb;
+    out[1] = -(d_ub - d_lb) * sd_inv;
+    out[2] = -(d_ub_ub - d_lb_lb) / 2 * sd_inv * sd_inv;
+  }
+
+  struct out_type {
+    /**
+     * minvls Actual number of function evaluations used.
+     * inform INFORM = 0 for normal exit, when
+     *             ABSERR <= MAX(ABSEPS, RELEPS*||finest||)
+     *          and
+     *             INTVLS <= MAXCLS.
+     *        INFORM = 1 If MAXVLS was too small to obtain the required
+     *        accuracy. In this case a value finest is returned with
+     *        estimated absolute accuracy ABSERR. */
+    size_t minvls;
+    int inform;
+    /// maximum estimated absolute accuracy of finest
+    double abserr;
+    /// likelihood approximation
+    double likelihood;
+    /// the derivative approximation
+    arma::vec derivs;
+    /// the approximate standard errors
+    arma::vec sd_errs;
+  };
+
+  out_type get_output(double * res,  double const * sdest, size_t const minvls,
+                      int const inform, double const abserr,
+                      int const *indices){
+    out_type out;
+    out.minvls = minvls;
+    out.inform = inform;
+    out.abserr = abserr;
+
+    double const likelihood = *res;
+    out.likelihood = likelihood;
+    out.sd_errs = arma::vec(sdest, get_n_integrands());
+
+    if(n_vars > 1){
+      // setup the derivative w.r.t. the covariance matrix and account for the
+      // permutation
+
+      out.likelihood *= norm_const;
+      out.sd_errs[0] *= norm_const;
+
+      {
+        // correct for the normalization constant and get the derivative w.r.t.
+        // the log likelihood
+        double const rel_likelihood = norm_const / out.likelihood;
+        std::for_each(res + 1, res + n_integrands,
+                      [&](double &x){ x *= rel_likelihood; });
+        std::for_each(out.sd_errs.begin() + 1, out.sd_errs.end(),
+                      [&](double &x){ x *= rel_likelihood; });
+      }
+
+      out.derivs.resize(n_vars * (n_vars + 1));
+
+      arma::vec d_mean(out.derivs.begin(), n_vars, false);
+
+      {
+        double const * const d_mean_permu{res + 1};
+        for(unsigned v = 0; v < n_vars; ++v)
+          d_mean[indices[v]] = d_mean_permu[v];
+      }
+
+      arma::mat d_Sig(d_mean.end(), n_vars, n_vars, false);
+
+      std::unique_ptr<double[]> Sig_permu_inv
+        (new double[(n_vars * (n_vars + 1)) / 2]);
+
+      {
+        std::copy
+          (Sig_chol_tri(), Sig_chol_tri() + (n_vars * (n_vars + 1)) / 2,
+           Sig_permu_inv.get());
+        constexpr char uplo{'U'};
+        int const int_n_vars = n_vars;
+        int info{};
+        F77_CALL(dpptri)(&uplo, &int_n_vars, Sig_permu_inv.get(), &info, 1);
+
+        if(info != 0)
+          throw std::runtime_error("dpptri failed");
+      }
+
+      double const * const d_Sig_permu_outer{res + 1 + n_vars};
+      size_t idx_upper{};
+      for(unsigned v1 = 0; v1 < n_vars; ++v1)
+        for(unsigned v2 = 0; v2 <= v1; ++v2, ++idx_upper){
+          double const deriv_val
+           {(d_Sig_permu_outer[idx_upper] - Sig_permu_inv[idx_upper]) / 2};
+
+          d_Sig(indices[v2], indices[v1]) = deriv_val;
+          d_Sig(indices[v1], indices[v2]) = deriv_val;
+        }
+
+      return out;
+    }
+
+    // set deriv elements
+    arma::vec &derivs = out.derivs;
+    arma::uword const n_derivs = n_integrands - 1;
+    derivs.set_size(n_derivs);
+    std::copy(res + 1, res + 1 + n_derivs, derivs.begin());
+    return out;
+  }
+};
+
 } // namespace pedmod
 
 #endif

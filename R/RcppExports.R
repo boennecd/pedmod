@@ -173,3 +173,16 @@ eval_pedigree_grad_cpp <- function(ptr, par, maxvls, abs_eps, rel_eps, indices =
     .Call(`_pedmod_eval_pedigree_grad`, ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder, use_aprx, n_threads, cluster_weights, method)
 }
 
+#' @export
+pedigree_ll_terms_loadings <- function(data, max_threads = 1L, n_sequences = 8L) {
+    .Call(`_pedmod_pedigree_ll_terms_loadings`, data, max_threads, n_sequences)
+}
+
+eval_pedigree_ll_loadings_cpp <- function(ptr, par, maxvls, abs_eps, rel_eps, indices = NULL, minvls = -1L, do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L, cluster_weights = NULL, method = 0L) {
+    .Call(`_pedmod_eval_pedigree_ll_loadings`, ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder, use_aprx, n_threads, cluster_weights, method)
+}
+
+eval_pedigree_grad_loadings_cpp <- function(ptr, par, maxvls, abs_eps, rel_eps, indices = NULL, minvls = -1L, do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L, cluster_weights = NULL, method = 0L) {
+    .Call(`_pedmod_eval_pedigree_grad_loadings`, ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder, use_aprx, n_threads, cluster_weights, method)
+}
+

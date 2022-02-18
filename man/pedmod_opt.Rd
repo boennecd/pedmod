@@ -3,6 +3,7 @@
 \name{pedmod_opt}
 \alias{pedmod_opt}
 \alias{pedmod_start}
+\alias{pedmod_start_loadings}
 \title{Optimize the Log Marginal Likelihood}
 \usage{
 pedmod_opt(
@@ -43,9 +44,18 @@ pedmod_start(
   method = 0L,
   sc_start = NULL
 )
+
+pedmod_start_loadings(
+  ptr,
+  data,
+  indices = NULL,
+  cluster_weights = NULL,
+  sc_start_invariant = NULL
+)
 }
 \arguments{
-\item{ptr}{object from \code{\link{pedigree_ll_terms}}.}
+\item{ptr}{object from \code{\link{pedigree_ll_terms}} or
+\code{\link{pedigree_ll_terms_loadings}}.}
 
 \item{par}{starting values passed to \code{opt_func}.}
 
@@ -98,7 +108,7 @@ lattice rules while one yields scrambled Sobol sequences.}
 \item{...}{Arguments passed to \code{opt_func}.}
 
 \item{data}{the \code{\link{list}} that was passed to
-\code{\link{pedigree_ll_terms}}.}
+\code{\link{pedigree_ll_terms}} or \code{\link{pedigree_ll_terms_loadings}}.}
 
 \item{scale_max}{the maximum value for the scale parameters. Sometimes, the
 optimization method tends to find large scale parameters and get stuck.
@@ -106,6 +116,9 @@ Setting a maximum solves this.}
 
 \item{sc_start}{starting value for the scale parameters. Use \code{NULL} if
 you have no value to start with.}
+
+\item{sc_start_invariant}{scale parameter(s) like sc_start. It is the value
+that all individuals should have (i.e. not one that varies by individual).}
 }
 \value{
 \code{pedmod_opt}: The output from the \code{opt_func} argument. Thus, if
@@ -120,6 +133,13 @@ number of non-fixed parameters.
  \item beta_no_rng: the fixed effects MLEs without random effects.
  \item logLik_no_rng: the log maximum likelihood without random effects.
  \item logLik_est: the likelihood at par.
+}
+
+\code{pedmod_start_loadings}: A \code{list} with:
+\itemize{
+ \item par: the starting value.
+ \item beta_no_rng: the fixed effects MLEs without random effects.
+ \item logLik_no_rng: the log maximum likelihood without random effects.
 }
 }
 \description{

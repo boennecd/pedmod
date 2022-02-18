@@ -18,22 +18,17 @@ context("pedigree_ll_term_loading unit tests") {
      f <- \(x){
      beta <- head(x, 5)
      theta <- tail(x, -5) |> matrix(4)
-     y_sign <- ifelse(y > 0, -1, 1)
-
-     mu <- drop(X %*% beta) * y_sign
+     mu <- drop(X %*% beta)
      scales <- exp(Z %*% theta)
-
-     C1_sign <- diag(y_sign) %*% C1 %*% diag(y_sign)
-     C2_sign <- diag(y_sign) %*% C2 %*% diag(y_sign)
 
      D1 <- diag(scales[, 1])
      D2 <- diag(scales[, 2])
-     Sig <- diag(3) + D1 %*% C1_sign %*% D1 + D2 %*% C2_sign %*% D2
+     Sig <- diag(3) + D1 %*% C1 %*% D1 + D2 %*% C2 %*% D2
 
      set.seed(1)
      pmvnorm(
-     upper = numeric(3), mean = mu, sigma = Sig,
-     algorithm = GenzBretz(1e6, abseps = 0)) |> log()
+     lower = ifelse(y > 0, 0, -Inf),  upper = ifelse(y > 0, Inf, 0),
+     mean = mu, sigma = Sig, algorithm = GenzBretz(1e6, abseps = 0)) |> log()
      }
 
      f(par) |> dput()

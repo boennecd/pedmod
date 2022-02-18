@@ -178,6 +178,12 @@ the derivatives with respect to
 or
 ![(\\vec\\gamma^\\top, \\psi\_1, \\dots, \\psi\_K)](https://render.githubusercontent.com/render/math?math=%28%5Cvec%5Cgamma%5E%5Ctop%2C%20%5Cpsi_1%2C%20%5Cdots%2C%20%5Cpsi_K%29 "(\vec\gamma^\top, \psi_1, \dots, \psi_K)").
 
+In some cases, it may be hypothesized that some individuals are less
+effected by e.g. their genes than others. A model to incorporate such
+effects is implemented in the `pedigree_ll_terms_loadings` function. See
+the [Individual Specific Loadings](#individual-specific-loadings)
+section for details and examples.
+
 We have re-written the Fortran code by Genz and Bretz (2002) in C++,
 made it easy to extend from a log marginal likelihood approximation to
 other approximations such as the derivatives, and added less precise but
@@ -284,12 +290,12 @@ The model is
  Y\_{ij} &= \\begin{cases} 1 & \\beta\_0 + \\beta\_1 X\_{ij} + \\beta\_2 B\_{ij} + G\_{ij} + R\_{ij} &gt; 0 \\\\ 0 & \\text{otherwise} \\end{cases} \\\\
  X\_{ij} &\\sim N(0, 1) \\\\
  B\_{ij} &\\sim \\text{Bin}(0.5, 1) \\\\
- (G\_{i1}, \\dots G\_{in\_{i}})^\\top &\\sim N^{(n\_i)}(\\vec 0, \\sigma^2 C\_{i1}) \\\\
- R\_{ij} &\\sim N(0, 1)\\end{align\*}](https://render.githubusercontent.com/render/math?math=%5Cbegin%7Balign%2A%7D%0A%20Y_%7Bij%7D%20%26%3D%20%5Cbegin%7Bcases%7D%201%20%26%20%5Cbeta_0%20%2B%20%5Cbeta_1%20X_%7Bij%7D%20%2B%20%5Cbeta_2%20B_%7Bij%7D%20%2B%20G_%7Bij%7D%20%2B%20R_%7Bij%7D%20%3E%200%20%5C%5C%200%20%26%20%5Ctext%7Botherwise%7D%20%5Cend%7Bcases%7D%20%5C%5C%0A%20X_%7Bij%7D%20%26%5Csim%20N%280%2C%201%29%20%5C%5C%0A%20B_%7Bij%7D%20%26%5Csim%20%5Ctext%7BBin%7D%280.5%2C%201%29%20%5C%5C%0A%20%28G_%7Bi1%7D%2C%20%5Cdots%20G_%7Bin_%7Bi%7D%7D%29%5E%5Ctop%20%26%5Csim%20N%5E%7B%28n_i%29%7D%28%5Cvec%200%2C%20%5Csigma%5E2%20C_%7Bi1%7D%29%20%5C%5C%0A%20R_%7Bij%7D%20%26%5Csim%20N%280%2C%201%29%5Cend%7Balign%2A%7D "\begin{align*}
+ (G\_{i1}, \\dots, G\_{in\_{i}})^\\top &\\sim N^{(n\_i)}(\\vec 0, \\sigma^2 C\_{i1}) \\\\
+ R\_{ij} &\\sim N(0, 1)\\end{align\*}](https://render.githubusercontent.com/render/math?math=%5Cbegin%7Balign%2A%7D%0A%20Y_%7Bij%7D%20%26%3D%20%5Cbegin%7Bcases%7D%201%20%26%20%5Cbeta_0%20%2B%20%5Cbeta_1%20X_%7Bij%7D%20%2B%20%5Cbeta_2%20B_%7Bij%7D%20%2B%20G_%7Bij%7D%20%2B%20R_%7Bij%7D%20%3E%200%20%5C%5C%200%20%26%20%5Ctext%7Botherwise%7D%20%5Cend%7Bcases%7D%20%5C%5C%0A%20X_%7Bij%7D%20%26%5Csim%20N%280%2C%201%29%20%5C%5C%0A%20B_%7Bij%7D%20%26%5Csim%20%5Ctext%7BBin%7D%280.5%2C%201%29%20%5C%5C%0A%20%28G_%7Bi1%7D%2C%20%5Cdots%2C%20G_%7Bin_%7Bi%7D%7D%29%5E%5Ctop%20%26%5Csim%20N%5E%7B%28n_i%29%7D%28%5Cvec%200%2C%20%5Csigma%5E2%20C_%7Bi1%7D%29%20%5C%5C%0A%20R_%7Bij%7D%20%26%5Csim%20N%280%2C%201%29%5Cend%7Balign%2A%7D "\begin{align*}
  Y_{ij} &= \begin{cases} 1 & \beta_0 + \beta_1 X_{ij} + \beta_2 B_{ij} + G_{ij} + R_{ij} > 0 \\ 0 & \text{otherwise} \end{cases} \\
  X_{ij} &\sim N(0, 1) \\
  B_{ij} &\sim \text{Bin}(0.5, 1) \\
- (G_{i1}, \dots G_{in_{i}})^\top &\sim N^{(n_i)}(\vec 0, \sigma^2 C_{i1}) \\
+ (G_{i1}, \dots, G_{in_{i}})^\top &\sim N^{(n_i)}(\vec 0, \sigma^2 C_{i1}) \\
  R_{ij} &\sim N(0, 1)\end{align*}")
 
 where
@@ -1318,15 +1324,15 @@ The model is
 ![\\begin{align\*}
  Y\_{ij} &= \\begin{cases} 1 & \\beta\_0 + \\beta\_1 B\_{ij} + E\_{ij} + G\_{ij} + R\_{ij} &gt; 0 \\\\ 0 & \\text{otherwise} \\end{cases} \\\\
  X\_{ij} &\\sim N(0, 1) \\\\
- B\_{ij} &\\sim \\text{Bin}(0.5, 1) \\\\
- (G\_{i1}, \\dots G\_{in\_{i}})^\\top &\\sim N^{(n\_i)}(\\vec 0, \\sigma^2\_G C\_{i1}) \\\\
-(E\_{i1}, \\dots E\_{in\_{i}})^\\top &\\sim N^{(n\_i)}(\\vec 0, \\sigma^2\_E C\_{i2}) \\\\
- R\_{ij} &\\sim N(0, 1)\\end{align\*}](https://render.githubusercontent.com/render/math?math=%5Cbegin%7Balign%2A%7D%0A%20Y_%7Bij%7D%20%26%3D%20%5Cbegin%7Bcases%7D%201%20%26%20%5Cbeta_0%20%2B%20%5Cbeta_1%20B_%7Bij%7D%20%2B%20E_%7Bij%7D%20%2B%20G_%7Bij%7D%20%2B%20R_%7Bij%7D%20%3E%200%20%5C%5C%200%20%26%20%5Ctext%7Botherwise%7D%20%5Cend%7Bcases%7D%20%5C%5C%0A%20X_%7Bij%7D%20%26%5Csim%20N%280%2C%201%29%20%5C%5C%0A%20B_%7Bij%7D%20%26%5Csim%20%5Ctext%7BBin%7D%280.5%2C%201%29%20%5C%5C%0A%20%28G_%7Bi1%7D%2C%20%5Cdots%20G_%7Bin_%7Bi%7D%7D%29%5E%5Ctop%20%26%5Csim%20N%5E%7B%28n_i%29%7D%28%5Cvec%200%2C%20%5Csigma%5E2_G%20C_%7Bi1%7D%29%20%5C%5C%0A%28E_%7Bi1%7D%2C%20%5Cdots%20E_%7Bin_%7Bi%7D%7D%29%5E%5Ctop%20%26%5Csim%20N%5E%7B%28n_i%29%7D%28%5Cvec%200%2C%20%5Csigma%5E2_E%20C_%7Bi2%7D%29%20%5C%5C%0A%20R_%7Bij%7D%20%26%5Csim%20N%280%2C%201%29%5Cend%7Balign%2A%7D "\begin{align*}
+ B\_{ij} &\\sim \\text{Bin}(0.1, 1) \\\\
+ (G\_{i1}, \\dots, G\_{in\_{i}})^\\top &\\sim N^{(n\_i)}(\\vec 0, \\sigma^2\_G C\_{i1}) \\\\
+(E\_{i1}, \\dots, E\_{in\_{i}})^\\top &\\sim N^{(n\_i)}(\\vec 0, \\sigma^2\_E C\_{i2}) \\\\
+ R\_{ij} &\\sim N(0, 1)\\end{align\*}](https://render.githubusercontent.com/render/math?math=%5Cbegin%7Balign%2A%7D%0A%20Y_%7Bij%7D%20%26%3D%20%5Cbegin%7Bcases%7D%201%20%26%20%5Cbeta_0%20%2B%20%5Cbeta_1%20B_%7Bij%7D%20%2B%20E_%7Bij%7D%20%2B%20G_%7Bij%7D%20%2B%20R_%7Bij%7D%20%3E%200%20%5C%5C%200%20%26%20%5Ctext%7Botherwise%7D%20%5Cend%7Bcases%7D%20%5C%5C%0A%20X_%7Bij%7D%20%26%5Csim%20N%280%2C%201%29%20%5C%5C%0A%20B_%7Bij%7D%20%26%5Csim%20%5Ctext%7BBin%7D%280.1%2C%201%29%20%5C%5C%0A%20%28G_%7Bi1%7D%2C%20%5Cdots%2C%20G_%7Bin_%7Bi%7D%7D%29%5E%5Ctop%20%26%5Csim%20N%5E%7B%28n_i%29%7D%28%5Cvec%200%2C%20%5Csigma%5E2_G%20C_%7Bi1%7D%29%20%5C%5C%0A%28E_%7Bi1%7D%2C%20%5Cdots%2C%20E_%7Bin_%7Bi%7D%7D%29%5E%5Ctop%20%26%5Csim%20N%5E%7B%28n_i%29%7D%28%5Cvec%200%2C%20%5Csigma%5E2_E%20C_%7Bi2%7D%29%20%5C%5C%0A%20R_%7Bij%7D%20%26%5Csim%20N%280%2C%201%29%5Cend%7Balign%2A%7D "\begin{align*}
  Y_{ij} &= \begin{cases} 1 & \beta_0 + \beta_1 B_{ij} + E_{ij} + G_{ij} + R_{ij} > 0 \\ 0 & \text{otherwise} \end{cases} \\
  X_{ij} &\sim N(0, 1) \\
- B_{ij} &\sim \text{Bin}(0.5, 1) \\
- (G_{i1}, \dots G_{in_{i}})^\top &\sim N^{(n_i)}(\vec 0, \sigma^2_G C_{i1}) \\
-(E_{i1}, \dots E_{in_{i}})^\top &\sim N^{(n_i)}(\vec 0, \sigma^2_E C_{i2}) \\
+ B_{ij} &\sim \text{Bin}(0.1, 1) \\
+ (G_{i1}, \dots, G_{in_{i}})^\top &\sim N^{(n_i)}(\vec 0, \sigma^2_G C_{i1}) \\
+(E_{i1}, \dots, E_{in_{i}})^\top &\sim N^{(n_i)}(\vec 0, \sigma^2_E C_{i2}) \\
  R_{ij} &\sim N(0, 1)\end{align*}")
 
 where
@@ -2164,6 +2170,348 @@ apply(time_vals, 1:2, quantile)
 #> 50%  16.783       12.471
 #> 75%  24.716       15.501
 #> 100% 47.171       23.816
+```
+
+## Individual Specific Loadings
+
+The models have used till now are in this form
+
+![\\begin{align\*}
+ Y\_{ij} &= \\begin{cases} 1 & \\vec x\_{ij}^\\top\\vec\\beta + 
+   R\_{ij} + \\sum\_{k = 1}^K \\sigma\_kU\_{ikj} &gt; 0 \\\\ 
+   0 & \\text{otherwise} \\end{cases} \\\\
+ (U\_{ik1}, \\dots,  U\_{ikn\_i})^\\top &\\sim N^{(n\_i)}(\\vec 0, C\_{ik}) \\\\
+ R\_{ij} &\\sim N(0, 1)\\end{align\*}](https://render.githubusercontent.com/render/math?math=%5Cbegin%7Balign%2A%7D%0A%20Y_%7Bij%7D%20%26%3D%20%5Cbegin%7Bcases%7D%201%20%26%20%5Cvec%20x_%7Bij%7D%5E%5Ctop%5Cvec%5Cbeta%20%2B%20%0A%20%20%20R_%7Bij%7D%20%2B%20%5Csum_%7Bk%20%3D%201%7D%5EK%20%5Csigma_kU_%7Bikj%7D%20%3E%200%20%5C%5C%20%0A%20%20%200%20%26%20%5Ctext%7Botherwise%7D%20%5Cend%7Bcases%7D%20%5C%5C%0A%20%28U_%7Bik1%7D%2C%20%5Cdots%2C%20%20U_%7Bikn_i%7D%29%5E%5Ctop%20%26%5Csim%20N%5E%7B%28n_i%29%7D%28%5Cvec%200%2C%20C_%7Bik%7D%29%20%5C%5C%0A%20R_%7Bij%7D%20%26%5Csim%20N%280%2C%201%29%5Cend%7Balign%2A%7D "\begin{align*}
+ Y_{ij} &= \begin{cases} 1 & \vec x_{ij}^\top\vec\beta + 
+   R_{ij} + \sum_{k = 1}^K \sigma_kU_{ikj} > 0 \\ 
+   0 & \text{otherwise} \end{cases} \\
+ (U_{ik1}, \dots,  U_{ikn_i})^\top &\sim N^{(n_i)}(\vec 0, C_{ik}) \\
+ R_{ij} &\sim N(0, 1)\end{align*}")
+
+for known fixed effects covariates
+![\\vec x\_{ij}](https://render.githubusercontent.com/render/math?math=%5Cvec%20x_%7Bij%7D "\vec x_{ij}")
+and scale matrices
+![C\_{ij}](https://render.githubusercontent.com/render/math?math=C_%7Bij%7D "C_{ij}").
+The
+![U\_{ikj}](https://render.githubusercontent.com/render/math?math=U_%7Bikj%7D "U_{ikj}")
+is the
+![k](https://render.githubusercontent.com/render/math?math=k "k")’th
+effect on individual
+![j](https://render.githubusercontent.com/render/math?math=j "j") in
+cluster
+![i](https://render.githubusercontent.com/render/math?math=i "i"). For
+instance, this could be the genetic effect or an environmental effect.
+
+We may consider the case where all individuals load differently on each
+of the random effects. A model to incorporate such effects is
+
+![\\begin{align\*}
+ Y\_{ij} &= \\begin{cases} 1 & \\vec x\_{ij}^\\top\\vec\\beta + 
+   R\_{ij} + \\sum\_{k = 1}^K \\sigma\_k(\\vec z\_{ij})U\_{ikj} &gt; 0 \\\\ 
+   0 & \\text{otherwise} \\end{cases} \\\\
+ \\sigma\_k(\\vec z\_{ij}) &= \\exp(\\vec\\theta\_k^\\top\\vec z\_{ij}) \\\\
+ (U\_{ik1}, \\dots,  U\_{ikn\_i})^\\top &\\sim N^{(n\_i)}(\\vec 0, C\_{ik}) \\\\
+ R\_{ij} &\\sim N(0, 1)\\end{align\*}](https://render.githubusercontent.com/render/math?math=%5Cbegin%7Balign%2A%7D%0A%20Y_%7Bij%7D%20%26%3D%20%5Cbegin%7Bcases%7D%201%20%26%20%5Cvec%20x_%7Bij%7D%5E%5Ctop%5Cvec%5Cbeta%20%2B%20%0A%20%20%20R_%7Bij%7D%20%2B%20%5Csum_%7Bk%20%3D%201%7D%5EK%20%5Csigma_k%28%5Cvec%20z_%7Bij%7D%29U_%7Bikj%7D%20%3E%200%20%5C%5C%20%0A%20%20%200%20%26%20%5Ctext%7Botherwise%7D%20%5Cend%7Bcases%7D%20%5C%5C%0A%20%5Csigma_k%28%5Cvec%20z_%7Bij%7D%29%20%26%3D%20%5Cexp%28%5Cvec%5Ctheta_k%5E%5Ctop%5Cvec%20z_%7Bij%7D%29%20%5C%5C%0A%20%28U_%7Bik1%7D%2C%20%5Cdots%2C%20%20U_%7Bikn_i%7D%29%5E%5Ctop%20%26%5Csim%20N%5E%7B%28n_i%29%7D%28%5Cvec%200%2C%20C_%7Bik%7D%29%20%5C%5C%0A%20R_%7Bij%7D%20%26%5Csim%20N%280%2C%201%29%5Cend%7Balign%2A%7D "\begin{align*}
+ Y_{ij} &= \begin{cases} 1 & \vec x_{ij}^\top\vec\beta + 
+   R_{ij} + \sum_{k = 1}^K \sigma_k(\vec z_{ij})U_{ikj} > 0 \\ 
+   0 & \text{otherwise} \end{cases} \\
+ \sigma_k(\vec z_{ij}) &= \exp(\vec\theta_k^\top\vec z_{ij}) \\
+ (U_{ik1}, \dots,  U_{ikn_i})^\top &\sim N^{(n_i)}(\vec 0, C_{ik}) \\
+ R_{ij} &\sim N(0, 1)\end{align*}")
+
+where the
+![\\vec z\_{ij}](https://render.githubusercontent.com/render/math?math=%5Cvec%20z_%7Bij%7D "\vec z_{ij}")
+are known covariates. If all the scale matrices are correlation
+matrices, then this implies that the proportion of variance attributable
+to the
+![l](https://render.githubusercontent.com/render/math?math=l "l")’th
+effect for individual
+![j](https://render.githubusercontent.com/render/math?math=j "j") in
+cluster
+![i](https://render.githubusercontent.com/render/math?math=i "i") is
+
+![\\frac{\\sigma\_l^2(\\vec z\_{ij})^2}{1 + \\sum\_{k = 1}^K\\sigma\_k^2(\\vec z\_{ij})^2}](https://render.githubusercontent.com/render/math?math=%5Cfrac%7B%5Csigma_l%5E2%28%5Cvec%20z_%7Bij%7D%29%5E2%7D%7B1%20%2B%20%5Csum_%7Bk%20%3D%201%7D%5EK%5Csigma_k%5E2%28%5Cvec%20z_%7Bij%7D%29%5E2%7D "\frac{\sigma_l^2(\vec z_{ij})^2}{1 + \sum_{k = 1}^K\sigma_k^2(\vec z_{ij})^2}")
+
+rather than
+
+![\\frac{\\sigma\_l^2}{1 + \\sum\_{k = 1}^K\\sigma\_k^2}.](https://render.githubusercontent.com/render/math?math=%5Cfrac%7B%5Csigma_l%5E2%7D%7B1%20%2B%20%5Csum_%7Bk%20%3D%201%7D%5EK%5Csigma_k%5E2%7D. "\frac{\sigma_l^2}{1 + \sum_{k = 1}^K\sigma_k^2}.")
+
+The model can equivalent be written as
+
+![\\begin{align\*}
+ Y\_{ij} &= \\begin{cases} 1 & \\vec x\_{ij}^\\top\\vec\\beta + 
+   \\epsilon\_{ij} &gt; 0 \\\\ 
+   0 & \\text{otherwise} \\end{cases} \\\\
+ \\sigma\_k(\\vec z\_{ij}) &= \\exp(\\vec\\theta\_k^\\top\\vec z\_{ij}) \\\\
+ D\_{ik} &= \\text{diag}(\\sigma\_k(\\vec z\_{i1}), \\dots, \\sigma\_k(\\vec z\_{in\_i}))\\\\
+ (\\epsilon\_{i1}, \\dots,  \\epsilon\_{in\_i})^\\top &\\sim 
+   N^{(n\_i)}\\left(\\vec 0, I + \\sum\_{k = 1}^K D\_{ik}C\_{ik}D\_{ik}\\right)\\end{align\*}](https://render.githubusercontent.com/render/math?math=%5Cbegin%7Balign%2A%7D%0A%20Y_%7Bij%7D%20%26%3D%20%5Cbegin%7Bcases%7D%201%20%26%20%5Cvec%20x_%7Bij%7D%5E%5Ctop%5Cvec%5Cbeta%20%2B%20%0A%20%20%20%5Cepsilon_%7Bij%7D%20%3E%200%20%5C%5C%20%0A%20%20%200%20%26%20%5Ctext%7Botherwise%7D%20%5Cend%7Bcases%7D%20%5C%5C%0A%20%5Csigma_k%28%5Cvec%20z_%7Bij%7D%29%20%26%3D%20%5Cexp%28%5Cvec%5Ctheta_k%5E%5Ctop%5Cvec%20z_%7Bij%7D%29%20%5C%5C%0A%20D_%7Bik%7D%20%26%3D%20%5Ctext%7Bdiag%7D%28%5Csigma_k%28%5Cvec%20z_%7Bi1%7D%29%2C%20%5Cdots%2C%20%5Csigma_k%28%5Cvec%20z_%7Bin_i%7D%29%29%5C%5C%0A%20%28%5Cepsilon_%7Bi1%7D%2C%20%5Cdots%2C%20%20%5Cepsilon_%7Bin_i%7D%29%5E%5Ctop%20%26%5Csim%20%0A%20%20%20N%5E%7B%28n_i%29%7D%5Cleft%28%5Cvec%200%2C%20I%20%2B%20%5Csum_%7Bk%20%3D%201%7D%5EK%20D_%7Bik%7DC_%7Bik%7DD_%7Bik%7D%5Cright%29%5Cend%7Balign%2A%7D "\begin{align*}
+ Y_{ij} &= \begin{cases} 1 & \vec x_{ij}^\top\vec\beta + 
+   \epsilon_{ij} > 0 \\ 
+   0 & \text{otherwise} \end{cases} \\
+ \sigma_k(\vec z_{ij}) &= \exp(\vec\theta_k^\top\vec z_{ij}) \\
+ D_{ik} &= \text{diag}(\sigma_k(\vec z_{i1}), \dots, \sigma_k(\vec z_{in_i}))\\
+ (\epsilon_{i1}, \dots,  \epsilon_{in_i})^\top &\sim 
+   N^{(n_i)}\left(\vec 0, I + \sum_{k = 1}^K D_{ik}C_{ik}D_{ik}\right)\end{align*}")
+
+where
+![\\text{diag}(\\cdots)](https://render.githubusercontent.com/render/math?math=%5Ctext%7Bdiag%7D%28%5Ccdots%29 "\text{diag}(\cdots)")
+returns a diagonal matrix. This form is useful for simulations.
+
+As en example, we extend our previous simulation to
+
+![\\begin{align\*}
+ Y\_{ij} &= \\begin{cases} 1 & \\beta\_0 + \\beta\_1 B\_{ij} + \\sigma\_E(\\vec z\_{ij})E\_{ij} + \\sigma\_G(\\vec z\_{ij})G\_{ij} + R\_{ij} &gt; 0 \\\\ 0 & \\text{otherwise} \\end{cases} \\\\
+ B\_{ij} &\\sim \\text{Bin}(0.1, 1) \\\\
+ (G\_{i1}, \\dots, G\_{in\_{i}})^\\top &\\sim N^{(n\_i)}(\\vec 0, C\_{i1}) \\\\
+(E\_{i1}, \\dots, E\_{in\_{i}})^\\top &\\sim N^{(n\_i)}(\\vec 0, C\_{i2}) \\\\
+ R\_{ij} &\\sim N(0, 1)\\end{align\*}](https://render.githubusercontent.com/render/math?math=%5Cbegin%7Balign%2A%7D%0A%20Y_%7Bij%7D%20%26%3D%20%5Cbegin%7Bcases%7D%201%20%26%20%5Cbeta_0%20%2B%20%5Cbeta_1%20B_%7Bij%7D%20%2B%20%5Csigma_E%28%5Cvec%20z_%7Bij%7D%29E_%7Bij%7D%20%2B%20%5Csigma_G%28%5Cvec%20z_%7Bij%7D%29G_%7Bij%7D%20%2B%20R_%7Bij%7D%20%3E%200%20%5C%5C%200%20%26%20%5Ctext%7Botherwise%7D%20%5Cend%7Bcases%7D%20%5C%5C%0A%20B_%7Bij%7D%20%26%5Csim%20%5Ctext%7BBin%7D%280.1%2C%201%29%20%5C%5C%0A%20%28G_%7Bi1%7D%2C%20%5Cdots%2C%20G_%7Bin_%7Bi%7D%7D%29%5E%5Ctop%20%26%5Csim%20N%5E%7B%28n_i%29%7D%28%5Cvec%200%2C%20C_%7Bi1%7D%29%20%5C%5C%0A%28E_%7Bi1%7D%2C%20%5Cdots%2C%20E_%7Bin_%7Bi%7D%7D%29%5E%5Ctop%20%26%5Csim%20N%5E%7B%28n_i%29%7D%28%5Cvec%200%2C%20C_%7Bi2%7D%29%20%5C%5C%0A%20R_%7Bij%7D%20%26%5Csim%20N%280%2C%201%29%5Cend%7Balign%2A%7D "\begin{align*}
+ Y_{ij} &= \begin{cases} 1 & \beta_0 + \beta_1 B_{ij} + \sigma_E(\vec z_{ij})E_{ij} + \sigma_G(\vec z_{ij})G_{ij} + R_{ij} > 0 \\ 0 & \text{otherwise} \end{cases} \\
+ B_{ij} &\sim \text{Bin}(0.1, 1) \\
+ (G_{i1}, \dots, G_{in_{i}})^\top &\sim N^{(n_i)}(\vec 0, C_{i1}) \\
+(E_{i1}, \dots, E_{in_{i}})^\top &\sim N^{(n_i)}(\vec 0, C_{i2}) \\
+ R_{ij} &\sim N(0, 1)\end{align*}")
+
+where
+![\\vec z\_{ij}](https://render.githubusercontent.com/render/math?math=%5Cvec%20z_%7Bij%7D "\vec z_{ij}")
+is a vector containing an intercept, an indicator for whether the
+individual is a male, and a covariate between minus one and one. We will
+let the heritability for males be larger than for females but the
+environmental effect will be the same given the second covariate.
+
+We assign the new simulation function below:
+
+``` r
+# the covariates for the scale parameters, Z
+vcov_covs <- cbind(intercept = rep(1, 10), is_male = rep(1:0, 5), 
+                   cov = seq(-1, 1, length.out = 10))
+vcov_covs
+#>       intercept is_male     cov
+#>  [1,]         1       1 -1.0000
+#>  [2,]         1       0 -0.7778
+#>  [3,]         1       1 -0.5556
+#>  [4,]         1       0 -0.3333
+#>  [5,]         1       1 -0.1111
+#>  [6,]         1       0  0.1111
+#>  [7,]         1       1  0.3333
+#>  [8,]         1       0  0.5556
+#>  [9,]         1       1  0.7778
+#> [10,]         1       0  1.0000
+
+# set the parameters we will use
+beta <- c(-2, 4)
+thetas <- matrix(c(-0.394228680182135, 1.12739721457885, 1,
+                   -0.50580045583924, 0.64964149206513, -1), 3)
+
+# we can compute the individual specific proportion of variances as follows
+scales <- exp(vcov_covs %*% thetas)
+cbind(scales^2, 1) / rowSums(cbind(scales^2, 1))
+#>          [,1]    [,2]    [,3]
+#>  [1,] 0.05127 0.86131 0.08742
+#>  [2,] 0.03404 0.61120 0.35477
+#>  [3,] 0.22025 0.62536 0.15440
+#>  [4,] 0.12019 0.36478 0.51503
+#>  [5,] 0.56559 0.27142 0.16300
+#>  [6,] 0.30538 0.15664 0.53797
+#>  [7,] 0.83362 0.06761 0.09877
+#>  [8,] 0.55221 0.04787 0.39992
+#>  [9,] 0.94125 0.01290 0.04585
+#> [10,] 0.76197 0.01116 0.22687
+
+# the heritability differs between males and females but the environmental 
+# effect is the same given the second covariate as shown below
+vcov_covs_tmp <- vcov_covs
+vcov_covs_tmp[, 3] <- 0
+scales <- exp(vcov_covs_tmp %*% thetas)
+cbind(scales^2, 1) / rowSums(cbind(scales^2, 1))
+#>       [,1] [,2] [,3]
+#>  [1,] 0.65  0.2 0.15
+#>  [2,] 0.25  0.2 0.55
+#>  [3,] 0.65  0.2 0.15
+#>  [4,] 0.25  0.2 0.55
+#>  [5,] 0.65  0.2 0.15
+#>  [6,] 0.25  0.2 0.55
+#>  [7,] 0.65  0.2 0.15
+#>  [8,] 0.25  0.2 0.55
+#>  [9,] 0.65  0.2 0.15
+#> [10,] 0.25  0.2 0.55
+
+# simulates a data set. 
+# 
+# Args:
+#   n_fams: number of families.
+#   beta: the fixed effect coefficients.
+#   thetas: the coefficients for the scale parameters.
+sim_dat <- function(n_fams, beta, thetas){
+  # setup before the simulations
+  Cmat <- 2 * kinship(ped)
+  n_obs <- NROW(fam)
+  
+  scales <- exp(vcov_covs %*% thetas)
+  Sig <- diag(n_obs) + diag(scales[, 1]) %*% Cmat %*% diag(scales[, 1]) + 
+    diag(scales[, 2]) %*% C_env %*% diag(scales[, 2])
+  Sig_chol <- chol(Sig)
+  
+  # simulate the data
+  out <- replicate(
+    n_fams, {
+      # simulate covariates
+      X <- cbind(`(Intercept)` = 1, Binary = runif(n_obs) > .9)
+      
+      # assign the linear predictor + noise
+      eta <- drop(X %*% beta) + drop(rnorm(n_obs) %*% Sig_chol)
+      
+      # return the list in the format needed for the package. We also have to 
+      # pass the covariates for the scale parameters
+      list(y = as.numeric(eta > 0), X = X, Z = vcov_covs, scale_mats = list(
+        Genetic = Cmat, Environment = C_env))
+    }, simplify = FALSE)
+  
+  # add attributes with the true values and return 
+  attributes(out) <- list(beta = beta, thetas = thetas)
+  out
+}
+```
+
+A data set is sampled below and the model is estimated.
+
+``` r
+# simulate a data set
+set.seed(72466753)
+dat <- sim_dat(n_fams = 1000L, beta = beta, thetas = thetas)
+
+# evaluate the log marginal likelihood at the true parameters
+library(pedmod)
+ll_terms <- pedigree_ll_terms_loadings(dat, max_threads = 4L)
+
+logLik_truth <- eval_pedigree_ll(
+  ll_terms, c(beta, thetas), maxvls = 25000L, minvls = 1000L, 
+  abs_eps = 0, rel_eps = 1e-3, n_threads = 4L)
+
+# remove the duplicated terms and use weights. This can be done more efficiently
+# and may not catch all duplicates
+dat_unqiue <- dat[!duplicated(dat)]
+length(dat_unqiue) # number of unique terms
+#> [1] 633
+
+# get the weights. This can be written in a much more efficient way
+c_weights <- sapply(dat_unqiue, function(x)
+  sum(sapply(dat, identical, y = x)))
+
+# evaluate log likelihood again and show that we got the same
+ll_terms <- pedigree_ll_terms_loadings(dat_unqiue, max_threads = 4L)
+
+logLik_truth_weighted <- eval_pedigree_ll(
+  ll_terms, c(beta, thetas), maxvls = 25000L, minvls = 1000L, 
+  abs_eps = 0, rel_eps = 1e-3, cluster_weights = c_weights, n_threads = 4L)
+
+print(logLik_truth_weighted, digits = 8)
+#> [1] -4373.3409
+#> attr(,"n_fails")
+#> [1] 0
+#> attr(,"std")
+#> [1] 0.014630429
+print(logLik_truth, digits = 8)
+#> [1] -4373.3537
+#> attr(,"n_fails")
+#> [1] 0
+#> attr(,"std")
+#> [1] 0.0061467664
+
+# get the starting values
+system.time(start <- pedmod_start_loadings(
+  ll_terms, data = dat_unqiue, cluster_weights = c_weights))
+#>    user  system elapsed 
+#>   0.010   0.004   0.013
+
+# find the maximum likelihood estimator
+set.seed(1)
+system.time(
+  opt_res <- pedmod_opt(
+    ll_terms, par = start$par, maxvls = 25000L, minvls = 5000L, 
+    abs_eps = 0, rel_eps = 1e-3, n_threads = 4L, use_aprx = TRUE, 
+    cluster_weights = c_weights))
+#>    user  system elapsed 
+#> 264.226   0.177  66.383
+```
+
+We compare the maximum likelihood estimator with the true values below.
+
+``` r
+# the fixed effects
+rbind(Truth = beta, 
+      Start = head(start$par, 2), 
+      Estimate = head(opt_res$par, 2))
+#>          (Intercept) Binary
+#> Truth         -2.000  4.000
+#> Start         -1.102  2.184
+#> Estimate      -2.106  4.283
+
+# the scale coefficients
+array(c(thetas, tail(start$par, -2), tail(opt_res$par, -2)), 
+      dim = c(dim(thetas), 3L), 
+      dimnames = list(NULL, NULL, c("Truth", "Start", "Estimate")))
+#> , , Truth
+#> 
+#>         [,1]    [,2]
+#> [1,] -0.3942 -0.5058
+#> [2,]  1.1274  0.6496
+#> [3,]  1.0000 -1.0000
+#> 
+#> , , Start
+#> 
+#>            [,1]       [,2]
+#> [1,] -6.931e-01 -6.931e-01
+#> [2,]  1.801e-15  1.801e-15
+#> [3,] -2.701e-15 -2.701e-15
+#> 
+#> , , Estimate
+#> 
+#>         [,1]    [,2]
+#> [1,] -0.3049 -0.4716
+#> [2,]  1.0951  0.5471
+#> [3,]  1.0203 -1.1915
+
+# compare the proportion of variance for the individual. First the estimates
+thetas_est <- matrix(tail(opt_res$par, -2), NCOL(vcov_covs))
+scales <- exp(vcov_covs %*% thetas_est)
+cbind(scales^2, 1) / rowSums(cbind(scales^2, 1))
+#>          [,1]     [,2]    [,3]
+#>  [1,] 0.04433 0.885422 0.07024
+#>  [2,] 0.03091 0.691014 0.27808
+#>  [3,] 0.22544 0.630351 0.14421
+#>  [4,] 0.12882 0.403229 0.46795
+#>  [5,] 0.60615 0.237294 0.15656
+#>  [6,] 0.34424 0.150863 0.50489
+#>  [7,] 0.86274 0.047287 0.08997
+#>  [8,] 0.60477 0.037107 0.35813
+#>  [9,] 0.95258 0.007310 0.04011
+#> [10,] 0.80148 0.006885 0.19163
+
+# then the true proportions
+scales <- exp(vcov_covs %*% thetas)
+cbind(scales^2, 1) / rowSums(cbind(scales^2, 1))
+#>          [,1]    [,2]    [,3]
+#>  [1,] 0.05127 0.86131 0.08742
+#>  [2,] 0.03404 0.61120 0.35477
+#>  [3,] 0.22025 0.62536 0.15440
+#>  [4,] 0.12019 0.36478 0.51503
+#>  [5,] 0.56559 0.27142 0.16300
+#>  [6,] 0.30538 0.15664 0.53797
+#>  [7,] 0.83362 0.06761 0.09877
+#>  [8,] 0.55221 0.04787 0.39992
+#>  [9,] 0.94125 0.01290 0.04585
+#> [10,] 0.76197 0.01116 0.22687
+
+# the log likelihood at the true parameters and at the estimate
+print(logLik_truth_weighted, digits = 8)
+#> [1] -4373.3409
+#> attr(,"n_fails")
+#> [1] 0
+#> attr(,"std")
+#> [1] 0.014630429
+print(-opt_res$value, digits = 8)
+#> [1] -4370.683
 ```
 
 ## More Complicated Example

@@ -1,3 +1,14 @@
+.not_supported_for <- function(x)
+  stop(sprintf("'%s' does not does inherit from an implemented type",
+               deparse(substitute(x))))
+
+.is_implemented_ptr <- function(x)
+  inherits(x, c("pedigree_ll_terms_ptr", "pedigree_ll_terms_loadings_ptr"))
+
+.warn_on_standardized <- function(standardized)
+  if(standardized)
+    warning("standardized makes no difference for loadings")
+
 #' @rdname eval_pedigree
 #'
 #' @title Approximate the Log Marginal Likelihood
@@ -10,9 +21,13 @@
 #' @param minvls minimum number of samples for each
 #' marginal likelihood term. Negative values provides a
 #' default which depends on the dimension of the integration.
-#' @param ptr object from \code{\link{pedigree_ll_terms}}.
-#' @param par numeric vector with fixed effect coefficients and log scale
-#' parameters. The log scale parameters should be last.
+#' @param ptr object from \code{\link{pedigree_ll_terms}} or
+#' \code{\link{pedigree_ll_terms_loadings}}.
+#' @param par numeric vector with parameters. For an object from
+#' \code{\link{pedigree_ll_terms}} these are the fixed effect coefficients and
+#' log scale parameters. The log scale parameters should be last. For an object
+#' from \code{\link{pedigree_ll_terms_loadings}} these are the fixed effects
+#' and the coefficients for scale parameters.
 #' @param indices zero-based vector with indices of which log marginal
 #' likelihood terms to include. Use \code{NULL} if all indices should be
 #' used.
@@ -111,14 +126,43 @@
 #' all.equal(deriv_dum, deriv_w_weight, tolerance = 1e-3)
 #'
 #' @export
-eval_pedigree_ll <- function(ptr, par, maxvls, abs_eps, rel_eps,
-                             indices = NULL, minvls = -1L, do_reorder = TRUE,
-                             use_aprx = FALSE, n_threads = 1L,
-                             cluster_weights = NULL, standardized = FALSE,
-                             method = 0L){
+eval_pedigree_ll <- function(
+  ptr, par, maxvls, abs_eps, rel_eps, indices = NULL, minvls = -1L,
+  do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L, cluster_weights = NULL,
+  standardized = FALSE, method = 0L){
+  fun <- if(inherits(ptr, "pedigree_ll_terms_ptr")){
+    .eval_pedigree_ll
+  } else if(inherits(ptr, "pedigree_ll_terms_loadings_ptr")){
+    .eval_pedigree_ll_loadings
+  } else
+    .not_supported_for(ptr)
+
+  fun(ptr = ptr, par = par, maxvls = maxvls, abs_eps = abs_eps,
+      rel_eps = rel_eps, indices = indices, minvls = minvls,
+      do_reorder = do_reorder, use_aprx = use_aprx, n_threads = n_threads,
+      cluster_weights = cluster_weights, standardized = standardized,
+      method = method)
+}
+
+.eval_pedigree_ll <- function(
+  ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder,
+  use_aprx, n_threads, cluster_weights, standardized, method){
   if(standardized)
     par <- standardized_to_direct(par = par, n_scales = get_n_scales(ptr))
+
   eval_pedigree_ll_cpp(
+    ptr = ptr, par = par, maxvls = maxvls, abs_eps = abs_eps, rel_eps = rel_eps,
+    indices = indices, minvls = minvls, do_reorder = do_reorder,
+    use_aprx = use_aprx, n_threads = n_threads,
+    cluster_weights = cluster_weights, method = method)
+}
+
+.eval_pedigree_ll_loadings <- function(
+  ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder,
+  use_aprx, n_threads, cluster_weights, standardized, method){
+  .warn_on_standardized(standardized)
+
+  eval_pedigree_ll_loadings_cpp(
     ptr = ptr, par = par, maxvls = maxvls, abs_eps = abs_eps, rel_eps = rel_eps,
     indices = indices, minvls = minvls, do_reorder = do_reorder,
     use_aprx = use_aprx, n_threads = n_threads,
@@ -137,11 +181,27 @@ eval_pedigree_ll <- function(ptr, par, maxvls, abs_eps, rel_eps,
 #' error from the likelihood approximation.
 #'
 #' @export
-eval_pedigree_grad <- function(ptr, par, maxvls, abs_eps, rel_eps,
-                               indices = NULL, minvls = -1L, do_reorder = TRUE,
-                               use_aprx = FALSE, n_threads = 1L,
-                               cluster_weights = NULL, standardized = FALSE,
-                               method = 0L){
+eval_pedigree_grad <- function(
+  ptr, par, maxvls, abs_eps, rel_eps, indices = NULL, minvls = -1L,
+  do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L, cluster_weights = NULL,
+  standardized = FALSE, method = 0L){
+  fun <- if(inherits(ptr, "pedigree_ll_terms_ptr")){
+    .eval_pedigree_grad
+  } else if(inherits(ptr, "pedigree_ll_terms_loadings_ptr")){
+    .eval_pedigree_grad_loadings
+  } else
+    .not_supported_for(ptr)
+
+  fun(ptr = ptr, par = par, maxvls = maxvls, abs_eps = abs_eps,
+      rel_eps = rel_eps, indices = indices, minvls = minvls,
+      do_reorder = do_reorder, use_aprx = use_aprx, n_threads = n_threads,
+      cluster_weights = cluster_weights, standardized = standardized,
+      method = method)
+}
+
+.eval_pedigree_grad <- function(
+  ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder,
+  use_aprx, n_threads, cluster_weights, standardized, method){
   if(standardized)
     par <- standardized_to_direct(par = par, n_scales = get_n_scales(ptr),
                                   jacobian = TRUE)
@@ -158,4 +218,16 @@ eval_pedigree_grad <- function(ptr, par, maxvls, abs_eps, rel_eps,
   res <- drop(out %*% attr(par, "jacobian"))
   attributes(res) <- attributes(out)
   res
+}
+
+.eval_pedigree_grad_loadings <- function(
+  ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder,
+  use_aprx, n_threads, cluster_weights, standardized, method){
+  .warn_on_standardized(standardized)
+
+  eval_pedigree_grad_loadings_cpp(
+    ptr = ptr, par = par, maxvls = maxvls, abs_eps = abs_eps, rel_eps = rel_eps,
+    indices = indices, minvls = minvls, do_reorder = do_reorder,
+    use_aprx = use_aprx, n_threads = n_threads,
+    cluster_weights = cluster_weights, method = method)
 }

@@ -228,6 +228,7 @@ unsigned eval_get_n_threads
 //' with an:
 //' \itemize{
 //'   \item{\code{"X"}}{ element with the design matrix for the fixed effect,}
+//'   \item{\code{"Z"}}{ element with the design matrix for the loadings of the effects (only needed for \code{pedigree_ll_terms_loadings}),}
 //'   \item{\code{"y"}}{ element with the zero-one outcomes, and}
 //'   \item{\code{"scale_mats"}}{ element with a list where each element is a
 //' scale/correlation matrix for a particular type of effect.}
@@ -244,7 +245,8 @@ unsigned eval_get_n_threads
 //' Thus, it is often important that the user adds an intercept column
 //' to these matrices as it is hardly ever justified to not include the
 //' intercept (the exceptions being e.g. when splines are used which include
-//' the intercept and with certain dummy designs).
+//' the intercept and with certain dummy designs). This equally holds for
+//' the \code{Z} matrices with \code{pedigree_ll_terms_loadings}.
 //'
 //' @examples
 //' # three families as an example
@@ -302,14 +304,25 @@ SEXP pedigree_ll_terms(Rcpp::List data, unsigned const max_threads = 1,
   return out;
 }
 
-// [[Rcpp::export]]
+// [[Rcpp::export(.get_n_scales, rng = false)]]
 int get_n_scales(SEXP ptr){
-  return Rcpp::XPtr<pedigree_terms>(ptr)->terms[0].l_factor.scale_mats.size();
+  return Rcpp::XPtr<pedigree_terms>(ptr)->terms[0].n_scales();
 }
 
-// [[Rcpp::export]]
+// [[Rcpp::export(.get_n_scales_loadings, rng = false)]]
+int get_n_scales_loadings(SEXP ptr){
+  Rcpp::XPtr<pedigree_terms_loading> obj(ptr);
+  return obj->terms[0].n_scales() * obj->terms[0].n_scale_coefs();
+}
+
+// [[Rcpp::export(.get_n_terms, rng = false)]]
 int get_n_terms(SEXP ptr){
   return Rcpp::XPtr<pedigree_terms>(ptr)->terms.size();
+}
+
+// [[Rcpp::export(.get_n_terms_loadings, rng = false)]]
+int get_n_terms_loadings(SEXP ptr){
+  return Rcpp::XPtr<pedigree_terms_loading>(ptr)->terms.size();
 }
 
 // [[Rcpp::export("eval_pedigree_ll_cpp")]]
@@ -528,6 +541,8 @@ Rcpp::NumericVector eval_pedigree_grad
   return grad;
 }
 
+//' @rdname pedigree_ll_terms
+//'
 //' @export
 // [[Rcpp::export]]
 SEXP pedigree_ll_terms_loadings

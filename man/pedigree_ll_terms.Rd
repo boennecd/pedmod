@@ -2,15 +2,19 @@
 % Please edit documentation in R/RcppExports.R
 \name{pedigree_ll_terms}
 \alias{pedigree_ll_terms}
+\alias{pedigree_ll_terms_loadings}
 \title{Get a C++ Object for Log Marginal Likelihood Approximations}
 \usage{
 pedigree_ll_terms(data, max_threads = 1L, n_sequences = 8L)
+
+pedigree_ll_terms_loadings(data, max_threads = 1L, n_sequences = 8L)
 }
 \arguments{
 \item{data}{\code{\link{list}} where each element is a list for a cluster
 with an:
 \itemize{
   \item{\code{"X"}}{ element with the design matrix for the fixed effect,}
+  \item{\code{"Z"}}{ element with the design matrix for the loadings of the effects (only needed for \code{pedigree_ll_terms_loadings}),}
   \item{\code{"y"}}{ element with the zero-one outcomes, and}
   \item{\code{"scale_mats"}}{ element with a list where each element is a
 scale/correlation matrix for a particular type of effect.}
@@ -33,7 +37,8 @@ like what \code{\link{lm.fit}} and \code{\link{glm.fit}} do.
 Thus, it is often important that the user adds an intercept column
 to these matrices as it is hardly ever justified to not include the
 intercept (the exceptions being e.g. when splines are used which include
-the intercept and with certain dummy designs).
+the intercept and with certain dummy designs). This equally holds for
+the \code{Z} matrices with \code{pedigree_ll_terms_loadings}.
 }
 \examples{
 # three families as an example

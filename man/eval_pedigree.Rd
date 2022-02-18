@@ -38,10 +38,14 @@ eval_pedigree_grad(
 )
 }
 \arguments{
-\item{ptr}{object from \code{\link{pedigree_ll_terms}}.}
+\item{ptr}{object from \code{\link{pedigree_ll_terms}} or
+\code{\link{pedigree_ll_terms_loadings}}.}
 
-\item{par}{numeric vector with fixed effect coefficients and log scale
-parameters. The log scale parameters should be last.}
+\item{par}{numeric vector with parameters. For an object from
+\code{\link{pedigree_ll_terms}} these are the fixed effect coefficients and
+log scale parameters. The log scale parameters should be last. For an object
+from \code{\link{pedigree_ll_terms_loadings}} these are the fixed effects
+and the coefficients for scale parameters.}
 
 \item{maxvls}{maximum number of samples in the approximation for each
 marginal likelihood term.}

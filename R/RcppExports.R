@@ -88,6 +88,7 @@ mvndst <- function(lower, upper, mu, sigma, maxvls = 25000L, abs_eps = .001, rel
 #' with an:
 #' \itemize{
 #'   \item{\code{"X"}}{ element with the design matrix for the fixed effect,}
+#'   \item{\code{"Z"}}{ element with the design matrix for the loadings of the effects (only needed for \code{pedigree_ll_terms_loadings}),}
 #'   \item{\code{"y"}}{ element with the zero-one outcomes, and}
 #'   \item{\code{"scale_mats"}}{ element with a list where each element is a
 #' scale/correlation matrix for a particular type of effect.}
@@ -104,7 +105,8 @@ mvndst <- function(lower, upper, mu, sigma, maxvls = 25000L, abs_eps = .001, rel
 #' Thus, it is often important that the user adds an intercept column
 #' to these matrices as it is hardly ever justified to not include the
 #' intercept (the exceptions being e.g. when splines are used which include
-#' the intercept and with certain dummy designs).
+#' the intercept and with certain dummy designs). This equally holds for
+#' the \code{Z} matrices with \code{pedigree_ll_terms_loadings}.
 #'
 #' @examples
 #' # three families as an example
@@ -157,12 +159,20 @@ pedigree_ll_terms <- function(data, max_threads = 1L, n_sequences = 8L) {
     .Call(`_pedmod_pedigree_ll_terms`, data, max_threads, n_sequences)
 }
 
-get_n_scales <- function(ptr) {
+.get_n_scales <- function(ptr) {
     .Call(`_pedmod_get_n_scales`, ptr)
 }
 
-get_n_terms <- function(ptr) {
+.get_n_scales_loadings <- function(ptr) {
+    .Call(`_pedmod_get_n_scales_loadings`, ptr)
+}
+
+.get_n_terms <- function(ptr) {
     .Call(`_pedmod_get_n_terms`, ptr)
+}
+
+.get_n_terms_loadings <- function(ptr) {
+    .Call(`_pedmod_get_n_terms_loadings`, ptr)
 }
 
 eval_pedigree_ll_cpp <- function(ptr, par, maxvls, abs_eps, rel_eps, indices = NULL, minvls = -1L, do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L, cluster_weights = NULL, method = 0L) {
@@ -173,6 +183,8 @@ eval_pedigree_grad_cpp <- function(ptr, par, maxvls, abs_eps, rel_eps, indices =
     .Call(`_pedmod_eval_pedigree_grad`, ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder, use_aprx, n_threads, cluster_weights, method)
 }
 
+#' @rdname pedigree_ll_terms
+#'
 #' @export
 pedigree_ll_terms_loadings <- function(data, max_threads = 1L, n_sequences = 8L) {
     .Call(`_pedmod_pedigree_ll_terms_loadings`, data, max_threads, n_sequences)

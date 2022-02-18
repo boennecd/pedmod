@@ -124,6 +124,12 @@ with respect to $(\vec\beta^\top, 2\log\sigma_1,\dots, 2\log\sigma_K)^\top$
 (that is, we work with $\psi_k = 2\log\sigma_k$) or 
 $(\vec\gamma^\top, \psi_1, \dots, \psi_K)$.
 
+In some cases, it may be hypothesized that some individuals are less effected by 
+e.g. their genes than others. A model to incorporate such effects is 
+implemented in the `pedigree_ll_terms_loadings` function.
+See the [Individual Specific Loadings](#individual-specific-loadings) section 
+for details and examples.
+
 We have re-written the Fortran code by @Genz02 in C++, made it easy to 
 extend from a log marginal likelihood approximation to other approximations 
 such as the derivatives, and added less precise but faster approximations 
@@ -222,7 +228,7 @@ $$\begin{align*}
  Y_{ij} &= \begin{cases} 1 & \beta_0 + \beta_1 X_{ij} + \beta_2 B_{ij} + G_{ij} + R_{ij} > 0 \\ 0 & \text{otherwise} \end{cases} \\
  X_{ij} &\sim N(0, 1) \\
  B_{ij} &\sim \text{Bin}(0.5, 1) \\
- (G_{i1}, \dots G_{in_{i}})^\top &\sim N^{(n_i)}(\vec 0, \sigma^2 C_{i1}) \\
+ (G_{i1}, \dots, G_{in_{i}})^\top &\sim N^{(n_i)}(\vec 0, \sigma^2 C_{i1}) \\
  R_{ij} &\sim N(0, 1)\end{align*}$$
  
 where $C_{i1}$ is two times the kinship matrix and $X_{ij}$ and 
@@ -949,9 +955,9 @@ The model is
 $$\begin{align*}
  Y_{ij} &= \begin{cases} 1 & \beta_0 + \beta_1 B_{ij} + E_{ij} + G_{ij} + R_{ij} > 0 \\ 0 & \text{otherwise} \end{cases} \\
  X_{ij} &\sim N(0, 1) \\
- B_{ij} &\sim \text{Bin}(0.5, 1) \\
- (G_{i1}, \dots G_{in_{i}})^\top &\sim N^{(n_i)}(\vec 0, \sigma^2_G C_{i1}) \\
-(E_{i1}, \dots E_{in_{i}})^\top &\sim N^{(n_i)}(\vec 0, \sigma^2_E C_{i2}) \\
+ B_{ij} &\sim \text{Bin}(0.1, 1) \\
+ (G_{i1}, \dots, G_{in_{i}})^\top &\sim N^{(n_i)}(\vec 0, \sigma^2_G C_{i1}) \\
+(E_{i1}, \dots, E_{in_{i}})^\top &\sim N^{(n_i)}(\vec 0, \sigma^2_E C_{i2}) \\
  R_{ij} &\sim N(0, 1)\end{align*}$$
  
 where $C_{i1}$ is two times the kinship matrix, $C_{i2}$ is singular matrix
@@ -1513,6 +1519,209 @@ time_vals <- sapply(sim_study, function(x) {
 apply(time_vals, 1:2, mean)
 apply(time_vals, 1:2, sd)
 apply(time_vals, 1:2, quantile)
+```
+
+## Individual Specific Loadings
+
+The models have used till now are in this form 
+
+$$\begin{align*}
+ Y_{ij} &= \begin{cases} 1 & \vec x_{ij}^\top\vec\beta + 
+   R_{ij} + \sum_{k = 1}^K \sigma_kU_{ikj} > 0 \\ 
+   0 & \text{otherwise} \end{cases} \\
+ (U_{ik1}, \dots,  U_{ikn_i})^\top &\sim N^{(n_i)}(\vec 0, C_{ik}) \\
+ R_{ij} &\sim N(0, 1)\end{align*}$$
+ 
+for known fixed effects covariates $\vec x_{ij}$ and scale matrices $C_{ij}$.
+The $U_{ikj}$ is the $k$'th effect on individual $j$ in cluster $i$. 
+For instance, this could be the genetic effect or an environmental effect. 
+
+We may consider the case where all individuals load differently on each of 
+the random effects. A model to incorporate such effects is
+
+$$\begin{align*}
+ Y_{ij} &= \begin{cases} 1 & \vec x_{ij}^\top\vec\beta + 
+   R_{ij} + \sum_{k = 1}^K \sigma_k(\vec z_{ij})U_{ikj} > 0 \\ 
+   0 & \text{otherwise} \end{cases} \\
+ \sigma_k(\vec z_{ij}) &= \exp(\vec\theta_k^\top\vec z_{ij}) \\
+ (U_{ik1}, \dots,  U_{ikn_i})^\top &\sim N^{(n_i)}(\vec 0, C_{ik}) \\
+ R_{ij} &\sim N(0, 1)\end{align*}$$
+ 
+where the $\vec z_{ij}$ are known covariates. 
+If all the scale matrices are correlation matrices, then this implies that the
+proportion of variance attributable to the $l$'th effect for individual $j$ in 
+cluster $i$ is 
+
+$$\frac{\sigma_l^2(\vec z_{ij})^2}{1 + \sum_{k = 1}^K\sigma_k^2(\vec z_{ij})^2}$$
+rather than
+
+$$\frac{\sigma_l^2}{1 + \sum_{k = 1}^K\sigma_k^2}.$$
+
+The model can equivalent be written as
+
+$$\begin{align*}
+ Y_{ij} &= \begin{cases} 1 & \vec x_{ij}^\top\vec\beta + 
+   \epsilon_{ij} > 0 \\ 
+   0 & \text{otherwise} \end{cases} \\
+ \sigma_k(\vec z_{ij}) &= \exp(\vec\theta_k^\top\vec z_{ij}) \\
+ D_{ik} &= \text{diag}(\sigma_k(\vec z_{i1}), \dots, \sigma_k(\vec z_{in_i}))\\
+ (\epsilon_{i1}, \dots,  \epsilon_{in_i})^\top &\sim 
+   N^{(n_i)}\left(\vec 0, I + \sum_{k = 1}^K D_{ik}C_{ik}D_{ik}\right)\end{align*}$$
+   
+where $\text{diag}(\cdots)$ returns a diagonal matrix. This form is useful for 
+simulations. 
+
+As en example, we extend our previous simulation to 
+
+$$\begin{align*}
+ Y_{ij} &= \begin{cases} 1 & \beta_0 + \beta_1 B_{ij} + \sigma_E(\vec z_{ij})E_{ij} + \sigma_G(\vec z_{ij})G_{ij} + R_{ij} > 0 \\ 0 & \text{otherwise} \end{cases} \\
+ B_{ij} &\sim \text{Bin}(0.1, 1) \\
+ (G_{i1}, \dots, G_{in_{i}})^\top &\sim N^{(n_i)}(\vec 0, C_{i1}) \\
+(E_{i1}, \dots, E_{in_{i}})^\top &\sim N^{(n_i)}(\vec 0, C_{i2}) \\
+ R_{ij} &\sim N(0, 1)\end{align*}$$
+ 
+where $\vec z_{ij}$ is a vector containing an intercept, an indicator for 
+whether the individual is a male, and a covariate between minus one and one. 
+We will let the heritability for males be larger than for females but the 
+environmental effect will be the same given the second covariate. 
+
+```{r clean_pre_loading, echo = FALSE}
+rm(list = setdiff(ls(), c("ped", "fam", "C_env")))
+```
+
+We assign the new simulation function below:
+
+```{r loading_assign_sim_dat}
+# the covariates for the scale parameters, Z
+vcov_covs <- cbind(intercept = rep(1, 10), is_male = rep(1:0, 5), 
+                   cov = seq(-1, 1, length.out = 10))
+vcov_covs
+
+# set the parameters we will use
+beta <- c(-2, 4)
+thetas <- matrix(c(-0.394228680182135, 1.12739721457885, 1,
+                   -0.50580045583924, 0.64964149206513, -1), 3)
+
+# we can compute the individual specific proportion of variances as follows
+scales <- exp(vcov_covs %*% thetas)
+cbind(scales^2, 1) / rowSums(cbind(scales^2, 1))
+
+# the heritability differs between males and females but the environmental 
+# effect is the same given the second covariate as shown below
+vcov_covs_tmp <- vcov_covs
+vcov_covs_tmp[, 3] <- 0
+scales <- exp(vcov_covs_tmp %*% thetas)
+cbind(scales^2, 1) / rowSums(cbind(scales^2, 1))
+
+# simulates a data set. 
+# 
+# Args:
+#   n_fams: number of families.
+#   beta: the fixed effect coefficients.
+#   thetas: the coefficients for the scale parameters.
+sim_dat <- function(n_fams, beta, thetas){
+  # setup before the simulations
+  Cmat <- 2 * kinship(ped)
+  n_obs <- NROW(fam)
+  
+  scales <- exp(vcov_covs %*% thetas)
+  Sig <- diag(n_obs) + diag(scales[, 1]) %*% Cmat %*% diag(scales[, 1]) + 
+    diag(scales[, 2]) %*% C_env %*% diag(scales[, 2])
+  Sig_chol <- chol(Sig)
+  
+  # simulate the data
+  out <- replicate(
+    n_fams, {
+      # simulate covariates
+      X <- cbind(`(Intercept)` = 1, Binary = runif(n_obs) > .9)
+      
+      # assign the linear predictor + noise
+      eta <- drop(X %*% beta) + drop(rnorm(n_obs) %*% Sig_chol)
+      
+      # return the list in the format needed for the package. We also have to 
+      # pass the covariates for the scale parameters
+      list(y = as.numeric(eta > 0), X = X, Z = vcov_covs, scale_mats = list(
+        Genetic = Cmat, Environment = C_env))
+    }, simplify = FALSE)
+  
+  # add attributes with the true values and return 
+  attributes(out) <- list(beta = beta, thetas = thetas)
+  out
+}
+```
+
+A data set is sampled below and the model is estimated.
+
+```{r loading_one_dat, cache = 1}
+# simulate a data set
+set.seed(72466753)
+dat <- sim_dat(n_fams = 1000L, beta = beta, thetas = thetas)
+
+# evaluate the log marginal likelihood at the true parameters
+library(pedmod)
+ll_terms <- pedigree_ll_terms_loadings(dat, max_threads = 4L)
+
+logLik_truth <- eval_pedigree_ll(
+  ll_terms, c(beta, thetas), maxvls = 25000L, minvls = 1000L, 
+  abs_eps = 0, rel_eps = 1e-3, n_threads = 4L)
+
+# remove the duplicated terms and use weights. This can be done more efficiently
+# and may not catch all duplicates
+dat_unqiue <- dat[!duplicated(dat)]
+length(dat_unqiue) # number of unique terms
+
+# get the weights. This can be written in a much more efficient way
+c_weights <- sapply(dat_unqiue, function(x)
+  sum(sapply(dat, identical, y = x)))
+
+# evaluate log likelihood again and show that we got the same
+ll_terms <- pedigree_ll_terms_loadings(dat_unqiue, max_threads = 4L)
+
+logLik_truth_weighted <- eval_pedigree_ll(
+  ll_terms, c(beta, thetas), maxvls = 25000L, minvls = 1000L, 
+  abs_eps = 0, rel_eps = 1e-3, cluster_weights = c_weights, n_threads = 4L)
+
+print(logLik_truth_weighted, digits = 8)
+print(logLik_truth, digits = 8)
+
+# get the starting values
+system.time(start <- pedmod_start_loadings(
+  ll_terms, data = dat_unqiue, cluster_weights = c_weights))
+
+# find the maximum likelihood estimator
+set.seed(1)
+system.time(
+  opt_res <- pedmod_opt(
+    ll_terms, par = start$par, maxvls = 25000L, minvls = 5000L, 
+    abs_eps = 0, rel_eps = 1e-3, n_threads = 4L, use_aprx = TRUE, 
+    cluster_weights = c_weights))
+```
+
+We compare the maximum likelihood estimator with the true values below.
+
+```{r loading_show_res}
+# the fixed effects
+rbind(Truth = beta, 
+      Start = head(start$par, 2), 
+      Estimate = head(opt_res$par, 2))
+
+# the scale coefficients
+array(c(thetas, tail(start$par, -2), tail(opt_res$par, -2)), 
+      dim = c(dim(thetas), 3L), 
+      dimnames = list(NULL, NULL, c("Truth", "Start", "Estimate")))
+
+# compare the proportion of variance for the individual. First the estimates
+thetas_est <- matrix(tail(opt_res$par, -2), NCOL(vcov_covs))
+scales <- exp(vcov_covs %*% thetas_est)
+cbind(scales^2, 1) / rowSums(cbind(scales^2, 1))
+
+# then the true proportions
+scales <- exp(vcov_covs %*% thetas)
+cbind(scales^2, 1) / rowSums(cbind(scales^2, 1))
+
+# the log likelihood at the true parameters and at the estimate
+print(logLik_truth_weighted, digits = 8)
+print(-opt_res$value, digits = 8)
 ```
 
 ## More Complicated Example

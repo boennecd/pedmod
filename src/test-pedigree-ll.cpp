@@ -75,9 +75,9 @@ context("pedigree_ll_term_loading unit tests") {
 
     constexpr double gr_shift{-1},
                        weight{.33};
-    double gr[n_par], var_est[n_par];
+    double gr[n_par], var_est[n_par + 1];
     std::fill(gr, gr + n_par, gr_shift);
-    std::fill(var_est, var_est + n_par, 0);
+    std::fill(var_est, var_est + n_par + 1, 0);
 
     expect_true(term.n_par() == n_par);
 

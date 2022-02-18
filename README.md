@@ -2514,6 +2514,117 @@ print(-opt_res$value, digits = 8)
 #> [1] -4370.683
 ```
 
+### Simulation Study
+
+We make a small simulation study below where we are interested in the
+estimation time and bias.
+
+``` r
+# the seeds we will use
+seeds <- c(36451989L, 18774630L, 76585289L, 31898455L, 55733878L, 99681114L, 37725150L, 99188448L, 66989159L, 20673587L, 47985954L, 42571905L, 53089211L, 18457743L, 96049437L, 70222325L, 86393368L, 45380572L, 81116968L, 48291155L, 89755299L, 69891073L, 1846862L, 15263013L, 37537710L, 
+           25194071L, 14471551L, 38278606L, 55596031L, 5436537L, 75008107L, 83382936L, 50689482L, 71708788L, 52258337L, 23423931L, 61069524L, 24452554L, 32406673L, 14900280L, 24818537L, 59733700L, 82407492L, 95500692L, 62528680L, 88728797L, 9891891L, 36354594L, 69630736L, 41755287L)
+
+# run the simulation study
+sim_study <- lapply(seeds, function(s){
+  set.seed(s)
+  
+  # only run the result if it has not been computed
+  f <- file.path("cache", "sim_study_loadings", 
+                 paste0("loadings-", s, ".RDS"))
+  if(!file.exists(f)){
+    # simulate the data
+    dat <- sim_dat(n_fams = 1000L, beta = beta, thetas = thetas)
+    
+    # get the weighted data set
+    dat_unqiue <- dat[!duplicated(dat)]
+    attributes(dat_unqiue) <- attributes(dat)
+    c_weights <- sapply(dat_unqiue, function(x)
+      sum(sapply(dat, identical, y = x)))
+    rm(dat)
+    
+    # get the starting values
+    library(pedmod)
+    ll_terms <- pedigree_ll_terms_loadings(dat_unqiue, max_threads = 4L)
+    
+    # fit the model
+    ti_start <- system.time(start <- pedmod_start_loadings(
+        ptr = ll_terms, data = dat_unqiue, cluster_weights = c_weights))
+    start$time <- ti_start
+    
+    ti_quick <- system.time(
+      opt_out_quick <- pedmod_opt(
+        ptr = ll_terms, par = start$par, maxvls = 5000L, abs_eps = 0, 
+        rel_eps = 1e-2, minvls = 500L, use_aprx = TRUE, n_threads = 4L, 
+        cluster_weights = c_weights))
+    opt_out_quick$time <- ti_quick
+    
+    ti_slow <- system.time(
+      opt_out <- pedmod_opt(
+        ptr = ll_terms, par = opt_out_quick$par, abs_eps = 0, use_aprx = TRUE, 
+        n_threads = 4L, cluster_weights = c_weights,
+        # we changed these parameters
+        maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
+    opt_out$time <- ti_slow
+    
+    saveRDS(list(start = start, opt_out_quick = opt_out_quick, 
+                 opt_out = opt_out), f)
+    
+  }
+  
+  # report to console and return 
+  out <- readRDS(f)
+  message(paste0(capture.output(
+    rbind(Estimate = out$opt_out$par, Truth = c(beta, thetas))), 
+    collapse = "\n"))
+
+  message(sprintf(
+    "Time %12.1f. Max ll: %12.4f\n",
+    with(out, start$time["elapsed"] + opt_out$time["elapsed"] +
+           opt_out_quick$time["elapsed"]),
+    -out$opt_out$value))
+  
+  out
+})
+
+# compute the bias estimates
+estimates <- sapply(sim_study, function(x) x$opt_out$par)
+rownames(estimates) <- c("(Intercept)", "Binary",
+                         paste0("Genetic", 1:3), 
+                         paste0("Env", 1:3))
+
+err <- estimates - c(beta, thetas)
+rbind(Bias = rowMeans(err), SE = apply(err, 1, sd) / sqrt(NCOL(err)))
+#>      (Intercept)   Binary Genetic1 Genetic2  Genetic3     Env1      Env2     Env3
+#> Bias    0.001765 0.006113 -0.01462  0.01463 -0.007231 -0.04052 -0.009779 -0.05695
+#> SE      0.021683 0.045060  0.02221  0.01423  0.012167  0.02994  0.014280  0.02254
+
+# make a box plot
+par(mar = c(7, 5, 1, 1))
+# S is for the standardized and D is for the direct parameterization
+boxplot(t(err), ylab = "Error", las = 2)
+abline(h = 0, lty = 2)
+grid()
+```
+
+<img src="man/figures/README-loadings_sim_study-1.png" width="100%" />
+
+``` r
+# summary stats for the computation time
+comp_times <- sapply(
+  sim_study, function(x) sapply(x, `[[`, "time")["elapsed", ])
+summary(t(comp_times))
+#>      start        opt_out_quick      opt_out    
+#>  Min.   :0.0090   Min.   : 6.18   Min.   :21.4  
+#>  1st Qu.:0.0100   1st Qu.:10.95   1st Qu.:25.6  
+#>  Median :0.0110   Median :12.13   Median :29.1  
+#>  Mean   :0.0106   Mean   :12.36   Mean   :28.8  
+#>  3rd Qu.:0.0118   3rd Qu.:13.56   3rd Qu.:31.0  
+#>  Max.   :0.0130   Max.   :17.51   Max.   :39.6
+summary(colSums(comp_times))
+#>    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+#>    31.5    37.7    41.0    41.2    44.8    54.1
+```
+
 ## More Complicated Example
 
 We consider a more complicated example in this section and use some of

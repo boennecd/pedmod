@@ -6,5 +6,7 @@ cache/sim_study_simple/*
 !cache/sim_study_simple_w_env
 cache/sim_study_simple_w_env/*
 !cache/sim_study_simple_w_env/.placeholder
+!cache/sim_study_loadings
+cache/sim_study_loadings/*
+!cache/sim_study_loadings/.placeholder
 figures/*
-

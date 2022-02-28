@@ -796,7 +796,7 @@ system.time(
 #&gt; Found perfect balanced connected partition early. Balance criterion is 500
 #&gt; Found approximately balanced connected partition. Balance criterion is 500
 #&gt;    user  system elapsed 
-#&gt;   0.091   0.012   0.102
+#&gt;   0.086   0.000   0.086
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 500
 NROW(max_part$removed_edges) # number of removed edges
@@ -827,7 +827,7 @@ system.time(
 #&gt; Keept 0 moves
 #&gt; The cut cost is 99
 #&gt;    user  system elapsed 
-#&gt;   0.899   0.000   0.899
+#&gt;   0.887   0.000   0.887
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 500
 NROW(max_part$removed_edges) # number of removed edges
@@ -866,7 +866,7 @@ system.time(
 #&gt; Keept 0 moves
 #&gt; The cut cost is 19
 #&gt;    user  system elapsed 
-#&gt;   0.008   0.016   0.021
+#&gt;   0.007   0.020   0.025
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 438
 NROW(max_part$removed_edges) # number of removed edges
@@ -929,7 +929,7 @@ system.time(
 #&gt; Keept 0 moves
 #&gt; The cut cost is 77
 #&gt;    user  system elapsed 
-#&gt;   0.015   0.000   0.015
+#&gt;   0.015   0.000   0.016
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 452
 NROW(max_part$removed_edges) # number of removed edges
@@ -1004,7 +1004,7 @@ system.time(
 #&gt; Found perfect balanced connected partition early. Balance criterion is 50000
 #&gt; Found approximately balanced connected partition. Balance criterion is 50000
 #&gt;    user  system elapsed 
-#&gt;   4.889   0.000   4.889
+#&gt;   4.953   0.000   4.952
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 50000
 NROW(max_part$removed_edges) # number of removed edges
@@ -1055,7 +1055,7 @@ system.time(
 #&gt; Keept 0 moves
 #&gt; The cut cost is 317
 #&gt;    user  system elapsed 
-#&gt;  24.427   0.004  24.428
+#&gt;  24.350   0.004  24.351
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 50000
 NROW(max_part$removed_edges) # number of removed edges
@@ -1094,7 +1094,7 @@ system.time(
 #&gt; Keept 0 moves
 #&gt; The cut cost is 356
 #&gt;    user  system elapsed 
-#&gt;   22.67    0.00   22.67
+#&gt;  22.681   0.008  22.687
 max_part_shuffled$balance_criterion # the balance criterion
 #&gt; [1] 50000
 NROW(max_part_shuffled$removed_edges) # number of removed edges
@@ -1129,7 +1129,7 @@ system.time(
 #&gt; Keept 0 moves
 #&gt; The cut cost is 356
 #&gt;    user  system elapsed 
-#&gt;   21.12    0.00   21.11
+#&gt;  20.905   0.004  20.908
 
 # we got the same 
 all.equal(max_part_shuffled_and_ordered, max_part_shuffled)
@@ -1137,10 +1137,8 @@ all.equal(max_part_shuffled_and_ordered, max_part_shuffled)
 
 # may not match! 
 all.equal(max_part, max_part_shuffled)
-#&gt; [1] &quot;Component \&quot;removed_edges\&quot;: Attributes: &lt; Component \&quot;dim\&quot;: Mean relative difference: 0.123 &gt;&quot;
-#&gt; [2] &quot;Component \&quot;removed_edges\&quot;: Numeric: lengths (634, 712) differ&quot;                                
-#&gt; [3] &quot;Component \&quot;set_1\&quot;: Mean relative difference: 0.0006784&quot;                                       
-#&gt; [4] &quot;Component \&quot;set_2\&quot;: Mean relative difference: 0.0006786&quot;</code></pre>
+#&gt; [1] &quot;Component \&quot;removed_edges\&quot;: Attributes: &lt; Component \&quot;dim\&quot;: Mean relative difference: 0.123 &gt;&quot; &quot;Component \&quot;removed_edges\&quot;: Numeric: lengths (634, 712) differ&quot;                                
+#&gt; [3] &quot;Component \&quot;set_1\&quot;: Mean relative difference: 0.0006784&quot;                                        &quot;Component \&quot;set_2\&quot;: Mean relative difference: 0.0006786&quot;</code></pre>
 <p>The solution will possibly not match when you reorder the data you pass to <code>max_balanced_partition</code>.</p>
 <p>We can also compare the above with what we would have gotten if we had not required that the partition is connected.</p>
 <pre class="r"><code># assign a variable with the connected partition
@@ -1256,7 +1254,7 @@ system.time(
 #&gt; Keept 0 moves
 #&gt; The cut cost is 6717
 #&gt;    user  system elapsed 
-#&gt;   2.706   0.000   2.706
+#&gt;   2.687   0.000   2.686
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 40000
 NROW(max_part$removed_edges) # number of removed edges
@@ -1297,7 +1295,7 @@ system.time(
 #&gt; Keept 0 moves
 #&gt; The cut cost is 269
 #&gt;    user  system elapsed 
-#&gt;   0.589   0.000   0.589
+#&gt;   0.582   0.000   0.582
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 49943
 NROW(max_part$removed_edges) # number of removed edges

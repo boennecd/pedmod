@@ -347,7 +347,7 @@ class cdf {
 
             } else if(lim_u[k] < 0){
               double const v_lb{pnorm_use(lim_l[k], use_aprx, true, true)},
-              v_ub{pnorm_use(lim_u[k], use_aprx, true, true)};
+                           v_ub{pnorm_use(lim_u[k], use_aprx, true, true)};
 
               log_pnrms_diff = v_ub + std::log1p(-exp(v_lb - v_ub));
 
@@ -460,11 +460,18 @@ public:
 
     auto setup_titling = [&]{
       if(use_tilting){
+        for(arma::uword i = 0; i < ndim; ++i){
+          if(infin[i] == 0)
+            lower[i] = -std::numeric_limits<double>::infinity();
+          else if(infin[i] == 1)
+            upper[i] = std::numeric_limits<double>::infinity();
+        }
+
         if(ndim < 2)
           use_tilting = false;
         else {
           auto find_tilt_res = find_tilting_param
-          (ndim, lower, upper, sigma_chol, 1e-8);
+            (ndim, lower, upper, sigma_chol, 1e-8);
 
           use_tilting = find_tilt_res.success;
           if(find_tilt_res.success)

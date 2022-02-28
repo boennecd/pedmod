@@ -3159,12 +3159,10 @@ Box plots of the relative errors are shown below:
 
 ``` r
 rowMeans(sim_res[, "SE", ])
-#>                 mvtnorm         TruncatedNormal        no aprx; Korobov          no aprx; Sobol 
-#>               2.800e-05               2.367e-05               3.160e-05               3.073e-05 
-#>        w/ aprx; Korobov          w/ aprx; Sobol no aprx; Korobov (tilt)   no aprx; Sobol (tilt) 
-#>               3.042e-05               3.129e-05               1.003e-02               7.004e-03 
+#>                 mvtnorm         TruncatedNormal        no aprx; Korobov          no aprx; Sobol        w/ aprx; Korobov          w/ aprx; Sobol no aprx; Korobov (tilt)   no aprx; Sobol (tilt) 
+#>               2.800e-05               4.180e-05               3.160e-05               3.073e-05               3.042e-05               3.129e-05               3.327e-05               2.803e-05 
 #> w/ aprx; Korobov (tilt)   w/ aprx; Sobol (tilt) 
-#>               1.003e-02               6.219e-03
+#>               3.441e-05               3.023e-05
 par(mar = c(10, 4, 1, 1), bty = "l")
 boxplot(t(sim_res[, "SE", ]), las = 2)
 grid()
@@ -3176,12 +3174,10 @@ The new implementation is faster when the approximation is used:
 
 ``` r
 rowMeans(sim_res[, "time", ])
-#>                 mvtnorm         TruncatedNormal        no aprx; Korobov          no aprx; Sobol 
-#>                0.019638                0.151080                0.014231                0.017404 
-#>        w/ aprx; Korobov          w/ aprx; Sobol no aprx; Korobov (tilt)   no aprx; Sobol (tilt) 
-#>                0.005813                0.007770                0.053415                0.069925 
+#>                 mvtnorm         TruncatedNormal        no aprx; Korobov          no aprx; Sobol        w/ aprx; Korobov          w/ aprx; Sobol no aprx; Korobov (tilt)   no aprx; Sobol (tilt) 
+#>                0.018197                0.031452                0.014258                0.017071                0.005730                0.007333                0.012594                0.011564 
 #> w/ aprx; Korobov (tilt)   w/ aprx; Sobol (tilt) 
-#>                0.039863                0.046193
+#>                0.009819                0.008964
 par(mar = c(9, 4, 1, 1), bty = "l")
 boxplot(t(sim_res[, "time", ]), log = "y", las = 2)
 grid()

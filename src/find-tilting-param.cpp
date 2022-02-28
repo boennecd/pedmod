@@ -1,11 +1,11 @@
+#include <Rmath.h> // Rf_dnorm4, Rf_pnorm5 etc.
+#include <R_ext/RS.h> // for F77_NAME and F77_CALL
 #include "find-tilting-param.h"
 #include <psqn-bfgs.h>
 #include <cmath>
 #include <numeric>
 #include <algorithm>
 #include <numeric>
-#include <Rmath.h> // Rf_dnorm4, Rf_pnorm5 etc.
-#include <R_ext/RS.h> // for F77_NAME and F77_CALL
 #include "pnorm.h"
 
 using std::exp;

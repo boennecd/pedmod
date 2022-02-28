@@ -19,6 +19,10 @@ Authors@R: c(
   person("Diethelm", "Wuertz", 
          role = c("cph")),
   person("R-core", email = "R-core@R-project.org",
+         role = "cph"),
+  person("Leo Belzile", 
+         role = "cph"),
+  person("Zdravko Botev ", 
          role = "cph"))
 Maintainer: Benjamin Christoffersen <boennecd@gmail.com>
 Description: Provides functions to estimate mixed probit models using, for 
@@ -51,8 +55,9 @@ Suggests:
     R.rsp, 
     abind, 
     kinship2,
-    igraph
+    igraph,
+    TruncatedNormal
 Depends: 
     R (>= 3.5.0)
 VignetteBuilder: R.rsp
-SystemRequirements: C++14
+SystemRequirements: C++17

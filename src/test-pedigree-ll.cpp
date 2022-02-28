@@ -67,7 +67,7 @@ context("pedigree_ll_term_loading unit tests") {
     {
       bool did_fail;
       auto const fn_res{term.fn(par, 1000000, -1, 1e-5, 100000, true, true,
-                                did_fail, pedmod::cdf_methods::Korobov)};
+                                did_fail, pedmod::cdf_methods::Korobov, false)};
       expect_true
         (std::abs(fn_res.log_likelihood - true_logLik) <
           std::abs(true_logLik) * 1e-4);
@@ -84,7 +84,7 @@ context("pedigree_ll_term_loading unit tests") {
     bool did_fail;
     double const fn_res{term.gr(par, gr, var_est, 1000000, -1, 1e-5, 100000,
                                 true, true, did_fail, weight,
-                                pedmod::cdf_methods::Korobov)};
+                                pedmod::cdf_methods::Korobov, false)};
 
     expect_true
       (std::abs(fn_res - true_logLik * weight) <

@@ -3064,6 +3064,10 @@ Moreover, we have implemented an approximation of the standard normal
 CDF and its inverse which reduces the computation time as we will show
 below.
 
+We also compare our implementation of the minimax titling method
+suggested by Botev (2017) with the implementation in the TruncatedNormal
+package.
+
 ``` r
 #####
 # settings for the simulation study
@@ -3083,14 +3087,20 @@ sim_res <- replicate(expr = {
   
   # function to use pmvnorm
   use_mvtnorm <- function(rel_eps)
-    pmvnorm(upper = u, sigma = S, algorithm = GenzBretz(
+    mvtnorm::pmvnorm(
+      upper = u, sigma = S, algorithm = GenzBretz(
       abseps = 0, releps = rel_eps, maxpts = 1e7))
   
+  # function to use pmvnorm from TruncatedNormal
+  use_trunc_norm <- function(n_sample)
+    TruncatedNormal::pmvnorm(
+      sigma = S, lb = rep(-Inf, n), ub = u, type = "qmc", B = n_sample)
+  
   # function to use this package
-  use_mvndst <- function(use_aprx = FALSE, method = 0L)
+  use_mvndst <- function(use_aprx = FALSE, method = 0L, use_tilting = TRUE)
     mvndst(lower = rep(-Inf, n), upper = u, mu = rep(0, n), 
            sigma = S, use_aprx = use_aprx, abs_eps = 0, rel_eps = rel_eps,
-           maxvls = 1e7, method = method)
+           maxvls = 1e7, method = method, use_tilting = use_tilting)
 
   # get a very precise estimate
   truth <- use_mvtnorm(rel_eps / 100)
@@ -3108,27 +3118,54 @@ sim_res <- replicate(expr = {
   }
   
   mvtnorm_res                <- run_n_time(use_mvtnorm(rel_eps))
-  mvndst_no_aprx_res_Korobov <- run_n_time(use_mvndst(FALSE, method = 0L))
-  mvndst_w_aprx_res_Korobov  <- run_n_time(use_mvndst(TRUE , method = 0L))
-  mvndst_no_aprx_res_Sobol   <- run_n_time(use_mvndst(FALSE, method = 1L))
-  mvndst_w_aprx_res_Sobol    <- run_n_time(use_mvndst(TRUE , method = 1L))
   
+  n_sample <- attr(use_mvndst(TRUE, method = 0L, use_tilting = TRUE), "n_it")
+  TruncatedNormal_res        <- run_n_time(use_trunc_norm(n_sample))
+  
+  mvndst_no_aprx_res_Korobov <- 
+    run_n_time(use_mvndst(FALSE, method = 0L, use_tilting = FALSE))
+  mvndst_w_aprx_res_Korobov  <- 
+    run_n_time(use_mvndst(TRUE , method = 0L, use_tilting = FALSE))
+  mvndst_no_aprx_res_Sobol   <- 
+    run_n_time(use_mvndst(FALSE, method = 1L, use_tilting = FALSE))
+  mvndst_w_aprx_res_Sobol    <- 
+    run_n_time(use_mvndst(TRUE , method = 1L, use_tilting = FALSE))
+  
+  mvndst_no_aprx_res_Korobov_tilt <- 
+    run_n_time(use_mvndst(FALSE, method = 0L, use_tilting = TRUE))
+  mvndst_w_aprx_res_Korobov_tilt  <- 
+    run_n_time(use_mvndst(TRUE , method = 0L, use_tilting = TRUE))
+  mvndst_no_aprx_res_Sobol_tilt   <- 
+    run_n_time(use_mvndst(FALSE, method = 1L, use_tilting = TRUE))
+  mvndst_w_aprx_res_Sobol_tilt    <- 
+    run_n_time(use_mvndst(TRUE , method = 1L, use_tilting = TRUE))
+
   # return 
   rbind(mvtnorm            = mvtnorm_res, 
+        TruncatedNormal = TruncatedNormal_res,
         `no aprx; Korobov` = mvndst_no_aprx_res_Korobov, 
         `no aprx; Sobol` = mvndst_no_aprx_res_Sobol, 
         `w/ aprx; Korobov` = mvndst_w_aprx_res_Korobov,
-        `w/ aprx; Sobol` = mvndst_w_aprx_res_Sobol)
+        `w/ aprx; Sobol` = mvndst_w_aprx_res_Sobol,
+        
+        `no aprx; Korobov (tilt)` = mvndst_no_aprx_res_Korobov_tilt, 
+        `no aprx; Sobol (tilt)` = mvndst_no_aprx_res_Sobol_tilt, 
+        `w/ aprx; Korobov (tilt)` = mvndst_w_aprx_res_Korobov_tilt,
+        `w/ aprx; Sobol (tilt)` = mvndst_w_aprx_res_Sobol_tilt)
 }, n = 100, simplify = "array")
 ```
 
-They have about the same average relative error as expected:
+Box plots of the relative errors are shown below:
 
 ``` r
 rowMeans(sim_res[, "SE", ])
-#>          mvtnorm no aprx; Korobov   no aprx; Sobol w/ aprx; Korobov   w/ aprx; Sobol 
-#>        2.651e-05        3.128e-05        3.015e-05        3.062e-05        2.922e-05
-par(mar = c(9, 4, 1, 1), bty = "l")
+#>                 mvtnorm         TruncatedNormal        no aprx; Korobov          no aprx; Sobol 
+#>               2.800e-05               2.367e-05               3.160e-05               3.073e-05 
+#>        w/ aprx; Korobov          w/ aprx; Sobol no aprx; Korobov (tilt)   no aprx; Sobol (tilt) 
+#>               3.042e-05               3.129e-05               1.003e-02               7.004e-03 
+#> w/ aprx; Korobov (tilt)   w/ aprx; Sobol (tilt) 
+#>               1.003e-02               6.219e-03
+par(mar = c(10, 4, 1, 1), bty = "l")
 boxplot(t(sim_res[, "SE", ]), las = 2)
 grid()
 ```
@@ -3139,8 +3176,12 @@ The new implementation is faster when the approximation is used:
 
 ``` r
 rowMeans(sim_res[, "time", ])
-#>          mvtnorm no aprx; Korobov   no aprx; Sobol w/ aprx; Korobov   w/ aprx; Sobol 
-#>         0.020816         0.014951         0.016653         0.005859         0.007090
+#>                 mvtnorm         TruncatedNormal        no aprx; Korobov          no aprx; Sobol 
+#>                0.019638                0.151080                0.014231                0.017404 
+#>        w/ aprx; Korobov          w/ aprx; Sobol no aprx; Korobov (tilt)   no aprx; Sobol (tilt) 
+#>                0.005813                0.007770                0.053415                0.069925 
+#> w/ aprx; Korobov (tilt)   w/ aprx; Sobol (tilt) 
+#>                0.039863                0.046193
 par(mar = c(9, 4, 1, 1), bty = "l")
 boxplot(t(sim_res[, "time", ]), log = "y", las = 2)
 grid()
@@ -3148,9 +3189,138 @@ grid()
 
 <img src="man/figures/README-use_new_impl-1.png" width="100%" />
 
+Next, we compare the methods with the first example from Botev (2017).
+This is with a low probability case and we would expect the minimax
+tilted version to perform better. We fix the number of samples with all
+packages in this example.
+
+``` r
+# settings for the test like in Botev (2017)
+library(mvtnorm)
+library(pedmod)
+library(microbenchmark)
+ds <- c(3, 5, 10, 15, 20, 25)
+n_sample <- 10000L
+
+# run the simulation study
+set.seed(15418038)
+sim_res <- sapply(ds, \(d){
+  S <- solve(diag(1/2, d) + 1/2)
+  l <- rep(1/2, d)
+  u <- rep(1, d)
+  
+  # function to use pmvnorm
+  use_mvtnorm <- function(n_sample)
+    mvtnorm::pmvnorm(lower = l, upper = u, sigma = S, algorithm = GenzBretz(
+            abseps = 0, releps = 0, maxpts = n_sample))
+  
+  # function to use pmvnorm from TruncatedNormal
+  use_trunc_norm <- function(n_sample)
+    TruncatedNormal::pmvnorm(
+      sigma = S, lb = l, ub = u, type = "qmc", B = n_sample)
+  
+  # function to use this package
+  use_mvndst <- function(use_aprx = FALSE, method = 0L, use_tilting = TRUE)
+    mvndst(lower = l, upper = u, mu = rep(0, d), 
+           sigma = S, use_aprx = use_aprx, abs_eps = 0, rel_eps = 0,
+           maxvls = n_sample, method = method, use_tilting = use_tilting, 
+           minvls = n_sample)
+
+  # get a very precise estimate
+  truth <- use_trunc_norm(n_sample * 100L)
+  
+  # computes the error with repeated approximations and compute the time it
+  # takes
+  n_rep <- 25L
+  run_n_time <- function(expr){
+    expr <- substitute(expr)
+    ti <- get_nanotime()
+    res <- replicate(n_rep, eval(expr))
+    ti <- get_nanotime() - ti
+    err <- (res - truth) / truth
+    c(SE = sqrt(sum(err^2) / n_rep), time = ti / n_rep / 1e9)
+  }
+  
+  mvtnorm_res                <- run_n_time(use_mvtnorm(n_sample))
+  
+  TruncatedNormal_res        <- run_n_time(use_trunc_norm(n_sample))
+  
+  mvndst_no_aprx_res_Korobov <- 
+    run_n_time(use_mvndst(FALSE, method = 0L, use_tilting = FALSE))
+  mvndst_w_aprx_res_Korobov  <- 
+    run_n_time(use_mvndst(TRUE , method = 0L, use_tilting = FALSE))
+  mvndst_no_aprx_res_Sobol   <- 
+    run_n_time(use_mvndst(FALSE, method = 1L, use_tilting = FALSE))
+  mvndst_w_aprx_res_Sobol    <- 
+    run_n_time(use_mvndst(TRUE , method = 1L, use_tilting = FALSE))
+  
+  mvndst_no_aprx_res_Korobov_tilt <- 
+    run_n_time(use_mvndst(FALSE, method = 0L, use_tilting = TRUE))
+  mvndst_w_aprx_res_Korobov_tilt  <- 
+    run_n_time(use_mvndst(TRUE , method = 0L, use_tilting = TRUE))
+  mvndst_no_aprx_res_Sobol_tilt   <- 
+    run_n_time(use_mvndst(FALSE, method = 1L, use_tilting = TRUE))
+  mvndst_w_aprx_res_Sobol_tilt    <- 
+    run_n_time(use_mvndst(TRUE , method = 1L, use_tilting = TRUE))
+  
+  rbind(mvtnorm            = mvtnorm_res, 
+        TruncatedNormal = TruncatedNormal_res,
+        `no aprx; Korobov` = mvndst_no_aprx_res_Korobov, 
+        `no aprx; Sobol` = mvndst_no_aprx_res_Sobol, 
+        `w/ aprx; Korobov` = mvndst_w_aprx_res_Korobov,
+        `w/ aprx; Sobol` = mvndst_w_aprx_res_Sobol,
+        
+        `no aprx; Korobov (tilt)` = mvndst_no_aprx_res_Korobov_tilt, 
+        `no aprx; Sobol (tilt)` = mvndst_no_aprx_res_Sobol_tilt, 
+        `w/ aprx; Korobov (tilt)` = mvndst_w_aprx_res_Korobov_tilt,
+        `w/ aprx; Sobol (tilt)` = mvndst_w_aprx_res_Sobol_tilt)
+}, simplify = "array")
+
+dimnames(sim_res)[[3]] <- ds
+```
+
+The relative errors plotted against the dimension is shown below:
+
+``` r
+par(mar = c(5, 5, 1, 1), cex = .8)
+matplot(ds, t(sim_res[, "SE", ]), type = "p", log = "y", 
+        pch = 1:dim(sim_res)[1], xlab = "Dimension", ylab = "Relative error", 
+        col = "black", bty = "l")
+matlines(ds, t(sim_res[, "SE", ]), col = "black", lty = 2)
+legend("bottomright", bty = "n", pch = 1:dim(sim_res)[1], 
+       legend = dimnames(sim_res)[[1]])
+grid()
+```
+
+<img src="man/figures/README-err_botev_example-1.png" width="100%" />
+
+A similar plot for the average estimation time is shown below.
+
+``` r
+par(mar = c(5, 5, 1, 1), cex = .8)
+matplot(ds, t(sim_res[, "time", ]), type = "p", log = "y", 
+        pch = 1:dim(sim_res)[1], xlab = "Dimension", ylab = "Time", 
+        col = "black", bty = "l")
+matlines(ds, t(sim_res[, "time", ]), col = "black", lty = 2)
+legend("bottomright", bty = "n", pch = 1:dim(sim_res)[1], 
+       legend = dimnames(sim_res)[[1]])
+grid()
+```
+
+<img src="man/figures/README-time_botev_example-1.png" width="100%" />
+
 ## References
 
 <div id="refs" class="references csl-bib-body hanging-indent">
+
+<div id="ref-Botev17" class="csl-entry">
+
+Botev, Z. I. 2017. “The Normal Law Under Linear Restrictions: Simulation
+and Estimation via Minimax Tilting.” *Journal of the Royal Statistical
+Society: Series B (Statistical Methodology)* 79 (1): 125–48.
+https://doi.org/<https://doi.org/10.1111/rssb.12162>.
+
+</div>
 
 <div id="ref-Genz02" class="csl-entry">
 

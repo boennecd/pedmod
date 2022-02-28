@@ -18,6 +18,8 @@
 #include "ped-mem.h"
 #include "string"
 #include "config.h"
+#include "find-tilting-param.h"
+#include <limits.h>
 
 #include <R_ext/RS.h> // F77_NAME and F77_CALL
 
@@ -99,35 +101,15 @@ inline int default_minvls(int dim){
  */
 cor_vec_res get_cor_vec(const arma::mat&);
 
-inline double safe_qnorm_w(double const x) noexcept {
-  constexpr double const eps =
-    std::numeric_limits<double>::epsilon() *
-    std::numeric_limits<double>::epsilon() *
-    std::numeric_limits<double>::epsilon();
-  if(x > 0 and x < 1)
-    return qnorm_w(x  , 0, 1, 1L, 0L);
-  else if(x <= 0)
-    return qnorm_w(eps, 0, 1, 1L, 0L);
-
-  // x >= 1.
-  return -qnorm_w (eps, 0, 1, 1L, 0L);
-}
-
-inline double safe_qnorm_aprx(double const x) noexcept {
-  constexpr double const eps =
-    std::numeric_limits<double>::epsilon() *
-    std::numeric_limits<double>::epsilon() *
-    std::numeric_limits<double>::epsilon();
-  if(x > 0 and x < 1)
-    return qnorm_aprx(x);
-  if(x <= 0)
-    return qnorm_aprx(eps);
-  // x >= 1.
-  return -qnorm_aprx (eps);
-}
-
-inline double pnorm_use(double const x, bool const use_aprx) {
-  return use_aprx ? pnorm_approx(x) : pnorm_std(x, 1L, 0L);
+inline double pnorm_use
+  (double const x, bool const use_aprx, bool const lower_tail, bool const use_log) {
+  if(use_aprx){
+    double const pnrm{pnorm_approx(x)};
+    if(use_log)
+      return lower_tail ? log(pnrm) :  log1p(-pnrm);
+    return lower_tail ? pnrm : 1 - pnrm;
+  }
+  return pnorm_std(x, lower_tail, use_log);
 }
 
 /**
@@ -179,6 +161,7 @@ class cdf {
                     n_integrands;
   const bool use_aprx;
   bool is_permutated = false;
+  bool use_tilting;
 
   static constexpr bool
     needs_last_unif = T_Functor::needs_last_unif();
@@ -193,12 +176,218 @@ class cdf {
   double * PEDMOD_RESTRICT const lower      = dmem.get_mem(),
          * PEDMOD_RESTRICT const upper      = lower + ndim,
          * PEDMOD_RESTRICT const sigma_chol = upper + ndim,
-         * PEDMOD_RESTRICT const draw       =
+         * PEDMOD_RESTRICT const tilt_param =
          sigma_chol + (ndim * (ndim + 1L)) / 2L,
+         * PEDMOD_RESTRICT const draw       = tilt_param + ndim,
          * PEDMOD_RESTRICT const dtmp_mem   = draw + ndim * n_qmc_seqs();
 
   // memory that can be used
-  int * const itmp_mem = indices.end();
+  int * const itmp_mem{indices.end()};
+
+  /**
+   computes multiple integrands simultaneously.
+   */
+  template<bool with_tilting>
+  void evaluate_intrands(
+      unsigned const *ndim_in, double const * unifs,
+      unsigned const *n_integrands_in,
+      double * PEDMOD_RESTRICT integrand_val, unsigned const n_draws) PEDMOD_NOEXCEPT {
+#ifdef DO_CHECKS
+    if(*ndim_in         != ndim)
+      throw std::invalid_argument("cdf::eval_integrand: invalid 'ndim_in'");
+    if(*n_integrands_in != n_integrands)
+      throw std::invalid_argument("cdf::eval_integrand: invalid 'n_integrands_in'");
+#endif
+
+    constexpr double Inf = std::numeric_limits<double>::infinity();
+
+    double * const PEDMOD_RESTRICT out   = integrand_val,
+           * const PEDMOD_RESTRICT dr    = draw,
+           * const PEDMOD_RESTRICT su    = dtmp_mem,
+           * const PEDMOD_RESTRICT w     = su + n_draws,
+           * const PEDMOD_RESTRICT lim_l = w + n_draws,
+           * const PEDMOD_RESTRICT lim_u = lim_l + n_draws;
+
+    if constexpr(with_tilting)
+      std::fill(w, w + n_draws, 0);
+    else
+      std::fill(w, w + n_draws, 1);
+
+    double const * PEDMOD_RESTRICT sc   = sigma_chol,
+                 * PEDMOD_RESTRICT lw   = lower,
+                 * PEDMOD_RESTRICT up   = upper;
+
+    int const *infin_j = infin.begin();
+
+    /* loop over variables and transform them to truncated normal
+     * variables */
+    for(arma::uword j = 0; j < ndim; ++j, ++sc, ++lw, ++up, ++infin_j){
+      std::fill(su, su + n_draws, 0);
+      {
+        double * dri = dr;
+        for(unsigned i = 0; i < j; ++i, ++sc)
+          for(unsigned k = 0; k < n_draws; ++k, ++dri)
+            su[k] += *sc * *dri;
+      }
+
+      if(*infin_j == 0L){
+        std::fill(lim_l, lim_l  + n_draws, -Inf);
+        for(unsigned k = 0; k < n_draws; ++k)
+          lim_u[k] = *up - su[k];
+
+      } else if(*infin_j == 1L){
+        std::fill(lim_u, lim_u  + n_draws, Inf);
+        for(unsigned k = 0; k < n_draws; ++k)
+          lim_l[k] = *lw - su[k];
+
+      } else
+        for(unsigned k = 0; k < n_draws; ++k) {
+          lim_l[k] = *lw - su[k];
+          lim_u[k] = *up - su[k];
+        }
+
+      bool const is_last_run{j + 1 >= ndim};
+      if constexpr(with_tilting){
+        auto subtract_tilt = [&]{
+          for(unsigned k = 0; k < n_draws; ++k) {
+            lim_l[k] -= tilt_param[j];
+            lim_u[k] -= tilt_param[j];
+          }
+        };
+
+        if constexpr(needs_last_unif)
+          subtract_tilt();
+        else if(!is_last_run)
+          subtract_tilt();
+      }
+
+      auto set_dr_n_weight = [&]{
+        unsigned const offset = j * n_draws;
+
+        for(unsigned k = 0; k < n_draws; ++k){
+          if(lim_l[k] >= lim_u[k]){
+            w[k] = with_tilting ? -Inf : 0;
+            dr[offset + k] = 0;
+            continue;
+          }
+
+          if constexpr(with_tilting){
+            double val, log_pnrms_diff;
+
+            if(lim_l[k] > 0){
+              double const v_lb{pnorm_use(lim_l[k], use_aprx, false, true)},
+                           v_ub{pnorm_use(lim_u[k], use_aprx, false, true)};
+
+              log_pnrms_diff = v_lb + std::log1p(-exp(v_ub - v_lb));
+
+              val = std::exp(v_lb) -
+                unifs[k * ndim + j] * std::exp(log_pnrms_diff);
+              val = qnorm_w(val, 0, 1, 0, 0);
+
+            } else if(lim_u[k] < 0){
+              double const v_lb{pnorm_use(lim_l[k], use_aprx, true, true)},
+                           v_ub{pnorm_use(lim_u[k], use_aprx, true, true)};
+
+              log_pnrms_diff = v_ub + std::log1p(-exp(v_lb - v_ub));
+
+              val =
+                std::exp(v_lb) + unifs[k * ndim + j] * std::exp(log_pnrms_diff);
+              val = -qnorm_w(val, 0, 1, 0, 0);
+
+            } else {
+              double const v_lb{pnorm_use(lim_l[k], use_aprx, true, false)},
+                           v_ub{pnorm_use(lim_u[k], use_aprx, false, false)};
+
+              log_pnrms_diff = std::log1p(-v_lb - v_ub);
+
+              val = pnorm_use(lim_l[k], use_aprx, false, false) -
+                unifs[k * ndim + j] * std::exp(log_pnrms_diff);
+              val = qnorm_w(val, 0, 1, 0, 0);
+
+            }
+
+            double const val_shifted{val + tilt_param[j]};
+            dr[offset + k] = val_shifted;
+            w[k] += log_pnrms_diff +
+              (tilt_param[j] - 2 * val_shifted) * tilt_param[j] / 2;
+
+          } else {
+            double const pnrm_lb{pnorm_use(lim_l[k], use_aprx, true, false)},
+                         pnrm_ub{pnorm_use(lim_u[k], use_aprx, true, false)};
+
+            double const l_diff{pnrm_ub - pnrm_lb};
+            w[k] *= l_diff;
+
+            double const quant_val = pnrm_lb + unifs[k * ndim + j] * l_diff;
+            dr[offset + k] = use_aprx ? qnorm_aprx(quant_val)
+                                      : qnorm_w   (quant_val, 0, 1, 1, 0);
+          }
+        }
+      };
+
+      if constexpr(needs_last_unif)
+        set_dr_n_weight();
+      else if(!is_last_run)
+        set_dr_n_weight();
+      else
+        for(unsigned k = 0; k < n_draws; ++k){
+          if(lim_l[k] >= lim_u[k]){
+            w[k] = with_tilting ? -Inf : 0;
+            continue;
+          }
+
+          if constexpr(with_tilting){
+            double log_pnrms_diff;
+
+            if(lim_l[k] > 0){
+              double const v_lb{pnorm_use(lim_l[k], use_aprx, false, true)},
+              v_ub{pnorm_use(lim_u[k], use_aprx, false, true)};
+
+              log_pnrms_diff = v_lb + std::log1p(-exp(v_ub - v_lb));
+
+            } else if(lim_u[k] < 0){
+              double const v_lb{pnorm_use(lim_l[k], use_aprx, true, true)},
+              v_ub{pnorm_use(lim_u[k], use_aprx, true, true)};
+
+              log_pnrms_diff = v_ub + std::log1p(-exp(v_lb - v_ub));
+
+            } else {
+              double const v_lb{pnorm_use(lim_l[k], use_aprx, true, false)},
+              v_ub{pnorm_use(lim_u[k], use_aprx, false, false)};
+
+              log_pnrms_diff = std::log1p(-v_lb - v_ub);
+
+            }
+
+            w[k] += log_pnrms_diff;
+
+          } else {
+            double const pnrm_lb{pnorm_use(lim_l[k], use_aprx, true, false)},
+                         pnrm_ub{pnorm_use(lim_u[k], use_aprx, true, false)};
+            w[k] *= pnrm_ub - pnrm_lb;
+
+          }
+        }
+    }
+
+    /* evaluate the integrand and weight the result. */
+    functor(dr, out, indices.begin(), is_permutated, n_draws);
+
+    // multiply by the density
+    double *o{out};
+    for(unsigned k = 0; k < n_draws; ++k){
+      if constexpr(with_tilting)
+        w[k] = std::exp(w[k]);
+      w[k] /= functor.get_norm_constant();
+      if(w[k] == 0){
+        std::fill(o, o + n_integrands, 0);
+        o += n_integrands;
+
+      } else
+        for(unsigned i = 0; i < n_integrands; ++i, ++o)
+          *o *= w[k];
+    }
+  }
 
 public:
   /**
@@ -211,7 +400,7 @@ public:
     imem.set_n_mem(3 * max_ndim, max_threads);
     // TODO: this is wasteful. Look through this
     dmem.set_n_mem(
-      (6 + n_qmc_seqs()) * max_ndim + n_up_tri + max_ndim * max_ndim +
+      (7 + n_qmc_seqs()) * max_ndim + n_up_tri + max_ndim * max_ndim +
         4 * n_qmc_seqs(),
       max_threads);
   }
@@ -219,11 +408,12 @@ public:
   cdf(T_Functor &functor, arma::vec const &lower_in,
       arma::vec const &upper_in, arma::vec const &mu_in,
       arma::mat const &sigma_in, bool const do_reorder,
-      bool const use_aprx):
+      bool const use_aprx, bool const use_tilting_in):
     functor(functor),
     ndim(mu_in.n_elem),
     n_integrands(functor.get_n_integrands()),
     use_aprx(use_aprx),
+    use_tilting{use_tilting_in},
     infin(([&](){
       arma::ivec out(imem.get_mem(), ndim, false);
       get_infin(out, lower_in, upper_in);
@@ -267,6 +457,23 @@ public:
       for(arma::uword i = 0; i < ndim; ++i, ++idx)
         *idx = static_cast<int>(i);
     }
+
+    auto setup_titling = [&]{
+      if(use_tilting){
+        if(ndim < 2)
+          use_tilting = false;
+        else {
+          auto find_tilt_res = find_tilting_param
+          (ndim, lower, upper, sigma_chol, 1e-8);
+
+          use_tilting = find_tilt_res.success;
+          if(find_tilt_res.success)
+            std::copy
+            (find_tilt_res.tilting_param.begin(),
+             find_tilt_res.tilting_param.end(), tilt_param);
+        }
+      }
+    };
 
     if(do_reorder and ndim > 1L){
       double * const y     = draw,
@@ -313,6 +520,8 @@ public:
         for(arma::uword j = 0; j < ndim; ++j)
           for(arma::uword i = 0; i < ndim; ++i)
             sigma_permu.at(i, j) = sigma_in.at(indices[i], indices[j]);
+
+        setup_titling();
         functor.prep_permutated(sigma_permu, indices.begin());
 
         return;
@@ -351,6 +560,7 @@ public:
     } else
       *sigma_chol = 1.;
 
+    setup_titling();
     functor.prep_permutated(sigma_in, indices.begin());
   }
 
@@ -361,93 +571,13 @@ public:
       unsigned const *ndim_in, double const * unifs,
       unsigned const *n_integrands_in,
       double * PEDMOD_RESTRICT integrand_val, unsigned const n_draws) PEDMOD_NOEXCEPT {
-#ifdef DO_CHECKS
-    if(*ndim_in         != ndim)
-      throw std::invalid_argument("cdf::eval_integrand: invalid 'ndim_in'");
-    if(*n_integrands_in != n_integrands)
-      throw std::invalid_argument("cdf::eval_integrand: invalid 'n_integrands_in'");
-#endif
+    if(use_tilting)
+      evaluate_intrands<true>
+       (ndim_in, unifs, n_integrands_in, integrand_val,n_draws);
+    else
+      evaluate_intrands<false>
+        (ndim_in, unifs, n_integrands_in, integrand_val,n_draws);
 
-    double * const PEDMOD_RESTRICT out   = integrand_val,
-           * const PEDMOD_RESTRICT dr    = draw,
-           * const PEDMOD_RESTRICT su    = dtmp_mem,
-           * const PEDMOD_RESTRICT w     = su + n_draws,
-           * const PEDMOD_RESTRICT lim_l = w + n_draws,
-           * const PEDMOD_RESTRICT lim_u = lim_l + n_draws;
-
-    std::fill(w, w + n_draws, 1);
-
-    double const * PEDMOD_RESTRICT sc   = sigma_chol,
-                 * PEDMOD_RESTRICT lw   = lower,
-                 * PEDMOD_RESTRICT up   = upper;
-    int const *infin_j = infin.begin();
-    /* loop over variables and transform them to truncated normal
-     * variables */
-    for(arma::uword j = 0; j < ndim; ++j, ++sc, ++lw, ++up, ++infin_j){
-      std::fill(su, su + n_draws, 0);
-      {
-        double * dri = dr;
-        for(unsigned i = 0; i < j; ++i, ++sc)
-          for(unsigned k = 0; k < n_draws; ++k, ++dri)
-            su[k] += *sc * *dri;
-      }
-
-      if(*infin_j == 0L)
-        for(unsigned k = 0; k < n_draws; ++k){
-          lim_l[k] = 0;
-          lim_u[k] = pnorm_use(*up - su[k], use_aprx);
-        }
-      else if(*infin_j == 1L)
-        for(unsigned k = 0; k < n_draws; ++k){
-          lim_l[k] = pnorm_use(*lw - su[k], use_aprx);
-          lim_u[k] = 1;
-        }
-      else
-        for(unsigned k = 0; k < n_draws; ++k){
-          lim_l[k] = pnorm_use(*lw - su[k], use_aprx);
-          lim_u[k] = pnorm_use(*up - su[k], use_aprx);
-        }
-
-      // TODO: use that this is constexpr
-      if(needs_last_unif or j + 1 < ndim){
-        unsigned const offset = j * n_draws;
-
-        for(unsigned k = 0; k < n_draws; ++k){
-          if(lim_l[k] < lim_u[k]){
-            double const l_diff{lim_u[k] - lim_l[k]};
-            w[k] *= l_diff;
-
-            double const quant_val = lim_l[k] + unifs[k * ndim + j] * l_diff;
-            dr[offset + k] =
-              use_aprx ?
-              safe_qnorm_aprx(quant_val) :
-              safe_qnorm_w   (quant_val);
-
-          } else
-            w[k] = 0;
-        }
-
-      } else
-        for(unsigned k = 0; k < n_draws; ++k){
-          if(lim_l[k] < lim_u[k]){
-            double const l_diff{lim_u[k] - lim_l[k]};
-            w[k] *= l_diff;
-
-          } else
-            w[k] = 0;
-        }
-    }
-
-    /* evaluate the integrand and weight the result. */
-    functor(dr, out, indices.begin(), is_permutated, n_draws);
-
-    // multiply by the density
-    double *o{out};
-    for(unsigned k = 0; k < n_draws; ++k){
-      w[k] /= functor.get_norm_constant();
-      for(unsigned i = 0; i < n_integrands; ++i, ++o)
-        *o *= w[k];
-    }
   }
 
   /**

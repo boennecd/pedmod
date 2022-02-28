@@ -16,7 +16,8 @@ mvndst(
   do_reorder = TRUE,
   use_aprx = FALSE,
   method = 0L,
-  n_sequences = 8L
+  n_sequences = 8L,
+  use_tilting = FALSE
 )
 }
 \arguments{
@@ -51,6 +52,9 @@ lattice rules while one yields scrambled Sobol sequences.}
 More samples yields a better estimate of the error but a worse
 approximation. Eight is used in the original Fortran code. If one is
 used then the error will be set to zero because it cannot be estimated.}
+
+\item{use_tilting}{\code{TRUE} if the exponential tilting method suggested
+by Botev (2017). See \url{https://doi.org/10.1111/rssb.12162}.}
 }
 \value{
 An approximation of the CDF. The \code{"n_it"} attribute shows the number of
@@ -70,20 +74,39 @@ S <- drop(rWishart(1L, 2 * n, diag(n) / 2 / n))
 u <- rnorm(n)
 
 system.time(pedmod_res <- mvndst(
-  lower = rep(-Inf, n), upper = u, sigma = S, mu = numeric(n),
-  maxvls = 1e6, abs_eps = 0, rel_eps = 1e-4, use_aprx = TRUE))
+    lower = rep(-Inf, n), upper = u, sigma = S, mu = numeric(n),
+    maxvls = 1e6, abs_eps = 0, rel_eps = 1e-4, use_aprx = TRUE))
 pedmod_res
 
 # compare with mvtnorm
 if(require(mvtnorm)){
-  mvtnorm_time <- system.time(mvtnorm_res <- pmvnorm(
-    upper = u, sigma = S, algorithm = GenzBretz(
-      maxpts = 1e6, abseps = 0, releps = 1e-4)))
-  cat("mvtnorm_res:\n")
-  print(mvtnorm_res)
+    mvtnorm_time <- system.time(mvtnorm_res <- mvtnorm::pmvnorm(
+        upper = u, sigma = S, algorithm = GenzBretz(
+            maxpts = 1e6, abseps = 0, releps = 1e-4)))
+    cat("mvtnorm_res:\n")
+    print(mvtnorm_res)
 
-  cat("mvtnorm_time:\n")
-  print(mvtnorm_time)
+    cat("mvtnorm_time:\n")
+    print(mvtnorm_time)
+}
+
+# with titling
+system.time(pedmod_res <- mvndst(
+    lower = rep(-Inf, n), upper = u, sigma = S, mu = numeric(n),
+    maxvls = 1e6, abs_eps = 0, rel_eps = 1e-4, use_tilting = TRUE))
+pedmod_res
+
+# compare with TruncatedNormal
+if(require(TruncatedNormal)){
+    TruncatedNormal_time <- system.time(
+        TruncatedNormal_res <- TruncatedNormal::pmvnorm(
+            lb = rep(-Inf, n), ub = u, sigma = S,
+            B = attr(pedmod_res, "n_it"), type = "qmc"))
+    cat("TruncatedNormal_res:\n")
+    print(TruncatedNormal_res)
+
+    cat("TruncatedNormal_time:\n")
+    print(TruncatedNormal_time)
 }
 
 }

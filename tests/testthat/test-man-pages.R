@@ -25,6 +25,13 @@ test_that("examples in manual pages gives the correct answer for eval_pedigree_[
     method = 1L)
   expect_equal(truth, pedmod_res, check.attributes = FALSE,
                tolerance = 1e-4)
+
+  pedmod_res <- mvndst(
+    lower = rep(-Inf, n), upper = u, sigma = S, mu = numeric(n),
+    maxvls = 1e6, abs_eps = 0, rel_eps = 1e-4, use_aprx = FALSE,
+    method = 1L, use_tilting = TRUE)
+  expect_equal(truth, pedmod_res, check.attributes = FALSE,
+               tolerance = 1e-4)
 })
 
 test_that("examples in manual pages gives the correct answer for eval_pedigree_[ll]/[grad]", {

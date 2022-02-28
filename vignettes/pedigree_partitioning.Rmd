@@ -700,4 +700,5 @@ NROW(max_part$removed_edges) # number of removed edges
 The method completely failed this time except when we started from the 
 balanced connected partition.
 
+
 ## References

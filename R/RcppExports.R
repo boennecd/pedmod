@@ -42,6 +42,8 @@
 #' More samples yields a better estimate of the error but a worse
 #' approximation. Eight is used in the original Fortran code. If one is
 #' used then the error will be set to zero because it cannot be estimated.
+#' @param use_tilting \code{TRUE} if the minimax tilting method suggested
+#' by Botev (2017). See \url{https://doi.org/10.1111/rssb.12162}.
 #'
 #' @return
 #' An approximation of the CDF. The \code{"n_it"} attribute shows the number of
@@ -57,25 +59,44 @@
 #' u <- rnorm(n)
 #'
 #' system.time(pedmod_res <- mvndst(
-#'   lower = rep(-Inf, n), upper = u, sigma = S, mu = numeric(n),
-#'   maxvls = 1e6, abs_eps = 0, rel_eps = 1e-4, use_aprx = TRUE))
+#'     lower = rep(-Inf, n), upper = u, sigma = S, mu = numeric(n),
+#'     maxvls = 1e6, abs_eps = 0, rel_eps = 1e-4, use_aprx = TRUE))
 #' pedmod_res
 #'
 #' # compare with mvtnorm
 #' if(require(mvtnorm)){
-#'   mvtnorm_time <- system.time(mvtnorm_res <- pmvnorm(
-#'     upper = u, sigma = S, algorithm = GenzBretz(
-#'       maxpts = 1e6, abseps = 0, releps = 1e-4)))
-#'   cat("mvtnorm_res:\n")
-#'   print(mvtnorm_res)
+#'     mvtnorm_time <- system.time(mvtnorm_res <- mvtnorm::pmvnorm(
+#'         upper = u, sigma = S, algorithm = GenzBretz(
+#'             maxpts = 1e6, abseps = 0, releps = 1e-4)))
+#'     cat("mvtnorm_res:\n")
+#'     print(mvtnorm_res)
 #'
-#'   cat("mvtnorm_time:\n")
-#'   print(mvtnorm_time)
+#'     cat("mvtnorm_time:\n")
+#'     print(mvtnorm_time)
+#' }
+#'
+#' # with titling
+#' system.time(pedmod_res <- mvndst(
+#'     lower = rep(-Inf, n), upper = u, sigma = S, mu = numeric(n),
+#'     maxvls = 1e6, abs_eps = 0, rel_eps = 1e-4, use_tilting = TRUE))
+#' pedmod_res
+#'
+#' # compare with TruncatedNormal
+#' if(require(TruncatedNormal)){
+#'     TruncatedNormal_time <- system.time(
+#'         TruncatedNormal_res <- TruncatedNormal::pmvnorm(
+#'             lb = rep(-Inf, n), ub = u, sigma = S,
+#'             B = attr(pedmod_res, "n_it"), type = "qmc"))
+#'     cat("TruncatedNormal_res:\n")
+#'     print(TruncatedNormal_res)
+#'
+#'     cat("TruncatedNormal_time:\n")
+#'     print(TruncatedNormal_time)
 #' }
 #'
 #' @export
-mvndst <- function(lower, upper, mu, sigma, maxvls = 25000L, abs_eps = .001, rel_eps = 0L, minvls = -1L, do_reorder = TRUE, use_aprx = FALSE, method = 0L, n_sequences = 8L) {
-    .Call(`_pedmod_mvndst`, lower, upper, mu, sigma, maxvls, abs_eps, rel_eps, minvls, do_reorder, use_aprx, method, n_sequences)
+mvndst <- function(lower, upper, mu, sigma, maxvls = 25000L, abs_eps = .001, rel_eps = 0L, minvls = -1L, do_reorder = TRUE, use_aprx = FALSE, method = 0L, n_sequences = 8L, use_tilting = FALSE) {
+    .Call(`_pedmod_mvndst`, lower, upper, mu, sigma, maxvls, abs_eps, rel_eps, minvls, do_reorder, use_aprx, method, n_sequences, use_tilting)
 }
 
 #' Get a C++ Object for Log Marginal Likelihood Approximations
@@ -175,12 +196,12 @@ pedigree_ll_terms <- function(data, max_threads = 1L, n_sequences = 8L) {
     .Call(`_pedmod_get_n_terms_loadings`, ptr)
 }
 
-eval_pedigree_ll_cpp <- function(ptr, par, maxvls, abs_eps, rel_eps, indices = NULL, minvls = -1L, do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L, cluster_weights = NULL, method = 0L) {
-    .Call(`_pedmod_eval_pedigree_ll`, ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder, use_aprx, n_threads, cluster_weights, method)
+eval_pedigree_ll_cpp <- function(ptr, par, maxvls, abs_eps, rel_eps, indices = NULL, minvls = -1L, do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L, cluster_weights = NULL, method = 0L, use_tilting = FALSE) {
+    .Call(`_pedmod_eval_pedigree_ll`, ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder, use_aprx, n_threads, cluster_weights, method, use_tilting)
 }
 
-eval_pedigree_grad_cpp <- function(ptr, par, maxvls, abs_eps, rel_eps, indices = NULL, minvls = -1L, do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L, cluster_weights = NULL, method = 0L) {
-    .Call(`_pedmod_eval_pedigree_grad`, ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder, use_aprx, n_threads, cluster_weights, method)
+eval_pedigree_grad_cpp <- function(ptr, par, maxvls, abs_eps, rel_eps, indices = NULL, minvls = -1L, do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L, cluster_weights = NULL, method = 0L, use_tilting = FALSE) {
+    .Call(`_pedmod_eval_pedigree_grad`, ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder, use_aprx, n_threads, cluster_weights, method, use_tilting)
 }
 
 #' @rdname pedigree_ll_terms
@@ -190,11 +211,11 @@ pedigree_ll_terms_loadings <- function(data, max_threads = 1L, n_sequences = 8L)
     .Call(`_pedmod_pedigree_ll_terms_loadings`, data, max_threads, n_sequences)
 }
 
-eval_pedigree_ll_loadings_cpp <- function(ptr, par, maxvls, abs_eps, rel_eps, indices = NULL, minvls = -1L, do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L, cluster_weights = NULL, method = 0L) {
-    .Call(`_pedmod_eval_pedigree_ll_loadings`, ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder, use_aprx, n_threads, cluster_weights, method)
+eval_pedigree_ll_loadings_cpp <- function(ptr, par, maxvls, abs_eps, rel_eps, indices = NULL, minvls = -1L, do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L, cluster_weights = NULL, method = 0L, use_tilting = FALSE) {
+    .Call(`_pedmod_eval_pedigree_ll_loadings`, ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder, use_aprx, n_threads, cluster_weights, method, use_tilting)
 }
 
-eval_pedigree_grad_loadings_cpp <- function(ptr, par, maxvls, abs_eps, rel_eps, indices = NULL, minvls = -1L, do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L, cluster_weights = NULL, method = 0L) {
-    .Call(`_pedmod_eval_pedigree_grad_loadings`, ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder, use_aprx, n_threads, cluster_weights, method)
+eval_pedigree_grad_loadings_cpp <- function(ptr, par, maxvls, abs_eps, rel_eps, indices = NULL, minvls = -1L, do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L, cluster_weights = NULL, method = 0L, use_tilting = FALSE) {
+    .Call(`_pedmod_eval_pedigree_grad_loadings`, ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder, use_aprx, n_threads, cluster_weights, method, use_tilting)
 }
 

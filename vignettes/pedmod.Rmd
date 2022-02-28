@@ -2227,6 +2227,9 @@ but the version in this package is re-written in C++ and differs slightly.
 Moreover, we have implemented an approximation of the standard normal CDF
 and its inverse which reduces the computation time as we will show below.
 
+We also compare our implementation of the minimax titling method suggested 
+by @Botev17 with the implementation in the TruncatedNormal package.
+
 ```{r compare_w_mvtnorm, cache = 1}
 #####
 # settings for the simulation study
@@ -2246,14 +2249,20 @@ sim_res <- replicate(expr = {
   
   # function to use pmvnorm
   use_mvtnorm <- function(rel_eps)
-    pmvnorm(upper = u, sigma = S, algorithm = GenzBretz(
+    mvtnorm::pmvnorm(
+      upper = u, sigma = S, algorithm = GenzBretz(
       abseps = 0, releps = rel_eps, maxpts = 1e7))
   
+  # function to use pmvnorm from TruncatedNormal
+  use_trunc_norm <- function(n_sample)
+    TruncatedNormal::pmvnorm(
+      sigma = S, lb = rep(-Inf, n), ub = u, type = "qmc", B = n_sample)
+  
   # function to use this package
-  use_mvndst <- function(use_aprx = FALSE, method = 0L)
+  use_mvndst <- function(use_aprx = FALSE, method = 0L, use_tilting = TRUE)
     mvndst(lower = rep(-Inf, n), upper = u, mu = rep(0, n), 
            sigma = S, use_aprx = use_aprx, abs_eps = 0, rel_eps = rel_eps,
-           maxvls = 1e7, method = method)
+           maxvls = 1e7, method = method, use_tilting = use_tilting)
 
   # get a very precise estimate
   truth <- use_mvtnorm(rel_eps / 100)
@@ -2271,36 +2280,175 @@ sim_res <- replicate(expr = {
   }
   
   mvtnorm_res                <- run_n_time(use_mvtnorm(rel_eps))
-  mvndst_no_aprx_res_Korobov <- run_n_time(use_mvndst(FALSE, method = 0L))
-  mvndst_w_aprx_res_Korobov  <- run_n_time(use_mvndst(TRUE , method = 0L))
-  mvndst_no_aprx_res_Sobol   <- run_n_time(use_mvndst(FALSE, method = 1L))
-  mvndst_w_aprx_res_Sobol    <- run_n_time(use_mvndst(TRUE , method = 1L))
   
+  n_sample <- attr(use_mvndst(TRUE, method = 0L, use_tilting = TRUE), "n_it")
+  TruncatedNormal_res        <- run_n_time(use_trunc_norm(n_sample))
+  
+  mvndst_no_aprx_res_Korobov <- 
+    run_n_time(use_mvndst(FALSE, method = 0L, use_tilting = FALSE))
+  mvndst_w_aprx_res_Korobov  <- 
+    run_n_time(use_mvndst(TRUE , method = 0L, use_tilting = FALSE))
+  mvndst_no_aprx_res_Sobol   <- 
+    run_n_time(use_mvndst(FALSE, method = 1L, use_tilting = FALSE))
+  mvndst_w_aprx_res_Sobol    <- 
+    run_n_time(use_mvndst(TRUE , method = 1L, use_tilting = FALSE))
+  
+  mvndst_no_aprx_res_Korobov_tilt <- 
+    run_n_time(use_mvndst(FALSE, method = 0L, use_tilting = TRUE))
+  mvndst_w_aprx_res_Korobov_tilt  <- 
+    run_n_time(use_mvndst(TRUE , method = 0L, use_tilting = TRUE))
+  mvndst_no_aprx_res_Sobol_tilt   <- 
+    run_n_time(use_mvndst(FALSE, method = 1L, use_tilting = TRUE))
+  mvndst_w_aprx_res_Sobol_tilt    <- 
+    run_n_time(use_mvndst(TRUE , method = 1L, use_tilting = TRUE))
+
   # return 
   rbind(mvtnorm            = mvtnorm_res, 
+        TruncatedNormal = TruncatedNormal_res,
         `no aprx; Korobov` = mvndst_no_aprx_res_Korobov, 
         `no aprx; Sobol` = mvndst_no_aprx_res_Sobol, 
         `w/ aprx; Korobov` = mvndst_w_aprx_res_Korobov,
-        `w/ aprx; Sobol` = mvndst_w_aprx_res_Sobol)
+        `w/ aprx; Sobol` = mvndst_w_aprx_res_Sobol,
+        
+        `no aprx; Korobov (tilt)` = mvndst_no_aprx_res_Korobov_tilt, 
+        `no aprx; Sobol (tilt)` = mvndst_no_aprx_res_Sobol_tilt, 
+        `w/ aprx; Korobov (tilt)` = mvndst_w_aprx_res_Korobov_tilt,
+        `w/ aprx; Sobol (tilt)` = mvndst_w_aprx_res_Sobol_tilt)
 }, n = 100, simplify = "array")
 ```
 
-They have about the same average relative error as expected:
+Box plots of the relative errors are shown below:
 
-```{r show_averge_rel_err}
+```{r show_averge_rel_err, fig.height = knitr::opts_chunk$get("fig.height") * 4/3}
 rowMeans(sim_res[, "SE", ])
-par(mar = c(9, 4, 1, 1), bty = "l")
+par(mar = c(10, 4, 1, 1), bty = "l")
 boxplot(t(sim_res[, "SE", ]), las = 2)
 grid()
 ```
 
 The new implementation is faster when the approximation is used:
 
-```{r use_new_impl}
+```{r use_new_impl, fig.height = knitr::opts_chunk$get("fig.height") * 4/3}
 rowMeans(sim_res[, "time", ])
 par(mar = c(9, 4, 1, 1), bty = "l")
 boxplot(t(sim_res[, "time", ]), log = "y", las = 2)
 grid()
 ```
+
+Next, we compare the methods with the first example from @Botev17. This is with 
+a low probability case and we would expect the minimax tilted version to 
+perform better. We fix the number of samples with all packages in this example.
+
+```{r botev_example, cache = TRUE}
+# settings for the test like in Botev (2017)
+library(mvtnorm)
+library(pedmod)
+library(microbenchmark)
+ds <- c(3, 5, 10, 15, 20, 25)
+n_sample <- 10000L
+
+# run the simulation study
+set.seed(15418038)
+sim_res <- sapply(ds, \(d){
+  S <- solve(diag(1/2, d) + 1/2)
+  l <- rep(1/2, d)
+  u <- rep(1, d)
+  
+  # function to use pmvnorm
+  use_mvtnorm <- function(n_sample)
+    mvtnorm::pmvnorm(lower = l, upper = u, sigma = S, algorithm = GenzBretz(
+            abseps = 0, releps = 0, maxpts = n_sample))
+  
+  # function to use pmvnorm from TruncatedNormal
+  use_trunc_norm <- function(n_sample)
+    TruncatedNormal::pmvnorm(
+      sigma = S, lb = l, ub = u, type = "qmc", B = n_sample)
+  
+  # function to use this package
+  use_mvndst <- function(use_aprx = FALSE, method = 0L, use_tilting = TRUE)
+    mvndst(lower = l, upper = u, mu = rep(0, d), 
+           sigma = S, use_aprx = use_aprx, abs_eps = 0, rel_eps = 0,
+           maxvls = n_sample, method = method, use_tilting = use_tilting, 
+           minvls = n_sample)
+
+  # get a very precise estimate
+  truth <- use_trunc_norm(n_sample * 100L)
+  
+  # computes the error with repeated approximations and compute the time it
+  # takes
+  n_rep <- 25L
+  run_n_time <- function(expr){
+    expr <- substitute(expr)
+    ti <- get_nanotime()
+    res <- replicate(n_rep, eval(expr))
+    ti <- get_nanotime() - ti
+    err <- (res - truth) / truth
+    c(SE = sqrt(sum(err^2) / n_rep), time = ti / n_rep / 1e9)
+  }
+  
+  mvtnorm_res                <- run_n_time(use_mvtnorm(n_sample))
+  
+  TruncatedNormal_res        <- run_n_time(use_trunc_norm(n_sample))
+  
+  mvndst_no_aprx_res_Korobov <- 
+    run_n_time(use_mvndst(FALSE, method = 0L, use_tilting = FALSE))
+  mvndst_w_aprx_res_Korobov  <- 
+    run_n_time(use_mvndst(TRUE , method = 0L, use_tilting = FALSE))
+  mvndst_no_aprx_res_Sobol   <- 
+    run_n_time(use_mvndst(FALSE, method = 1L, use_tilting = FALSE))
+  mvndst_w_aprx_res_Sobol    <- 
+    run_n_time(use_mvndst(TRUE , method = 1L, use_tilting = FALSE))
+  
+  mvndst_no_aprx_res_Korobov_tilt <- 
+    run_n_time(use_mvndst(FALSE, method = 0L, use_tilting = TRUE))
+  mvndst_w_aprx_res_Korobov_tilt  <- 
+    run_n_time(use_mvndst(TRUE , method = 0L, use_tilting = TRUE))
+  mvndst_no_aprx_res_Sobol_tilt   <- 
+    run_n_time(use_mvndst(FALSE, method = 1L, use_tilting = TRUE))
+  mvndst_w_aprx_res_Sobol_tilt    <- 
+    run_n_time(use_mvndst(TRUE , method = 1L, use_tilting = TRUE))
+  
+  rbind(mvtnorm            = mvtnorm_res, 
+        TruncatedNormal = TruncatedNormal_res,
+        `no aprx; Korobov` = mvndst_no_aprx_res_Korobov, 
+        `no aprx; Sobol` = mvndst_no_aprx_res_Sobol, 
+        `w/ aprx; Korobov` = mvndst_w_aprx_res_Korobov,
+        `w/ aprx; Sobol` = mvndst_w_aprx_res_Sobol,
+        
+        `no aprx; Korobov (tilt)` = mvndst_no_aprx_res_Korobov_tilt, 
+        `no aprx; Sobol (tilt)` = mvndst_no_aprx_res_Sobol_tilt, 
+        `w/ aprx; Korobov (tilt)` = mvndst_w_aprx_res_Korobov_tilt,
+        `w/ aprx; Sobol (tilt)` = mvndst_w_aprx_res_Sobol_tilt)
+}, simplify = "array")
+
+dimnames(sim_res)[[3]] <- ds
+```
+
+The relative errors plotted against the dimension is shown below:
+
+```{r err_botev_example, fig.height = knitr::opts_chunk$get("fig.height") * 4/3}
+par(mar = c(5, 5, 1, 1), cex = .8)
+matplot(ds, t(sim_res[, "SE", ]), type = "p", log = "y", 
+        pch = 1:dim(sim_res)[1], xlab = "Dimension", ylab = "Relative error", 
+        col = "black", bty = "l")
+matlines(ds, t(sim_res[, "SE", ]), col = "black", lty = 2)
+legend("bottomright", bty = "n", pch = 1:dim(sim_res)[1], 
+       legend = dimnames(sim_res)[[1]])
+grid()
+```
+
+A similar plot for the average estimation time is shown below.
+
+```{r time_botev_example, fig.height = knitr::opts_chunk$get("fig.height") * 4/3}
+par(mar = c(5, 5, 1, 1), cex = .8)
+matplot(ds, t(sim_res[, "time", ]), type = "p", log = "y", 
+        pch = 1:dim(sim_res)[1], xlab = "Dimension", ylab = "Time", 
+        col = "black", bty = "l")
+matlines(ds, t(sim_res[, "time", ]), col = "black", lty = 2)
+legend("bottomright", bty = "n", pch = 1:dim(sim_res)[1], 
+       legend = dimnames(sim_res)[[1]])
+grid()
+```
+
 
 ## References

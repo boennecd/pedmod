@@ -87,7 +87,8 @@ public:
   fn_res fn
     (double const * par, unsigned const maxvls, double const abs_eps,
      double const rel_eps, int minvls, bool const do_reorder,
-     bool const use_aprx, bool &did_fail, cdf_methods const method){
+     bool const use_aprx, bool &did_fail, cdf_methods const method,
+     bool const use_tilting){
     did_fail = true;
     arma::vec mu(dmem.get_mem(), n_members(), false),
            lower(mu.end()      , n_members(), false),
@@ -107,7 +108,8 @@ public:
     if(minvls < 0)
       minvls = std::min<int>(1000, 100 * n_members());
     auto const res = cdf<likelihood>(
-      func, lower, upper, mu, sig, do_reorder, use_aprx).approximate(
+      func, lower, upper, mu, sig, do_reorder, use_aprx,
+      use_tilting).approximate(
           maxvls, abs_eps, rel_eps, method, minvls, max_n_sequences);
 
     did_fail = res.inform > 0;
@@ -128,7 +130,7 @@ public:
     (double const * par, double * d_par, double * var_est, unsigned const maxvls,
      double const abs_eps, double const rel_eps, int minvls,
      bool const do_reorder, bool const use_aprx, bool &did_fail,
-     double const weight, cdf_methods const method){
+     double const weight, cdf_methods const method, bool const use_tilting){
     did_fail = true;
     arma::vec mu(dmem.get_mem(), n_members(), false),
            lower(mu.end()      , n_members(), false),
@@ -146,7 +148,8 @@ public:
       l_factor.setup(sig, par + n_fix_effect(), 1., true);
       likelihood lfunc;
       auto const norm_const = cdf<likelihood>(
-        lfunc, lower, upper, mu, sig, do_reorder, use_aprx).approximate(
+        lfunc, lower, upper, mu, sig, do_reorder, use_aprx,
+        use_tilting).approximate(
             maxvls, abs_eps, std::min(1., 10. * rel_eps), method, minvls,
             max_n_sequences);
 
@@ -156,7 +159,8 @@ public:
     if(minvls < 0)
       minvls = std::min<unsigned>(1000, 100 * n_members());
     auto const res = cdf<pedigree_l_factor>(
-      l_factor, lower, upper, mu, sig, do_reorder, use_aprx).approximate(
+      l_factor, lower, upper, mu, sig, do_reorder, use_aprx,
+      use_tilting).approximate(
           maxvls, abs_eps, rel_eps, method, minvls,
           max_n_sequences);
 
@@ -255,7 +259,8 @@ public:
   fn_res fn
     (double const * par, unsigned const maxvls, double const abs_eps,
      double const rel_eps, int minvls, bool const do_reorder,
-     bool const use_aprx, bool &did_fail, cdf_methods const method){
+     bool const use_aprx, bool &did_fail, cdf_methods const method,
+     bool const use_tilting){
     did_fail = true;
     arma::vec lower(n_members()),
               upper(n_members());
@@ -285,7 +290,8 @@ public:
     if(minvls < 0)
       minvls = std::min<int>(1000, 100 * n_members());
     auto const res = cdf<likelihood>(
-      func, lower, upper, mu, sig, do_reorder, use_aprx).approximate(
+      func, lower, upper, mu, sig, do_reorder, use_aprx,
+      use_tilting).approximate(
           maxvls, abs_eps, rel_eps, method, minvls, max_n_sequences);
 
     did_fail = res.inform > 0;
@@ -306,7 +312,7 @@ public:
     (double const * par, double * d_par, double * var_est, unsigned const maxvls,
      double const abs_eps, double const rel_eps, int minvls,
      bool const do_reorder, bool const use_aprx, bool &did_fail,
-     double const weight, cdf_methods const method){
+     double const weight, cdf_methods const method, bool const use_tilting){
     did_fail = true;
     arma::vec lower(n_members()),
               upper(n_members());
@@ -340,14 +346,16 @@ public:
     {
       likelihood lfunc;
       norm_const = cdf<likelihood>(
-        lfunc, lower, upper, mu, sig, do_reorder, use_aprx).approximate(
+        lfunc, lower, upper, mu, sig, do_reorder, use_aprx,
+        use_tilting).approximate(
             maxvls, abs_eps, std::min(1., 10. * rel_eps), method, minvls,
             max_n_sequences).likelihood;
     }
 
     generic_l_factor l_factor(mu, sig, norm_const);
     auto res = cdf<generic_l_factor>(
-      l_factor, lower, upper, mu, sig, do_reorder, use_aprx).approximate(
+      l_factor, lower, upper, mu, sig, do_reorder, use_aprx,
+      use_tilting).approximate(
           maxvls, abs_eps, rel_eps, method, minvls,
           max_n_sequences);
 

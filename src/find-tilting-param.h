@@ -6,6 +6,7 @@
 struct find_tilting_param_res {
   std::vector<double> tilting_param;
   bool success;
+  bool is_interior;
 };
 
 /**

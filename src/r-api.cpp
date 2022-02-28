@@ -27,6 +27,8 @@
 //' More samples yields a better estimate of the error but a worse
 //' approximation. Eight is used in the original Fortran code. If one is
 //' used then the error will be set to zero because it cannot be estimated.
+//' @param use_tilting \code{TRUE} if the minimax tilting method suggested
+//' by Botev (2017). See \url{https://doi.org/10.1111/rssb.12162}.
 //'
 //' @return
 //' An approximation of the CDF. The \code{"n_it"} attribute shows the number of
@@ -42,20 +44,39 @@
 //' u <- rnorm(n)
 //'
 //' system.time(pedmod_res <- mvndst(
-//'   lower = rep(-Inf, n), upper = u, sigma = S, mu = numeric(n),
-//'   maxvls = 1e6, abs_eps = 0, rel_eps = 1e-4, use_aprx = TRUE))
+//'     lower = rep(-Inf, n), upper = u, sigma = S, mu = numeric(n),
+//'     maxvls = 1e6, abs_eps = 0, rel_eps = 1e-4, use_aprx = TRUE))
 //' pedmod_res
 //'
 //' # compare with mvtnorm
 //' if(require(mvtnorm)){
-//'   mvtnorm_time <- system.time(mvtnorm_res <- pmvnorm(
-//'     upper = u, sigma = S, algorithm = GenzBretz(
-//'       maxpts = 1e6, abseps = 0, releps = 1e-4)))
-//'   cat("mvtnorm_res:\n")
-//'   print(mvtnorm_res)
+//'     mvtnorm_time <- system.time(mvtnorm_res <- mvtnorm::pmvnorm(
+//'         upper = u, sigma = S, algorithm = GenzBretz(
+//'             maxpts = 1e6, abseps = 0, releps = 1e-4)))
+//'     cat("mvtnorm_res:\n")
+//'     print(mvtnorm_res)
 //'
-//'   cat("mvtnorm_time:\n")
-//'   print(mvtnorm_time)
+//'     cat("mvtnorm_time:\n")
+//'     print(mvtnorm_time)
+//' }
+//'
+//' # with titling
+//' system.time(pedmod_res <- mvndst(
+//'     lower = rep(-Inf, n), upper = u, sigma = S, mu = numeric(n),
+//'     maxvls = 1e6, abs_eps = 0, rel_eps = 1e-4, use_tilting = TRUE))
+//' pedmod_res
+//'
+//' # compare with TruncatedNormal
+//' if(require(TruncatedNormal)){
+//'     TruncatedNormal_time <- system.time(
+//'         TruncatedNormal_res <- TruncatedNormal::pmvnorm(
+//'             lb = rep(-Inf, n), ub = u, sigma = S,
+//'             B = attr(pedmod_res, "n_it"), type = "qmc"))
+//'     cat("TruncatedNormal_res:\n")
+//'     print(TruncatedNormal_res)
+//'
+//'     cat("TruncatedNormal_time:\n")
+//'     print(TruncatedNormal_time)
 //' }
 //'
 //' @export
@@ -66,7 +87,7 @@ Rcpp::NumericVector mvndst
    double const abs_eps = .001, double const rel_eps = 0,
    int minvls = -1, bool const do_reorder = true,
    bool const use_aprx = false, int const method = 0,
-   unsigned const n_sequences = 8){
+   unsigned const n_sequences = 8, bool const use_tilting = false){
   arma::uword const n = lower.n_elem;
   if(upper.n_elem != n)
     throw std::invalid_argument("mvndst: invalid upper");
@@ -89,7 +110,8 @@ Rcpp::NumericVector mvndst
   pedmod::cdf<pedmod::likelihood>::alloc_mem(lower.n_elem, 1);
   pedmod::likelihood::alloc_mem(lower.n_elem, 1, n_sequences);
   auto const out = pedmod::cdf<pedmod::likelihood>(
-    func, lower, upper, mu, sigma, do_reorder, use_aprx).approximate(
+    func, lower, upper, mu, sigma, do_reorder, use_aprx,
+    use_tilting).approximate(
         maxvls, abs_eps, rel_eps, pedmod::get_cdf_methods(method), minvls,
         n_sequences);
 
@@ -333,7 +355,7 @@ Rcpp::NumericVector eval_pedigree_ll
    int const minvls = -1, bool const do_reorder = true,
    bool const use_aprx = false, unsigned n_threads = 1L,
    Rcpp::Nullable<Rcpp::NumericVector> cluster_weights = R_NilValue,
-   int const method = 0){
+   int const method = 0, bool const use_tilting = false){
   Rcpp::XPtr<pedigree_terms> terms_ptr(ptr);
   std::vector<pedmod::pedigree_ll_term > &terms = terms_ptr->terms;
   n_threads = eval_get_n_threads(n_threads, *terms_ptr);
@@ -402,7 +424,7 @@ Rcpp::NumericVector eval_pedigree_ll
 
       auto const res = terms.at(idx[i]).fn(
         &par[0], maxvls, abs_eps, rel_eps, minvls, do_reorder, use_aprx,
-        did_fail, meth);
+        did_fail, meth, use_tilting);
 
       wmem[0] += w_i * res.log_likelihood;
       wmem[1] += w_i * w_i * res.estimator_var;
@@ -436,7 +458,7 @@ Rcpp::NumericVector eval_pedigree_grad
    int const minvls = -1, bool const do_reorder = true,
    bool const use_aprx = false, unsigned n_threads = 1L,
    Rcpp::Nullable<Rcpp::NumericVector> cluster_weights = R_NilValue,
-   int const method = 0){
+   int const method = 0, bool const use_tilting = false){
   Rcpp::XPtr<pedigree_terms> terms_ptr(ptr);
   std::vector<pedmod::pedigree_ll_term > &terms = terms_ptr->terms;
   n_threads = eval_get_n_threads(n_threads, *terms_ptr);
@@ -502,7 +524,7 @@ Rcpp::NumericVector eval_pedigree_grad
 
       *wmem += terms.at(idx[i]).gr(
         &par[0], wmem + 1, var_est, maxvls, abs_eps, rel_eps, minvls,
-        do_reorder, use_aprx, did_fail, w_i, meth);
+        do_reorder, use_aprx, did_fail, w_i, meth, use_tilting);
       n_fails += did_fail;
     });
 #ifdef _OPENMP
@@ -563,7 +585,7 @@ Rcpp::NumericVector eval_pedigree_ll_loadings
    int const minvls = -1, bool const do_reorder = true,
    bool const use_aprx = false, unsigned n_threads = 1L,
    Rcpp::Nullable<Rcpp::NumericVector> cluster_weights = R_NilValue,
-   int const method = 0){
+   int const method = 0, bool const use_tilting = false){
   Rcpp::XPtr<pedigree_terms_loading> terms_ptr(ptr);
   std::vector<pedmod::pedigree_ll_term_loading> &terms = terms_ptr->terms;
   n_threads = eval_get_n_threads(n_threads, *terms_ptr);
@@ -626,7 +648,7 @@ Rcpp::NumericVector eval_pedigree_ll_loadings
 
       auto const res = terms.at(idx[i]).fn(
         &par[0], maxvls, abs_eps, rel_eps, minvls, do_reorder, use_aprx,
-        did_fail, meth);
+        did_fail, meth, true);
 
       wmem[0] += w_i * res.log_likelihood;
       wmem[1] += w_i * w_i * res.estimator_var;
@@ -659,7 +681,7 @@ Rcpp::NumericVector eval_pedigree_grad_loadings
    int const minvls = -1, bool const do_reorder = true,
    bool const use_aprx = false, unsigned n_threads = 1L,
    Rcpp::Nullable<Rcpp::NumericVector> cluster_weights = R_NilValue,
-   int const method = 0){
+   int const method = 0, bool const use_tilting = false){
   Rcpp::XPtr<pedigree_terms_loading> terms_ptr(ptr);
   std::vector<pedmod::pedigree_ll_term_loading> &terms = terms_ptr->terms;
   n_threads = eval_get_n_threads(n_threads, *terms_ptr);
@@ -723,7 +745,7 @@ Rcpp::NumericVector eval_pedigree_grad_loadings
 
       *wmem += terms.at(idx[i]).gr(
         &par[0], wmem + 1, var_est, maxvls, abs_eps, rel_eps, minvls,
-        do_reorder, use_aprx, did_fail, w_i, meth);
+        do_reorder, use_aprx, did_fail, w_i, meth, use_tilting);
       n_fails += did_fail;
     });
 #ifdef _OPENMP

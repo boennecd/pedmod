@@ -6,6 +6,7 @@
 #include <numeric>
 #include <Rmath.h> // Rf_dnorm4, Rf_pnorm5 etc.
 #include <R_ext/RS.h> // for F77_NAME and F77_CALL
+#include "pnorm.h"
 
 using std::exp;
 
@@ -16,9 +17,9 @@ extern "C" {
 }
 
 namespace {
-inline double pnrm_log(double const x){
-  // TODO: replace. Can create a warning which crashed w/ parallel computing
-  return Rf_pnorm5(x, 0, 1, 1, 1);
+inline double pnrm
+  (double const x, bool const lower_tail, bool const use_log){
+  return pnorm_std(x, lower_tail, use_log);
 }
 inline double dnrm_log(double const x){
   // TODO: replace. Can create a warning which crashed w/ parallel computing
@@ -64,8 +65,6 @@ class root_problem final : public PSQN::problem {
               double       * PSQN_RESTRICT gr) {
     double const * const tilt{val},
                  * const point{tilt + dim};
-    if(comp_grad)
-      std::fill(gr, gr + 2 * dim, 0);
 
     double * mem_ptr{working_mem.data()};
     auto get_mem = [&](size_t const n_mem){
@@ -80,6 +79,86 @@ class root_problem final : public PSQN::problem {
     double * const derivs_pnrm_terms{get_mem(dim)},
            * const hess_pnrm_terms{get_mem(comp_grad ? dim : 1)};
     for(size_t i = 0; i < dim; ++i){
+      double lb_shift{-std::numeric_limits<double>::infinity()},
+             ub_shift{std::numeric_limits<double>::infinity()};
+
+      switch(l_type[i]){
+      case limit_type::lower_bounded:
+        lb_shift = lower_limits[i] - choleksy_T_point[i] - tilt[i];
+        break;
+      case limit_type::upper_bounded:
+        ub_shift = upper_limits[i] - choleksy_T_point[i] - tilt[i];
+        break;
+
+      case limit_type::both:
+        lb_shift = lower_limits[i] - choleksy_T_point[i] - tilt[i];
+        ub_shift = upper_limits[i] - choleksy_T_point[i] - tilt[i];
+        break;
+      }
+
+      double denom_log;
+      if(lb_shift > 0){
+        double const v_lb{pnrm(lb_shift, false, true)},
+                     v_ub{pnrm(ub_shift, false, true)};
+
+        denom_log = v_lb + std::log1p(-exp(v_ub - v_lb));
+      } else if(ub_shift < 0){
+        double const v_lb{pnrm(lb_shift, true, true)},
+                     v_ub{pnrm(ub_shift, true, true)};
+
+        denom_log = v_ub + std::log1p(-exp(v_lb - v_ub));
+
+      } else {
+        double const v_lb{pnrm(lb_shift, true, false)},
+                     v_ub{pnrm(ub_shift, false, false)};
+
+        denom_log = std::log1p(-v_lb - v_ub);
+      }
+
+      switch(l_type[i]){
+      case limit_type::lower_bounded:
+        {
+          double const dnrm_log_lb{dnrm_log(lb_shift)},
+                          ratio_lb{exp(dnrm_log_lb - denom_log)};
+
+          derivs_pnrm_terms[i] = ratio_lb;
+          if constexpr (comp_grad)
+            hess_pnrm_terms[i] = lb_shift * ratio_lb -
+              derivs_pnrm_terms[i] * derivs_pnrm_terms[i];
+
+        }
+        break;
+
+      case limit_type::upper_bounded:
+        {
+          double const dnrm_log_ub{dnrm_log(ub_shift)},
+                       ratio_ub{exp(dnrm_log_ub - denom_log)};
+
+          derivs_pnrm_terms[i] = - ratio_ub;
+          if constexpr(comp_grad)
+            hess_pnrm_terms[i] = - ub_shift * ratio_ub -
+              derivs_pnrm_terms[i] * derivs_pnrm_terms[i];
+        }
+        break;
+
+      case limit_type::both:
+        {
+          double const dnrm_log_lb{dnrm_log(lb_shift)},
+                       dnrm_log_ub{dnrm_log(ub_shift)},
+                       ratio_lb{exp(dnrm_log_lb - denom_log)},
+                       ratio_ub{exp(dnrm_log_ub - denom_log)};
+
+          derivs_pnrm_terms[i] = ratio_lb - ratio_ub;
+          if constexpr(comp_grad)
+            hess_pnrm_terms[i] = lb_shift * ratio_lb - ub_shift * ratio_ub -
+              derivs_pnrm_terms[i] * derivs_pnrm_terms[i];
+        }
+        break;
+
+      }
+
+      // TODO: delete
+        /*
       switch(l_type[i]){
       case limit_type::lower_bounded:
         {
@@ -91,7 +170,7 @@ class root_problem final : public PSQN::problem {
         double const ratio_lb{exp(dnrm_log_lb - denom_log)};
 
         derivs_pnrm_terms[i] = ratio_lb;
-        if(comp_grad)
+        if constexpr (comp_grad)
           hess_pnrm_terms[i] = lb_shift * ratio_lb -
             derivs_pnrm_terms[i] * derivs_pnrm_terms[i];
 
@@ -108,7 +187,7 @@ class root_problem final : public PSQN::problem {
         double const ratio_ub{exp(dnrm_log_ub - denom_log)};
 
         derivs_pnrm_terms[i] = - ratio_ub;
-        if(comp_grad)
+        if constexpr(comp_grad)
           hess_pnrm_terms[i] = - ub_shift * ratio_ub -
             derivs_pnrm_terms[i] * derivs_pnrm_terms[i];
         }
@@ -129,10 +208,11 @@ class root_problem final : public PSQN::problem {
                      ratio_ub{exp(dnrm_log_ub - denom_log)};
 
         derivs_pnrm_terms[i] = ratio_lb - ratio_ub;
-        if(comp_grad)
+        if constexpr(comp_grad)
           hess_pnrm_terms[i] = lb_shift * ratio_lb - ub_shift * ratio_ub -
             derivs_pnrm_terms[i] * derivs_pnrm_terms[i];
       }
+      */
     }
 
     double * const gr_params{get_mem(2 * dim)};
@@ -148,7 +228,7 @@ class root_problem final : public PSQN::problem {
     for(size_t i = 0; i < 2 * dim; ++i)
       out += gr_params[i] * gr_params[i];
 
-    if(comp_grad){
+    if constexpr(comp_grad){
       // TODO: we can avoid explicitly computing the Hessian
       size_t const dim_hess{2 * dim};
       double * const hess{get_mem(dim_hess * dim_hess)},
@@ -257,10 +337,14 @@ public:
     std::for_each(tilt, tilt + dim, [](double &x) { x *= -1; });
   }
 
-  bool is_interior_solution(double const *res){
+  bool is_interior_solution(double const *res) {
     double const * const point{res + dim};
     double * const choleksy_T_point{working_mem.data()};
-    cholesky_product_T(choleksy_T_point, point);
+    {
+      double const *c{cholesky};
+      for(size_t i = 0; i < dim; ++i, c += i)
+        choleksy_T_point[i] = std::inner_product(point, point + i + 1, c, 0.);
+    }
 
     bool out{true};
     for(size_t i = 0; i < dim && out; ++i)
@@ -284,14 +368,13 @@ find_tilting_param_res find_tilting_param
 
   auto res = PSQN::bfgs(prob, param.data(), rel_eps, 1000L);
   bool const succeeded =
-    (res.info == PSQN::info_code::converged ||
-     res.info == PSQN::info_code::max_it_reached) &&
-     // TODO: need to implement a constrained optimizer when for when this
-     //       fails
-     prob.is_interior_solution(param.data());
+    res.info == PSQN::info_code::converged ||
+    res.info == PSQN::info_code::max_it_reached;
+  bool const is_interior{prob.is_interior_solution(param.data())};
 
+  param.data()[dim - 1] = 0;
   find_tilting_param_res out
-    { std::vector<double>(dim), succeeded };
+    { std::vector<double>(dim), succeeded, is_interior };
 
   if(succeeded){
     std::copy(param.data(), param.data() + dim, out.tilting_param.data());

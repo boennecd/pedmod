@@ -1,7 +1,7 @@
 Package: pedmod
 Type: Package
 Title: Pedigree Models
-Version: 0.1.1
+Version: 0.2.0
 Authors@R: c(
   person("Benjamin", "Christoffersen", 
          email = "boennecd@gmail.com", 
@@ -30,9 +30,10 @@ Description: Provides functions to estimate mixed probit models using, for
     commonly called liability threshold models. The approximation is 
     based on direct log marginal likelihood approximations like the randomized 
     Quasi-Monte Carlo suggested by <doi:10.1198/106186002394> with a similar 
-    procedure to approximate the derivatives. Graph-based methods are also 
-    provided that can be used to simplify pedigrees.
-License: GPL-2
+    procedure to approximate the derivatives. The minimax tilting method 
+    suggested by <doi:10.1111/rssb.12162> is also supported. Graph-based methods 
+    are also provided that can be used to simplify pedigrees.
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.2

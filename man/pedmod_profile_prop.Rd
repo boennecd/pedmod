@@ -26,6 +26,7 @@ pedmod_profile_prop(
   verbose = FALSE,
   max_step = 15L,
   opt_func = NULL,
+  use_tilting = FALSE,
   ...
 )
 }
@@ -90,6 +91,9 @@ either directions.}
 \item{opt_func}{function to perform minimization with arguments like
 \code{\link{optim}}. BFGS is used with \code{\link{optim}} if this argument
 is \code{NULL}.}
+
+\item{use_tilting}{\code{TRUE} if the minimax tilting method suggested
+by Botev (2017). See \url{https://doi.org/10.1111/rssb.12162}.}
 
 \item{...}{arguments passed to \code{opt_func}.}
 }

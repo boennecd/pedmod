@@ -18,7 +18,8 @@ eval_pedigree_ll(
   n_threads = 1L,
   cluster_weights = NULL,
   standardized = FALSE,
-  method = 0L
+  method = 0L,
+  use_tilting = FALSE
 )
 
 eval_pedigree_grad(
@@ -34,7 +35,8 @@ eval_pedigree_grad(
   n_threads = 1L,
   cluster_weights = NULL,
   standardized = FALSE,
-  method = 0L
+  method = 0L,
+  use_tilting = FALSE
 )
 }
 \arguments{
@@ -80,6 +82,9 @@ at \code{vignette("pedmod", package = "pedmod")}.}
 
 \item{method}{integer with the method to use. Zero yields randomized Korobov
 lattice rules while one yields scrambled Sobol sequences.}
+
+\item{use_tilting}{\code{TRUE} if the minimax tilting method suggested
+by Botev (2017). See \url{https://doi.org/10.1111/rssb.12162}.}
 }
 \value{
 \code{eval_pedigree_ll}:

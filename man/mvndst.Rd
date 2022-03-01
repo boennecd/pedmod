@@ -53,7 +53,7 @@ More samples yields a better estimate of the error but a worse
 approximation. Eight is used in the original Fortran code. If one is
 used then the error will be set to zero because it cannot be estimated.}
 
-\item{use_tilting}{\code{TRUE} if the exponential tilting method suggested
+\item{use_tilting}{\code{TRUE} if the minimax tilting method suggested
 by Botev (2017). See \url{https://doi.org/10.1111/rssb.12162}.}
 }
 \value{

@@ -23,6 +23,7 @@ pedmod_opt(
   fix = NULL,
   standardized = FALSE,
   method = 0L,
+  use_tilting = FALSE,
   ...
 )
 
@@ -42,7 +43,8 @@ pedmod_start(
   cluster_weights = NULL,
   standardized = FALSE,
   method = 0L,
-  sc_start = NULL
+  sc_start = NULL,
+  use_tilting = FALSE
 )
 
 pedmod_start_loadings(
@@ -104,6 +106,9 @@ at \code{vignette("pedmod", package = "pedmod")}.}
 
 \item{method}{integer with the method to use. Zero yields randomized Korobov
 lattice rules while one yields scrambled Sobol sequences.}
+
+\item{use_tilting}{\code{TRUE} if the minimax tilting method suggested
+by Botev (2017). See \url{https://doi.org/10.1111/rssb.12162}.}
 
 \item{...}{Arguments passed to \code{opt_func}.}
 

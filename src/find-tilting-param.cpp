@@ -1,5 +1,3 @@
-#include <Rmath.h> // Rf_dnorm4, Rf_pnorm5 etc.
-#include <R_ext/RS.h> // for F77_NAME and F77_CALL
 #include "find-tilting-param.h"
 #include <psqn-bfgs.h>
 #include <cmath>
@@ -7,6 +5,9 @@
 #include <algorithm>
 #include <numeric>
 #include "pnorm.h"
+#include <limits.h>
+
+#include <R_ext/RS.h> // for F77_NAME and F77_CALL
 
 using std::exp;
 
@@ -22,8 +23,11 @@ inline double pnrm
   return pnorm_std(x, lower_tail, use_log);
 }
 inline double dnrm_log(double const x){
-  // TODO: replace. Can create a warning which crashed w/ parallel computing
-  return Rf_dnorm4(x, 0, 1, 1);
+  // dput(sqrt(.Machine$double.xmax / 10))
+  constexpr double sqrt_double_max{4.23992114886859e+153},
+                   log_sqrt_2pi{0.918938533204673};
+  return x > sqrt_double_max ? -std::numeric_limits<double>::infinity()
+                             : -log_sqrt_2pi - x * x / 2;
 }
 
 /// the class to find the root of the gradient ignoring the constraint

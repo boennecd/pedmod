@@ -20,6 +20,7 @@
 #include "config.h"
 #include "find-tilting-param.h"
 #include <limits.h>
+#include "qtnorm.h"
 
 #include <R_ext/RS.h> // F77_NAME and F77_CALL
 
@@ -290,9 +291,14 @@ class cdf {
 
               log_pnrms_diff = v_ub + std::log1p(-exp(v_lb - v_ub));
 
-              val =
-                std::exp(v_lb) + unifs[k * ndim + j] * std::exp(log_pnrms_diff);
-              val = -qnorm_w(val, 0, 1, 0, 0);
+              if(lim_u[k] < -35)
+                val = qtnorm(unifs[k * ndim + j], lim_l[k], lim_u[k]);
+              else {
+                val =
+                  std::exp(v_lb)
+                    + unifs[k * ndim + j] * std::exp(log_pnrms_diff);
+                val = -qnorm_w(val, 0, 1, 0, 0);
+              }
 
             } else {
               double const v_lb{pnorm_use(lim_l[k], use_aprx, true, false)},
@@ -321,6 +327,17 @@ class cdf {
             double const quant_val = pnrm_lb + unifs[k * ndim + j] * l_diff;
             dr[offset + k] = use_aprx ? qnorm_aprx(quant_val)
                                       : qnorm_w   (quant_val, 0, 1, 1, 0);
+
+          }
+
+          if(unifs[k * ndim + j] <= 0 || unifs[k * ndim + j] >= 1){
+            // for reasons that are beyond me at the moment, unifs are
+            // (although very rarely) sometimes exactly 0 or 1 with some
+            // methods which gives +/-Inf values when the appropriate limit
+            // is +/-Inf
+            w[k] = with_tilting ? -Inf : 0;
+            dr[offset + k] = 0;
+
           }
         }
       };
@@ -365,7 +382,6 @@ class cdf {
             double const pnrm_lb{pnorm_use(lim_l[k], use_aprx, true, false)},
                          pnrm_ub{pnorm_use(lim_u[k], use_aprx, true, false)};
             w[k] *= pnrm_ub - pnrm_lb;
-
           }
         }
     }
@@ -378,6 +394,12 @@ class cdf {
     for(unsigned k = 0; k < n_draws; ++k){
       if constexpr(with_tilting)
         w[k] = std::exp(w[k]);
+      else if(std::isnan(w[k]))
+        // the method is not numerically stable in very extreme settings
+        // and we may have set a draw equal to +/-Inf which will give
+        // a NaN
+        w[k] = 0;
+
       w[k] /= functor.get_norm_constant();
       if(w[k] == 0){
         std::fill(o, o + n_integrands, 0);

@@ -29,7 +29,8 @@ pedmod_sqn(
   rel_eps_hess = rel_eps,
   verbose = FALSE,
   method = 0L,
-  check_every = 2L * n_grad_steps
+  check_every = 2L * n_grad_steps,
+  use_tilting = FALSE
 )
 }
 \arguments{
@@ -109,6 +110,9 @@ lattice rules while one yields scrambled Sobol sequences.}
 \item{check_every}{integer for the number of gradient steps between checking
 that the likelihood did increase. If not, the iterations are reset and the
 step-size is halved.}
+
+\item{use_tilting}{\code{TRUE} if the minimax tilting method suggested
+by Botev (2017). See \url{https://doi.org/10.1111/rssb.12162}.}
 }
 \value{
 A list with the following elements:

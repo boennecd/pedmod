@@ -317,7 +317,7 @@ library(pedmod)
 ll_terms <- pedigree_ll_terms(dat, max_threads = 4L)
 system.time(start <- pedmod_start(ptr = ll_terms, data = dat, n_threads = 4L))
 #>    user  system elapsed 
-#>  17.785   0.174   4.619
+#>  16.476   0.284   4.431
 
 # log likelihood without the random effects and at the starting values
 start$logLik_no_rng
@@ -332,7 +332,7 @@ system.time(
     n_threads = 4L, 
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 #>    user  system elapsed 
-#>   57.12    0.00   14.28
+#>  51.504   0.094  13.010
 ```
 
 The results of the estimation are shown below:
@@ -397,7 +397,7 @@ system.time(
   start_tilt <- pedmod_start(ptr = ll_terms, data = dat, n_threads = 4L, 
                              use_tilting = TRUE))
 #>    user  system elapsed 
-#>  20.941   0.012   5.247
+#>  21.615   0.023   5.442
 
 # estimate the model
 system.time(
@@ -406,7 +406,7 @@ system.time(
     n_threads = 4L, use_tilting = TRUE,
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 #>    user  system elapsed 
-#>  126.24    0.00   31.61
+#> 125.675   0.004  31.515
 ```
 
 The results of the estimation are shown below:
@@ -512,7 +512,7 @@ The model can also be estimated with the standardized parameterization:
 system.time(start_std <- pedmod_start(
   ptr = ll_terms, data = dat, n_threads = 4L, standardized = TRUE))
 #>    user  system elapsed 
-#>   6.005   0.012   1.512
+#>   5.375   0.021   1.374
 
 # the starting values are close
 standardized_to_direct(start_std$par, n_scales = 1L)
@@ -540,7 +540,7 @@ system.time(
     n_threads = 4L, standardized = TRUE,
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 #>    user  system elapsed 
-#>  38.972   0.004   9.748
+#>  34.901   0.004   8.768
 
 # we get the same
 standardized_to_direct(opt_out_std$par, n_scales = 1L)
@@ -582,7 +582,7 @@ system.time(
     minvls = 1000L, n_it = 400L, n_grad_steps = 10L, n_grad = 100L, 
     n_hess = 400L))
 #>    user  system elapsed 
-#>  417.52    0.03  104.45
+#> 362.916   0.147  90.992
 
 # show the log marginal likelihood
 ll_wrapper <- function(x)
@@ -633,7 +633,7 @@ system.time(
     # but use fewer samples in each iteration
     n_grad = 20L, n_hess = 100L))
 #>    user  system elapsed 
-#> 417.421   0.464 104.880
+#> 369.356   0.004  92.370
 
 # compute the marginal log likelihood and compare the parameter estimates
 print(ll_wrapper(sqn_out_few$par), digits = 8)
@@ -1160,7 +1160,7 @@ system.time(
     n_threads = 4L, 
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L, method = 1L))
 #>    user  system elapsed 
-#>  55.745   0.178  14.209
+#>  52.530   0.156  13.429
 
 # compare the result. We start with the log likelihood
 print(-opt_out_sobol$value, digits = 8)
@@ -1456,12 +1456,12 @@ system.time(ll_res <- eval_pedigree_ll(
   ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4))
 #>    user  system elapsed 
-#>   0.699   0.000   0.177
+#>   0.638   0.000   0.160
 system.time(grad_res <- eval_pedigree_grad(
   ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4))
 #>    user  system elapsed 
-#>  17.288   0.000   4.399
+#>  15.718   0.004   4.007
 
 # find the duplicated combinations of pedigrees, covariates, and outcomes. One 
 # likely needs to change this code if the pedigrees are not identical but are 
@@ -1484,13 +1484,13 @@ system.time(ll_res_fast <- eval_pedigree_ll(
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4, 
   cluster_weights = c_weights))
 #>    user  system elapsed 
-#>   0.309   0.000   0.079
+#>   0.288   0.000   0.074
 system.time(grad_res_fast <- eval_pedigree_grad(
   ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4, 
   cluster_weights = c_weights))
 #>    user  system elapsed 
-#>   7.400   0.000   1.941
+#>   6.701   0.000   1.763
 
 # show that we get the same (up to a Monte Carlo error)
 print(c(redundant = ll_res, fast = ll_res_fast), digits = 6)
@@ -1507,7 +1507,7 @@ system.time(
   start <- pedmod_start(ptr = ll_terms, data = dat_unqiue, 
                         cluster_weights = c_weights))
 #>    user  system elapsed 
-#>   6.541   0.000   6.541
+#>   5.899   0.004   5.902
 
 # optimize
 system.time(
@@ -1516,7 +1516,7 @@ system.time(
     n_threads = 4L,  cluster_weights = c_weights,
     maxvls = 5000L, rel_eps = 1e-2, minvls = 500L))
 #>    user  system elapsed 
-#>   9.715   0.000   2.430
+#>   9.057   0.004   2.271
 system.time(
   opt_out <- pedmod_opt(
     ptr = ll_terms, par = opt_out_quick$par, abs_eps = 0, use_aprx = TRUE, 
@@ -1524,7 +1524,7 @@ system.time(
     # we changed these parameters
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 #>    user  system elapsed 
-#>   74.68    0.00   18.71
+#>  69.906   0.008  17.534
 ```
 
 The results are shown below:
@@ -1626,7 +1626,7 @@ system.time(start_std <- pedmod_start(
   ptr = ll_terms, data = dat_unqiue, cluster_weights = c_weights, 
   standardized = TRUE))
 #>    user  system elapsed 
-#>   6.878   0.016   6.891
+#>   5.992   0.015   6.005
 
 # are the starting values similar?
 standardized_to_direct(start_std$par, n_scales = 2L)
@@ -1654,7 +1654,7 @@ system.time(
     n_threads = 4L,  cluster_weights = c_weights, standardized = TRUE,
     maxvls = 5000L, rel_eps = 1e-2, minvls = 500L))
 #>    user  system elapsed 
-#>  20.432   0.000   5.113
+#>  17.123   0.000   4.282
 system.time(
   opt_out_std <- pedmod_opt(
     ptr = ll_terms, par = opt_out_quick_std$par, abs_eps = 0, use_aprx = TRUE, 
@@ -1662,7 +1662,7 @@ system.time(
     # we changed these parameters
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 #>    user  system elapsed 
-#>  55.680   0.004  13.971
+#>   48.67    0.00   12.25
 
 # we get the same
 standardized_to_direct(opt_out_std$par, n_scales = 2L)
@@ -2515,7 +2515,7 @@ print(logLik_truth, digits = 8)
 system.time(start <- pedmod_start_loadings(
   ll_terms, data = dat_unqiue, cluster_weights = c_weights))
 #>    user  system elapsed 
-#>   0.012   0.000   0.012
+#>   0.013   0.000   0.012
 
 # find the maximum likelihood estimator
 set.seed(1)
@@ -2525,7 +2525,7 @@ system.time(
     abs_eps = 0, rel_eps = 1e-3, n_threads = 4L, use_aprx = TRUE, 
     cluster_weights = c_weights))
 #>    user  system elapsed 
-#> 422.508   0.011 105.863
+#> 401.723   0.004 100.543
 ```
 
 We compare the maximum likelihood estimator with the true values below.
@@ -2906,7 +2906,7 @@ gr <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE,
 # check output at the starting values
 system.time(ll <- -fn(c(beta, sc)))
 #>    user  system elapsed 
-#>   4.642   0.000   1.178
+#>   3.816   0.000   0.969
 ll # the log likelihood at the starting values
 #> [1] -26042
 #> attr(,"n_fails")
@@ -2915,7 +2915,7 @@ ll # the log likelihood at the starting values
 #> [1] 0.05963
 system.time(gr_val <- gr(c(beta, sc)))
 #>    user  system elapsed 
-#>   47.55    0.00   12.31
+#>  34.437   0.001   8.701
 gr_val # the gradient at the starting values
 #> [1] 1894.83 -549.43 -235.73   47.21  -47.84
 #> attr(,"value")
@@ -2956,7 +2956,7 @@ rbind(numDeriv = numDeriv::grad(fn, c(beta, sc), indices = 0:10),
 # optimize the log likelihood approximation
 system.time(opt <- optim(c(beta, sc), fn, gr, method = "BFGS"))
 #>     user   system  elapsed 
-#> 1898.362    0.412  482.656
+#> 1604.617    0.084  408.127
 ```
 
 The output from the optimization is shown below:
@@ -2999,12 +2999,12 @@ microbenchmark(
   times = 1)
 #> Unit: seconds
 #>            expr    min     lq   mean median     uq    max neval
-#>   fn (1 thread)  4.413  4.413  4.413  4.413  4.413  4.413     1
-#>  fn (2 threads)  2.356  2.356  2.356  2.356  2.356  2.356     1
-#>  fn (4 threads)  1.224  1.224  1.224  1.224  1.224  1.224     1
-#>   gr (1 thread) 43.792 43.792 43.792 43.792 43.792 43.792     1
-#>  gr (2 threads) 23.394 23.394 23.394 23.394 23.394 23.394     1
-#>  gr (4 threads) 12.001 12.001 12.001 12.001 12.001 12.001     1
+#>   fn (1 thread)  3.860  3.860  3.860  3.860  3.860  3.860     1
+#>  fn (2 threads)  2.044  2.044  2.044  2.044  2.044  2.044     1
+#>  fn (4 threads)  1.197  1.197  1.197  1.197  1.197  1.197     1
+#>   gr (1 thread) 33.393 33.393 33.393 33.393 33.393 33.393     1
+#>  gr (2 threads) 18.438 18.438 18.438 18.438 18.438 18.438     1
+#>  gr (4 threads)  9.469  9.469  9.469  9.469  9.469  9.469     1
 ```
 
 ### Using ADAM
@@ -3105,7 +3105,7 @@ system.time(
                    verbose = FALSE, maxvls = maxpts_use, 
                    minvls = minvls))
 #>     user   system  elapsed 
-#> 1831.421    0.456  465.114
+#> 1506.743    0.092  381.485
 ```
 
 The result is shown below.
@@ -3252,10 +3252,10 @@ Box plots of the relative errors are shown below:
 
 ``` r
 rowMeans(sim_res[, "SE", ])
-#>                 mvtnorm         TruncatedNormal        no aprx; Korobov          no aprx; Sobol        w/ aprx; Korobov          w/ aprx; Sobol 
-#>               2.800e-05               4.180e-05               3.160e-05               3.073e-05               3.042e-05               3.129e-05 
-#> no aprx; Korobov (tilt)   no aprx; Sobol (tilt) w/ aprx; Korobov (tilt)   w/ aprx; Sobol (tilt) 
-#>               3.327e-05               2.803e-05               3.441e-05               3.023e-05
+#>                 mvtnorm         TruncatedNormal        no aprx; Korobov          no aprx; Sobol        w/ aprx; Korobov          w/ aprx; Sobol no aprx; Korobov (tilt)   no aprx; Sobol (tilt) 
+#>               2.800e-05               4.180e-05               3.160e-05               3.073e-05               3.042e-05               3.129e-05               3.327e-05               2.803e-05 
+#> w/ aprx; Korobov (tilt)   w/ aprx; Sobol (tilt) 
+#>               3.441e-05               3.023e-05
 par(mar = c(10, 4, 1, 1), bty = "l")
 boxplot(t(sim_res[, "SE", ]), las = 2)
 grid()
@@ -3267,10 +3267,10 @@ The new implementation is faster when the approximation is used:
 
 ``` r
 rowMeans(sim_res[, "time", ])
-#>                 mvtnorm         TruncatedNormal        no aprx; Korobov          no aprx; Sobol        w/ aprx; Korobov          w/ aprx; Sobol 
-#>                0.018830                0.031499                0.014779                0.017823                0.006025                0.007592 
-#> no aprx; Korobov (tilt)   no aprx; Sobol (tilt) w/ aprx; Korobov (tilt)   w/ aprx; Sobol (tilt) 
-#>                0.012844                0.011818                0.010548                0.009230
+#>                 mvtnorm         TruncatedNormal        no aprx; Korobov          no aprx; Sobol        w/ aprx; Korobov          w/ aprx; Sobol no aprx; Korobov (tilt)   no aprx; Sobol (tilt) 
+#>                0.021500                0.033469                0.013125                0.015807                0.005101                0.006605                0.013263                0.011697 
+#> w/ aprx; Korobov (tilt)   w/ aprx; Sobol (tilt) 
+#>                0.009973                0.009201
 par(mar = c(9, 4, 1, 1), bty = "l")
 boxplot(t(sim_res[, "time", ]), log = "y", las = 2)
 grid()
@@ -3365,12 +3365,30 @@ sim_res <- sapply(ds, \(d){
         `w/ aprx; Sobol (tilt)` = mvndst_w_aprx_res_Sobol_tilt)
 }, simplify = "array")
 
-dimnames(sim_res)[[3]] <- ds
+dimnames(sim_res) <- 
+  setNames(c(dimnames(sim_res)[1:2], list(ds)), 
+           c("Method", "Metric", "Dimension"))
 ```
 
 The relative errors plotted against the dimension is shown below:
 
 ``` r
+# the errors for each method and dimension
+sim_res[, "SE", ]
+#>                          Dimension
+#> Method                            3         5        10        15        20        25
+#>   mvtnorm                 1.005e-06 1.722e-05 7.666e-04 2.452e-02 6.705e-01 0.5974926
+#>   TruncatedNormal         4.625e-06 1.747e-05 5.788e-05 1.296e-04 2.809e-04 0.0004396
+#>   no aprx; Korobov        6.249e-08 1.334e-06 2.049e-03 2.010e-02 2.959e-01 0.6516725
+#>   no aprx; Sobol          5.200e-05 1.557e-04 3.787e-03 6.253e-02 5.190e-01 0.6469734
+#>   w/ aprx; Korobov        9.503e-07 2.086e-06 2.248e-03 2.289e-02 3.705e-01 0.5753172
+#>   w/ aprx; Sobol          4.537e-05 1.610e-04 3.892e-03 5.176e-02 3.763e-01 0.5478715
+#>   no aprx; Korobov (tilt) 4.413e-08 4.469e-07 1.029e-05 2.053e-05 5.373e-05 0.0001374
+#>   no aprx; Sobol (tilt)   3.183e-06 1.287e-05 5.801e-05 1.131e-04 3.104e-04 0.0003817
+#>   w/ aprx; Korobov (tilt) 1.525e-07 9.345e-06 8.235e-05 4.117e-03       NaN       NaN
+#>   w/ aprx; Sobol (tilt)   3.096e-06 1.695e-05 1.075e-04 4.113e-03       NaN       NaN
+
+# plot the errors
 par(mar = c(5, 5, 1, 1), cex = .8)
 matplot(ds, t(sim_res[, "SE", ]), type = "p", log = "y", 
         pch = 1:dim(sim_res)[1], xlab = "Dimension", ylab = "Relative error", 
@@ -3386,6 +3404,22 @@ grid()
 A similar plot for the average estimation time is shown below.
 
 ``` r
+# the computation time for each method and dimension
+sim_res[, "time", ]
+#>                          Dimension
+#> Method                            3        5       10       15       20       25
+#>   mvtnorm                 0.0024067 0.005424 0.018456 0.042322 0.057349 0.068199
+#>   TruncatedNormal         0.0122055 0.019316 0.038898 0.062641 0.094156 0.106770
+#>   no aprx; Korobov        0.0034562 0.006207 0.013211 0.020854 0.027386 0.033167
+#>   no aprx; Sobol          0.0027300 0.004714 0.009704 0.015673 0.020394 0.024325
+#>   w/ aprx; Korobov        0.0008868 0.001552 0.003516 0.005990 0.008068 0.010250
+#>   w/ aprx; Sobol          0.0009271 0.001482 0.003102 0.005173 0.007007 0.008573
+#>   no aprx; Korobov (tilt) 0.0067830 0.011841 0.023753 0.037348 0.055101 0.061286
+#>   no aprx; Sobol (tilt)   0.0050182 0.008537 0.017167 0.026277 0.034755 0.043430
+#>   w/ aprx; Korobov (tilt) 0.0057416 0.010059 0.020040 0.037517 0.019914 0.024933
+#>   w/ aprx; Sobol (tilt)   0.0042668 0.007367 0.014746 0.025970 0.014936 0.018928
+
+# plot the computation time
 par(mar = c(5, 5, 1, 1), cex = .8)
 matplot(ds, t(sim_res[, "time", ]), type = "p", log = "y", 
         pch = 1:dim(sim_res)[1], xlab = "Dimension", ylab = "Time", 

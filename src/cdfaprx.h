@@ -102,8 +102,9 @@ inline int default_minvls(int dim){
  */
 cor_vec_res get_cor_vec(const arma::mat&);
 
-inline double pnorm_use
-  (double const x, bool const use_aprx, bool const lower_tail, bool const use_log) {
+template<bool lower_tail, bool use_log>
+double pnorm_use
+  (double const x, bool const use_aprx) {
   if(use_aprx){
     double const pnrm{pnorm_approx(x)};
     if(use_log)
@@ -232,12 +233,12 @@ class cdf {
       }
 
       if(*infin_j == 0L){
-        std::fill(lim_l, lim_l  + n_draws, -Inf);
+        std::fill(lim_l, lim_l + n_draws, with_tilting ? -Inf : 0);
         for(unsigned k = 0; k < n_draws; ++k)
           lim_u[k] = *up - su[k];
 
       } else if(*infin_j == 1L){
-        std::fill(lim_u, lim_u  + n_draws, Inf);
+        std::fill(lim_u, lim_u  + n_draws,  with_tilting ? Inf : 1);
         for(unsigned k = 0; k < n_draws; ++k)
           lim_l[k] = *lw - su[k];
 
@@ -260,6 +261,22 @@ class cdf {
           subtract_tilt();
         else if(!is_last_run)
           subtract_tilt();
+      } else {
+        if(*infin_j == 0){
+          for(unsigned k = 0; k < n_draws; ++k)
+            lim_u[k] = pnorm_use<true, false>(lim_u[k], use_aprx);
+
+        } else if(*infin_j == 1){
+          for(unsigned k = 0; k < n_draws; ++k)
+            lim_l[k] = pnorm_use<true, false>(lim_l[k], use_aprx);
+
+        } else {
+          for(unsigned k = 0; k < n_draws; ++k){
+            lim_l[k] = pnorm_use<true, false>(lim_l[k], use_aprx);
+            lim_u[k] = pnorm_use<true, false>(lim_u[k], use_aprx);
+          }
+
+        }
       }
 
       auto set_dr_n_weight = [&]{
@@ -276,8 +293,8 @@ class cdf {
             double val, log_pnrms_diff;
 
             if(lim_l[k] > 0){
-              double const v_lb{pnorm_use(lim_l[k], use_aprx, false, true)},
-                           v_ub{pnorm_use(lim_u[k], use_aprx, false, true)};
+              double const v_lb{pnorm_use<false, true>(lim_l[k], use_aprx)},
+                           v_ub{pnorm_use<false, true>(lim_u[k], use_aprx)};
 
               log_pnrms_diff = v_lb + std::log1p(-exp(v_ub - v_lb));
 
@@ -286,8 +303,8 @@ class cdf {
               val = qnorm_w(val, 0, 1, 0, 0);
 
             } else if(lim_u[k] < 0){
-              double const v_lb{pnorm_use(lim_l[k], use_aprx, true, true)},
-                           v_ub{pnorm_use(lim_u[k], use_aprx, true, true)};
+              double const v_lb{pnorm_use<true, true>(lim_l[k], use_aprx)},
+                           v_ub{pnorm_use<true, true>(lim_u[k], use_aprx)};
 
               log_pnrms_diff = v_ub + std::log1p(-exp(v_lb - v_ub));
 
@@ -301,12 +318,12 @@ class cdf {
               }
 
             } else {
-              double const v_lb{pnorm_use(lim_l[k], use_aprx, true, false)},
-                           v_ub{pnorm_use(lim_u[k], use_aprx, false, false)};
+              double const v_lb{pnorm_use<true, false>(lim_l[k], use_aprx)},
+                           v_ub{pnorm_use<false, false>(lim_u[k], use_aprx)};
 
               log_pnrms_diff = std::log1p(-v_lb - v_ub);
 
-              val = pnorm_use(lim_l[k], use_aprx, false, false) -
+              val = pnorm_use<false, false>(lim_l[k], use_aprx) -
                 unifs[k * ndim + j] * std::exp(log_pnrms_diff);
               val = qnorm_w(val, 0, 1, 0, 0);
 
@@ -318,13 +335,10 @@ class cdf {
               (tilt_param[j] - 2 * val_shifted) * tilt_param[j] / 2;
 
           } else {
-            double const pnrm_lb{pnorm_use(lim_l[k], use_aprx, true, false)},
-                         pnrm_ub{pnorm_use(lim_u[k], use_aprx, true, false)};
-
-            double const l_diff{pnrm_ub - pnrm_lb};
+            double const l_diff{lim_u[k] - lim_l[k]};
             w[k] *= l_diff;
 
-            double const quant_val = pnrm_lb + unifs[k * ndim + j] * l_diff;
+            double const quant_val = lim_l[k] + unifs[k * ndim + j] * l_diff;
             dr[offset + k] = use_aprx ? qnorm_aprx(quant_val)
                                       : qnorm_w   (quant_val, 0, 1, 1, 0);
 
@@ -357,20 +371,20 @@ class cdf {
             double log_pnrms_diff;
 
             if(lim_l[k] > 0){
-              double const v_lb{pnorm_use(lim_l[k], use_aprx, false, true)},
-              v_ub{pnorm_use(lim_u[k], use_aprx, false, true)};
+              double const v_lb{pnorm_use<false, true>(lim_l[k], use_aprx)},
+                           v_ub{pnorm_use<false, true>(lim_u[k], use_aprx)};
 
               log_pnrms_diff = v_lb + std::log1p(-exp(v_ub - v_lb));
 
             } else if(lim_u[k] < 0){
-              double const v_lb{pnorm_use(lim_l[k], use_aprx, true, true)},
-                           v_ub{pnorm_use(lim_u[k], use_aprx, true, true)};
+              double const v_lb{pnorm_use<true, true>(lim_l[k], use_aprx)},
+                           v_ub{pnorm_use<true, true>(lim_u[k], use_aprx)};
 
               log_pnrms_diff = v_ub + std::log1p(-exp(v_lb - v_ub));
 
             } else {
-              double const v_lb{pnorm_use(lim_l[k], use_aprx, true, false)},
-              v_ub{pnorm_use(lim_u[k], use_aprx, false, false)};
+              double const v_lb{pnorm_use<true, false>(lim_l[k], use_aprx)},
+                           v_ub{pnorm_use<false, false>(lim_u[k], use_aprx)};
 
               log_pnrms_diff = std::log1p(-v_lb - v_ub);
 
@@ -379,10 +393,10 @@ class cdf {
             w[k] += log_pnrms_diff;
 
           } else {
-            double const pnrm_lb{pnorm_use(lim_l[k], use_aprx, true, false)},
-                         pnrm_ub{pnorm_use(lim_u[k], use_aprx, true, false)};
-            w[k] *= pnrm_ub - pnrm_lb;
+            w[k] *= lim_u[k] - lim_l[k];
+
           }
+
         }
     }
 

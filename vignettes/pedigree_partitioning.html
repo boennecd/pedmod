@@ -796,7 +796,7 @@ system.time(
 #&gt; Found perfect balanced connected partition early. Balance criterion is 500
 #&gt; Found approximately balanced connected partition. Balance criterion is 500
 #&gt;    user  system elapsed 
-#&gt;   0.087   0.013   0.100
+#&gt;   0.091   0.015   0.108
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 500
 NROW(max_part$removed_edges) # number of removed edges
@@ -827,7 +827,7 @@ system.time(
 #&gt; Keept 0 moves
 #&gt; The cut cost is 99
 #&gt;    user  system elapsed 
-#&gt;   0.895   0.000   0.895
+#&gt;   0.891   0.000   0.890
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 500
 NROW(max_part$removed_edges) # number of removed edges
@@ -866,7 +866,7 @@ system.time(
 #&gt; Keept 0 moves
 #&gt; The cut cost is 19
 #&gt;    user  system elapsed 
-#&gt;   0.009   0.009   0.018
+#&gt;   0.003   0.021   0.025
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 438
 NROW(max_part$removed_edges) # number of removed edges
@@ -1004,7 +1004,7 @@ system.time(
 #&gt; Found perfect balanced connected partition early. Balance criterion is 50000
 #&gt; Found approximately balanced connected partition. Balance criterion is 50000
 #&gt;    user  system elapsed 
-#&gt;   4.920   0.019   4.938
+#&gt;   4.817   0.000   4.815
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 50000
 NROW(max_part$removed_edges) # number of removed edges
@@ -1055,7 +1055,7 @@ system.time(
 #&gt; Keept 0 moves
 #&gt; The cut cost is 317
 #&gt;    user  system elapsed 
-#&gt;   26.64    0.00   26.68
+#&gt;   24.62    0.00   24.61
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 50000
 NROW(max_part$removed_edges) # number of removed edges
@@ -1094,7 +1094,7 @@ system.time(
 #&gt; Keept 0 moves
 #&gt; The cut cost is 356
 #&gt;    user  system elapsed 
-#&gt;  24.023   0.004  24.028
+#&gt;  23.430   0.074  23.502
 max_part_shuffled$balance_criterion # the balance criterion
 #&gt; [1] 50000
 NROW(max_part_shuffled$removed_edges) # number of removed edges
@@ -1129,7 +1129,7 @@ system.time(
 #&gt; Keept 0 moves
 #&gt; The cut cost is 356
 #&gt;    user  system elapsed 
-#&gt;   20.64    0.00   20.64
+#&gt;   22.56    0.14   22.70
 
 # we got the same 
 all.equal(max_part_shuffled_and_ordered, max_part_shuffled)
@@ -1256,7 +1256,7 @@ system.time(
 #&gt; Keept 0 moves
 #&gt; The cut cost is 6717
 #&gt;    user  system elapsed 
-#&gt;   2.761   0.004   2.765
+#&gt;   3.050   0.084   3.136
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 40000
 NROW(max_part$removed_edges) # number of removed edges
@@ -1297,7 +1297,7 @@ system.time(
 #&gt; Keept 0 moves
 #&gt; The cut cost is 269
 #&gt;    user  system elapsed 
-#&gt;   0.591   0.000   0.591
+#&gt;   0.601   0.005   0.606
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 49943
 NROW(max_part$removed_edges) # number of removed edges

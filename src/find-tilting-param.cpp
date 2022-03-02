@@ -1,10 +1,10 @@
+#include "pnorm.h"
 #include "find-tilting-param.h"
 #include <psqn-bfgs.h>
 #include <cmath>
 #include <numeric>
 #include <algorithm>
 #include <numeric>
-#include "pnorm.h"
 #include <limits.h>
 
 #include <R_ext/RS.h> // for F77_NAME and F77_CALL

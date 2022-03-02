@@ -2408,7 +2408,7 @@ Next, we compare the methods with the first example from @Botev17. This is with
 a low probability case and we would expect the minimax tilted version to 
 perform better. We fix the number of samples with all packages in this example.
 
-```{r botev_example, cache = TRUE}
+```{r botev_example, cache = 1}
 # settings for the test like in Botev (2017)
 library(mvtnorm)
 library(pedmod)
@@ -2490,12 +2490,18 @@ sim_res <- sapply(ds, \(d){
         `w/ aprx; Sobol (tilt)` = mvndst_w_aprx_res_Sobol_tilt)
 }, simplify = "array")
 
-dimnames(sim_res)[[3]] <- ds
+dimnames(sim_res) <- 
+  setNames(c(dimnames(sim_res)[1:2], list(ds)), 
+           c("Method", "Metric", "Dimension"))
 ```
 
 The relative errors plotted against the dimension is shown below:
 
 ```{r err_botev_example, fig.height = knitr::opts_chunk$get("fig.height") * 4/3}
+# the errors for each method and dimension
+sim_res[, "SE", ]
+
+# plot the errors
 par(mar = c(5, 5, 1, 1), cex = .8)
 matplot(ds, t(sim_res[, "SE", ]), type = "p", log = "y", 
         pch = 1:dim(sim_res)[1], xlab = "Dimension", ylab = "Relative error", 
@@ -2509,6 +2515,10 @@ grid()
 A similar plot for the average estimation time is shown below.
 
 ```{r time_botev_example, fig.height = knitr::opts_chunk$get("fig.height") * 4/3}
+# the computation time for each method and dimension
+sim_res[, "time", ]
+
+# plot the computation time
 par(mar = c(5, 5, 1, 1), cex = .8)
 matplot(ds, t(sim_res[, "time", ]), type = "p", log = "y", 
         pch = 1:dim(sim_res)[1], xlab = "Dimension", ylab = "Time", 

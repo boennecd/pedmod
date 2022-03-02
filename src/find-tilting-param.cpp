@@ -1,16 +1,9 @@
 #include "pnorm.h"
-
-#ifdef beta
-// the header includes Rmath with #define beta Rf_beta
-#undef beta
-#endif
-
 #include "find-tilting-param.h"
 #include <psqn-bfgs.h>
 #include <cmath>
 #include <numeric>
 #include <algorithm>
-#include <numeric>
 #include <limits.h>
 
 #include <R_ext/RS.h> // for F77_NAME and F77_CALL

@@ -5,6 +5,10 @@
 // I ran into issues with likes those mentioned here
 //   https://bugs.webkit.org/show_bug.cgi?id=59249
 // Thus, we always use math.h
+#ifdef beta
+// we get an error if we do not undefine beta
+#undef beta
+#endif
 #include <math.h> // may be included anyway?
 
 /**

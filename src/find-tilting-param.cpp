@@ -1,4 +1,10 @@
 #include "pnorm.h"
+
+#ifdef beta
+// the header includes Rmath with #define beta Rf_beta
+#undef beta
+#endif
+
 #include "find-tilting-param.h"
 #include <psqn-bfgs.h>
 #include <cmath>
@@ -160,63 +166,6 @@ class root_problem final : public PSQN::problem {
         break;
 
       }
-
-      // TODO: delete
-        /*
-      switch(l_type[i]){
-      case limit_type::lower_bounded:
-        {
-          double const lb_shift{lower_limits[i] - choleksy_T_point[i] - tilt[i]},
-                    pnrm_log_lb{pnrm_log(lb_shift)},
-                    dnrm_log_lb{dnrm_log(lb_shift)};
-
-        double const denom_log{std::log1p(-exp(pnrm_log_lb))};
-        double const ratio_lb{exp(dnrm_log_lb - denom_log)};
-
-        derivs_pnrm_terms[i] = ratio_lb;
-        if constexpr (comp_grad)
-          hess_pnrm_terms[i] = lb_shift * ratio_lb -
-            derivs_pnrm_terms[i] * derivs_pnrm_terms[i];
-
-        }
-        break;
-
-      case limit_type::upper_bounded:
-        {
-          double const ub_shift{upper_limits[i] - choleksy_T_point[i] - tilt[i]},
-                       pnrm_log_ub{pnrm_log(ub_shift)},
-                       dnrm_log_ub{dnrm_log(ub_shift)};
-
-        double const denom_log{pnrm_log_ub};
-        double const ratio_ub{exp(dnrm_log_ub - denom_log)};
-
-        derivs_pnrm_terms[i] = - ratio_ub;
-        if constexpr(comp_grad)
-          hess_pnrm_terms[i] = - ub_shift * ratio_ub -
-            derivs_pnrm_terms[i] * derivs_pnrm_terms[i];
-        }
-
-        break;
-
-      case limit_type::both:
-        double const lb_shift{lower_limits[i] - choleksy_T_point[i] - tilt[i]},
-                     ub_shift{upper_limits[i] - choleksy_T_point[i] - tilt[i]},
-                  pnrm_log_lb{pnrm_log(lb_shift)},
-                  pnrm_log_ub{pnrm_log(ub_shift)},
-                  dnrm_log_lb{dnrm_log(lb_shift)},
-                  dnrm_log_ub{dnrm_log(ub_shift)};
-
-        double const denom_log
-          {pnrm_log_ub + std::log1p(-exp(pnrm_log_lb - pnrm_log_ub))};
-        double const ratio_lb{exp(dnrm_log_lb - denom_log)},
-                     ratio_ub{exp(dnrm_log_ub - denom_log)};
-
-        derivs_pnrm_terms[i] = ratio_lb - ratio_ub;
-        if constexpr(comp_grad)
-          hess_pnrm_terms[i] = lb_shift * ratio_lb - ub_shift * ratio_ub -
-            derivs_pnrm_terms[i] * derivs_pnrm_terms[i];
-      }
-      */
     }
 
     double * const gr_params{get_mem(2 * dim)};

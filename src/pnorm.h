@@ -12,9 +12,16 @@
  * R function.
  */
 static inline double pnorm_std(double const x, int lower, int is_log) {
-  if(isnan(x))
-    return NAN;
-  else if(isinf(x)){
+  int const is_inf = isinf(x),
+            is_nan = isnan(x);
+
+  if(!is_inf && !is_nan){
+    double p, cp;
+    p = x;
+    Rf_pnorm_both(x, &p, &cp, lower ? 0 : 1, is_log);
+    return lower ? p : cp;
+
+  } else if(is_inf){
     if(is_log){
       if(lower)
         return x > 0 ? 0 : -INFINITY;
@@ -28,10 +35,8 @@ static inline double pnorm_std(double const x, int lower, int is_log) {
     }
   }
 
-  double p, cp;
-  p = x;
-  Rf_pnorm_both(x, &p, &cp, lower ? 0 : 1, is_log);
-  return lower ? p : cp;
+  // isnan == TRUE
+  return NAN;
 }
 
 /**

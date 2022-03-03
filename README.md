@@ -1312,39 +1312,39 @@ time_vals <- sapply(sim_study, function(x) {
 }, simplify = "array")
 apply(time_vals, 1:2, mean)
 #>              opt_out start total
-#> Direct         6.048 1.889 7.937
-#> Standardized   7.983 1.873 9.855
+#> Direct         5.709 1.809 7.518
+#> Standardized   7.464 1.818 9.282
 apply(time_vals, 1:2, sd)
 #>              opt_out start total
-#> Direct         3.315 1.067 3.591
-#> Standardized   2.499 1.187 2.713
+#> Direct         3.201  1.03 3.499
+#> Standardized   2.294  1.18 2.491
 apply(time_vals, 1:2, quantile)
 #> , , opt_out
 #> 
 #>      Direct Standardized
-#> 0%    2.806        3.995
-#> 25%   3.961        5.996
-#> 50%   4.461        8.018
-#> 75%   7.989        9.578
-#> 100% 20.399       13.009
+#> 0%    2.540        3.746
+#> 25%   3.779        5.703
+#> 50%   4.145        7.796
+#> 75%   7.588        8.910
+#> 100% 20.125       12.145
 #> 
 #> , , start
 #> 
 #>      Direct Standardized
-#> 0%    0.698        0.679
-#> 25%   1.210        1.164
-#> 50%   1.557        1.357
-#> 75%   2.151        2.099
-#> 100%  6.060        6.072
+#> 0%    0.680        0.726
+#> 25%   1.170        1.105
+#> 50%   1.447        1.332
+#> 75%   2.019        1.993
+#> 100%  5.776        6.279
 #> 
 #> , , total
 #> 
 #>      Direct Standardized
-#> 0%    4.015        5.349
-#> 25%   5.469        7.776
-#> 50%   6.650        9.661
-#> 75%   9.653       11.723
-#> 100% 24.266       15.324
+#> 0%    3.759        5.069
+#> 25%   5.157        7.216
+#> 50%   6.336        9.308
+#> 75%   9.122       10.950
+#> 100% 23.930       14.392
 ```
 
 ## Example: Adding Child Environment Effects
@@ -2230,39 +2230,39 @@ time_vals <- sapply(sim_study, function(x) {
 }, simplify = "array")
 apply(time_vals, 1:2, mean)
 #>              opt_out start total
-#> Direct        16.270 2.668 18.94
-#> Standardized   9.688 2.771 12.46
+#> Direct        15.863  2.64 18.50
+#> Standardized   9.411  2.76 12.17
 apply(time_vals, 1:2, sd)
 #>              opt_out start total
-#> Direct        10.289 1.746 9.888
-#> Standardized   4.776 2.046 5.224
+#> Direct        10.128 1.745 9.707
+#> Standardized   4.584 2.028 5.036
 apply(time_vals, 1:2, quantile)
 #> , , opt_out
 #> 
 #>      Direct Standardized
-#> 0%    0.965        0.891
-#> 25%   9.546        7.079
-#> 50%  14.601        9.993
-#> 75%  21.763       12.364
-#> 100% 44.510       22.292
+#> 0%    0.941        0.875
+#> 25%   9.177        6.957
+#> 50%  14.333        9.650
+#> 75%  21.156       12.176
+#> 100% 43.567       21.385
 #> 
 #> , , start
 #> 
 #>      Direct Standardized
-#> 0%    1.097        1.100
-#> 25%   1.608        1.580
-#> 50%   1.950        1.918
-#> 75%   2.865        3.325
-#> 100%  9.454       12.719
+#> 0%    1.131        1.078
+#> 25%   1.621        1.530
+#> 50%   1.985        1.938
+#> 75%   2.731        3.334
+#> 100%  9.591       12.792
 #> 
 #> , , total
 #> 
 #>      Direct Standardized
-#> 0%    3.435        2.405
-#> 25%  12.370        9.384
-#> 50%  16.783       12.471
-#> 75%  24.716       15.501
-#> 100% 47.171       23.816
+#> 0%    3.503        2.343
+#> 25%  12.137        9.179
+#> 50%  16.000       12.100
+#> 75%  24.274       15.086
+#> 100% 46.207       23.235
 ```
 
 ## Individual Specific Loadings
@@ -2688,8 +2688,8 @@ rownames(estimates) <- c("(Intercept)", "Binary",
 err <- estimates - c(beta, thetas)
 rbind(Bias = rowMeans(err), SE = apply(err, 1, sd) / sqrt(NCOL(err)))
 #>      (Intercept)   Binary Genetic1 Genetic2  Genetic3     Env1      Env2     Env3
-#> Bias    0.001765 0.006113 -0.01462  0.01463 -0.007231 -0.04052 -0.009779 -0.05695
-#> SE      0.021683 0.045060  0.02221  0.01423  0.012167  0.02994  0.014280  0.02254
+#> Bias    0.001647 0.006513 -0.01467  0.01475 -0.007031 -0.04018 -0.009813 -0.05664
+#> SE      0.021679 0.045077  0.02218  0.01423  0.012172  0.02994  0.014275  0.02255
 
 # make a box plot
 par(mar = c(7, 5, 1, 1))
@@ -2706,16 +2706,16 @@ grid()
 comp_times <- sapply(
   sim_study, function(x) sapply(x, `[[`, "time")["elapsed", ])
 summary(t(comp_times))
-#>      start        opt_out_quick      opt_out    
-#>  Min.   :0.0090   Min.   : 6.18   Min.   :21.4  
-#>  1st Qu.:0.0100   1st Qu.:10.95   1st Qu.:25.6  
-#>  Median :0.0110   Median :12.13   Median :29.1  
-#>  Mean   :0.0106   Mean   :12.36   Mean   :28.8  
-#>  3rd Qu.:0.0118   3rd Qu.:13.56   3rd Qu.:31.0  
-#>  Max.   :0.0130   Max.   :17.51   Max.   :39.6
+#>      start        opt_out_quick     opt_out    
+#>  Min.   :0.0090   Min.   :12.3   Min.   :29.6  
+#>  1st Qu.:0.0090   1st Qu.:15.7   1st Qu.:38.5  
+#>  Median :0.0100   Median :17.9   Median :44.8  
+#>  Mean   :0.0102   Mean   :18.0   Mean   :45.6  
+#>  3rd Qu.:0.0110   3rd Qu.:19.6   3rd Qu.:51.1  
+#>  Max.   :0.0120   Max.   :25.8   Max.   :67.5
 summary(colSums(comp_times))
 #>    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-#>    31.5    37.7    41.0    41.2    44.8    54.1
+#>    43.9    56.7    63.6    63.6    69.9    86.0
 ```
 
 ## More Complicated Example
@@ -3252,10 +3252,10 @@ Box plots of the relative errors are shown below:
 
 ``` r
 rowMeans(sim_res[, "SE", ])
-#>                 mvtnorm         TruncatedNormal        no aprx; Korobov          no aprx; Sobol        w/ aprx; Korobov          w/ aprx; Sobol no aprx; Korobov (tilt)   no aprx; Sobol (tilt) 
-#>               2.800e-05               4.180e-05               3.160e-05               3.073e-05               3.042e-05               3.129e-05               3.327e-05               2.803e-05 
-#> w/ aprx; Korobov (tilt)   w/ aprx; Sobol (tilt) 
-#>               3.441e-05               3.023e-05
+#>                 mvtnorm         TruncatedNormal        no aprx; Korobov          no aprx; Sobol        w/ aprx; Korobov          w/ aprx; Sobol 
+#>               2.800e-05               4.180e-05               3.160e-05               3.073e-05               3.042e-05               3.129e-05 
+#> no aprx; Korobov (tilt)   no aprx; Sobol (tilt) w/ aprx; Korobov (tilt)   w/ aprx; Sobol (tilt) 
+#>               3.327e-05               2.803e-05               3.441e-05               3.023e-05
 par(mar = c(10, 4, 1, 1), bty = "l")
 boxplot(t(sim_res[, "SE", ]), las = 2)
 grid()
@@ -3267,10 +3267,10 @@ The new implementation is faster when the approximation is used:
 
 ``` r
 rowMeans(sim_res[, "time", ])
-#>                 mvtnorm         TruncatedNormal        no aprx; Korobov          no aprx; Sobol        w/ aprx; Korobov          w/ aprx; Sobol no aprx; Korobov (tilt)   no aprx; Sobol (tilt) 
-#>                0.018635                0.030536                0.012634                0.015266                0.004649                0.006056                0.012767                0.011740 
-#> w/ aprx; Korobov (tilt)   w/ aprx; Sobol (tilt) 
-#>                0.009654                0.008844
+#>                 mvtnorm         TruncatedNormal        no aprx; Korobov          no aprx; Sobol        w/ aprx; Korobov          w/ aprx; Sobol 
+#>                0.018635                0.030536                0.012634                0.015266                0.004649                0.006056 
+#> no aprx; Korobov (tilt)   no aprx; Sobol (tilt) w/ aprx; Korobov (tilt)   w/ aprx; Sobol (tilt) 
+#>                0.012767                0.011740                0.009654                0.008844
 par(mar = c(9, 4, 1, 1), bty = "l")
 boxplot(t(sim_res[, "time", ]), log = "y", las = 2)
 grid()

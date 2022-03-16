@@ -155,8 +155,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // eval_pedigree_ll
-Rcpp::NumericVector eval_pedigree_ll(SEXP ptr, arma::vec par, int const maxvls, double const abs_eps, double const rel_eps, Rcpp::Nullable<Rcpp::IntegerVector> indices, int const minvls, bool const do_reorder, bool const use_aprx, unsigned n_threads, Rcpp::Nullable<Rcpp::NumericVector> cluster_weights, int const method, bool const use_tilting);
-RcppExport SEXP _pedmod_eval_pedigree_ll(SEXP ptrSEXP, SEXP parSEXP, SEXP maxvlsSEXP, SEXP abs_epsSEXP, SEXP rel_epsSEXP, SEXP indicesSEXP, SEXP minvlsSEXP, SEXP do_reorderSEXP, SEXP use_aprxSEXP, SEXP n_threadsSEXP, SEXP cluster_weightsSEXP, SEXP methodSEXP, SEXP use_tiltingSEXP) {
+Rcpp::NumericVector eval_pedigree_ll(SEXP ptr, arma::vec par, int const maxvls, double const abs_eps, double const rel_eps, Rcpp::Nullable<Rcpp::IntegerVector> indices, int const minvls, bool const do_reorder, bool const use_aprx, unsigned n_threads, Rcpp::Nullable<Rcpp::NumericVector> cluster_weights, int const method, bool const use_tilting, Rcpp::Nullable<Rcpp::NumericVector> vls_scales);
+RcppExport SEXP _pedmod_eval_pedigree_ll(SEXP ptrSEXP, SEXP parSEXP, SEXP maxvlsSEXP, SEXP abs_epsSEXP, SEXP rel_epsSEXP, SEXP indicesSEXP, SEXP minvlsSEXP, SEXP do_reorderSEXP, SEXP use_aprxSEXP, SEXP n_threadsSEXP, SEXP cluster_weightsSEXP, SEXP methodSEXP, SEXP use_tiltingSEXP, SEXP vls_scalesSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -173,13 +173,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::NumericVector> >::type cluster_weights(cluster_weightsSEXP);
     Rcpp::traits::input_parameter< int const >::type method(methodSEXP);
     Rcpp::traits::input_parameter< bool const >::type use_tilting(use_tiltingSEXP);
-    rcpp_result_gen = Rcpp::wrap(eval_pedigree_ll(ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder, use_aprx, n_threads, cluster_weights, method, use_tilting));
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::NumericVector> >::type vls_scales(vls_scalesSEXP);
+    rcpp_result_gen = Rcpp::wrap(eval_pedigree_ll(ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder, use_aprx, n_threads, cluster_weights, method, use_tilting, vls_scales));
     return rcpp_result_gen;
 END_RCPP
 }
 // eval_pedigree_grad
-Rcpp::NumericVector eval_pedigree_grad(SEXP ptr, arma::vec par, int const maxvls, double const abs_eps, double const rel_eps, Rcpp::Nullable<Rcpp::IntegerVector> indices, int const minvls, bool const do_reorder, bool const use_aprx, unsigned n_threads, Rcpp::Nullable<Rcpp::NumericVector> cluster_weights, int const method, bool const use_tilting);
-RcppExport SEXP _pedmod_eval_pedigree_grad(SEXP ptrSEXP, SEXP parSEXP, SEXP maxvlsSEXP, SEXP abs_epsSEXP, SEXP rel_epsSEXP, SEXP indicesSEXP, SEXP minvlsSEXP, SEXP do_reorderSEXP, SEXP use_aprxSEXP, SEXP n_threadsSEXP, SEXP cluster_weightsSEXP, SEXP methodSEXP, SEXP use_tiltingSEXP) {
+Rcpp::NumericVector eval_pedigree_grad(SEXP ptr, arma::vec par, int const maxvls, double const abs_eps, double const rel_eps, Rcpp::Nullable<Rcpp::IntegerVector> indices, int const minvls, bool const do_reorder, bool const use_aprx, unsigned n_threads, Rcpp::Nullable<Rcpp::NumericVector> cluster_weights, int const method, bool const use_tilting, Rcpp::Nullable<Rcpp::NumericVector> vls_scales);
+RcppExport SEXP _pedmod_eval_pedigree_grad(SEXP ptrSEXP, SEXP parSEXP, SEXP maxvlsSEXP, SEXP abs_epsSEXP, SEXP rel_epsSEXP, SEXP indicesSEXP, SEXP minvlsSEXP, SEXP do_reorderSEXP, SEXP use_aprxSEXP, SEXP n_threadsSEXP, SEXP cluster_weightsSEXP, SEXP methodSEXP, SEXP use_tiltingSEXP, SEXP vls_scalesSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -196,7 +197,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::NumericVector> >::type cluster_weights(cluster_weightsSEXP);
     Rcpp::traits::input_parameter< int const >::type method(methodSEXP);
     Rcpp::traits::input_parameter< bool const >::type use_tilting(use_tiltingSEXP);
-    rcpp_result_gen = Rcpp::wrap(eval_pedigree_grad(ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder, use_aprx, n_threads, cluster_weights, method, use_tilting));
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::NumericVector> >::type vls_scales(vls_scalesSEXP);
+    rcpp_result_gen = Rcpp::wrap(eval_pedigree_grad(ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder, use_aprx, n_threads, cluster_weights, method, use_tilting, vls_scales));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -214,8 +216,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // eval_pedigree_ll_loadings
-Rcpp::NumericVector eval_pedigree_ll_loadings(SEXP ptr, arma::vec par, int const maxvls, double const abs_eps, double const rel_eps, Rcpp::Nullable<Rcpp::IntegerVector> indices, int const minvls, bool const do_reorder, bool const use_aprx, unsigned n_threads, Rcpp::Nullable<Rcpp::NumericVector> cluster_weights, int const method, bool const use_tilting);
-RcppExport SEXP _pedmod_eval_pedigree_ll_loadings(SEXP ptrSEXP, SEXP parSEXP, SEXP maxvlsSEXP, SEXP abs_epsSEXP, SEXP rel_epsSEXP, SEXP indicesSEXP, SEXP minvlsSEXP, SEXP do_reorderSEXP, SEXP use_aprxSEXP, SEXP n_threadsSEXP, SEXP cluster_weightsSEXP, SEXP methodSEXP, SEXP use_tiltingSEXP) {
+Rcpp::NumericVector eval_pedigree_ll_loadings(SEXP ptr, arma::vec par, int const maxvls, double const abs_eps, double const rel_eps, Rcpp::Nullable<Rcpp::IntegerVector> indices, int const minvls, bool const do_reorder, bool const use_aprx, unsigned n_threads, Rcpp::Nullable<Rcpp::NumericVector> cluster_weights, int const method, bool const use_tilting, Rcpp::Nullable<Rcpp::NumericVector> vls_scales);
+RcppExport SEXP _pedmod_eval_pedigree_ll_loadings(SEXP ptrSEXP, SEXP parSEXP, SEXP maxvlsSEXP, SEXP abs_epsSEXP, SEXP rel_epsSEXP, SEXP indicesSEXP, SEXP minvlsSEXP, SEXP do_reorderSEXP, SEXP use_aprxSEXP, SEXP n_threadsSEXP, SEXP cluster_weightsSEXP, SEXP methodSEXP, SEXP use_tiltingSEXP, SEXP vls_scalesSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -232,13 +234,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::NumericVector> >::type cluster_weights(cluster_weightsSEXP);
     Rcpp::traits::input_parameter< int const >::type method(methodSEXP);
     Rcpp::traits::input_parameter< bool const >::type use_tilting(use_tiltingSEXP);
-    rcpp_result_gen = Rcpp::wrap(eval_pedigree_ll_loadings(ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder, use_aprx, n_threads, cluster_weights, method, use_tilting));
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::NumericVector> >::type vls_scales(vls_scalesSEXP);
+    rcpp_result_gen = Rcpp::wrap(eval_pedigree_ll_loadings(ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder, use_aprx, n_threads, cluster_weights, method, use_tilting, vls_scales));
     return rcpp_result_gen;
 END_RCPP
 }
 // eval_pedigree_grad_loadings
-Rcpp::NumericVector eval_pedigree_grad_loadings(SEXP ptr, arma::vec par, int const maxvls, double const abs_eps, double const rel_eps, Rcpp::Nullable<Rcpp::IntegerVector> indices, int const minvls, bool const do_reorder, bool const use_aprx, unsigned n_threads, Rcpp::Nullable<Rcpp::NumericVector> cluster_weights, int const method, bool const use_tilting);
-RcppExport SEXP _pedmod_eval_pedigree_grad_loadings(SEXP ptrSEXP, SEXP parSEXP, SEXP maxvlsSEXP, SEXP abs_epsSEXP, SEXP rel_epsSEXP, SEXP indicesSEXP, SEXP minvlsSEXP, SEXP do_reorderSEXP, SEXP use_aprxSEXP, SEXP n_threadsSEXP, SEXP cluster_weightsSEXP, SEXP methodSEXP, SEXP use_tiltingSEXP) {
+Rcpp::NumericVector eval_pedigree_grad_loadings(SEXP ptr, arma::vec par, int const maxvls, double const abs_eps, double const rel_eps, Rcpp::Nullable<Rcpp::IntegerVector> indices, int const minvls, bool const do_reorder, bool const use_aprx, unsigned n_threads, Rcpp::Nullable<Rcpp::NumericVector> cluster_weights, int const method, bool const use_tilting, Rcpp::Nullable<Rcpp::NumericVector> vls_scales);
+RcppExport SEXP _pedmod_eval_pedigree_grad_loadings(SEXP ptrSEXP, SEXP parSEXP, SEXP maxvlsSEXP, SEXP abs_epsSEXP, SEXP rel_epsSEXP, SEXP indicesSEXP, SEXP minvlsSEXP, SEXP do_reorderSEXP, SEXP use_aprxSEXP, SEXP n_threadsSEXP, SEXP cluster_weightsSEXP, SEXP methodSEXP, SEXP use_tiltingSEXP, SEXP vls_scalesSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -255,7 +258,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::NumericVector> >::type cluster_weights(cluster_weightsSEXP);
     Rcpp::traits::input_parameter< int const >::type method(methodSEXP);
     Rcpp::traits::input_parameter< bool const >::type use_tilting(use_tiltingSEXP);
-    rcpp_result_gen = Rcpp::wrap(eval_pedigree_grad_loadings(ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder, use_aprx, n_threads, cluster_weights, method, use_tilting));
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::NumericVector> >::type vls_scales(vls_scalesSEXP);
+    rcpp_result_gen = Rcpp::wrap(eval_pedigree_grad_loadings(ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder, use_aprx, n_threads, cluster_weights, method, use_tilting, vls_scales));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -273,11 +277,11 @@ static const R_CallMethodDef CallEntries[] = {
     {"_pedmod_get_n_scales_loadings", (DL_FUNC) &_pedmod_get_n_scales_loadings, 1},
     {"_pedmod_get_n_terms", (DL_FUNC) &_pedmod_get_n_terms, 1},
     {"_pedmod_get_n_terms_loadings", (DL_FUNC) &_pedmod_get_n_terms_loadings, 1},
-    {"_pedmod_eval_pedigree_ll", (DL_FUNC) &_pedmod_eval_pedigree_ll, 13},
-    {"_pedmod_eval_pedigree_grad", (DL_FUNC) &_pedmod_eval_pedigree_grad, 13},
+    {"_pedmod_eval_pedigree_ll", (DL_FUNC) &_pedmod_eval_pedigree_ll, 14},
+    {"_pedmod_eval_pedigree_grad", (DL_FUNC) &_pedmod_eval_pedigree_grad, 14},
     {"_pedmod_pedigree_ll_terms_loadings", (DL_FUNC) &_pedmod_pedigree_ll_terms_loadings, 3},
-    {"_pedmod_eval_pedigree_ll_loadings", (DL_FUNC) &_pedmod_eval_pedigree_ll_loadings, 13},
-    {"_pedmod_eval_pedigree_grad_loadings", (DL_FUNC) &_pedmod_eval_pedigree_grad_loadings, 13},
+    {"_pedmod_eval_pedigree_ll_loadings", (DL_FUNC) &_pedmod_eval_pedigree_ll_loadings, 14},
+    {"_pedmod_eval_pedigree_grad_loadings", (DL_FUNC) &_pedmod_eval_pedigree_grad_loadings, 14},
     {"run_testthat_tests", (DL_FUNC) &run_testthat_tests, 1},
     {NULL, NULL, 0}
 };

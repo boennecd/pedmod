@@ -1451,17 +1451,17 @@ beta_true   <- attr(dat, "beta")
 sig_sq_true <- attr(dat, "sig_sq")
 
 library(pedmod)
-ll_terms <- pedigree_ll_terms(dat, max_threads = 4L)
+ll_terms_wo_weights <- pedigree_ll_terms(dat, max_threads = 4L)
 system.time(ll_res <- eval_pedigree_ll(
-  ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
-  rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4))
+  ll_terms_wo_weights, c(beta_true, log(sig_sq_true)), maxvls = 100000L, 
+  abs_eps = 0, rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4))
 #>    user  system elapsed 
-#>   0.570   0.000   0.144
+#>   0.588   0.075   0.239
 system.time(grad_res <- eval_pedigree_grad(
-  ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
-  rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4))
+  ll_terms_wo_weights, c(beta_true, log(sig_sq_true)), maxvls = 100000L, 
+  abs_eps = 0, rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4))
 #>    user  system elapsed 
-#>  14.637   0.000   3.731
+#>  13.491   0.000   3.428
 
 # find the duplicated combinations of pedigrees, covariates, and outcomes. One 
 # likely needs to change this code if the pedigrees are not identical but are 
@@ -1490,7 +1490,7 @@ system.time(grad_res_fast <- eval_pedigree_grad(
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4, 
   cluster_weights = c_weights))
 #>    user  system elapsed 
-#>   6.317   0.000   1.659
+#>   5.912   0.000   1.552
 
 # show that we get the same (up to a Monte Carlo error)
 print(c(redundant = ll_res, fast = ll_res_fast), digits = 6)
@@ -1502,12 +1502,73 @@ rbind(redundant = grad_res, fast = grad_res_fast)
 #> fast      -12.05 5.155 -13.56 -8.665
 rm(dat) # will not need this anymore
 
+# note that the variance is greater for the weighted version
+ll_ests <- sapply(1:50, function(seed){
+  set.seed(seed)
+  eval_pedigree_ll(
+    ll_terms_wo_weights, c(beta_true, log(sig_sq_true)), maxvls = 100000L, 
+    abs_eps = 0, rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4)
+})
+ll_ests_fast <- sapply(1:50, function(seed){
+  set.seed(seed)
+  eval_pedigree_ll(
+    ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 10000L, abs_eps = 0, 
+    rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4, 
+    cluster_weights = c_weights)
+})
+
+# the estimates are comparable
+c(`Without weights` = mean(ll_ests), `With weights` = mean(ll_ests_fast))
+#> Without weights    With weights 
+#>           -2697           -2697
+
+# the standard deviation is different
+c(`Without weights` = sd(ll_ests), `With weights` = sd(ll_ests_fast))
+#> Without weights    With weights 
+#>        0.003629        0.020053
+
+# we can mitigate this by using the vls_scales argument which though is a bit 
+# slower
+ll_ests_fast_vls_scales <- sapply(1:50, function(seed){
+  set.seed(seed)
+  eval_pedigree_ll(
+    ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 10000L, abs_eps = 0, 
+    rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4, 
+    cluster_weights = c_weights, vls_scales = sqrt(c_weights))
+})
+
+# the estimates are comparable
+c(`Without weights` = mean(ll_ests), `With weights` = mean(ll_ests_fast), 
+  `With weights and vls_scales` = mean(ll_ests_fast_vls_scales))
+#>             Without weights                With weights With weights and vls_scales 
+#>                       -2697                       -2697                       -2697
+
+# the standard deviation is different
+c(`Without weights` = sd(ll_ests), `With weights` = sd(ll_ests_fast), 
+  `With weights and vls_scales` = sd(ll_ests_fast_vls_scales))
+#>             Without weights                With weights With weights and vls_scales 
+#>                    0.003629                    0.020053                    0.004966
+
+# it is still faster
+system.time(ll_res_fast <- eval_pedigree_ll(
+  ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
+  rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4, 
+  cluster_weights = c_weights, vls_scales = sqrt(c_weights)))
+#>    user  system elapsed 
+#>   0.403   0.000   0.139
+system.time(grad_res_fast <- eval_pedigree_grad(
+  ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
+  rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4, 
+  cluster_weights = c_weights, vls_scales = sqrt(c_weights)))
+#>    user  system elapsed 
+#>   6.285   0.000   1.669
+
 # find the starting values
 system.time(
   start <- pedmod_start(ptr = ll_terms, data = dat_unqiue, 
                         cluster_weights = c_weights))
 #>    user  system elapsed 
-#>   5.368   0.000   5.368
+#>   5.631   0.000   5.631
 
 # optimize
 system.time(
@@ -1516,7 +1577,7 @@ system.time(
     n_threads = 4L,  cluster_weights = c_weights,
     maxvls = 5000L, rel_eps = 1e-2, minvls = 500L))
 #>    user  system elapsed 
-#>   8.086   0.000   2.024
+#>   8.489   0.000   2.125
 system.time(
   opt_out <- pedmod_opt(
     ptr = ll_terms, par = opt_out_quick$par, abs_eps = 0, use_aprx = TRUE, 
@@ -1524,7 +1585,7 @@ system.time(
     # we changed these parameters
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 #>    user  system elapsed 
-#>   59.10    0.00   14.81
+#>   62.11    0.00   15.53
 ```
 
 The results are shown below:
@@ -2475,10 +2536,10 @@ dat <- sim_dat(n_fams = 1000L, beta = beta, thetas = thetas)
 
 # evaluate the log marginal likelihood at the true parameters
 library(pedmod)
-ll_terms <- pedigree_ll_terms_loadings(dat, max_threads = 4L)
+ll_terms_wo_weights <- pedigree_ll_terms_loadings(dat, max_threads = 4L)
 
 logLik_truth <- eval_pedigree_ll(
-  ll_terms, c(beta, thetas), maxvls = 25000L, minvls = 1000L, 
+  ll_terms_wo_weights, c(beta, thetas), maxvls = 25000L, minvls = 1000L, 
   abs_eps = 0, rel_eps = 1e-3, n_threads = 4L)
 
 # remove the duplicated terms and use weights. This can be done more efficiently
@@ -2496,7 +2557,7 @@ ll_terms <- pedigree_ll_terms_loadings(dat_unqiue, max_threads = 4L)
 
 logLik_truth_weighted <- eval_pedigree_ll(
   ll_terms, c(beta, thetas), maxvls = 25000L, minvls = 1000L, 
-  abs_eps = 0, rel_eps = 1e-3, cluster_weights = c_weights, n_threads = 4L)
+  abs_eps = 0, rel_eps = 1e-3, n_threads = 4L, cluster_weights = c_weights)
 
 print(logLik_truth_weighted, digits = 8)
 #> [1] -4373.3542
@@ -2510,6 +2571,52 @@ print(logLik_truth, digits = 8)
 #> [1] 0
 #> attr(,"std")
 #> [1] 0.0064573353
+
+# note that the variance is greater for the weighted version
+ll_ests <- sapply(1:50, function(seed){
+  set.seed(seed)
+  eval_pedigree_ll(
+    ll_terms_wo_weights, c(beta, thetas), maxvls = 10000L, minvls = 1000L, 
+    abs_eps = 0, rel_eps = 1e-3, n_threads = 4L)
+})
+ll_ests_fast <- sapply(1:50, function(seed){
+  set.seed(seed)
+  eval_pedigree_ll(
+    ll_terms, c(beta, thetas), maxvls = 10000L, minvls = 1000L, 
+    abs_eps = 0, rel_eps = 1e-3, n_threads = 4L, cluster_weights = c_weights)
+})
+
+# the estimates are comparable
+c(`Without weights` = mean(ll_ests), `With weights` = mean(ll_ests_fast))
+#> Without weights    With weights 
+#>           -4373           -4373
+
+# the standard deviation is different
+c(`Without weights` = sd(ll_ests), `With weights` = sd(ll_ests_fast))
+#> Without weights    With weights 
+#>        0.009941        0.032046
+
+# we can mitigate this by using the vls_scales argument which though is a bit 
+# slower
+ll_ests_fast_vls_scales <- sapply(1:50, function(seed){
+  set.seed(seed)
+  eval_pedigree_ll(
+    ll_terms, c(beta, thetas), maxvls = 10000L, minvls = 1000L, 
+    abs_eps = 0, rel_eps = 1e-3, n_threads = 4L, cluster_weights = c_weights, 
+    vls_scales = sqrt(c_weights))
+})
+
+# the estimates are comparable
+c(`Without weights` = mean(ll_ests), `With weights` = mean(ll_ests_fast), 
+  `With weights and vls_scales` = mean(ll_ests_fast_vls_scales))
+#>             Without weights                With weights With weights and vls_scales 
+#>                       -4373                       -4373                       -4373
+
+# the standard deviation is different
+c(`Without weights` = sd(ll_ests), `With weights` = sd(ll_ests_fast), 
+  `With weights and vls_scales` = sd(ll_ests_fast_vls_scales))
+#>             Without weights                With weights With weights and vls_scales 
+#>                    0.009941                    0.032046                    0.010431
 
 # get the starting values
 system.time(start <- pedmod_start_loadings(
@@ -2525,7 +2632,7 @@ system.time(
     abs_eps = 0, rel_eps = 1e-3, n_threads = 4L, use_aprx = TRUE, 
     cluster_weights = c_weights))
 #>    user  system elapsed 
-#> 384.709   0.028  96.317
+#> 369.397   0.028  92.412
 ```
 
 We compare the maximum likelihood estimator with the true values below.
@@ -3252,10 +3359,12 @@ Box plots of the relative errors are shown below:
 
 ``` r
 rowMeans(sim_res[, "SE", ])
-#>                 mvtnorm         TruncatedNormal        no aprx; Korobov          no aprx; Sobol        w/ aprx; Korobov          w/ aprx; Sobol 
-#>               2.800e-05               4.180e-05               3.160e-05               3.073e-05               3.042e-05               3.129e-05 
-#> no aprx; Korobov (tilt)   no aprx; Sobol (tilt) w/ aprx; Korobov (tilt)   w/ aprx; Sobol (tilt) 
-#>               3.327e-05               2.803e-05               3.441e-05               3.023e-05
+#>                 mvtnorm         TruncatedNormal        no aprx; Korobov          no aprx; Sobol 
+#>               2.800e-05               4.180e-05               3.160e-05               3.073e-05 
+#>        w/ aprx; Korobov          w/ aprx; Sobol no aprx; Korobov (tilt)   no aprx; Sobol (tilt) 
+#>               3.042e-05               3.129e-05               3.327e-05               2.803e-05 
+#> w/ aprx; Korobov (tilt)   w/ aprx; Sobol (tilt) 
+#>               3.441e-05               3.023e-05
 par(mar = c(10, 4, 1, 1), bty = "l")
 boxplot(t(sim_res[, "SE", ]), las = 2)
 grid()
@@ -3267,10 +3376,12 @@ The new implementation is faster when the approximation is used:
 
 ``` r
 rowMeans(sim_res[, "time", ])
-#>                 mvtnorm         TruncatedNormal        no aprx; Korobov          no aprx; Sobol        w/ aprx; Korobov          w/ aprx; Sobol 
-#>                0.018635                0.030536                0.012634                0.015266                0.004649                0.006056 
-#> no aprx; Korobov (tilt)   no aprx; Sobol (tilt) w/ aprx; Korobov (tilt)   w/ aprx; Sobol (tilt) 
-#>                0.012767                0.011740                0.009654                0.008844
+#>                 mvtnorm         TruncatedNormal        no aprx; Korobov          no aprx; Sobol 
+#>                0.018635                0.030536                0.012634                0.015266 
+#>        w/ aprx; Korobov          w/ aprx; Sobol no aprx; Korobov (tilt)   no aprx; Sobol (tilt) 
+#>                0.004649                0.006056                0.012767                0.011740 
+#> w/ aprx; Korobov (tilt)   w/ aprx; Sobol (tilt) 
+#>                0.009654                0.008844
 par(mar = c(9, 4, 1, 1), bty = "l")
 boxplot(t(sim_res[, "time", ]), log = "y", las = 2)
 grid()

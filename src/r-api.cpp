@@ -125,6 +125,44 @@ Rcpp::NumericVector mvndst
 
 namespace {
 
+arma::vec check_n_get_vls_scales
+  (Rcpp::Nullable<Rcpp::NumericVector> vls_scales, size_t const n_terms,
+   unsigned const maxvls){
+  if(vls_scales.isNotNull()){
+    Rcpp::NumericVector r_weights(vls_scales);
+    if(static_cast<size_t>(r_weights.size()) != n_terms)
+      throw std::invalid_argument(
+          "invalid size of vls_scales. Should have length " +
+            std::to_string(n_terms) +  " had length " +
+            std::to_string(r_weights.size()) + ".");
+
+    arma::vec out = r_weights;
+    std::for_each(out.begin(), out.end(), [&](double const x){
+      if(x * maxvls < 1)
+        throw std::runtime_error("vls_scales[i] * maxvls < 1");
+    });
+
+    return out;
+  }
+
+  return {};
+}
+
+arma::vec check_n_get_cluster_weights
+  (Rcpp::Nullable<Rcpp::NumericVector> cluster_weights, size_t const n_terms){
+  if(cluster_weights.isNotNull()){
+    Rcpp::NumericVector r_weights(cluster_weights);
+    if(static_cast<size_t>(r_weights.size()) != n_terms)
+      throw std::invalid_argument(
+          "invalid size of cluster_weights. Should have length " +
+            std::to_string(n_terms) +  " had length " +
+            std::to_string(r_weights.size()) + ".");
+    return r_weights;
+  }
+
+  return {};
+}
+
 struct pedigree_terms {
   unsigned const max_threads;
   std::vector<pedmod::pedigree_ll_term > terms;
@@ -355,7 +393,8 @@ Rcpp::NumericVector eval_pedigree_ll
    int const minvls = -1, bool const do_reorder = true,
    bool const use_aprx = false, unsigned n_threads = 1L,
    Rcpp::Nullable<Rcpp::NumericVector> cluster_weights = R_NilValue,
-   int const method = 0, bool const use_tilting = false){
+   int const method = 0, bool const use_tilting = false,
+   Rcpp::Nullable<Rcpp::NumericVector> vls_scales = R_NilValue){
   Rcpp::XPtr<pedigree_terms> terms_ptr(ptr);
   std::vector<pedmod::pedigree_ll_term > &terms = terms_ptr->terms;
   n_threads = eval_get_n_threads(n_threads, *terms_ptr);
@@ -372,18 +411,13 @@ Rcpp::NumericVector eval_pedigree_ll
   if(maxvls < minvls or maxvls < 1)
     throw std::invalid_argument("mvndst: invalid maxvls");
 
-  // get potential weights
-  arma::vec c_weights;
-  if(cluster_weights.isNotNull()){
-    Rcpp::NumericVector r_weights(cluster_weights);
-    if(static_cast<size_t>(r_weights.size()) != terms.size())
-      throw std::invalid_argument(
-          "invalid size of cluster_weights. Should have length " +
-            std::to_string(terms.size()) +  " had length " +
-            std::to_string(r_weights.size()) + ".");
-    c_weights = r_weights;
-  }
+  arma::vec const c_weights
+    {check_n_get_cluster_weights(cluster_weights, terms.size())};
   bool const has_weights = c_weights.size() > 0;
+
+  arma::vec const vls_scales_use
+    {check_n_get_vls_scales(vls_scales, terms.size(), maxvls)};
+  bool const has_vls_scales{vls_scales_use.size() > 0};
 
   // transform scale parameters
   auto const n_fix = terms[0].n_fix_effect();
@@ -422,8 +456,16 @@ Rcpp::NumericVector eval_pedigree_ll
       if(std::abs(w_i) < std::numeric_limits<double>::epsilon())
         return;
 
+      int minvls_use{minvls};
+      int maxvls_use{maxvls};
+      if(has_vls_scales){
+        if(minvls > 0)
+          minvls_use = std::max<int>(1, std::lround(minvls * vls_scales_use[i]));
+        maxvls_use = std::lround(maxvls * vls_scales_use[i]);
+      }
+
       auto const res = terms.at(idx[i]).fn(
-        &par[0], maxvls, abs_eps, rel_eps, minvls, do_reorder, use_aprx,
+        &par[0], maxvls_use, abs_eps, rel_eps, minvls_use, do_reorder, use_aprx,
         did_fail, meth, use_tilting);
 
       wmem[0] += w_i * res.log_likelihood;
@@ -458,7 +500,8 @@ Rcpp::NumericVector eval_pedigree_grad
    int const minvls = -1, bool const do_reorder = true,
    bool const use_aprx = false, unsigned n_threads = 1L,
    Rcpp::Nullable<Rcpp::NumericVector> cluster_weights = R_NilValue,
-   int const method = 0, bool const use_tilting = false){
+   int const method = 0, bool const use_tilting = false,
+   Rcpp::Nullable<Rcpp::NumericVector> vls_scales = R_NilValue){
   Rcpp::XPtr<pedigree_terms> terms_ptr(ptr);
   std::vector<pedmod::pedigree_ll_term > &terms = terms_ptr->terms;
   n_threads = eval_get_n_threads(n_threads, *terms_ptr);
@@ -472,18 +515,13 @@ Rcpp::NumericVector eval_pedigree_grad
           std::to_string(par.size()) + " elements but should have " +
           std::to_string(terms[0].n_par()) + ".");
 
-  // get potential weights
-  arma::vec c_weights;
-  if(cluster_weights.isNotNull()){
-    Rcpp::NumericVector r_weights(cluster_weights);
-    if(static_cast<size_t>(r_weights.size()) != terms.size())
-      throw std::invalid_argument(
-          "invalid size of cluster_weights. Should have length " +
-            std::to_string(terms.size()) +  " had length " +
-            std::to_string(r_weights.size()) + ".");
-    c_weights = r_weights;
-  }
+  arma::vec const c_weights
+    {check_n_get_cluster_weights(cluster_weights, terms.size())};
   bool const has_weights = c_weights.size() > 0;
+
+  arma::vec const vls_scales_use
+    {check_n_get_vls_scales(vls_scales, terms.size(), maxvls)};
+  bool const has_vls_scales{vls_scales_use.size() > 0};
 
   // transform scale parameters
   auto const n_fix = terms[0].n_fix_effect();
@@ -522,8 +560,16 @@ Rcpp::NumericVector eval_pedigree_grad
       if(std::abs(w_i) < std::numeric_limits<double>::epsilon())
         return;
 
+      int minvls_use{minvls};
+      int maxvls_use{maxvls};
+      if(has_vls_scales){
+        if(minvls > 0)
+          minvls_use = std::max<int>(1, std::lround(minvls * vls_scales_use[i]));
+        maxvls_use = std::lround(maxvls * vls_scales_use[i]);
+      }
+
       *wmem += terms.at(idx[i]).gr(
-        &par[0], wmem + 1, var_est, maxvls, abs_eps, rel_eps, minvls,
+        &par[0], wmem + 1, var_est, maxvls_use, abs_eps, rel_eps, minvls_use,
         do_reorder, use_aprx, did_fail, w_i, meth, use_tilting);
       n_fails += did_fail;
     });
@@ -585,7 +631,8 @@ Rcpp::NumericVector eval_pedigree_ll_loadings
    int const minvls = -1, bool const do_reorder = true,
    bool const use_aprx = false, unsigned n_threads = 1L,
    Rcpp::Nullable<Rcpp::NumericVector> cluster_weights = R_NilValue,
-   int const method = 0, bool const use_tilting = false){
+   int const method = 0, bool const use_tilting = false,
+   Rcpp::Nullable<Rcpp::NumericVector> vls_scales = R_NilValue){
   Rcpp::XPtr<pedigree_terms_loading> terms_ptr(ptr);
   std::vector<pedmod::pedigree_ll_term_loading> &terms = terms_ptr->terms;
   n_threads = eval_get_n_threads(n_threads, *terms_ptr);
@@ -602,18 +649,13 @@ Rcpp::NumericVector eval_pedigree_ll_loadings
   if(maxvls < minvls or maxvls < 1)
     throw std::invalid_argument("mvndst: invalid maxvls");
 
-  // get potential weights
-  arma::vec c_weights;
-  if(cluster_weights.isNotNull()){
-    Rcpp::NumericVector r_weights(cluster_weights);
-    if(static_cast<size_t>(r_weights.size()) != terms.size())
-      throw std::invalid_argument(
-          "invalid size of cluster_weights. Should have length " +
-            std::to_string(terms.size()) +  " had length " +
-            std::to_string(r_weights.size()) + ".");
-    c_weights = r_weights;
-  }
+  arma::vec const c_weights
+    {check_n_get_cluster_weights(cluster_weights, terms.size())};
   bool const has_weights = c_weights.size() > 0;
+
+  arma::vec const vls_scales_use
+    {check_n_get_vls_scales(vls_scales, terms.size(), maxvls)};
+  bool const has_vls_scales{vls_scales_use.size() > 0};
 
   pedmod::cache_mem<double> r_mem;
   r_mem.set_n_mem(2, n_threads);
@@ -646,8 +688,16 @@ Rcpp::NumericVector eval_pedigree_ll_loadings
       if(std::abs(w_i) < std::numeric_limits<double>::epsilon())
         return;
 
+      int minvls_use{minvls};
+      int maxvls_use{maxvls};
+      if(has_vls_scales){
+        if(minvls > 0)
+          minvls_use = std::max<int>(1, std::lround(minvls * vls_scales_use[i]));
+        maxvls_use = std::lround(maxvls * vls_scales_use[i]);
+      }
+
       auto const res = terms.at(idx[i]).fn(
-        &par[0], maxvls, abs_eps, rel_eps, minvls, do_reorder, use_aprx,
+        &par[0], maxvls_use, abs_eps, rel_eps, minvls_use, do_reorder, use_aprx,
         did_fail, meth, true);
 
       wmem[0] += w_i * res.log_likelihood;
@@ -681,7 +731,8 @@ Rcpp::NumericVector eval_pedigree_grad_loadings
    int const minvls = -1, bool const do_reorder = true,
    bool const use_aprx = false, unsigned n_threads = 1L,
    Rcpp::Nullable<Rcpp::NumericVector> cluster_weights = R_NilValue,
-   int const method = 0, bool const use_tilting = false){
+   int const method = 0, bool const use_tilting = false,
+   Rcpp::Nullable<Rcpp::NumericVector> vls_scales = R_NilValue){
   Rcpp::XPtr<pedigree_terms_loading> terms_ptr(ptr);
   std::vector<pedmod::pedigree_ll_term_loading> &terms = terms_ptr->terms;
   n_threads = eval_get_n_threads(n_threads, *terms_ptr);
@@ -698,18 +749,13 @@ Rcpp::NumericVector eval_pedigree_grad_loadings
   if(maxvls < minvls or maxvls < 1)
     throw std::invalid_argument("mvndst: invalid maxvls");
 
-  // get potential weights
-  arma::vec c_weights;
-  if(cluster_weights.isNotNull()){
-    Rcpp::NumericVector r_weights(cluster_weights);
-    if(static_cast<size_t>(r_weights.size()) != terms.size())
-      throw std::invalid_argument(
-          "invalid size of cluster_weights. Should have length " +
-            std::to_string(terms.size()) +  " had length " +
-            std::to_string(r_weights.size()) + ".");
-    c_weights = r_weights;
-  }
+  arma::vec const c_weights
+    {check_n_get_cluster_weights(cluster_weights, terms.size())};
   bool const has_weights = c_weights.size() > 0;
+
+  arma::vec const vls_scales_use
+    {check_n_get_vls_scales(vls_scales, terms.size(), maxvls)};
+  bool const has_vls_scales{vls_scales_use.size() > 0};
 
   pedmod::cache_mem<double> r_mem;
   r_mem.set_n_mem(2 * (1 + par.size()), n_threads);
@@ -743,8 +789,16 @@ Rcpp::NumericVector eval_pedigree_grad_loadings
       if(std::abs(w_i) < std::numeric_limits<double>::epsilon())
         return;
 
+      int minvls_use{minvls};
+      int maxvls_use{maxvls};
+      if(has_vls_scales){
+        if(minvls > 0)
+          minvls_use = std::max<int>(1, std::lround(minvls * vls_scales_use[i]));
+        maxvls_use = std::lround(maxvls * vls_scales_use[i]);
+      }
+
       *wmem += terms.at(idx[i]).gr(
-        &par[0], wmem + 1, var_est, maxvls, abs_eps, rel_eps, minvls,
+        &par[0], wmem + 1, var_est, maxvls_use, abs_eps, rel_eps, minvls_use,
         do_reorder, use_aprx, did_fail, w_i, meth, use_tilting);
       n_fails += did_fail;
     });

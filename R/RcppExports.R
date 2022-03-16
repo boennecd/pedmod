@@ -196,12 +196,12 @@ pedigree_ll_terms <- function(data, max_threads = 1L, n_sequences = 8L) {
     .Call(`_pedmod_get_n_terms_loadings`, ptr)
 }
 
-eval_pedigree_ll_cpp <- function(ptr, par, maxvls, abs_eps, rel_eps, indices = NULL, minvls = -1L, do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L, cluster_weights = NULL, method = 0L, use_tilting = FALSE) {
-    .Call(`_pedmod_eval_pedigree_ll`, ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder, use_aprx, n_threads, cluster_weights, method, use_tilting)
+eval_pedigree_ll_cpp <- function(ptr, par, maxvls, abs_eps, rel_eps, indices = NULL, minvls = -1L, do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L, cluster_weights = NULL, method = 0L, use_tilting = FALSE, vls_scales = NULL) {
+    .Call(`_pedmod_eval_pedigree_ll`, ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder, use_aprx, n_threads, cluster_weights, method, use_tilting, vls_scales)
 }
 
-eval_pedigree_grad_cpp <- function(ptr, par, maxvls, abs_eps, rel_eps, indices = NULL, minvls = -1L, do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L, cluster_weights = NULL, method = 0L, use_tilting = FALSE) {
-    .Call(`_pedmod_eval_pedigree_grad`, ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder, use_aprx, n_threads, cluster_weights, method, use_tilting)
+eval_pedigree_grad_cpp <- function(ptr, par, maxvls, abs_eps, rel_eps, indices = NULL, minvls = -1L, do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L, cluster_weights = NULL, method = 0L, use_tilting = FALSE, vls_scales = NULL) {
+    .Call(`_pedmod_eval_pedigree_grad`, ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder, use_aprx, n_threads, cluster_weights, method, use_tilting, vls_scales)
 }
 
 #' @rdname pedigree_ll_terms
@@ -211,11 +211,11 @@ pedigree_ll_terms_loadings <- function(data, max_threads = 1L, n_sequences = 8L)
     .Call(`_pedmod_pedigree_ll_terms_loadings`, data, max_threads, n_sequences)
 }
 
-eval_pedigree_ll_loadings_cpp <- function(ptr, par, maxvls, abs_eps, rel_eps, indices = NULL, minvls = -1L, do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L, cluster_weights = NULL, method = 0L, use_tilting = FALSE) {
-    .Call(`_pedmod_eval_pedigree_ll_loadings`, ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder, use_aprx, n_threads, cluster_weights, method, use_tilting)
+eval_pedigree_ll_loadings_cpp <- function(ptr, par, maxvls, abs_eps, rel_eps, indices = NULL, minvls = -1L, do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L, cluster_weights = NULL, method = 0L, use_tilting = FALSE, vls_scales = NULL) {
+    .Call(`_pedmod_eval_pedigree_ll_loadings`, ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder, use_aprx, n_threads, cluster_weights, method, use_tilting, vls_scales)
 }
 
-eval_pedigree_grad_loadings_cpp <- function(ptr, par, maxvls, abs_eps, rel_eps, indices = NULL, minvls = -1L, do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L, cluster_weights = NULL, method = 0L, use_tilting = FALSE) {
-    .Call(`_pedmod_eval_pedigree_grad_loadings`, ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder, use_aprx, n_threads, cluster_weights, method, use_tilting)
+eval_pedigree_grad_loadings_cpp <- function(ptr, par, maxvls, abs_eps, rel_eps, indices = NULL, minvls = -1L, do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L, cluster_weights = NULL, method = 0L, use_tilting = FALSE, vls_scales = NULL) {
+    .Call(`_pedmod_eval_pedigree_grad_loadings`, ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder, use_aprx, n_threads, cluster_weights, method, use_tilting, vls_scales)
 }
 

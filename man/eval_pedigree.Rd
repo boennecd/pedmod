@@ -19,7 +19,8 @@ eval_pedigree_ll(
   cluster_weights = NULL,
   standardized = FALSE,
   method = 0L,
-  use_tilting = FALSE
+  use_tilting = FALSE,
+  vls_scales = NULL
 )
 
 eval_pedigree_grad(
@@ -36,7 +37,8 @@ eval_pedigree_grad(
   cluster_weights = NULL,
   standardized = FALSE,
   method = 0L,
-  use_tilting = FALSE
+  use_tilting = FALSE,
+  vls_scales = NULL
 )
 }
 \arguments{
@@ -85,6 +87,12 @@ lattice rules while one yields scrambled Sobol sequences.}
 
 \item{use_tilting}{\code{TRUE} if the minimax tilting method suggested
 by Botev (2017). See \url{https://doi.org/10.1111/rssb.12162}.}
+
+\item{vls_scales}{can be a numeric vector with a positive scalar for each
+cluster. Then \code{vls_scales[i] * minvls} and
+\code{vls_scales[i] * maxvls} is used for cluster \code{i} rather than
+\code{minvls} and \code{maxvls}. Set \code{vls_scales = NULL} if the latter
+should be used.}
 }
 \value{
 \code{eval_pedigree_ll}:

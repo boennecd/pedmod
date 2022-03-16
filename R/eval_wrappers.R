@@ -37,6 +37,11 @@
 #' @param standardized logical for whether to use the standardized or direct
 #' parameterization. See \code{\link{standardized_to_direct}} and the vignette
 #' at \code{vignette("pedmod", package = "pedmod")}.
+#' @param vls_scales can be a numeric vector with a positive scalar for each
+#' cluster. Then \code{vls_scales[i] * minvls} and
+#' \code{vls_scales[i] * maxvls} is used for cluster \code{i} rather than
+#' \code{minvls} and \code{maxvls}. Set \code{vls_scales = NULL} if the latter
+#' should be used.
 #'
 #' @inheritParams pedigree_ll_terms
 #' @inheritParams mvndst
@@ -129,7 +134,7 @@
 eval_pedigree_ll <- function(
   ptr, par, maxvls, abs_eps, rel_eps, indices = NULL, minvls = -1L,
   do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L, cluster_weights = NULL,
-  standardized = FALSE, method = 0L, use_tilting = FALSE){
+  standardized = FALSE, method = 0L, use_tilting = FALSE, vls_scales = NULL){
   fun <- if(inherits(ptr, "pedigree_ll_terms_ptr")){
     .eval_pedigree_ll
   } else if(inherits(ptr, "pedigree_ll_terms_loadings_ptr")){
@@ -141,12 +146,13 @@ eval_pedigree_ll <- function(
       rel_eps = rel_eps, indices = indices, minvls = minvls,
       do_reorder = do_reorder, use_aprx = use_aprx, n_threads = n_threads,
       cluster_weights = cluster_weights, standardized = standardized,
-      method = method, use_tilting = use_tilting)
+      method = method, use_tilting = use_tilting, vls_scales = vls_scales)
 }
 
 .eval_pedigree_ll <- function(
   ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder,
-  use_aprx, n_threads, cluster_weights, standardized, method, use_tilting){
+  use_aprx, n_threads, cluster_weights, standardized, method, use_tilting,
+  vls_scales){
   if(standardized)
     par <- standardized_to_direct(par = par, n_scales = get_n_scales(ptr))
 
@@ -154,19 +160,20 @@ eval_pedigree_ll <- function(
     ptr = ptr, par = par, maxvls = maxvls, abs_eps = abs_eps, rel_eps = rel_eps,
     indices = indices, minvls = minvls, do_reorder = do_reorder,
     use_aprx = use_aprx, n_threads = n_threads, use_tilting = use_tilting,
-    cluster_weights = cluster_weights, method = method)
+    cluster_weights = cluster_weights, method = method, vls_scales = vls_scales)
 }
 
 .eval_pedigree_ll_loadings <- function(
   ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder,
-  use_aprx, n_threads, cluster_weights, standardized, method, use_tilting){
+  use_aprx, n_threads, cluster_weights, standardized, method, use_tilting,
+  vls_scales){
   .warn_on_standardized(standardized)
 
   eval_pedigree_ll_loadings_cpp(
     ptr = ptr, par = par, maxvls = maxvls, abs_eps = abs_eps, rel_eps = rel_eps,
     indices = indices, minvls = minvls, do_reorder = do_reorder,
     use_aprx = use_aprx, n_threads = n_threads, use_tilting = use_tilting,
-    cluster_weights = cluster_weights, method = method)
+    cluster_weights = cluster_weights, method = method, vls_scales = vls_scales)
 }
 
 #' @rdname eval_pedigree
@@ -184,7 +191,7 @@ eval_pedigree_ll <- function(
 eval_pedigree_grad <- function(
   ptr, par, maxvls, abs_eps, rel_eps, indices = NULL, minvls = -1L,
   do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L, cluster_weights = NULL,
-  standardized = FALSE, method = 0L, use_tilting = FALSE){
+  standardized = FALSE, method = 0L, use_tilting = FALSE, vls_scales = NULL){
   fun <- if(inherits(ptr, "pedigree_ll_terms_ptr")){
     .eval_pedigree_grad
   } else if(inherits(ptr, "pedigree_ll_terms_loadings_ptr")){
@@ -196,12 +203,13 @@ eval_pedigree_grad <- function(
       rel_eps = rel_eps, indices = indices, minvls = minvls,
       do_reorder = do_reorder, use_aprx = use_aprx, n_threads = n_threads,
       cluster_weights = cluster_weights, standardized = standardized,
-      method = method, use_tilting = use_tilting)
+      method = method, use_tilting = use_tilting, vls_scales = vls_scales)
 }
 
 .eval_pedigree_grad <- function(
   ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder,
-  use_aprx, n_threads, cluster_weights, standardized, method, use_tilting){
+  use_aprx, n_threads, cluster_weights, standardized, method, use_tilting,
+  vls_scales){
   if(standardized)
     par <- standardized_to_direct(par = par, n_scales = get_n_scales(ptr),
                                   jacobian = TRUE)
@@ -210,7 +218,7 @@ eval_pedigree_grad <- function(
     ptr = ptr, par = par, maxvls = maxvls, abs_eps = abs_eps, rel_eps = rel_eps,
     indices = indices, minvls = minvls, do_reorder = do_reorder,
     use_aprx = use_aprx, n_threads = n_threads, use_tilting = use_tilting,
-    cluster_weights = cluster_weights, method = method)
+    cluster_weights = cluster_weights, method = method, vls_scales = vls_scales)
 
   if(!standardized)
     return(out)
@@ -223,12 +231,12 @@ eval_pedigree_grad <- function(
 .eval_pedigree_grad_loadings <- function(
   ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder,
   use_aprx, n_threads, cluster_weights, standardized, method,
-  use_tilting){
+  use_tilting, vls_scales){
   .warn_on_standardized(standardized)
 
   eval_pedigree_grad_loadings_cpp(
     ptr = ptr, par = par, maxvls = maxvls, abs_eps = abs_eps, rel_eps = rel_eps,
     indices = indices, minvls = minvls, do_reorder = do_reorder,
     use_aprx = use_aprx, n_threads = n_threads, use_tilting = use_tilting,
-    cluster_weights = cluster_weights, method = method)
+    cluster_weights = cluster_weights, method = method, vls_scales = vls_scales)
 }

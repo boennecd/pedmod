@@ -1048,13 +1048,13 @@ beta_true   <- attr(dat, "beta")
 sig_sq_true <- attr(dat, "sig_sq")
 
 library(pedmod)
-ll_terms <- pedigree_ll_terms(dat, max_threads = 4L)
+ll_terms_wo_weights <- pedigree_ll_terms(dat, max_threads = 4L)
 system.time(ll_res <- eval_pedigree_ll(
-  ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
-  rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4))
+  ll_terms_wo_weights, c(beta_true, log(sig_sq_true)), maxvls = 100000L, 
+  abs_eps = 0, rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4))
 system.time(grad_res <- eval_pedigree_grad(
-  ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
-  rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4))
+  ll_terms_wo_weights, c(beta_true, log(sig_sq_true)), maxvls = 100000L, 
+  abs_eps = 0, rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4))
 
 # find the duplicated combinations of pedigrees, covariates, and outcomes. One 
 # likely needs to change this code if the pedigrees are not identical but are 
@@ -1084,6 +1084,55 @@ system.time(grad_res_fast <- eval_pedigree_grad(
 print(c(redundant = ll_res, fast = ll_res_fast), digits = 6)
 rbind(redundant = grad_res, fast = grad_res_fast)
 rm(dat) # will not need this anymore
+
+# note that the variance is greater for the weighted version
+ll_ests <- sapply(1:50, function(seed){
+  set.seed(seed)
+  eval_pedigree_ll(
+    ll_terms_wo_weights, c(beta_true, log(sig_sq_true)), maxvls = 100000L, 
+    abs_eps = 0, rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4)
+})
+ll_ests_fast <- sapply(1:50, function(seed){
+  set.seed(seed)
+  eval_pedigree_ll(
+    ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 10000L, abs_eps = 0, 
+    rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4, 
+    cluster_weights = c_weights)
+})
+
+# the estimates are comparable
+c(`Without weights` = mean(ll_ests), `With weights` = mean(ll_ests_fast))
+
+# the standard deviation is different
+c(`Without weights` = sd(ll_ests), `With weights` = sd(ll_ests_fast))
+
+# we can mitigate this by using the vls_scales argument which though is a bit 
+# slower
+ll_ests_fast_vls_scales <- sapply(1:50, function(seed){
+  set.seed(seed)
+  eval_pedigree_ll(
+    ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 10000L, abs_eps = 0, 
+    rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4, 
+    cluster_weights = c_weights, vls_scales = sqrt(c_weights))
+})
+
+# the estimates are comparable
+c(`Without weights` = mean(ll_ests), `With weights` = mean(ll_ests_fast), 
+  `With weights and vls_scales` = mean(ll_ests_fast_vls_scales))
+
+# the standard deviation is different
+c(`Without weights` = sd(ll_ests), `With weights` = sd(ll_ests_fast), 
+  `With weights and vls_scales` = sd(ll_ests_fast_vls_scales))
+
+# it is still faster
+system.time(ll_res_fast <- eval_pedigree_ll(
+  ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
+  rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4, 
+  cluster_weights = c_weights, vls_scales = sqrt(c_weights)))
+system.time(grad_res_fast <- eval_pedigree_grad(
+  ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
+  rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4, 
+  cluster_weights = c_weights, vls_scales = sqrt(c_weights)))
 
 # find the starting values
 system.time(
@@ -1728,10 +1777,10 @@ dat <- sim_dat(n_fams = 1000L, beta = beta, thetas = thetas)
 
 # evaluate the log marginal likelihood at the true parameters
 library(pedmod)
-ll_terms <- pedigree_ll_terms_loadings(dat, max_threads = 4L)
+ll_terms_wo_weights <- pedigree_ll_terms_loadings(dat, max_threads = 4L)
 
 logLik_truth <- eval_pedigree_ll(
-  ll_terms, c(beta, thetas), maxvls = 25000L, minvls = 1000L, 
+  ll_terms_wo_weights, c(beta, thetas), maxvls = 25000L, minvls = 1000L, 
   abs_eps = 0, rel_eps = 1e-3, n_threads = 4L)
 
 # remove the duplicated terms and use weights. This can be done more efficiently
@@ -1748,10 +1797,48 @@ ll_terms <- pedigree_ll_terms_loadings(dat_unqiue, max_threads = 4L)
 
 logLik_truth_weighted <- eval_pedigree_ll(
   ll_terms, c(beta, thetas), maxvls = 25000L, minvls = 1000L, 
-  abs_eps = 0, rel_eps = 1e-3, cluster_weights = c_weights, n_threads = 4L)
+  abs_eps = 0, rel_eps = 1e-3, n_threads = 4L, cluster_weights = c_weights)
 
 print(logLik_truth_weighted, digits = 8)
 print(logLik_truth, digits = 8)
+
+# note that the variance is greater for the weighted version
+ll_ests <- sapply(1:50, function(seed){
+  set.seed(seed)
+  eval_pedigree_ll(
+    ll_terms_wo_weights, c(beta, thetas), maxvls = 10000L, minvls = 1000L, 
+    abs_eps = 0, rel_eps = 1e-3, n_threads = 4L)
+})
+ll_ests_fast <- sapply(1:50, function(seed){
+  set.seed(seed)
+  eval_pedigree_ll(
+    ll_terms, c(beta, thetas), maxvls = 10000L, minvls = 1000L, 
+    abs_eps = 0, rel_eps = 1e-3, n_threads = 4L, cluster_weights = c_weights)
+})
+
+# the estimates are comparable
+c(`Without weights` = mean(ll_ests), `With weights` = mean(ll_ests_fast))
+
+# the standard deviation is different
+c(`Without weights` = sd(ll_ests), `With weights` = sd(ll_ests_fast))
+
+# we can mitigate this by using the vls_scales argument which though is a bit 
+# slower
+ll_ests_fast_vls_scales <- sapply(1:50, function(seed){
+  set.seed(seed)
+  eval_pedigree_ll(
+    ll_terms, c(beta, thetas), maxvls = 10000L, minvls = 1000L, 
+    abs_eps = 0, rel_eps = 1e-3, n_threads = 4L, cluster_weights = c_weights, 
+    vls_scales = sqrt(c_weights))
+})
+
+# the estimates are comparable
+c(`Without weights` = mean(ll_ests), `With weights` = mean(ll_ests_fast), 
+  `With weights and vls_scales` = mean(ll_ests_fast_vls_scales))
+
+# the standard deviation is different
+c(`Without weights` = sd(ll_ests), `With weights` = sd(ll_ests_fast), 
+  `With weights and vls_scales` = sd(ll_ests_fast_vls_scales))
 
 # get the starting values
 system.time(start <- pedmod_start_loadings(

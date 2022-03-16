@@ -119,7 +119,8 @@ pedmod_opt <- function(ptr, par, maxvls, abs_eps, rel_eps,
                        opt_func = NULL, seed = 1L, indices = NULL, minvls = -1L,
                        do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L,
                        cluster_weights = NULL, fix = NULL, standardized = FALSE,
-                       method = 0L, use_tilting = FALSE, ...){
+                       method = 0L, use_tilting = FALSE, vls_scales = NULL,
+                       ...){
   # checks
   stopifnot(!missing(ptr), !missing(par), !missing(maxvls), !missing(abs_eps),
             !missing(rel_eps),
@@ -157,7 +158,7 @@ pedmod_opt <- function(ptr, par, maxvls, abs_eps, rel_eps,
         indices = indices, minvls = minvls, abs_eps = abs_eps,
         do_reorder = do_reorder, use_aprx = use_aprx, n_threads = n_threads,
         cluster_weights = cluster_weights, standardized = standardized,
-        method = method, use_tilting = use_tilting),
+        method = method, use_tilting = use_tilting, vls_scales = vls_scales),
       silent = TRUE)
     if(inherits(out, "try-error"))
       return(NA_real_)
@@ -173,7 +174,8 @@ pedmod_opt <- function(ptr, par, maxvls, abs_eps, rel_eps,
                           use_aprx = use_aprx, n_threads = n_threads,
                           cluster_weights = cluster_weights,
                           standardized = standardized,
-                          method = method, use_tilting = use_tilting)
+                          method = method, use_tilting = use_tilting,
+                          vls_scales = vls_scales)
     if(length(fix) > 0)
       out <- out[-fix]
     out
@@ -209,7 +211,8 @@ pedmod_start <- function(ptr, data, maxvls = 1000L, abs_eps = 0, rel_eps = 1e-2,
                          minvls = 100L, do_reorder = TRUE, use_aprx = TRUE,
                          n_threads = 1L, cluster_weights = NULL,
                          standardized = FALSE, method = 0L,
-                         sc_start = NULL, use_tilting = FALSE){
+                         sc_start = NULL, use_tilting = FALSE,
+                         vls_scales = NULL){
   # checks
   stopifnot(is.numeric(scale_max), length(scale_max) == 1L,
             scale_max > 0,
@@ -291,7 +294,7 @@ pedmod_start <- function(ptr, data, maxvls = 1000L, abs_eps = 0, rel_eps = 1e-2,
         n_threads = n_threads, cluster_weights = cluster_weights,
         indices = indices, do_reorder = do_reorder,
         standardized = standardized, method = method,
-        use_tilting = use_tilting),
+        use_tilting = use_tilting, vls_scales = vls_scales),
         silent = TRUE)
       if(inherits(out, "try-error"))
         return(NA_real_)
@@ -308,7 +311,7 @@ pedmod_start <- function(ptr, data, maxvls = 1000L, abs_eps = 0, rel_eps = 1e-2,
         n_threads = n_threads, cluster_weights = cluster_weights,
         indices = indices, do_reorder = do_reorder,
         standardized = standardized, method = method,
-        use_tilting = use_tilting)
+        use_tilting = use_tilting, vls_scales = vls_scales)
 
       tail(out, -length(beta))
     }
@@ -345,7 +348,7 @@ pedmod_start <- function(ptr, data, maxvls = 1000L, abs_eps = 0, rel_eps = 1e-2,
       rel_eps = rel_eps, minvls = minvls, use_aprx = use_aprx,
       n_threads = n_threads, cluster_weights = cluster_weights,
       indices = indices, do_reorder = do_reorder, method = method,
-      use_tilting = use_tilting),
+      use_tilting = use_tilting, vls_scales = vls_scales),
       silent = TRUE)
     if(inherits(out, "try-error"))
       return(NA_real_)
@@ -363,7 +366,7 @@ pedmod_start <- function(ptr, data, maxvls = 1000L, abs_eps = 0, rel_eps = 1e-2,
       rel_eps = rel_eps, minvls = minvls, use_aprx = use_aprx,
       n_threads = n_threads, cluster_weights = cluster_weights,
       indices = indices, do_reorder = do_reorder, method = method,
-      use_tilting = use_tilting)
+      use_tilting = use_tilting, vls_scales = vls_scales)
 
     sum_d_beta <- sum(beta * out[seq_along(beta)])
     sum_d_beta * exp(sc) / (2 * fac) + tail(out, -length(beta))
@@ -597,7 +600,7 @@ pedmod_sqn <- function(ptr, par, maxvls, abs_eps, rel_eps, step_factor,
                        maxvls_hess = maxvls, abs_eps_hess = abs_eps,
                        rel_eps_hess = rel_eps, verbose = FALSE,
                        method = 0L, check_every = 2L * n_grad_steps,
-                       use_tilting = FALSE){
+                       use_tilting = FALSE, vls_scales = NULL){
   # checks
   stopifnot(!missing(ptr), !missing(par), !missing(maxvls), !missing(abs_eps),
             !missing(rel_eps))
@@ -639,7 +642,7 @@ pedmod_sqn <- function(ptr, par, maxvls, abs_eps, rel_eps, step_factor,
       indices = indices, minvls = minvls, abs_eps = abs_eps,
       do_reorder = do_reorder, use_aprx = use_aprx, n_threads = n_threads,
       cluster_weights = cluster_weights, standardized = standardized,
-      method = method, use_tilting = use_tilting),
+      method = method, use_tilting = use_tilting, vls_scales = vls_scales),
       silent = TRUE)
     if(inherits(out, "try-error"))
       return(NA_real_)
@@ -657,7 +660,7 @@ pedmod_sqn <- function(ptr, par, maxvls, abs_eps, rel_eps, step_factor,
                           use_aprx = use_aprx, n_threads = n_threads,
                           cluster_weights = cluster_weights,
                           standardized = standardized, method = method,
-                          use_tilting = use_tilting)
+                          use_tilting = use_tilting, vls_scales = vls_scales)
     if(any_fixed)
       out <- out[-fix]
     if(!is.null(indices))
@@ -929,7 +932,8 @@ pedmod_profile <- function(ptr, par, delta, maxvls, minvls = -1L,
                            do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L,
                            cluster_weights = NULL, method = 0L, seed = 1L,
                            verbose = FALSE, max_step = 15L,
-                           standardized = FALSE, use_tilting = FALSE, ...){
+                           standardized = FALSE, use_tilting = FALSE,
+                           vls_scales = NULL, ...){
   # checks
   stopifnot(
     !missing(ptr), !missing(par), !missing(maxvls), !missing(abs_eps),
@@ -951,7 +955,7 @@ pedmod_profile <- function(ptr, par, delta, maxvls, minvls = -1L,
                      do_reorder = do_reorder, use_aprx = use_aprx,
                      n_threads = n_threads, cluster_weights = cluster_weights,
                      standardized = standardized, method = method,
-                     use_tilting = use_tilting)
+                     use_tilting = use_tilting, vls_scales = vls_scales)
   }
   optim_res <- list(par = par[-which_prof], value = -fn(par))
 
@@ -1237,7 +1241,7 @@ pedmod_profile_prop <- function(
   minvls_start = if(minvls < 0) minvls else minvls / 5,
   do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L, cluster_weights = NULL,
   method = 0L, seed = 1L, verbose = FALSE, max_step = 15L,
-  opt_func = NULL, use_tilting = FALSE, ...){
+  opt_func = NULL, use_tilting = FALSE, vls_scales = NULL, ...){
   # checks
   standardized <- FALSE
   n_scales <- get_n_scales(ptr)
@@ -1261,7 +1265,8 @@ pedmod_profile_prop <- function(
                      rel_eps = rel_eps, indices = indices, minvls = minv,
                      do_reorder = do_reorder, use_aprx = use_aprx,
                      n_threads = n_threads, cluster_weights = cluster_weights,
-                     method = method, use_tilting = use_tilting)
+                     method = method, use_tilting = use_tilting,
+                     vls_scales = vls_scales)
   }
   optim_res <- list(par = par, value = -fn(par))
 
@@ -1337,7 +1342,7 @@ pedmod_profile_prop <- function(
         indices = indices, minvls = minvls, abs_eps = abs_eps,
         do_reorder = do_reorder, use_aprx = use_aprx, n_threads = n_threads,
         cluster_weights = cluster_weights, standardized = standardized,
-        method = method, use_tilting = use_tilting),
+        method = method, use_tilting = use_tilting, vls_scales = vls_scales),
         silent = TRUE)
       if(inherits(out, "try-error"))
         return(NA_real_)
@@ -1352,7 +1357,7 @@ pedmod_profile_prop <- function(
         indices = indices, minvls = minvls, abs_eps = abs_eps,
         do_reorder = do_reorder, use_aprx = use_aprx, n_threads = n_threads,
         cluster_weights = cluster_weights, standardized = standardized,
-        method = method, use_tilting = use_tilting),
+        method = method, use_tilting = use_tilting, vls_scales = vls_scales),
         silent = TRUE)
       if(inherits(out, "try-error"))
         return(rep(NA_real_, length(par_vec) - 1L))

@@ -24,6 +24,7 @@ pedmod_opt(
   standardized = FALSE,
   method = 0L,
   use_tilting = FALSE,
+  vls_scales = NULL,
   ...
 )
 
@@ -44,7 +45,8 @@ pedmod_start(
   standardized = FALSE,
   method = 0L,
   sc_start = NULL,
-  use_tilting = FALSE
+  use_tilting = FALSE,
+  vls_scales = NULL
 )
 
 pedmod_start_loadings(
@@ -109,6 +111,12 @@ lattice rules while one yields scrambled Sobol sequences.}
 
 \item{use_tilting}{\code{TRUE} if the minimax tilting method suggested
 by Botev (2017). See \url{https://doi.org/10.1111/rssb.12162}.}
+
+\item{vls_scales}{can be a numeric vector with a positive scalar for each
+cluster. Then \code{vls_scales[i] * minvls} and
+\code{vls_scales[i] * maxvls} is used for cluster \code{i} rather than
+\code{minvls} and \code{maxvls}. Set \code{vls_scales = NULL} if the latter
+should be used.}
 
 \item{...}{Arguments passed to \code{opt_func}.}
 

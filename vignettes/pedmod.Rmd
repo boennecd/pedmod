@@ -1135,20 +1135,21 @@ system.time(grad_res_fast <- eval_pedigree_grad(
   cluster_weights = c_weights, vls_scales = sqrt(c_weights)))
 
 # find the starting values
-system.time(
-  start <- pedmod_start(ptr = ll_terms, data = dat_unqiue, 
-                        cluster_weights = c_weights))
+system.time(start <- pedmod_start(
+  ptr = ll_terms, data = dat_unqiue, cluster_weights = c_weights, 
+  vls_scales = sqrt(c_weights)))
 
 # optimize
 system.time(
   opt_out_quick <- pedmod_opt(
     ptr = ll_terms, par = start$par, abs_eps = 0, use_aprx = TRUE, 
     n_threads = 4L,  cluster_weights = c_weights,
-    maxvls = 5000L, rel_eps = 1e-2, minvls = 500L))
+    maxvls = 5000L, rel_eps = 1e-2, minvls = 500L, 
+    vls_scales = sqrt(c_weights)))
 system.time(
   opt_out <- pedmod_opt(
     ptr = ll_terms, par = opt_out_quick$par, abs_eps = 0, use_aprx = TRUE, 
-    n_threads = 4L,  cluster_weights = c_weights,
+    n_threads = 4L,  cluster_weights = c_weights, vls_scales = sqrt(c_weights),
     # we changed these parameters
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 ```
@@ -1168,6 +1169,50 @@ rbind(opt_out       = exp(tail(opt_out$par, 2)),
 print( start  $logLik_est, digits = 8)  # this is unreliably/imprecise
 print(-opt_out$value     , digits = 8)
 ```
+
+### Motivation of Different Number of Samples
+
+We use the `cluster_weights` argument above to exploit that some of the 
+log marginal likelihood terms are identical. Specifically, let $l_j$ be the 
+$j$th distinct log marginal likelihood term 
+and $\vec\theta$ be the model parameters, then we use 
+that the log marginal likelihood is 
+
+$$l(\vec\theta) = \sum_{j = 1}^L\sum_{i = 1}^{w_j}l_j(\vec\theta) = \sum_{j = 1}^Lw_jl_j(\vec\theta).$$
+
+The unweighted version is the left hand side and the weighted version is the 
+right hand side. The two have different variances. Our 
+quasi-Monte-Carlo method has (almost) a variance for each $\exp l_j$ which is 
+$\mathcal{O}(m^{-2})$ with $m$ being the number of samples we use for each 
+$l_j$. Thus, the variance of the unweighted version is
+
+$$\sum_{l = j}^L\sum_{i = 1}^{w_j}\text{Var}(l_j(\vec\theta))$$
+
+which is 
+
+$$\mathcal{O}\left(\sum_{j = 1}^L \frac{w_j}{m^2}\right)$$
+
+However, the variance of the weighted version is
+
+$$\sum_{j = 1}^L\text{Var}(w_jl_j(\vec\theta))$$
+
+which is 
+
+$$\mathcal{O}\left(\sum_{j = 1}^L \frac{w_j^2}{m^2}\right)$$
+
+Though, we can get a similar variance by using $\sqrt{w_j}m$ samples for 
+term $j$. The variance then becomes
+
+$$\mathcal{O}\left(\sum_{j = 1}^L \frac{w_j^2}{w_jm^2}\right) = \mathcal{O}\left(\sum_{j = 1}^L \frac{w_j}{m^2}\right)$$
+but we do so using only 
+
+$$m\sum_{j = 1}^L\sqrt{w_j}$$
+
+samples rather than 
+
+$$m\sum_{j = 1}^Lw_j.$$
+
+### Alternative Parameterization
 
 As before, we can also work with the standardized parameterization. 
 
@@ -1191,10 +1236,12 @@ exp(tail(opt_out$par, 2)) / total_var
 # compute the likelihood with either parameterization
 set.seed(1L)
 eval_pedigree_ll(ptr = ll_terms, par = opt_out$par, maxvls = 10000L, 
-                 minvls = 1000L, rel_eps = 1e-3, use_aprx = TRUE, abs_eps = 0)
+                 minvls = 1000L, rel_eps = 1e-3, use_aprx = TRUE, abs_eps = 0, 
+                 cluster_weights = c_weights, vls_scales = sqrt(c_weights))
 set.seed(1L)
 eval_pedigree_ll(ptr = ll_terms, par = std_par    , maxvls = 10000L, 
                  minvls = 1000L, rel_eps = 1e-3, use_aprx = TRUE, abs_eps = 0, 
+                 cluster_weights = c_weights, vls_scales = sqrt(c_weights),
                  standardized = TRUE)
 
 # we can also get the same gradient with an application of the chain rule
@@ -1205,11 +1252,14 @@ jac <- attr(
 set.seed(1L)
 g1 <- eval_pedigree_grad(ptr = ll_terms, par = opt_out$par, maxvls = 10000L, 
                          minvls = 1000L, rel_eps = 1e-3, use_aprx = TRUE, 
-                         abs_eps = 0)
+                         abs_eps = 0, cluster_weights = c_weights, 
+                         vls_scales = sqrt(c_weights))
 set.seed(1L)
 g2 <- eval_pedigree_grad(ptr = ll_terms, par = std_par, maxvls = 10000L, 
                          minvls = 1000L, rel_eps = 1e-3, use_aprx = TRUE, 
-                         abs_eps = 0, standardized = TRUE)
+                         abs_eps = 0, standardized = TRUE,  
+                         cluster_weights = c_weights, 
+                         vls_scales = sqrt(c_weights))
 all.equal(drop(g1 %*% jac), g2, check.attributes = FALSE)
 ```
 
@@ -1219,7 +1269,7 @@ The model can also be estimated with the the standardized parameterization:
 # perform the optimization. We start with finding the starting values
 system.time(start_std <- pedmod_start(
   ptr = ll_terms, data = dat_unqiue, cluster_weights = c_weights, 
-  standardized = TRUE))
+  vls_scales = sqrt(c_weights), standardized = TRUE))
 
 # are the starting values similar?
 standardized_to_direct(start_std$par, n_scales = 2L)
@@ -1234,11 +1284,13 @@ system.time(
   opt_out_quick_std <- pedmod_opt(
     ptr = ll_terms, par = start_std$par, abs_eps = 0, use_aprx = TRUE, 
     n_threads = 4L,  cluster_weights = c_weights, standardized = TRUE,
-    maxvls = 5000L, rel_eps = 1e-2, minvls = 500L))
+    maxvls = 5000L, rel_eps = 1e-2, minvls = 500L, 
+    vls_scales = sqrt(c_weights)))
 system.time(
   opt_out_std <- pedmod_opt(
     ptr = ll_terms, par = opt_out_quick_std$par, abs_eps = 0, use_aprx = TRUE, 
     n_threads = 4L,  cluster_weights = c_weights, standardized = TRUE,
+    vls_scales = sqrt(c_weights),
     # we changed these parameters
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 
@@ -1303,7 +1355,7 @@ pl_curve_func <- function(fix, fix_val,
   opt_out_quick <- pedmod_opt(
     ptr = ll_terms, par = fix_par, maxvls = 5000L, abs_eps = 0, 
     rel_eps = 1e-2, minvls = 500L, use_aprx = TRUE, n_threads = 4L, 
-    fix = fix, cluster_weights = c_weights)
+    fix = fix, cluster_weights = c_weights, vls_scales = sqrt(c_weights))
   
   # notice that pedmod_opt only returns a subset of the parameters. These are 
   # the parameters that have been optimized over
@@ -1312,7 +1364,7 @@ pl_curve_func <- function(fix, fix_val,
   opt_out <- pedmod_opt(
     ptr = ll_terms, par = par_new, abs_eps = 0, 
     use_aprx = TRUE, n_threads = 4L, fix = fix,
-    cluster_weights = c_weights,
+    cluster_weights = c_weights, vls_scales = sqrt(c_weights),
     # we changed these parameters
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L)
   
@@ -1355,14 +1407,16 @@ ll_terms <- pedigree_ll_terms(dat_unqiue, max_threads = 4L)
 pl_genetic <- pedmod_profile(
   ptr = ll_terms, par = opt_out$par, delta = .4, maxvls = 20000L, 
   minvls = 1000L, alpha = .05, abs_eps = 0, rel_eps = 1e-4, which_prof = 3L,
-  use_aprx = TRUE, n_threads = 4L, verbose = TRUE, cluster_weights = c_weights)
+  use_aprx = TRUE, n_threads = 4L, verbose = TRUE, cluster_weights = c_weights, 
+  vls_scales = sqrt(c_weights))
 exp(pl_genetic$confs) # the confidence interval
 
 # then we compute the curve for the environment effect
 pl_env <- pedmod_profile(
   ptr = ll_terms, par = opt_out$par, delta = .6, maxvls = 20000L, 
   minvls = 1000L, alpha = .05, abs_eps = 0, rel_eps = 1e-4, which_prof = 4L,
-  use_aprx = TRUE, n_threads = 4L, verbose = TRUE, cluster_weights = c_weights)
+  use_aprx = TRUE, n_threads = 4L, verbose = TRUE, cluster_weights = c_weights, 
+  vls_scales = sqrt(c_weights))
 exp(pl_env$confs) # the confidence interval
 ```
 
@@ -1432,7 +1486,8 @@ ll_terms <- pedigree_ll_terms(dat_unqiue, max_threads = 4L)
 pl_genetic_prop <- pedmod_profile_prop(
   ptr = ll_terms, par = opt_out$par, maxvls = 20000L, 
   minvls = 1000L, alpha = .05, abs_eps = 0, rel_eps = 1e-4, which_prof = 1L,
-  use_aprx = TRUE, n_threads = 4L, verbose = TRUE, cluster_weights = c_weights)
+  use_aprx = TRUE, n_threads = 4L, verbose = TRUE, cluster_weights = c_weights, 
+  vls_scales = sqrt(c_weights))
 pl_genetic_prop$confs # the confidence interval
 
 # confidence interval for the proportion of variance for the environment
@@ -1440,7 +1495,8 @@ pl_genetic_prop$confs # the confidence interval
 pl_env_prop <- pedmod_profile_prop(
   ptr = ll_terms, par = opt_out$par, maxvls = 20000L, 
   minvls = 1000L, alpha = .05, abs_eps = 0, rel_eps = 1e-4, which_prof = 2L,
-  use_aprx = TRUE, n_threads = 4L, verbose = TRUE, cluster_weights = c_weights)
+  use_aprx = TRUE, n_threads = 4L, verbose = TRUE, cluster_weights = c_weights,
+  vls_scales = sqrt(c_weights))
 pl_env_prop$confs # the confidence interval
 ```
 
@@ -1536,7 +1592,8 @@ sim_study <- lapply(seeds, function(s){
       ll_terms <- pedigree_ll_terms(dat_unqiue, max_threads = 4L)
       ti_start <- system.time(start <- pedmod_start(
         ptr = ll_terms, data = dat_unqiue, n_threads = 4L, 
-        cluster_weights = c_weights, standardized = standardized))
+        cluster_weights = c_weights, standardized = standardized,
+        vls_scales = sqrt(c_weights)))
       start$time <- ti_start
       
       # fit the model
@@ -1544,14 +1601,15 @@ sim_study <- lapply(seeds, function(s){
         opt_out_quick <- pedmod_opt(
           ptr = ll_terms, par = start$par, maxvls = 5000L, abs_eps = 0, 
           rel_eps = 1e-2, minvls = 500L, use_aprx = TRUE, n_threads = 4L, 
-          cluster_weights = c_weights, standardized = standardized))
+          cluster_weights = c_weights, standardized = standardized,
+          vls_scales = sqrt(c_weights)))
       opt_out_quick$time <- ti_quick
       
       ti_slow <- system.time(
         opt_out <- pedmod_opt(
           ptr = ll_terms, par = opt_out_quick$par, abs_eps = 0, use_aprx = TRUE, 
           n_threads = 4L, cluster_weights = c_weights,
-           standardized = standardized,
+           standardized = standardized, vls_scales = sqrt(c_weights),
           # we changed these parameters
           maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
       opt_out$time <- ti_slow
@@ -1850,7 +1908,7 @@ system.time(
   opt_res <- pedmod_opt(
     ll_terms, par = start$par, maxvls = 25000L, minvls = 5000L, 
     abs_eps = 0, rel_eps = 1e-3, n_threads = 4L, use_aprx = TRUE, 
-    cluster_weights = c_weights))
+    cluster_weights = c_weights, vls_scales = sqrt(c_weights)))
 ```
 
 We compare the maximum likelihood estimator with the true values below.
@@ -1919,13 +1977,14 @@ sim_study <- lapply(seeds, function(s){
       opt_out_quick <- pedmod_opt(
         ptr = ll_terms, par = start$par, maxvls = 5000L, abs_eps = 0, 
         rel_eps = 1e-2, minvls = 500L, use_aprx = TRUE, n_threads = 4L, 
-        cluster_weights = c_weights))
+        cluster_weights = c_weights, vls_scales = sqrt(c_weights)))
     opt_out_quick$time <- ti_quick
     
     ti_slow <- system.time(
       opt_out <- pedmod_opt(
         ptr = ll_terms, par = opt_out_quick$par, abs_eps = 0, use_aprx = TRUE, 
-        n_threads = 4L, cluster_weights = c_weights,
+        n_threads = 4L, cluster_weights = c_weights, 
+        vls_scales = sqrt(c_weights),
         # we changed these parameters
         maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
     opt_out$time <- ti_slow

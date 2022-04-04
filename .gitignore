@@ -2,6 +2,5 @@
 .Rhistory
 .RData
 .Ruserdata
-create-vignette.R
 inst/doc
 sandbox/*.out*

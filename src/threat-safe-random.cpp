@@ -5,6 +5,10 @@
 #endif
 
 #include <Rmath.h>
+#ifdef beta
+// we get an error if we do not undefine beta
+#undef beta
+#endif
 
 #include <boost/random.hpp>
 #include <boost/generator_iterator.hpp>

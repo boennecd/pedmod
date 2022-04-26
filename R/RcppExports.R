@@ -43,7 +43,7 @@
 #' approximation. Eight is used in the original Fortran code. If one is
 #' used then the error will be set to zero because it cannot be estimated.
 #' @param use_tilting \code{TRUE} if the minimax tilting method suggested
-#' by Botev (2017). See \url{https://doi.org/10.1111/rssb.12162}.
+#' by Botev (2017). See \doi{10.1111/rssb.12162}.
 #'
 #' @return
 #' An approximation of the CDF. The \code{"n_it"} attribute shows the number of
@@ -129,6 +129,14 @@ mvndst <- function(lower, upper, mu, sigma, maxvls = 25000L, abs_eps = .001, rel
 #' the intercept and with certain dummy designs). This equally holds for
 #' the \code{Z} matrices with \code{pedigree_ll_terms_loadings}.
 #'
+#' \code{pedigree_ll_terms_loadings} relax the assumption that the scale
+#' parameter is the same for all individuals. \code{pedigree_ll_terms_loadings}
+#' and \code{pedigree_ll_terms} yield the same model if \code{"Z"} is an
+#' intercept column for all families but with a different parameterization.
+#' In this case, \code{pedigree_ll_terms} will be
+#' faster. See \code{vignette("pedmod", "pedmod")} for examples of using
+#' \code{pedigree_ll_terms_loadings}.
+#'
 #' @examples
 #' # three families as an example
 #' fam_dat <- list(
@@ -174,6 +182,14 @@ mvndst <- function(lower, upper, mu, sigma, maxvls = 25000L, abs_eps = .001, rel
 #'
 #' # get a pointer to the C++ object
 #' ptr <- pedigree_ll_terms(dat_arg, max_threads = 1L)
+#'
+#' # get the argument for a the version with loadings
+#' dat_arg_loadings <- lapply(fam_dat, function(x){
+#'   list(y = as.numeric(x$y), X = x$X, Z = x$X[, 1:2],
+#'        scale_mats = list(x$rel_mat, x$met_mat))
+#' })
+#'
+#' ptr <- pedigree_ll_terms_loadings(dat_arg_loadings, max_threads = 1L)
 #'
 #' @export
 pedigree_ll_terms <- function(data, max_threads = 1L, n_sequences = 8L) {

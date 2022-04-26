@@ -248,10 +248,16 @@ Since the implementation is easy to extend, possible extensions are:
 
 ## Installation
 
-The package can be installed from Github by calling:
+The package can be installed from GitHub by calling:
 
 ``` r
 remotes::install_github("boennecd/pedmod", build_vignettes = TRUE)
+```
+
+The package can also be installed from CRAN by calling:
+
+``` r
+install.packages("pedmod")
 ```
 
 The code benefits from being build with automatic vectorization so

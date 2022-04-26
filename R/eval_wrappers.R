@@ -130,6 +130,30 @@
 #'   rel_eps = 1e-3, minvls = 2000, use_aprx = TRUE))
 #' all.equal(deriv_dum, deriv_w_weight, tolerance = 1e-3)
 #'
+#' # with loadings
+#' dat_arg_loadings <- lapply(fam_dat, function(x){
+#'   list(y = as.numeric(x$y), X = x$X, Z = x$X[, 1:2],
+#'        scale_mats = list(x$rel_mat, x$met_mat))
+#' })
+#'
+#' ptr_loadings <-
+#'   pedigree_ll_terms_loadings(dat_arg_loadings, max_threads = 1L)
+#'
+#' scs <- c(log(0.5) / 2, 0.1, log(0.33) / 2, 0.2) # got more scales parameters
+#' eval_pedigree_ll(
+#'   ptr = ptr_loadings, par = c(beta, scs), abs_eps = -1, maxvls = 1e4,
+#'   rel_eps = 1e-3, minvls = 2000, use_aprx = TRUE)
+#' eval_pedigree_grad(
+#'   ptr = ptr_loadings, par = c(beta, scs), abs_eps = -1, maxvls = 1e4,
+#'   rel_eps = 1e-3, minvls = 2000, use_aprx = TRUE)
+#'
+#' # can recover the result from before
+#' scs <- c(log(0.5) / 2, 0, log(0.33) / 2, 0)
+#' ll3 <- eval_pedigree_ll(
+#'   ptr = ptr_loadings, par = c(beta, scs), abs_eps = -1, maxvls = 1e4,
+#'   rel_eps = 1e-3, minvls = 2000, use_aprx = TRUE)
+#' all.equal(ll1, ll3, tolerance = 1e-5)
+#'
 #' @export
 eval_pedigree_ll <- function(
   ptr, par, maxvls, abs_eps, rel_eps, indices = NULL, minvls = -1L,

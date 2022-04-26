@@ -1,14 +1,14 @@
 ## Test environments
 * Ubuntu 20.04 LTS with gcc 10.1.0
-  R version 4.1.1
+  R version 4.1.3
 * Ubuntu 20.04 LTS with gcc 10.1.0
-  R version 4.1.1 with valgrind
+  R version 4.1.3 with valgrind
 * Ubuntu 20.04 LTS with gcc 10.1.0
   R devel 2021-10-09 r81024 with ASAN and UBSAN
 * Ubuntu 20.04 LTS with gcc 10.1.0
   R devel 2021-10-02 r81000 with LTO checks
-* Github actions on windows-latest (release), macOS-latest (release), 
-  ubuntu-20.04 (release), and ubuntu-20.04 (devel)
+* GitHub actions on windows-latest (release), macOS-latest (release), 
+  ubuntu-20.04 (release), ubuntu-20.04 (old-release), and ubuntu-20.04 (devel)
 * win-builder (devel, oldrelease, and release)
 * `rhub::check_for_cran()`
 * `rhub::check(platform = c("fedora-clang-devel", "macos-highsierra-release-cran"))`

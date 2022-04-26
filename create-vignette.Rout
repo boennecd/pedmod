@@ -1,0 +1,3498 @@
+
+R version 4.1.3 (2022-03-10) -- "One Push-Up"
+Copyright (C) 2022 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> library(rmarkdown)
+> library(reshape2)
+> (function(){
++   setwd("vignettes")
++ 
++   render("pedigree_partitioning.Rmd", output_format = "html_document")
++   render("pedmod.Rmd", output_format = "html_document")
++   render("pedmod.Rmd", output_format = github_document(
++     pandoc_args = "--webtex=https://render.githubusercontent.com/render/math?math="),
++     output_file = "README.md")
++   file.copy("README.md", file.path("..", "README.md"), overwrite = TRUE)
++   unlink("README.md")
++   unlink("README.html")
++ 
++   fs <- list.files(file.path("man", "figures"))
++   for(f in fs)
++     file.copy(file.path("man", "figures", f),
++               file.path("..", "man", "figures", f), overwrite = TRUE)
++   unlink("man", recursive = TRUE)
++ })()
+
+
+processing file: pedigree_partitioning.Rmd
+  |                                                                              |                                                                      |   0%  |                                                                              |..                                                                    |   2%
+  ordinary text without R code
+
+  |                                                                              |...                                                                   |   5%
+label: setup (with options) 
+List of 1
+ $ include: logi FALSE
+
+  |                                                                              |.....                                                                 |   7%
+  ordinary text without R code
+
+  |                                                                              |.......                                                               |  10%
+label: pedigree_example
+  |                                                                              |.........                                                             |  12%
+  ordinary text without R code
+
+  |                                                                              |..........                                                            |  15%
+label: assign_create_igraph_input
+  |                                                                              |............                                                          |  17%
+  ordinary text without R code
+
+  |                                                                              |..............                                                        |  20%
+label: show_family_as_graph (with options) 
+List of 1
+ $ message: logi FALSE
+
+
+Attaching package: 'igraph'
+
+The following objects are masked from 'package:stats':
+
+    decompose, spectrum
+
+The following object is masked from 'package:base':
+
+    union
+
+  |                                                                              |...............                                                       |  22%
+  ordinary text without R code
+
+  |                                                                              |.................                                                     |  24%
+label: only_balanced
+
+Attaching package: 'pedmod'
+
+The following object is masked from 'package:igraph':
+
+    biconnected_components
+
+  |                                                                              |...................                                                   |  27%
+   inline R code fragments
+
+  |                                                                              |....................                                                  |  29%
+label: more_clear_only_balanced
+  |                                                                              |......................                                                |  32%
+  ordinary text without R code
+
+  |                                                                              |........................                                              |  34%
+label: also_reduce_cost
+  |                                                                              |..........................                                            |  37%
+   inline R code fragments
+
+  |                                                                              |...........................                                           |  39%
+label: use_weights
+  |                                                                              |.............................                                         |  41%
+  ordinary text without R code
+
+  |                                                                              |...............................                                       |  44%
+label: use_edge_weights_too
+  |                                                                              |................................                                      |  46%
+  ordinary text without R code
+
+  |                                                                              |..................................                                    |  49%
+label: pedigree_unconnected
+  |                                                                              |....................................                                  |  51%
+  ordinary text without R code
+
+  |                                                                              |......................................                                |  54%
+label: connected_start_pedigree_unconnected
+  |                                                                              |.......................................                               |  56%
+  ordinary text without R code
+
+  |                                                                              |.........................................                             |  59%
+label: assign_sim_graph
+  |                                                                              |...........................................                           |  61%
+  ordinary text without R code
+
+  |                                                                              |............................................                          |  63%
+label: simulate_small_graph
+  |                                                                              |..............................................                        |  66%
+  ordinary text without R code
+
+  |                                                                              |................................................                      |  68%
+label: find_partition_simulate_small_graph
+  |                                                                              |..................................................                    |  71%
+   inline R code fragments
+
+  |                                                                              |...................................................                   |  73%
+label: partion_w_cut_simulate_small_graph
+  |                                                                              |.....................................................                 |  76%
+  ordinary text without R code
+
+  |                                                                              |.......................................................               |  78%
+label: larger_ex (with options) 
+List of 2
+ $ fig.width : num 7
+ $ fig.height: num 7
+
+  |                                                                              |........................................................              |  80%
+  ordinary text without R code
+
+  |                                                                              |..........................................................            |  83%
+label: unconnected_larger_ex (with options) 
+List of 2
+ $ fig.width : num 7
+ $ fig.height: num 7
+
+  |                                                                              |............................................................          |  85%
+  ordinary text without R code
+
+  |                                                                              |.............................................................         |  88%
+label: largest_ex
+  |                                                                              |...............................................................       |  90%
+  ordinary text without R code
+
+  |                                                                              |.................................................................     |  93%
+label: shuffle_big_ex
+  |                                                                              |...................................................................   |  95%
+  ordinary text without R code
+
+  |                                                                              |....................................................................  |  98%
+label: unconnected_largest_ex
+  |                                                                              |......................................................................| 100%
+  ordinary text without R code
+
+
+output file: pedigree_partitioning.knit.md
+
+/usr/bin/pandoc +RTS -K512m -RTS pedigree_partitioning.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output pedigree_partitioning.html --lua-filter /home/boennecd/R/x86_64-pc-linux-gnu-library/4.1/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /home/boennecd/R/x86_64-pc-linux-gnu-library/4.1/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --standalone --section-divs --template /home/boennecd/R/x86_64-pc-linux-gnu-library/4.1/rmarkdown/rmd/h/default.html --no-highlight --variable highlightjs=1 --variable theme=bootstrap --include-in-header /tmp/RtmpPLH5cn/rmarkdown-str2d936d1523a.html --mathjax --variable 'mathjax-url:https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --filter /usr/bin/pandoc-citeproc 
+
+Output created: pedigree_partitioning.html
+
+
+processing file: pedmod.Rmd
+  |                                                                              |                                                                      |   0%  |                                                                              |.                                                                     |   1%
+  ordinary text without R code
+
+
+label: setup (with options) 
+List of 1
+ $ include: logi FALSE
+
+  |                                                                              |..                                                                    |   2%
+  ordinary text without R code
+
+  |                                                                              |..                                                                    |   3%
+label: how_to_install (with options) 
+List of 1
+ $ eval: logi FALSE
+
+  |                                                                              |...                                                                   |   4%
+  ordinary text without R code
+
+
+label: cran_how_to_install (with options) 
+List of 1
+ $ eval: logi FALSE
+
+  |                                                                              |....                                                                  |   5%
+  ordinary text without R code
+
+  |                                                                              |....                                                                  |   6%
+label: setup_simple
+  |                                                                              |.....                                                                 |   6%
+  ordinary text without R code
+
+  |                                                                              |.....                                                                 |   7%
+label: assign_sim_dat
+  |                                                                              |......                                                                |   8%
+  ordinary text without R code
+
+  |                                                                              |......                                                                |   9%
+label: est_simple (with options) 
+List of 1
+ $ cache: num 1
+
+  |                                                                              |.......                                                               |   9%
+  ordinary text without R code
+
+  |                                                                              |.......                                                               |  10%
+label: est_simple_res
+  |                                                                              |........                                                              |  11%
+  ordinary text without R code
+
+  |                                                                              |........                                                              |  12%
+label: tilt_est_simple (with options) 
+List of 1
+ $ cache: num 1
+
+  |                                                                              |.........                                                             |  12%
+  ordinary text without R code
+
+  |                                                                              |.........                                                             |  13%
+label: tilt_est_simple_res
+  |                                                                              |..........                                                            |  14%
+  ordinary text without R code
+
+
+label: std_est_simple (with options) 
+List of 1
+ $ cache: num 1
+
+  |                                                                              |...........                                                           |  15%
+  ordinary text without R code
+
+  |                                                                              |...........                                                           |  16%
+label: continued_std_est_simple (with options) 
+List of 1
+ $ cache: num 1
+
+  |                                                                              |............                                                          |  17%
+  ordinary text without R code
+
+
+label: pre_use_pedmod_psqn (with options) 
+List of 1
+ $ echo: logi FALSE
+
+  |                                                                              |.............                                                         |  18%
+  ordinary text without R code
+
+  |                                                                              |.............                                                         |  19%
+label: use_pedmod_sqn (with options) 
+List of 2
+ $ cache   : num 1
+ $ fig.keep: chr "last"
+
+  |                                                                              |..............                                                        |  19%
+  ordinary text without R code
+
+  |                                                                              |..............                                                        |  20%
+label: simple_ex_profile_likelihood (with options) 
+List of 1
+ $ cache: num 1
+
+  |                                                                              |...............                                                       |  21%
+  ordinary text without R code
+
+  |                                                                              |...............                                                       |  22%
+label: conf_int_simple_ex
+  |                                                                              |................                                                      |  22%
+  ordinary text without R code
+
+  |                                                                              |................                                                      |  23%
+label: plot_simple_ex_profile_likelihood
+  |                                                                              |.................                                                     |  24%
+  ordinary text without R code
+
+
+label: pre_simple_pedmod_profile (with options) 
+List of 1
+ $ echo: logi FALSE
+
+  |                                                                              |..................                                                    |  25%
+  ordinary text without R code
+
+  |                                                                              |..................                                                    |  26%
+label: simple_pedmod_profile (with options) 
+List of 3
+ $ cache   : num 1
+ $ message : logi TRUE
+ $ fig.keep: chr "last"
+
+  |                                                                              |...................                                                   |  27%
+  ordinary text without R code
+
+
+label: binary_simple_pedmod_profile (with options) 
+List of 3
+ $ cache   : num 1
+ $ message : logi TRUE
+ $ fig.keep: chr "last"
+
+  |                                                                              |....................                                                  |  28%
+  ordinary text without R code
+
+  |                                                                              |....................                                                  |  29%
+label: simple_ex_more_profile_likelihood (with options) 
+List of 1
+ $ cache: num 1
+
+  |                                                                              |.....................                                                 |  29%
+  ordinary text without R code
+
+  |                                                                              |.....................                                                 |  30%
+label: draw_mult_pf_curves
+  |                                                                              |......................                                                |  31%
+  ordinary text without R code
+
+  |                                                                              |......................                                                |  32%
+label: pre_rqmc (with options) 
+List of 1
+ $ echo: logi FALSE
+
+  |                                                                              |.......................                                               |  32%
+  ordinary text without R code
+
+  |                                                                              |.......................                                               |  33%
+label: rqmc (with options) 
+List of 1
+ $ cache: num 1
+
+  |                                                                              |........................                                              |  34%
+  ordinary text without R code
+
+  |                                                                              |........................                                              |  35%
+label: show_res_rqmc
+  |                                                                              |.........................                                             |  35%
+  ordinary text without R code
+
+  |                                                                              |.........................                                             |  36%
+label: rqmc_likelihood (with options) 
+List of 1
+ $ cache: num 1
+
+  |                                                                              |..........................                                            |  37%
+  ordinary text without R code
+
+
+label: show_rqmc_likelihood
+  |                                                                              |...........................                                           |  38%
+  ordinary text without R code
+
+  |                                                                              |...........................                                           |  39%
+label: rqmc_est_simple (with options) 
+List of 1
+ $ cache: num 1
+
+  |                                                                              |............................                                          |  40%
+  ordinary text without R code
+
+
+label: clean_pre_sim_study_simple (with options) 
+List of 1
+ $ echo: logi FALSE
+
+  |                                                                              |.............................                                         |  41%
+  ordinary text without R code
+
+  |                                                                              |.............................                                         |  42%
+label: sim_study_simple
+(Intercept)  Continuous      Binary             
+     -3.226       1.039       2.158       1.243 
+(Intercept)  Continuous      Binary             
+     -3.211       1.034       2.148       1.230 
+attr(,"variance proportions")
+Residual          
+  0.2262   0.7738 
+Time          7.1,          8.3. Max ll:   -1574.0667,   -1574.0658
+
+(Intercept)  Continuous      Binary             
+     -3.291       1.107       2.137       1.305 
+(Intercept)  Continuous      Binary             
+     -3.296       1.109       2.141       1.309 
+attr(,"variance proportions")
+Residual          
+  0.2127   0.7873 
+Time          9.3,         12.5. Max ll:   -1569.6613,   -1569.6609
+
+(Intercept)  Continuous      Binary             
+    -2.8068      0.9498      1.9047      1.0250 
+(Intercept)  Continuous      Binary             
+     -2.817       0.953       1.912       1.034 
+attr(,"variance proportions")
+Residual          
+  0.2623   0.7377 
+Time         10.9,         11.5. Max ll:   -1618.0764,   -1618.0755
+
+(Intercept)  Continuous      Binary             
+    -2.7593      0.9823      1.8346      0.9390 
+(Intercept)  Continuous      Binary             
+    -2.7689      0.9857      1.8411      0.9488 
+attr(,"variance proportions")
+Residual          
+  0.2791   0.7209 
+Time          3.8,          9.5. Max ll:   -1616.7848,   -1616.7831
+
+(Intercept)  Continuous      Binary             
+     -3.137       1.134       2.059       1.165 
+(Intercept)  Continuous      Binary             
+     -3.134       1.134       2.058       1.163 
+attr(,"variance proportions")
+Residual          
+  0.2381   0.7619 
+Time          4.8,          7.9. Max ll:   -1583.7124,   -1583.7126
+
+(Intercept)  Continuous      Binary             
+     -3.298       1.041       2.182       1.360 
+(Intercept)  Continuous      Binary             
+     -3.267       1.031       2.162       1.336 
+attr(,"variance proportions")
+Residual          
+  0.2082   0.7918 
+Time         14.7,         10.5. Max ll:   -1615.3256,   -1615.3264
+
+(Intercept)  Continuous      Binary             
+    -2.5151      0.7905      1.5948      0.4593 
+(Intercept)  Continuous      Binary             
+    -2.5151      0.7904      1.5947      0.4596 
+attr(,"variance proportions")
+Residual          
+  0.3871   0.6129 
+Time          8.8,         11.5. Max ll:   -1566.8999,   -1566.8999
+
+(Intercept)  Continuous      Binary             
+     -3.323       1.096       2.071       1.469 
+(Intercept)  Continuous      Binary             
+     -3.314       1.094       2.065       1.462 
+attr(,"variance proportions")
+Residual          
+  0.1882   0.8118 
+Time          6.3,         10.7. Max ll:   -1590.2368,   -1590.2370
+
+(Intercept)  Continuous      Binary             
+     -3.735       1.259       2.476       1.649 
+(Intercept)  Continuous      Binary             
+     -3.711       1.251       2.460       1.634 
+attr(,"variance proportions")
+Residual          
+  0.1633   0.8367 
+Time          6.6,         14.4. Max ll:   -1583.5849,   -1583.5846
+
+(Intercept)  Continuous      Binary             
+    -2.8343      1.0366      1.8531      0.9601 
+(Intercept)  Continuous      Binary             
+    -2.8286      1.0345      1.8493      0.9546 
+attr(,"variance proportions")
+Residual          
+   0.278    0.722 
+Time          4.8,         11.6. Max ll:   -1573.0906,   -1573.0908
+
+(Intercept)  Continuous      Binary             
+     -3.462       1.114       2.300       1.389 
+(Intercept)  Continuous      Binary             
+     -3.454       1.112       2.295       1.384 
+attr(,"variance proportions")
+Residual          
+  0.2004   0.7996 
+Time          7.1,          9.6. Max ll:   -1549.6444,   -1549.6443
+
+(Intercept)  Continuous      Binary             
+     -3.275       1.095       2.262       1.258 
+(Intercept)  Continuous      Binary             
+     -3.272       1.094       2.260       1.256 
+attr(,"variance proportions")
+Residual          
+  0.2216   0.7784 
+Time          6.2,          7.0. Max ll:   -1580.3836,   -1580.3836
+
+(Intercept)  Continuous      Binary             
+    -2.7584      0.9734      1.8345      0.8728 
+(Intercept)  Continuous      Binary             
+    -2.7552      0.9723      1.8323      0.8696 
+attr(,"variance proportions")
+Residual          
+  0.2953   0.7047 
+Time          5.3,          9.2. Max ll:   -1598.1032,   -1598.1023
+
+(Intercept)  Continuous      Binary             
+     -3.019       1.002       2.126       1.173 
+(Intercept)  Continuous      Binary             
+     -3.034       1.006       2.136       1.185 
+attr(,"variance proportions")
+Residual          
+  0.2342   0.7658 
+Time          6.1,         14.1. Max ll:   -1647.5906,   -1647.5890
+
+(Intercept)  Continuous      Binary             
+     -3.716       1.274       2.407       1.578 
+(Intercept)  Continuous      Binary             
+     -3.723       1.276       2.411       1.582 
+attr(,"variance proportions")
+Residual          
+  0.1705   0.8295 
+Time          3.8,         11.9. Max ll:   -1526.4827,   -1526.4814
+
+(Intercept)  Continuous      Binary             
+     -2.934       1.055       1.911       1.126 
+(Intercept)  Continuous      Binary             
+     -2.924       1.052       1.903       1.119 
+attr(,"variance proportions")
+Residual          
+  0.2461   0.7539 
+Time         14.4,         10.2. Max ll:   -1613.5392,   -1613.5391
+
+(Intercept)  Continuous      Binary             
+    -2.8034      0.9291      1.9383      1.0235 
+(Intercept)  Continuous      Binary             
+    -2.8070      0.9303      1.9408      1.0271 
+attr(,"variance proportions")
+Residual          
+  0.2637   0.7363 
+Time          8.8,          5.1. Max ll:   -1653.6128,   -1653.6129
+
+(Intercept)  Continuous      Binary             
+    -2.8805      0.9265      1.8133      1.1205 
+(Intercept)  Continuous      Binary             
+     -2.899       0.932       1.825       1.137 
+attr(,"variance proportions")
+Residual          
+  0.2428   0.7572 
+Time          8.9,         11.6. Max ll:   -1625.5476,   -1625.5452
+
+(Intercept)  Continuous      Binary             
+     -2.862       1.002       1.855       1.013 
+(Intercept)  Continuous      Binary             
+     -2.860       1.001       1.853       1.011 
+attr(,"variance proportions")
+Residual          
+  0.2669   0.7331 
+Time          5.3,          5.1. Max ll:   -1608.3804,   -1608.3804
+
+(Intercept)  Continuous      Binary             
+    -2.9567      0.9662      2.0162      1.0261 
+(Intercept)  Continuous      Binary             
+    -2.9515      0.9645      2.0127      1.0212 
+attr(,"variance proportions")
+Residual          
+  0.2648   0.7352 
+Time          6.5,         10.5. Max ll:   -1589.7108,   -1589.7108
+
+(Intercept)  Continuous      Binary             
+     -3.383       1.144       2.231       1.388 
+(Intercept)  Continuous      Binary             
+     -3.378       1.142       2.227       1.384 
+attr(,"variance proportions")
+Residual          
+  0.2003   0.7997 
+Time          5.1,          6.8. Max ll:   -1580.1220,   -1580.1218
+
+(Intercept)  Continuous      Binary             
+    -2.7232      0.9308      1.7718      0.8454 
+(Intercept)  Continuous      Binary             
+    -2.7427      0.9376      1.7850      0.8649 
+attr(,"variance proportions")
+Residual          
+  0.2963   0.7037 
+Time          4.0,          8.3. Max ll:   -1595.5390,   -1595.5364
+
+(Intercept)  Continuous      Binary             
+     -3.530       1.139       2.372       1.439 
+(Intercept)  Continuous      Binary             
+     -3.516       1.135       2.361       1.428 
+attr(,"variance proportions")
+Residual          
+  0.1933   0.8067 
+Time          5.0,          6.0. Max ll:   -1574.6020,   -1574.6036
+
+(Intercept)  Continuous      Binary             
+    -2.6764      0.9196      1.7183      0.7708 
+(Intercept)  Continuous      Binary             
+    -2.6848      0.9225      1.7240      0.7799 
+attr(,"variance proportions")
+Residual          
+  0.3143   0.6857 
+Time          5.1,         10.0. Max ll:   -1581.5043,   -1581.5037
+
+(Intercept)  Continuous      Binary             
+     -3.308       1.004       2.247       1.353 
+(Intercept)  Continuous      Binary             
+     -3.307       1.003       2.247       1.352 
+attr(,"variance proportions")
+Residual          
+  0.2056   0.7944 
+Time          5.4,         10.6. Max ll:   -1591.3680,   -1591.3679
+
+(Intercept)  Continuous      Binary             
+     -3.984       1.288       2.559       1.984 
+(Intercept)  Continuous      Binary             
+     -3.981       1.287       2.557       1.983 
+attr(,"variance proportions")
+Residual          
+   0.121    0.879 
+Time         23.9,          8.2. Max ll:   -1641.9077,   -1641.9075
+
+(Intercept)  Continuous      Binary             
+    -2.8043      0.9353      1.8464      0.9950 
+(Intercept)  Continuous      Binary             
+     -2.815       0.938       1.854       1.005 
+attr(,"variance proportions")
+Residual          
+   0.268    0.732 
+Time          5.4,         12.1. Max ll:   -1610.3250,   -1610.3232
+
+(Intercept)  Continuous      Binary             
+    -2.7686      0.9774      1.9829      1.0085 
+(Intercept)  Continuous      Binary             
+    -2.7613      0.9749      1.9777      1.0015 
+attr(,"variance proportions")
+Residual          
+  0.2686   0.7314 
+Time          5.0,          6.3. Max ll:   -1699.3578,   -1699.3561
+
+(Intercept)  Continuous      Binary             
+    -2.7637      0.9000      1.9396      0.8837 
+(Intercept)  Continuous      Binary             
+    -2.7726      0.9028      1.9460      0.8924 
+attr(,"variance proportions")
+Residual          
+  0.2906   0.7094 
+Time          5.1,          8.5. Max ll:   -1615.5320,   -1615.5305
+
+(Intercept)  Continuous      Binary             
+     -3.190       1.169       2.173       1.370 
+(Intercept)  Continuous      Binary             
+     -3.179       1.165       2.164       1.362 
+attr(,"variance proportions")
+Residual          
+  0.2039   0.7961 
+Time          5.6,         13.0. Max ll:   -1608.8413,   -1608.8405
+
+(Intercept)  Continuous      Binary             
+    -2.6756      0.8857      1.8309      0.6906 
+(Intercept)  Continuous      Binary             
+    -2.6788      0.8868      1.8332      0.6940 
+attr(,"variance proportions")
+Residual          
+  0.3331   0.6669 
+Time          5.2,          5.1. Max ll:   -1577.1618,   -1577.1616
+
+(Intercept)  Continuous      Binary             
+    -2.9307      0.9919      1.9318      1.1919 
+(Intercept)  Continuous      Binary             
+    -2.9386      0.9945      1.9368      1.1983 
+attr(,"variance proportions")
+Residual          
+  0.2318   0.7682 
+Time          4.7,          5.6. Max ll:   -1650.7065,   -1650.7056
+
+(Intercept)  Continuous      Binary             
+    -2.5901      0.8567      1.6904      0.7512 
+(Intercept)  Continuous      Binary             
+    -2.5874      0.8558      1.6887      0.7479 
+attr(,"variance proportions")
+Residual          
+  0.3213   0.6787 
+Time          9.6,          5.3. Max ll:   -1611.1538,   -1611.1544
+
+(Intercept)  Continuous      Binary             
+     -3.882       1.309       2.673       1.666 
+(Intercept)  Continuous      Binary             
+     -3.861       1.302       2.659       1.654 
+attr(,"variance proportions")
+Residual          
+  0.1606   0.8394 
+Time         10.8,          9.0. Max ll:   -1543.1585,   -1543.1572
+
+(Intercept)  Continuous      Binary             
+     -3.302       1.002       2.224       1.390 
+(Intercept)  Continuous      Binary             
+    -3.2826      0.9965      2.2103      1.3753 
+attr(,"variance proportions")
+Residual          
+  0.2018   0.7982 
+Time         10.3,          9.7. Max ll:   -1643.4977,   -1643.4958
+
+(Intercept)  Continuous      Binary             
+    -2.8096      0.8574      1.9157      0.7994 
+(Intercept)  Continuous      Binary             
+    -2.8133      0.8585      1.9181      0.8032 
+attr(,"variance proportions")
+Residual          
+  0.3093   0.6907 
+Time         10.4,          9.0. Max ll:   -1574.7349,   -1574.7348
+
+(Intercept)  Continuous      Binary             
+    -2.6379      0.8634      1.7388      0.6046 
+(Intercept)  Continuous      Binary             
+    -2.6388      0.8637      1.7394      0.6058 
+attr(,"variance proportions")
+Residual          
+   0.353    0.647 
+Time         10.7,         11.0. Max ll:   -1544.2522,   -1544.2522
+
+(Intercept)  Continuous      Binary             
+     -3.732       1.313       2.482       1.562 
+(Intercept)  Continuous      Binary             
+     -3.768       1.325       2.505       1.585 
+attr(,"variance proportions")
+Residual          
+  0.1701   0.8299 
+Time          5.8,         12.7. Max ll:   -1517.1693,   -1517.1691
+
+(Intercept)  Continuous      Binary             
+    -2.7397      0.9550      1.8515      0.8856 
+(Intercept)  Continuous      Binary             
+    -2.7538      0.9595      1.8619      0.9001 
+attr(,"variance proportions")
+Residual          
+   0.289    0.711 
+Time          8.9,          9.2. Max ll:   -1606.8305,   -1606.8306
+
+(Intercept)  Continuous      Binary             
+     -3.119       1.042       2.045       1.021 
+(Intercept)  Continuous      Binary             
+     -3.111       1.039       2.040       1.014 
+attr(,"variance proportions")
+Residual          
+  0.2662   0.7338 
+Time          4.7,          8.7. Max ll:   -1530.2611,   -1530.2607
+
+(Intercept)  Continuous      Binary             
+    -2.7945      0.9446      1.8856      1.0420 
+(Intercept)  Continuous      Binary             
+     -2.795       0.945       1.886       1.043 
+attr(,"variance proportions")
+Residual          
+  0.2606   0.7394 
+Time          8.9,          8.4. Max ll:   -1643.2979,   -1643.2979
+
+(Intercept)  Continuous      Binary             
+     -3.086       1.082       2.090       1.240 
+(Intercept)  Continuous      Binary             
+     -3.088       1.082       2.091       1.242 
+attr(,"variance proportions")
+Residual          
+  0.2242   0.7758 
+Time          4.5,          9.4. Max ll:   -1637.9652,   -1637.9651
+
+(Intercept)  Continuous      Binary             
+     -2.962       1.050       1.794       1.221 
+(Intercept)  Continuous      Binary             
+     -2.959       1.049       1.792       1.218 
+attr(,"variance proportions")
+Residual          
+  0.2283   0.7717 
+Time          9.8,         10.5. Max ll:   -1626.8064,   -1626.8063
+
+(Intercept)  Continuous      Binary             
+     -2.932       1.007       2.074       1.009 
+(Intercept)  Continuous      Binary             
+     -2.930       1.006       2.074       1.008 
+attr(,"variance proportions")
+Residual          
+  0.2673   0.7327 
+Time          9.6,         10.4. Max ll:   -1624.0941,   -1624.0939
+
+(Intercept)  Continuous      Binary             
+    -2.8140      0.9323      1.9071      0.7796 
+(Intercept)  Continuous      Binary             
+    -2.8165      0.9331      1.9086      0.7823 
+attr(,"variance proportions")
+Residual          
+  0.3138   0.6862 
+Time          6.3,          5.8. Max ll:   -1582.0835,   -1582.0837
+
+(Intercept)  Continuous      Binary             
+     -3.614       1.133       2.193       1.512 
+(Intercept)  Continuous      Binary             
+     -3.621       1.135       2.198       1.517 
+attr(,"variance proportions")
+Residual          
+  0.1799   0.8201 
+Time          6.2,          6.7. Max ll:   -1512.1259,   -1512.1256
+
+(Intercept)  Continuous      Binary             
+    -2.8741      0.9475      1.9688      0.9152 
+(Intercept)  Continuous      Binary             
+    -2.8739      0.9474      1.9686      0.9149 
+attr(,"variance proportions")
+Residual          
+   0.286    0.714 
+Time          8.1,         13.2. Max ll:   -1577.6617,   -1577.6617
+
+(Intercept)  Continuous      Binary             
+     -2.899       1.033       1.859       1.081 
+(Intercept)  Continuous      Binary             
+     -2.885       1.028       1.849       1.068 
+attr(,"variance proportions")
+Residual          
+  0.2558   0.7442 
+Time          6.1,          6.9. Max ll:   -1630.5539,   -1630.5533
+
+(Intercept)  Continuous      Binary             
+     -3.205       1.057       2.110       1.293 
+(Intercept)  Continuous      Binary             
+     -3.200       1.056       2.107       1.290 
+attr(,"variance proportions")
+Residual          
+  0.2159   0.7841 
+Time          7.0,          6.3. Max ll:   -1585.6072,   -1585.6071
+
+(Intercept)  Continuous      Binary             
+    -2.9610      0.9663      2.0263      1.1579 
+(Intercept)  Continuous      Binary             
+    -2.9718      0.9701      2.0319      1.1672 
+attr(,"variance proportions")
+Residual          
+  0.2374   0.7626 
+Time          9.2,          8.6. Max ll:   -1643.4114,   -1643.4113
+
+  |                                                                              |..............................                                        |  42%
+  ordinary text without R code
+
+  |                                                                              |..............................                                        |  43%
+label: clean_pre_simple_w_ev (with options) 
+List of 1
+ $ echo: logi FALSE
+
+  |                                                                              |...............................                                       |  44%
+  ordinary text without R code
+
+  |                                                                              |...............................                                       |  45%
+label: xtra_mat_simple_w_ev
+  |                                                                              |................................                                      |  45%
+  ordinary text without R code
+
+  |                                                                              |................................                                      |  46%
+label: simple_w_ev_assign_sim_dat
+  |                                                                              |.................................                                     |  47%
+  ordinary text without R code
+
+
+label: simple_w_ev_sim (with options) 
+List of 1
+ $ cache: num 1
+
+  |                                                                              |..................................                                    |  48%
+  ordinary text without R code
+
+  |                                                                              |..................................                                    |  49%
+label: est_simple_w_res
+  |                                                                              |...................................                                   |  50%
+  ordinary text without R code
+
+
+label: std_simple_w_ev_sim (with options) 
+List of 1
+ $ cache: num 1
+
+  |                                                                              |....................................                                  |  51%
+  ordinary text without R code
+
+  |                                                                              |....................................                                  |  52%
+label: continued_std_simple_w_ev_sim (with options) 
+List of 1
+ $ cache: num 1
+
+  |                                                                              |.....................................                                 |  53%
+  ordinary text without R code
+
+
+label: simple_w_ev_ex_profile_likelihood (with options) 
+List of 1
+ $ cache: num 1
+
+  |                                                                              |......................................                                |  54%
+  ordinary text without R code
+
+  |                                                                              |......................................                                |  55%
+label: draw_simple_w_ev_ex_profile_likelihood
+  |                                                                              |.......................................                               |  55%
+  ordinary text without R code
+
+  |                                                                              |.......................................                               |  56%
+label: pre_env_pl_curves (with options) 
+List of 1
+ $ echo: logi FALSE
+
+  |                                                                              |........................................                              |  57%
+  ordinary text without R code
+
+  |                                                                              |........................................                              |  58%
+label: env_pl_curves (with options) 
+List of 2
+ $ cache  : num 1
+ $ message: logi TRUE
+
+  |                                                                              |.........................................                             |  58%
+  ordinary text without R code
+
+  |                                                                              |.........................................                             |  59%
+label: plot_env_pl_curves
+  |                                                                              |..........................................                            |  60%
+  ordinary text without R code
+
+
+label: pre_prop_var_conf (with options) 
+List of 1
+ $ echo: logi FALSE
+
+  |                                                                              |...........................................                           |  61%
+  ordinary text without R code
+
+  |                                                                              |...........................................                           |  62%
+label: prop_var_conf (with options) 
+List of 2
+ $ cache  : num 1
+ $ message: logi TRUE
+
+  |                                                                              |............................................                          |  63%
+  ordinary text without R code
+
+
+label: plot_prop_var_conf
+  |                                                                              |.............................................                         |  64%
+  ordinary text without R code
+
+  |                                                                              |.............................................                         |  65%
+label: clean_pre_sim_simple_w_ev (with options) 
+List of 1
+ $ echo: logi FALSE
+
+  |                                                                              |..............................................                        |  65%
+  ordinary text without R code
+
+  |                                                                              |..............................................                        |  66%
+label: sim_study_simple_w
+(Intercept)      Binary                         
+    -2.6481      3.6237      0.4520     -0.3163 
+(Intercept)      Binary                         
+    -2.6494      3.6255      0.4550     -0.3181 
+attr(,"variance proportions")
+Residual                   
+  0.3027   0.4771   0.2202 
+Time         13.9,         11.9. Max ll:   -2873.6880,   -2873.6880
+
+(Intercept)      Binary                         
+    -3.1239      4.3575      0.9219     -0.0400 
+(Intercept)      Binary                         
+   -3.14096     4.38187     0.93442    -0.02373 
+attr(,"variance proportions")
+Residual                   
+  0.2211   0.5629   0.2159 
+Time          6.2,          5.9. Max ll:   -2779.6528,   -2779.6490
+
+(Intercept)      Binary                         
+    -2.8415      3.7622      0.2716      0.2028 
+(Intercept)      Binary                         
+    -2.8435      3.7648      0.2741      0.2039 
+attr(,"variance proportions")
+Residual                   
+  0.2824   0.3714   0.3462 
+Time         10.8,         10.9. Max ll:   -2711.1825,   -2711.1824
+
+(Intercept)      Binary                         
+    -2.6060      3.5515      0.2742     -0.2248 
+(Intercept)      Binary                         
+    -2.6100      3.5565      0.2771     -0.2187 
+attr(,"variance proportions")
+Residual                   
+  0.3202   0.4225   0.2573 
+Time          8.2,         17.5. Max ll:   -2808.3757,   -2808.3754
+
+(Intercept)      Binary                         
+   -2.88444     4.02697     0.63506    -0.01787 
+(Intercept)      Binary                         
+   -2.88579     4.02873     0.63836    -0.02096 
+attr(,"variance proportions")
+Residual                   
+  0.2582   0.4889   0.2529 
+Time         22.5,         21.7. Max ll:   -2806.5809,   -2806.5807
+
+(Intercept)      Binary                         
+    -3.3957      4.5568      0.9988      0.2835 
+(Intercept)      Binary                         
+    -3.4331      4.6061      1.0251      0.3133 
+attr(,"variance proportions")
+Residual                   
+  0.1940   0.5407   0.2654 
+Time         40.5,          6.3. Max ll:   -2709.5480,   -2709.5473
+
+(Intercept)      Binary                         
+   -2.92890     3.87255     0.63523     0.05416 
+(Intercept)      Binary                         
+   -2.93490     3.88068     0.64162     0.05832 
+attr(,"variance proportions")
+Residual                   
+  0.2526   0.4797   0.2677 
+Time         28.0,         23.1. Max ll:   -2823.8290,   -2823.8293
+
+(Intercept)      Binary                         
+    -2.5719      3.3543      0.2517     -0.4231 
+(Intercept)      Binary                         
+    -2.5770      3.3611      0.2584     -0.4188 
+attr(,"variance proportions")
+Residual                   
+  0.3387   0.4385   0.2228 
+Time         18.1,         18.4. Max ll:   -2753.4429,   -2753.4427
+
+(Intercept)      Binary                         
+    -2.5207      3.4087      0.2612     -0.5451 
+(Intercept)      Binary                         
+    -2.5101      3.3956      0.2535     -0.5687 
+attr(,"variance proportions")
+Residual                   
+  0.3503   0.4513   0.1984 
+Time         14.8,          5.3. Max ll:   -2800.0163,   -2800.0188
+
+(Intercept)      Binary                         
+   -2.75972     3.65591     0.25050    -0.09371 
+(Intercept)      Binary                         
+   -2.76491     3.66279     0.25590    -0.08809 
+attr(,"variance proportions")
+Residual                   
+  0.3118   0.4027   0.2855 
+Time         20.8,         26.2. Max ll:   -2641.9371,   -2641.9372
+
+(Intercept)      Binary                         
+    -3.0379      4.1667      0.5716      0.3603 
+(Intercept)      Binary                         
+    -3.0274      4.1525      0.5625      0.3510 
+attr(,"variance proportions")
+Residual                   
+  0.2395   0.4203   0.3402 
+Time         10.5,          7.6. Max ll:   -2767.1644,   -2767.1643
+
+(Intercept)      Binary                         
+   -2.72371     3.51815     0.24602    -0.08211 
+(Intercept)      Binary                         
+   -2.71727     3.50906     0.24165    -0.09278 
+attr(,"variance proportions")
+Residual                   
+  0.3140   0.3998   0.2862 
+Time         15.2,         12.6. Max ll:   -2719.1933,   -2719.1929
+
+(Intercept)      Binary                         
+   -2.98297     3.88486     0.65546    -0.01686 
+(Intercept)      Binary                         
+  -2.993169    3.898462    0.665999   -0.009816 
+attr(,"variance proportions")
+Residual                   
+  0.2540   0.4944   0.2515 
+Time         18.5,         19.9. Max ll:   -2716.4606,   -2716.4600
+
+(Intercept)      Binary                         
+    -2.7699      3.8082      0.6410     -0.3775 
+(Intercept)      Binary                         
+    -2.7661      3.8027      0.6356     -0.3772 
+attr(,"variance proportions")
+Residual                   
+  0.2798   0.5283   0.1919 
+Time         26.5,         21.9. Max ll:   -2842.7168,   -2842.7170
+
+(Intercept)      Binary                         
+    -2.6527      3.5657      0.2886     -0.2409 
+(Intercept)      Binary                         
+    -2.6601      3.5751      0.2956     -0.2308 
+attr(,"variance proportions")
+Residual                   
+  0.3187   0.4283   0.2530 
+Time         17.8,         14.9. Max ll:   -2737.0265,   -2737.0259
+
+(Intercept)      Binary                         
+    -2.9122      3.8533      0.6993     -0.1953 
+(Intercept)      Binary                         
+    -2.9182      3.8616      0.7052     -0.1908 
+attr(,"variance proportions")
+Residual                   
+  0.2597   0.5257   0.2146 
+Time         20.2,         17.9. Max ll:   -2789.6682,   -2789.6677
+
+(Intercept)      Binary                         
+    -2.4991      3.3502      0.1687     -0.4777 
+(Intercept)      Binary                         
+    -2.5001      3.3515      0.1724     -0.4812 
+attr(,"variance proportions")
+Residual                   
+  0.3564   0.4234   0.2202 
+Time         25.6,         14.7. Max ll:   -2803.0912,   -2803.0911
+
+(Intercept)      Binary                         
+  -3.138572    4.212868    0.865131    0.006645 
+(Intercept)      Binary                         
+    -3.1742      4.2606      0.8952      0.0355 
+attr(,"variance proportions")
+Residual                   
+  0.2230   0.5459   0.2311 
+Time         14.9,         16.9. Max ll:   -2709.9648,   -2709.9612
+
+(Intercept)      Binary                         
+    -3.6355      4.9108      1.2837      0.2779 
+(Intercept)      Binary                         
+    -3.6054      4.8702      1.2638      0.2581 
+attr(,"variance proportions")
+Residual                   
+  0.1714   0.6067   0.2219 
+Time         13.1,          6.1. Max ll:   -2731.5370,   -2731.5334
+
+(Intercept)      Binary                         
+    -3.2488      4.3348      0.9021      0.1601 
+(Intercept)      Binary                         
+    -3.2375      4.3194      0.8935      0.1503 
+attr(,"variance proportions")
+Residual                   
+  0.2171   0.5306   0.2523 
+Time         16.5,         17.2. Max ll:   -2719.6435,   -2719.6428
+
+(Intercept)      Binary                         
+    -4.4644      6.1794      1.7044      0.9144 
+(Intercept)      Binary                         
+    -4.4027      6.0944      1.6731      0.8815 
+attr(,"variance proportions")
+Residual                   
+  0.1144   0.6095   0.2762 
+Time         12.8,          9.1. Max ll:   -2702.0254,   -2702.0253
+
+(Intercept)      Binary                         
+    -2.8297      3.7021      0.3139      0.1611 
+(Intercept)      Binary                         
+    -2.8342      3.7075      0.3192      0.1633 
+attr(,"variance proportions")
+Residual                   
+  0.2814   0.3872   0.3313 
+Time         19.6,         10.3. Max ll:   -2743.2772,   -2743.2771
+
+(Intercept)      Binary                         
+    -3.0707      4.0870      0.9175     -0.1502 
+(Intercept)      Binary                         
+    -3.0505      4.0601      0.9016     -0.1716 
+attr(,"variance proportions")
+Residual                   
+  0.2322   0.5721   0.1956 
+Time         17.7,         25.1. Max ll:   -2832.3663,   -2832.3646
+
+(Intercept)      Binary                         
+    -3.1727      4.1588      0.6502      0.3095 
+(Intercept)      Binary                         
+    -3.1702      4.1560      0.6473      0.3075 
+attr(,"variance proportions")
+Residual                   
+  0.2342   0.4474   0.3185 
+Time          5.2,          6.4. Max ll:   -2655.4698,   -2655.4703
+
+(Intercept)      Binary                         
+    -3.5638      4.8269      1.0583      0.5324 
+(Intercept)      Binary                         
+    -3.4844      4.7181      1.0034      0.4745 
+attr(,"variance proportions")
+Residual                   
+  0.1875   0.5113   0.3013 
+Time         15.0,          5.2. Max ll:   -2710.7684,   -2710.7672
+
+(Intercept)      Binary                         
+    -2.5484      3.4448      0.1328     -0.2769 
+(Intercept)      Binary                         
+    -2.5450      3.4389      0.1228     -0.2753 
+attr(,"variance proportions")
+Residual                   
+  0.3460   0.3912   0.2627 
+Time         13.2,          5.0. Max ll:   -2782.1826,   -2782.1855
+
+(Intercept)      Binary                         
+    -2.6874      3.5791      0.4774     -0.3116 
+(Intercept)      Binary                         
+    -2.6967      3.5912      0.4918     -0.3119 
+attr(,"variance proportions")
+Residual                   
+  0.2970   0.4856   0.2174 
+Time         15.2,          6.2. Max ll:   -2857.1727,   -2857.1719
+
+(Intercept)      Binary                         
+    -3.5197      4.5932      1.0615      0.5975 
+(Intercept)      Binary                         
+    -3.5345      4.6120      1.0708      0.6089 
+attr(,"variance proportions")
+Residual                   
+  0.1737   0.5069   0.3194 
+Time         24.4,         20.9. Max ll:   -2849.6794,   -2849.6787
+
+(Intercept)      Binary                         
+   -2.99804     3.99226     0.76219     0.01046 
+(Intercept)      Binary                         
+  -2.993245    3.984808    0.756769    0.005723 
+attr(,"variance proportions")
+Residual                   
+  0.2417   0.5152   0.2431 
+Time          5.1,          5.1. Max ll:   -2821.0137,   -2821.0145
+
+(Intercept)      Binary                         
+    -2.9105      3.7849      0.7159     -0.5208 
+(Intercept)      Binary                         
+    -2.9180      3.7949      0.7222     -0.5116 
+attr(,"variance proportions")
+Residual                   
+  0.2733   0.5628   0.1639 
+Time         21.4,         21.8. Max ll:   -2654.8796,   -2654.8795
+
+(Intercept)      Binary                         
+   -3.13175     4.15935     0.88408     0.09016 
+(Intercept)      Binary                         
+   -3.14311     4.17529     0.89347     0.09897 
+attr(,"variance proportions")
+Residual                   
+  0.2199   0.5373   0.2428 
+Time          7.0,          8.7. Max ll:   -2801.1225,   -2801.1213
+
+(Intercept)      Binary                         
+    -3.3559      4.5460      0.9768      0.2464 
+(Intercept)      Binary                         
+    -3.4527      4.6770      1.0457      0.3223 
+attr(,"variance proportions")
+Residual                   
+  0.1914   0.5445   0.2641 
+Time          7.4,         16.3. Max ll:   -2697.2636,   -2697.2459
+
+(Intercept)      Binary                         
+    -3.5680      4.4687      1.1718      0.3754 
+(Intercept)      Binary                         
+    -3.5541      4.4519      1.1616      0.3662 
+attr(,"variance proportions")
+Residual                   
+  0.1774   0.5668   0.2558 
+Time          9.2,          6.0. Max ll:   -2762.9871,   -2762.9884
+
+(Intercept)      Binary                         
+    -3.0594      3.9578      0.8123     -0.3610 
+(Intercept)      Binary                         
+    -3.0444      3.9381      0.7969     -0.3681 
+attr(,"variance proportions")
+Residual                   
+  0.2557   0.5673   0.1770 
+Time         20.5,         24.5. Max ll:   -2623.0103,   -2623.0092
+
+(Intercept)      Binary                         
+   -2.92019     3.99500     0.60893    -0.08805 
+(Intercept)      Binary                         
+   -2.91969     3.99520     0.60793    -0.08754 
+attr(,"variance proportions")
+Residual                   
+  0.2665   0.4894   0.2441 
+Time         12.2,         12.9. Max ll:   -2741.6145,   -2741.6146
+
+(Intercept)      Binary                         
+    -3.0171      4.1442      0.6049      0.2525 
+(Intercept)      Binary                         
+    -3.0158      4.1426      0.6036      0.2516 
+attr(,"variance proportions")
+Residual                   
+  0.2430   0.4444   0.3125 
+Time         16.9,         10.8. Max ll:   -2754.9104,   -2754.9104
+
+(Intercept)      Binary                         
+    -3.1113      3.9482      0.8101     -0.1061 
+(Intercept)      Binary                         
+   -3.14104     3.98559     0.83164    -0.07186 
+attr(,"variance proportions")
+Residual                   
+  0.2365   0.5433   0.2201 
+Time         10.2,         16.1. Max ll:   -2686.3897,   -2686.3850
+
+(Intercept)      Binary                         
+    -2.8393      3.7168      0.5725     -0.1982 
+(Intercept)      Binary                         
+    -2.8452      3.7246      0.5780     -0.1919 
+attr(,"variance proportions")
+Residual                   
+  0.2772   0.4940   0.2288 
+Time         22.6,         15.3. Max ll:   -2757.3076,   -2757.3082
+
+(Intercept)      Binary                         
+   -3.10187     4.13678     0.78083     0.02054 
+(Intercept)      Binary                         
+  -3.087071    4.116978    0.768161    0.007932 
+attr(,"variance proportions")
+Residual                   
+  0.2402   0.5178   0.2421 
+Time         18.5,         15.5. Max ll:   -2712.5176,   -2712.5161
+
+(Intercept)      Binary                         
+    -3.7393      5.0751      1.2741      0.4224 
+(Intercept)      Binary                         
+     -3.765       5.111       1.291       0.440 
+attr(,"variance proportions")
+Residual                   
+  0.1616   0.5875   0.2509 
+Time         23.2,         18.6. Max ll:   -2650.1481,   -2650.1477
+
+(Intercept)      Binary                         
+   -3.19204     4.29838     0.94724     0.05537 
+(Intercept)      Binary                         
+   -3.16787     4.26653     0.92976     0.02959 
+attr(,"variance proportions")
+Residual                   
+  0.2191   0.5552   0.2257 
+Time         23.8,         12.4. Max ll:   -2768.4679,   -2768.4735
+
+(Intercept)      Binary                         
+   -3.00454     4.01815     0.64918     0.05757 
+(Intercept)      Binary                         
+   -2.97403     3.97999     0.62111     0.02973 
+attr(,"variance proportions")
+Residual                   
+  0.2570   0.4783   0.2647 
+Time         19.9,         11.8. Max ll:   -2703.6490,   -2703.6541
+
+(Intercept)      Binary                         
+     -4.965       6.620       1.813       1.373 
+(Intercept)      Binary                         
+     -4.923       6.565       1.794       1.354 
+attr(,"variance proportions")
+Residual                   
+ 0.09186  0.55248  0.35566 
+Time          8.1,         13.4. Max ll:   -2704.0546,   -2704.0577
+
+(Intercept)      Binary                         
+    -3.0483      4.0841      0.5768      0.2105 
+(Intercept)      Binary                         
+    -3.0708      4.1144      0.5962      0.2306 
+attr(,"variance proportions")
+Residual                   
+  0.2454   0.4455   0.3091 
+Time          9.9,         18.0. Max ll:   -2681.1892,   -2681.1869
+
+(Intercept)      Binary                         
+   -2.99664     3.90846     0.60526     0.08917 
+(Intercept)      Binary                         
+   -2.99940     3.91291     0.61028     0.08726 
+attr(,"variance proportions")
+Residual                   
+  0.2543   0.4682   0.2775 
+Time         16.7,         15.4. Max ll:   -2697.4757,   -2697.4757
+
+(Intercept)      Binary                         
+   -2.90238     4.00198     0.62882    -0.01734 
+(Intercept)      Binary                         
+  -2.917657    4.023222    0.642297   -0.002034 
+attr(,"variance proportions")
+Residual                   
+  0.2565   0.4875   0.2560 
+Time         10.7,         22.5. Max ll:   -2788.8708,   -2788.8686
+
+(Intercept)      Binary                         
+    -2.7053      3.6784      0.2292     -0.1311 
+(Intercept)      Binary                         
+    -2.7068      3.6805      0.2301     -0.1285 
+attr(,"variance proportions")
+Residual                   
+  0.3187   0.4011   0.2802 
+Time         25.8,         18.2. Max ll:   -2663.0191,   -2663.0192
+
+(Intercept)      Binary                         
+    -2.8351      3.6617      0.5623     -0.3803 
+(Intercept)      Binary                         
+    -2.8297      3.6546      0.5579     -0.3884 
+attr(,"variance proportions")
+Residual                   
+   0.292    0.510    0.198 
+Time         22.1,         21.4. Max ll:   -2683.9444,   -2683.9442
+
+(Intercept)      Binary                         
+    -2.7685      3.7055      0.4611     -0.2187 
+(Intercept)      Binary                         
+    -2.7758      3.7155      0.4691     -0.2117 
+attr(,"variance proportions")
+Residual                   
+  0.2935   0.4691   0.2375 
+Time         21.2,         20.3. Max ll:   -2745.8377,   -2745.8383
+
+(Intercept)      Binary                         
+    -3.1543      4.2108      0.7239      0.2752 
+(Intercept)      Binary                         
+    -3.1803      4.2464      0.7473      0.2937 
+attr(,"variance proportions")
+Residual                   
+  0.2246   0.4742   0.3013 
+Time          9.1,         18.6. Max ll:   -2711.1000,   -2711.0964
+
+  |                                                                              |...............................................                       |  67%
+  ordinary text without R code
+
+  |                                                                              |...............................................                       |  68%
+label: clean_pre_loading (with options) 
+List of 1
+ $ echo: logi FALSE
+
+  |                                                                              |................................................                      |  68%
+  ordinary text without R code
+
+  |                                                                              |................................................                      |  69%
+label: loading_assign_sim_dat
+  |                                                                              |.................................................                     |  70%
+  ordinary text without R code
+
+  |                                                                              |.................................................                     |  71%
+label: loading_one_dat (with options) 
+List of 1
+ $ cache: num 1
+
+  |                                                                              |..................................................                    |  71%
+  ordinary text without R code
+
+  |                                                                              |..................................................                    |  72%
+label: loading_show_res
+  |                                                                              |...................................................                   |  73%
+  ordinary text without R code
+
+
+label: loadings_sim_study
+         (Intercept) Binary                                           
+Estimate      -2.053  4.193 -0.2298 0.9849 0.8875 -0.5781 0.6671 -1.19
+Truth         -2.000  4.000 -0.3942 1.1274 1.0000 -0.5058 0.6496 -1.00
+Time         72.1. Max ll:   -4395.5206
+
+         (Intercept) Binary                                            
+Estimate      -2.041  4.122 -0.2802 0.9964 0.9152 -0.6492 0.6032 -1.222
+Truth         -2.000  4.000 -0.3942 1.1274 1.0000 -0.5058 0.6496 -1.000
+Time         76.8. Max ll:   -4292.2899
+
+         (Intercept) Binary                                          
+Estimate      -1.954  3.957 -0.4962 1.125 1.064 -0.5981 0.6764 -1.144
+Truth         -2.000  4.000 -0.3942 1.127 1.000 -0.5058 0.6496 -1.000
+Time         73.8. Max ll:   -4326.5815
+
+         (Intercept) Binary                                           
+Estimate      -2.081   4.21 -0.4313 1.196 1.079 -0.3455 0.6563 -0.9428
+Truth         -2.000   4.00 -0.3942 1.127 1.000 -0.5058 0.6496 -1.0000
+Time         74.2. Max ll:   -4363.1704
+
+         (Intercept) Binary                                          
+Estimate      -1.761  3.673 -0.7327 1.320 1.168 -0.7034 0.8034 -1.002
+Truth         -2.000  4.000 -0.3942 1.127 1.000 -0.5058 0.6496 -1.000
+Time         70.6. Max ll:   -4427.5856
+
+         (Intercept) Binary                                          
+Estimate      -1.912  3.818 -0.3517 1.174 0.8831 -0.8667 0.8055 -1.11
+Truth         -2.000  4.000 -0.3942 1.127 1.0000 -0.5058 0.6496 -1.00
+Time         71.5. Max ll:   -4319.9260
+
+         (Intercept) Binary                                          
+Estimate      -1.855  3.539 -0.5836 1.320 1.031 -0.6889 0.6438 -1.224
+Truth         -2.000  4.000 -0.3942 1.127 1.000 -0.5058 0.6496 -1.000
+Time         73.7. Max ll:   -4473.3598
+
+         (Intercept) Binary                                           
+Estimate      -1.972  3.827 -0.4241 1.115 1.033 -0.3852 0.5416 -0.8847
+Truth         -2.000  4.000 -0.3942 1.127 1.000 -0.5058 0.6496 -1.0000
+Time         63.0. Max ll:   -4392.1278
+
+         (Intercept) Binary                                          
+Estimate      -1.758  3.655 -0.6797 1.208 1.142 -0.7824 0.7729 -1.123
+Truth         -2.000  4.000 -0.3942 1.127 1.000 -0.5058 0.6496 -1.000
+Time         76.2. Max ll:   -4402.6644
+
+         (Intercept) Binary                                            
+Estimate      -2.071  4.072 -0.4300 1.271 0.9176 -0.2868 0.5098 -0.8079
+Truth         -2.000  4.000 -0.3942 1.127 1.0000 -0.5058 0.6496 -1.0000
+Time         75.6. Max ll:   -4290.3400
+
+         (Intercept) Binary                                           
+Estimate       -1.88  3.936 -0.4741 1.124 0.9737 -0.6571 0.7954 -1.051
+Truth          -2.00  4.000 -0.3942 1.127 1.0000 -0.5058 0.6496 -1.000
+Time         74.4. Max ll:   -4392.1055
+
+         (Intercept) Binary                                          
+Estimate      -2.112  4.097 -0.4200 1.251 1.094 -0.5048 0.6629 -1.112
+Truth         -2.000  4.000 -0.3942 1.127 1.000 -0.5058 0.6496 -1.000
+Time        100.8. Max ll:   -4316.2796
+
+         (Intercept) Binary                                           
+Estimate       -2.05   3.98 -0.4284 1.075 0.9944 -0.4427 0.5961 -1.054
+Truth          -2.00   4.00 -0.3942 1.127 1.0000 -0.5058 0.6496 -1.000
+Time         76.3. Max ll:   -4308.1808
+
+         (Intercept) Binary                                           
+Estimate      -2.067   4.29 -0.2698 1.121 0.9817 -0.5124 0.5458 -1.139
+Truth         -2.000   4.00 -0.3942 1.127 1.0000 -0.5058 0.6496 -1.000
+Time         78.6. Max ll:   -4393.9034
+
+         (Intercept) Binary                                           
+Estimate      -2.032  4.117 -0.3868 1.182 1.003 -0.3404 0.5515 -0.7907
+Truth         -2.000  4.000 -0.3942 1.127 1.000 -0.5058 0.6496 -1.0000
+Time         73.7. Max ll:   -4337.5184
+
+         (Intercept) Binary                                            
+Estimate      -1.816  3.584 -0.4684 1.081 0.8506 -0.6493 0.7018 -0.9337
+Truth         -2.000  4.000 -0.3942 1.127 1.0000 -0.5058 0.6496 -1.0000
+Time         75.3. Max ll:   -4390.6236
+
+         (Intercept) Binary                                          
+Estimate      -2.171  4.325 -0.2060 1.008 1.038 -0.5262 0.6707 -1.224
+Truth         -2.000  4.000 -0.3942 1.127 1.000 -0.5058 0.6496 -1.000
+Time         77.5. Max ll:   -4380.6590
+
+         (Intercept) Binary                                            
+Estimate      -1.852  3.707 -0.5354 1.181 0.9674 -0.6312 0.6697 -0.9591
+Truth         -2.000  4.000 -0.3942 1.127 1.0000 -0.5058 0.6496 -1.0000
+Time         74.5. Max ll:   -4321.1143
+
+         (Intercept) Binary                                          
+Estimate      -1.837  3.739 -0.3843 1.149 0.8793 -0.9356 0.6531 -1.37
+Truth         -2.000  4.000 -0.3942 1.127 1.0000 -0.5058 0.6496 -1.00
+Time        122.7. Max ll:   -4430.8984
+
+         (Intercept) Binary                                           
+Estimate      -2.048  4.304 -0.3624 1.118 0.9561 -0.5290 0.6725 -1.114
+Truth         -2.000  4.000 -0.3942 1.127 1.0000 -0.5058 0.6496 -1.000
+Time         70.9. Max ll:   -4294.5649
+
+         (Intercept) Binary                                           
+Estimate      -1.934  3.961 -0.3022 1.123 0.8777 -0.6057 0.5885 -1.022
+Truth         -2.000  4.000 -0.3942 1.127 1.0000 -0.5058 0.6496 -1.000
+Time         86.1. Max ll:   -4399.1707
+
+         (Intercept) Binary                                          
+Estimate      -1.958  3.749 -0.5025 1.106 1.073 -0.5677 0.6526 -1.107
+Truth         -2.000  4.000 -0.3942 1.127 1.000 -0.5058 0.6496 -1.000
+Time         88.3. Max ll:   -4356.5822
+
+         (Intercept) Binary                                            
+Estimate      -2.061  4.043 -0.2275 0.9665 0.9189 -0.6237 0.7219 -1.172
+Truth         -2.000  4.000 -0.3942 1.1274 1.0000 -0.5058 0.6496 -1.000
+Time         76.4. Max ll:   -4373.2042
+
+         (Intercept) Binary                                          
+Estimate      -1.873   3.85 -0.5279 1.108 1.064 -0.6430 0.5668 -1.056
+Truth         -2.000   4.00 -0.3942 1.127 1.000 -0.5058 0.6496 -1.000
+Time         77.2. Max ll:   -4309.0397
+
+         (Intercept) Binary                                        
+Estimate      -2.071  4.259 -0.3689 1.177 1.01 -0.4911 0.5890 -1.15
+Truth         -2.000  4.000 -0.3942 1.127 1.00 -0.5058 0.6496 -1.00
+Time         87.8. Max ll:   -4347.8675
+
+         (Intercept) Binary                                          
+Estimate      -1.693  3.509 -0.8653 1.390 1.132 -0.9271 0.8370 -1.208
+Truth         -2.000  4.000 -0.3942 1.127 1.000 -0.5058 0.6496 -1.000
+Time         72.8. Max ll:   -4375.8549
+
+         (Intercept) Binary                                          
+Estimate      -2.042  4.328 -0.2748 1.084 1.031 -0.6428 0.7044 -1.186
+Truth         -2.000  4.000 -0.3942 1.127 1.000 -0.5058 0.6496 -1.000
+Time         79.3. Max ll:   -4363.7035
+
+         (Intercept) Binary                                           
+Estimate      -1.934  3.978 -0.2393 1.013 0.8374 -0.7019 0.8612 -1.111
+Truth         -2.000  4.000 -0.3942 1.127 1.0000 -0.5058 0.6496 -1.000
+Time         86.3. Max ll:   -4466.5790
+
+         (Intercept) Binary                                           
+Estimate      -1.986  3.864 -0.5248 1.131 1.124 -0.4335 0.6876 -0.9752
+Truth         -2.000  4.000 -0.3942 1.127 1.000 -0.5058 0.6496 -1.0000
+Time         90.1. Max ll:   -4373.6275
+
+         (Intercept) Binary                                            
+Estimate      -1.765  3.447 -0.5916 1.165 0.9087 -0.8215 0.7575 -0.9905
+Truth         -2.000  4.000 -0.3942 1.127 1.0000 -0.5058 0.6496 -1.0000
+Time         66.7. Max ll:   -4318.9956
+
+         (Intercept) Binary                                           
+Estimate      -1.769  3.596 -0.6388 1.201 0.9826 -0.8140 0.6811 -1.161
+Truth         -2.000  4.000 -0.3942 1.127 1.0000 -0.5058 0.6496 -1.000
+Time         74.7. Max ll:   -4338.8528
+
+         (Intercept) Binary                                             
+Estimate      -2.579  5.095 -0.1128 1.101 0.9658  0.04665 0.4953 -0.7177
+Truth         -2.000  4.000 -0.3942 1.127 1.0000 -0.50580 0.6496 -1.0000
+Time         84.4. Max ll:   -4224.2779
+
+         (Intercept) Binary                                           
+Estimate        -1.9  3.676 -0.4001 1.043 0.9241 -0.5890 0.6056 -1.153
+Truth           -2.0  4.000 -0.3942 1.127 1.0000 -0.5058 0.6496 -1.000
+Time         85.3. Max ll:   -4471.9661
+
+         (Intercept) Binary                                           
+Estimate       -2.13  4.149 -0.2481 1.079 0.9239 -0.5418 0.6210 -1.093
+Truth          -2.00  4.000 -0.3942 1.127 1.0000 -0.5058 0.6496 -1.000
+Time         93.6. Max ll:   -4276.7022
+
+         (Intercept) Binary                                          
+Estimate      -2.129  4.317 -0.3403 1.257 1.103 -0.5524 0.5002 -1.217
+Truth         -2.000  4.000 -0.3942 1.127 1.000 -0.5058 0.6496 -1.000
+Time         89.9. Max ll:   -4332.3312
+
+         (Intercept) Binary                                            
+Estimate      -2.063  4.098 -0.4089 1.212 0.9922 -0.3152 0.4545 -0.9248
+Truth         -2.000  4.000 -0.3942 1.127 1.0000 -0.5058 0.6496 -1.0000
+Time         90.3. Max ll:   -4339.0285
+
+         (Intercept) Binary                                            
+Estimate      -2.086  3.819 -0.4173 1.139 0.9889 -0.3475 0.5232 -0.9504
+Truth         -2.000  4.000 -0.3942 1.127 1.0000 -0.5058 0.6496 -1.0000
+Time         75.7. Max ll:   -4316.2749
+
+         (Intercept) Binary                                           
+Estimate      -2.191  4.254 -0.5258 1.306 1.113 -0.1926 0.5441 -0.8696
+Truth         -2.000  4.000 -0.3942 1.127 1.000 -0.5058 0.6496 -1.0000
+Time         75.1. Max ll:   -4268.1531
+
+         (Intercept) Binary                                           
+Estimate       -2.04   4.02 -0.2637 0.9665 0.9791 -0.9439 0.8186 -1.46
+Truth          -2.00   4.00 -0.3942 1.1274 1.0000 -0.5058 0.6496 -1.00
+Time         69.0. Max ll:   -4268.2668
+
+         (Intercept) Binary                                          
+Estimate      -2.045   4.11 -0.2804 1.030 0.92 -0.4226 0.6616 -0.9568
+Truth         -2.000   4.00 -0.3942 1.127 1.00 -0.5058 0.6496 -1.0000
+Time        119.4. Max ll:   -4388.3865
+
+         (Intercept) Binary                                           
+Estimate      -1.966  3.983 -0.3808 1.187 0.8906 -0.5510 0.5453 -1.127
+Truth         -2.000  4.000 -0.3942 1.127 1.0000 -0.5058 0.6496 -1.000
+Time         77.7. Max ll:   -4407.2292
+
+         (Intercept) Binary                                           
+Estimate      -2.112   4.17 -0.4109 1.236 1.028 -0.2814 0.5557 -0.8248
+Truth         -2.000   4.00 -0.3942 1.127 1.000 -0.5058 0.6496 -1.0000
+Time         91.5. Max ll:   -4332.2359
+
+         (Intercept) Binary                                            
+Estimate      -2.244    4.7 -0.05866 1.006 0.8425 -0.2309 0.5947 -0.824
+Truth         -2.000    4.0 -0.39423 1.127 1.0000 -0.5058 0.6496 -1.000
+Time         91.9. Max ll:   -4385.8508
+
+         (Intercept) Binary                                           
+Estimate      -2.009  4.154 -0.3381 1.074 1.008 -0.5128 0.7617 -0.9153
+Truth         -2.000  4.000 -0.3942 1.127 1.000 -0.5058 0.6496 -1.0000
+Time         89.9. Max ll:   -4385.7186
+
+         (Intercept) Binary                                           
+Estimate      -1.951  3.842 -0.5735 1.346 1.112 -0.4395 0.5613 -0.9494
+Truth         -2.000  4.000 -0.3942 1.127 1.000 -0.5058 0.6496 -1.0000
+Time         62.1. Max ll:   -4394.5320
+
+         (Intercept) Binary                                           
+Estimate      -2.168  4.395 -0.2106 1.091 0.9485 -0.3936 0.5238 -1.118
+Truth         -2.000  4.000 -0.3942 1.127 1.0000 -0.5058 0.6496 -1.000
+Time         81.0. Max ll:   -4390.1742
+
+         (Intercept) Binary                                           
+Estimate      -2.154  4.449 -0.4595 1.212 1.079 -0.1841 0.5060 -0.8118
+Truth         -2.000  4.000 -0.3942 1.127 1.000 -0.5058 0.6496 -1.0000
+Time         91.4. Max ll:   -4280.0757
+
+         (Intercept) Binary                                         
+Estimate      -1.837  3.533 -0.5455 1.164 1.04 -0.8977 0.6671 -1.353
+Truth         -2.000  4.000 -0.3942 1.127 1.00 -0.5058 0.6496 -1.000
+Time         74.9. Max ll:   -4387.5879
+
+         (Intercept) Binary                                           
+Estimate      -2.027  4.046 -0.2647 1.054 0.9153 -0.5476 0.5232 -1.092
+Truth         -2.000  4.000 -0.3942 1.127 1.0000 -0.5058 0.6496 -1.000
+Time         82.4. Max ll:   -4358.2662
+
+         (Intercept) Binary                                           
+Estimate      -1.958  3.946 -0.4975 1.127 1.045 -0.3939 0.6469 -0.8831
+Truth         -2.000  4.000 -0.3942 1.127 1.000 -0.5058 0.6496 -1.0000
+Time         76.1. Max ll:   -4400.4975
+
+  |                                                                              |....................................................                  |  74%
+  ordinary text without R code
+
+  |                                                                              |....................................................                  |  75%
+label: clean_up_complicated (with options) 
+List of 1
+ $ echo: logi FALSE
+
+  |                                                                              |.....................................................                 |  76%
+  ordinary text without R code
+
+
+label: source_sim_file
+  |                                                                              |......................................................                |  77%
+  ordinary text without R code
+
+  |                                                                              |......................................................                |  78%
+label: one_family
+   [[ suppressing 10 column names '9', '10', '15' ... ]]
+   [[ suppressing 10 column names '9', '10', '15' ... ]]
+  |                                                                              |.......................................................               |  78%
+  ordinary text without R code
+
+  |                                                                              |.......................................................               |  79%
+label: est_mod (with options) 
+List of 1
+ $ cache: num 1
+
+  |                                                                              |........................................................              |  80%
+  ordinary text without R code
+
+  |                                                                              |........................................................              |  81%
+label: show_est_mod
+  |                                                                              |.........................................................             |  81%
+  ordinary text without R code
+
+  |                                                                              |.........................................................             |  82%
+label: svrg (with options) 
+List of 2
+ $ eval: logi FALSE
+ $ echo: logi FALSE
+
+  |                                                                              |..........................................................            |  83%
+  ordinary text without R code
+
+
+label: pre_comp_par (with options) 
+List of 1
+ $ echo: logi FALSE
+
+  |                                                                              |...........................................................           |  84%
+  ordinary text without R code
+
+  |                                                                              |...........................................................           |  85%
+label: time_mult (with options) 
+List of 1
+ $ cache: num 1
+
+  |                                                                              |............................................................          |  86%
+  ordinary text without R code
+
+
+label: re_create_ptr (with options) 
+List of 1
+ $ echo: logi FALSE
+
+  |                                                                              |.............................................................         |  87%
+  ordinary text without R code
+
+  |                                                                              |.............................................................         |  88%
+label: use_adam (with options) 
+List of 1
+ $ cache: num 1
+
+  |                                                                              |..............................................................        |  88%
+  ordinary text without R code
+
+  |                                                                              |..............................................................        |  89%
+label: adam_re_create_ptr (with options) 
+List of 1
+ $ echo: logi FALSE
+
+  |                                                                              |...............................................................       |  90%
+  ordinary text without R code
+
+  |                                                                              |...............................................................       |  91%
+label: res_adam
+  |                                                                              |................................................................      |  91%
+  ordinary text without R code
+
+  |                                                                              |................................................................      |  92%
+label: compare_w_mvtnorm (with options) 
+List of 1
+ $ cache: num 1
+
+  |                                                                              |.................................................................     |  93%
+  ordinary text without R code
+
+  |                                                                              |.................................................................     |  94%
+label: show_averge_rel_err (with options) 
+List of 1
+ $ fig.height: num 5.33
+
+  |                                                                              |..................................................................    |  94%
+  ordinary text without R code
+
+  |                                                                              |..................................................................    |  95%
+label: use_new_impl (with options) 
+List of 1
+ $ fig.height: num 5.33
+
+  |                                                                              |...................................................................   |  96%
+  ordinary text without R code
+
+
+label: botev_example (with options) 
+List of 1
+ $ cache: num 1
+
+  |                                                                              |....................................................................  |  97%
+  ordinary text without R code
+
+  |                                                                              |....................................................................  |  98%
+label: err_botev_example (with options) 
+List of 1
+ $ fig.height: num 5.33
+
+  |                                                                              |..................................................................... |  99%
+  ordinary text without R code
+
+
+label: time_botev_example (with options) 
+List of 1
+ $ fig.height: num 5.33
+
+  |                                                                              |......................................................................| 100%
+  ordinary text without R code
+
+
+output file: pedmod.knit.md
+
+/usr/bin/pandoc +RTS -K512m -RTS pedmod.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output pedmod.html --lua-filter /home/boennecd/R/x86_64-pc-linux-gnu-library/4.1/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /home/boennecd/R/x86_64-pc-linux-gnu-library/4.1/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --standalone --section-divs --template /home/boennecd/R/x86_64-pc-linux-gnu-library/4.1/rmarkdown/rmd/h/default.html --no-highlight --variable highlightjs=1 --variable theme=bootstrap --include-in-header /tmp/RtmpPLH5cn/rmarkdown-str2d9331580ad3.html --mathjax --variable 'mathjax-url:https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --filter /usr/bin/pandoc-citeproc 
+[WARNING] This document format requires a nonempty <title> element.
+  Please specify either 'title' or 'pagetitle' in the metadata,
+  e.g. by using --metadata pagetitle="..." on the command line.
+  Falling back to 'pedmod.knit'
+
+Output created: pedmod.html
+
+
+processing file: pedmod.Rmd
+  |                                                                              |                                                                      |   0%  |                                                                              |.                                                                     |   1%
+  ordinary text without R code
+
+
+label: setup (with options) 
+List of 1
+ $ include: logi FALSE
+
+  |                                                                              |..                                                                    |   2%
+  ordinary text without R code
+
+  |                                                                              |..                                                                    |   3%
+label: how_to_install (with options) 
+List of 1
+ $ eval: logi FALSE
+
+  |                                                                              |...                                                                   |   4%
+  ordinary text without R code
+
+
+label: cran_how_to_install (with options) 
+List of 1
+ $ eval: logi FALSE
+
+  |                                                                              |....                                                                  |   5%
+  ordinary text without R code
+
+  |                                                                              |....                                                                  |   6%
+label: setup_simple
+  |                                                                              |.....                                                                 |   6%
+  ordinary text without R code
+
+  |                                                                              |.....                                                                 |   7%
+label: assign_sim_dat
+  |                                                                              |......                                                                |   8%
+  ordinary text without R code
+
+  |                                                                              |......                                                                |   9%
+label: est_simple (with options) 
+List of 1
+ $ cache: num 1
+
+  |                                                                              |.......                                                               |   9%
+  ordinary text without R code
+
+  |                                                                              |.......                                                               |  10%
+label: est_simple_res
+  |                                                                              |........                                                              |  11%
+  ordinary text without R code
+
+  |                                                                              |........                                                              |  12%
+label: tilt_est_simple (with options) 
+List of 1
+ $ cache: num 1
+
+  |                                                                              |.........                                                             |  12%
+  ordinary text without R code
+
+  |                                                                              |.........                                                             |  13%
+label: tilt_est_simple_res
+  |                                                                              |..........                                                            |  14%
+  ordinary text without R code
+
+
+label: std_est_simple (with options) 
+List of 1
+ $ cache: num 1
+
+  |                                                                              |...........                                                           |  15%
+  ordinary text without R code
+
+  |                                                                              |...........                                                           |  16%
+label: continued_std_est_simple (with options) 
+List of 1
+ $ cache: num 1
+
+  |                                                                              |............                                                          |  17%
+  ordinary text without R code
+
+
+label: pre_use_pedmod_psqn (with options) 
+List of 1
+ $ echo: logi FALSE
+
+  |                                                                              |.............                                                         |  18%
+  ordinary text without R code
+
+  |                                                                              |.............                                                         |  19%
+label: use_pedmod_sqn (with options) 
+List of 2
+ $ cache   : num 1
+ $ fig.keep: chr "last"
+
+  |                                                                              |..............                                                        |  19%
+  ordinary text without R code
+
+  |                                                                              |..............                                                        |  20%
+label: simple_ex_profile_likelihood (with options) 
+List of 1
+ $ cache: num 1
+
+  |                                                                              |...............                                                       |  21%
+  ordinary text without R code
+
+  |                                                                              |...............                                                       |  22%
+label: conf_int_simple_ex
+  |                                                                              |................                                                      |  22%
+  ordinary text without R code
+
+  |                                                                              |................                                                      |  23%
+label: plot_simple_ex_profile_likelihood
+  |                                                                              |.................                                                     |  24%
+  ordinary text without R code
+
+
+label: pre_simple_pedmod_profile (with options) 
+List of 1
+ $ echo: logi FALSE
+
+  |                                                                              |..................                                                    |  25%
+  ordinary text without R code
+
+  |                                                                              |..................                                                    |  26%
+label: simple_pedmod_profile (with options) 
+List of 3
+ $ cache   : num 1
+ $ message : logi TRUE
+ $ fig.keep: chr "last"
+
+  |                                                                              |...................                                                   |  27%
+  ordinary text without R code
+
+
+label: binary_simple_pedmod_profile (with options) 
+List of 3
+ $ cache   : num 1
+ $ message : logi TRUE
+ $ fig.keep: chr "last"
+
+  |                                                                              |....................                                                  |  28%
+  ordinary text without R code
+
+  |                                                                              |....................                                                  |  29%
+label: simple_ex_more_profile_likelihood (with options) 
+List of 1
+ $ cache: num 1
+
+  |                                                                              |.....................                                                 |  29%
+  ordinary text without R code
+
+  |                                                                              |.....................                                                 |  30%
+label: draw_mult_pf_curves
+  |                                                                              |......................                                                |  31%
+  ordinary text without R code
+
+  |                                                                              |......................                                                |  32%
+label: pre_rqmc (with options) 
+List of 1
+ $ echo: logi FALSE
+
+  |                                                                              |.......................                                               |  32%
+  ordinary text without R code
+
+  |                                                                              |.......................                                               |  33%
+label: rqmc (with options) 
+List of 1
+ $ cache: num 1
+
+  |                                                                              |........................                                              |  34%
+  ordinary text without R code
+
+  |                                                                              |........................                                              |  35%
+label: show_res_rqmc
+  |                                                                              |.........................                                             |  35%
+  ordinary text without R code
+
+  |                                                                              |.........................                                             |  36%
+label: rqmc_likelihood (with options) 
+List of 1
+ $ cache: num 1
+
+  |                                                                              |..........................                                            |  37%
+  ordinary text without R code
+
+
+label: show_rqmc_likelihood
+  |                                                                              |...........................                                           |  38%
+  ordinary text without R code
+
+  |                                                                              |...........................                                           |  39%
+label: rqmc_est_simple (with options) 
+List of 1
+ $ cache: num 1
+
+  |                                                                              |............................                                          |  40%
+  ordinary text without R code
+
+
+label: clean_pre_sim_study_simple (with options) 
+List of 1
+ $ echo: logi FALSE
+
+  |                                                                              |.............................                                         |  41%
+  ordinary text without R code
+
+  |                                                                              |.............................                                         |  42%
+label: sim_study_simple
+(Intercept)  Continuous      Binary             
+     -3.226       1.039       2.158       1.243 
+(Intercept)  Continuous      Binary             
+     -3.211       1.034       2.148       1.230 
+attr(,"variance proportions")
+Residual          
+  0.2262   0.7738 
+Time          7.1,          8.3. Max ll:   -1574.0667,   -1574.0658
+
+(Intercept)  Continuous      Binary             
+     -3.291       1.107       2.137       1.305 
+(Intercept)  Continuous      Binary             
+     -3.296       1.109       2.141       1.309 
+attr(,"variance proportions")
+Residual          
+  0.2127   0.7873 
+Time          9.3,         12.5. Max ll:   -1569.6613,   -1569.6609
+
+(Intercept)  Continuous      Binary             
+    -2.8068      0.9498      1.9047      1.0250 
+(Intercept)  Continuous      Binary             
+     -2.817       0.953       1.912       1.034 
+attr(,"variance proportions")
+Residual          
+  0.2623   0.7377 
+Time         10.9,         11.5. Max ll:   -1618.0764,   -1618.0755
+
+(Intercept)  Continuous      Binary             
+    -2.7593      0.9823      1.8346      0.9390 
+(Intercept)  Continuous      Binary             
+    -2.7689      0.9857      1.8411      0.9488 
+attr(,"variance proportions")
+Residual          
+  0.2791   0.7209 
+Time          3.8,          9.5. Max ll:   -1616.7848,   -1616.7831
+
+(Intercept)  Continuous      Binary             
+     -3.137       1.134       2.059       1.165 
+(Intercept)  Continuous      Binary             
+     -3.134       1.134       2.058       1.163 
+attr(,"variance proportions")
+Residual          
+  0.2381   0.7619 
+Time          4.8,          7.9. Max ll:   -1583.7124,   -1583.7126
+
+(Intercept)  Continuous      Binary             
+     -3.298       1.041       2.182       1.360 
+(Intercept)  Continuous      Binary             
+     -3.267       1.031       2.162       1.336 
+attr(,"variance proportions")
+Residual          
+  0.2082   0.7918 
+Time         14.7,         10.5. Max ll:   -1615.3256,   -1615.3264
+
+(Intercept)  Continuous      Binary             
+    -2.5151      0.7905      1.5948      0.4593 
+(Intercept)  Continuous      Binary             
+    -2.5151      0.7904      1.5947      0.4596 
+attr(,"variance proportions")
+Residual          
+  0.3871   0.6129 
+Time          8.8,         11.5. Max ll:   -1566.8999,   -1566.8999
+
+(Intercept)  Continuous      Binary             
+     -3.323       1.096       2.071       1.469 
+(Intercept)  Continuous      Binary             
+     -3.314       1.094       2.065       1.462 
+attr(,"variance proportions")
+Residual          
+  0.1882   0.8118 
+Time          6.3,         10.7. Max ll:   -1590.2368,   -1590.2370
+
+(Intercept)  Continuous      Binary             
+     -3.735       1.259       2.476       1.649 
+(Intercept)  Continuous      Binary             
+     -3.711       1.251       2.460       1.634 
+attr(,"variance proportions")
+Residual          
+  0.1633   0.8367 
+Time          6.6,         14.4. Max ll:   -1583.5849,   -1583.5846
+
+(Intercept)  Continuous      Binary             
+    -2.8343      1.0366      1.8531      0.9601 
+(Intercept)  Continuous      Binary             
+    -2.8286      1.0345      1.8493      0.9546 
+attr(,"variance proportions")
+Residual          
+   0.278    0.722 
+Time          4.8,         11.6. Max ll:   -1573.0906,   -1573.0908
+
+(Intercept)  Continuous      Binary             
+     -3.462       1.114       2.300       1.389 
+(Intercept)  Continuous      Binary             
+     -3.454       1.112       2.295       1.384 
+attr(,"variance proportions")
+Residual          
+  0.2004   0.7996 
+Time          7.1,          9.6. Max ll:   -1549.6444,   -1549.6443
+
+(Intercept)  Continuous      Binary             
+     -3.275       1.095       2.262       1.258 
+(Intercept)  Continuous      Binary             
+     -3.272       1.094       2.260       1.256 
+attr(,"variance proportions")
+Residual          
+  0.2216   0.7784 
+Time          6.2,          7.0. Max ll:   -1580.3836,   -1580.3836
+
+(Intercept)  Continuous      Binary             
+    -2.7584      0.9734      1.8345      0.8728 
+(Intercept)  Continuous      Binary             
+    -2.7552      0.9723      1.8323      0.8696 
+attr(,"variance proportions")
+Residual          
+  0.2953   0.7047 
+Time          5.3,          9.2. Max ll:   -1598.1032,   -1598.1023
+
+(Intercept)  Continuous      Binary             
+     -3.019       1.002       2.126       1.173 
+(Intercept)  Continuous      Binary             
+     -3.034       1.006       2.136       1.185 
+attr(,"variance proportions")
+Residual          
+  0.2342   0.7658 
+Time          6.1,         14.1. Max ll:   -1647.5906,   -1647.5890
+
+(Intercept)  Continuous      Binary             
+     -3.716       1.274       2.407       1.578 
+(Intercept)  Continuous      Binary             
+     -3.723       1.276       2.411       1.582 
+attr(,"variance proportions")
+Residual          
+  0.1705   0.8295 
+Time          3.8,         11.9. Max ll:   -1526.4827,   -1526.4814
+
+(Intercept)  Continuous      Binary             
+     -2.934       1.055       1.911       1.126 
+(Intercept)  Continuous      Binary             
+     -2.924       1.052       1.903       1.119 
+attr(,"variance proportions")
+Residual          
+  0.2461   0.7539 
+Time         14.4,         10.2. Max ll:   -1613.5392,   -1613.5391
+
+(Intercept)  Continuous      Binary             
+    -2.8034      0.9291      1.9383      1.0235 
+(Intercept)  Continuous      Binary             
+    -2.8070      0.9303      1.9408      1.0271 
+attr(,"variance proportions")
+Residual          
+  0.2637   0.7363 
+Time          8.8,          5.1. Max ll:   -1653.6128,   -1653.6129
+
+(Intercept)  Continuous      Binary             
+    -2.8805      0.9265      1.8133      1.1205 
+(Intercept)  Continuous      Binary             
+     -2.899       0.932       1.825       1.137 
+attr(,"variance proportions")
+Residual          
+  0.2428   0.7572 
+Time          8.9,         11.6. Max ll:   -1625.5476,   -1625.5452
+
+(Intercept)  Continuous      Binary             
+     -2.862       1.002       1.855       1.013 
+(Intercept)  Continuous      Binary             
+     -2.860       1.001       1.853       1.011 
+attr(,"variance proportions")
+Residual          
+  0.2669   0.7331 
+Time          5.3,          5.1. Max ll:   -1608.3804,   -1608.3804
+
+(Intercept)  Continuous      Binary             
+    -2.9567      0.9662      2.0162      1.0261 
+(Intercept)  Continuous      Binary             
+    -2.9515      0.9645      2.0127      1.0212 
+attr(,"variance proportions")
+Residual          
+  0.2648   0.7352 
+Time          6.5,         10.5. Max ll:   -1589.7108,   -1589.7108
+
+(Intercept)  Continuous      Binary             
+     -3.383       1.144       2.231       1.388 
+(Intercept)  Continuous      Binary             
+     -3.378       1.142       2.227       1.384 
+attr(,"variance proportions")
+Residual          
+  0.2003   0.7997 
+Time          5.1,          6.8. Max ll:   -1580.1220,   -1580.1218
+
+(Intercept)  Continuous      Binary             
+    -2.7232      0.9308      1.7718      0.8454 
+(Intercept)  Continuous      Binary             
+    -2.7427      0.9376      1.7850      0.8649 
+attr(,"variance proportions")
+Residual          
+  0.2963   0.7037 
+Time          4.0,          8.3. Max ll:   -1595.5390,   -1595.5364
+
+(Intercept)  Continuous      Binary             
+     -3.530       1.139       2.372       1.439 
+(Intercept)  Continuous      Binary             
+     -3.516       1.135       2.361       1.428 
+attr(,"variance proportions")
+Residual          
+  0.1933   0.8067 
+Time          5.0,          6.0. Max ll:   -1574.6020,   -1574.6036
+
+(Intercept)  Continuous      Binary             
+    -2.6764      0.9196      1.7183      0.7708 
+(Intercept)  Continuous      Binary             
+    -2.6848      0.9225      1.7240      0.7799 
+attr(,"variance proportions")
+Residual          
+  0.3143   0.6857 
+Time          5.1,         10.0. Max ll:   -1581.5043,   -1581.5037
+
+(Intercept)  Continuous      Binary             
+     -3.308       1.004       2.247       1.353 
+(Intercept)  Continuous      Binary             
+     -3.307       1.003       2.247       1.352 
+attr(,"variance proportions")
+Residual          
+  0.2056   0.7944 
+Time          5.4,         10.6. Max ll:   -1591.3680,   -1591.3679
+
+(Intercept)  Continuous      Binary             
+     -3.984       1.288       2.559       1.984 
+(Intercept)  Continuous      Binary             
+     -3.981       1.287       2.557       1.983 
+attr(,"variance proportions")
+Residual          
+   0.121    0.879 
+Time         23.9,          8.2. Max ll:   -1641.9077,   -1641.9075
+
+(Intercept)  Continuous      Binary             
+    -2.8043      0.9353      1.8464      0.9950 
+(Intercept)  Continuous      Binary             
+     -2.815       0.938       1.854       1.005 
+attr(,"variance proportions")
+Residual          
+   0.268    0.732 
+Time          5.4,         12.1. Max ll:   -1610.3250,   -1610.3232
+
+(Intercept)  Continuous      Binary             
+    -2.7686      0.9774      1.9829      1.0085 
+(Intercept)  Continuous      Binary             
+    -2.7613      0.9749      1.9777      1.0015 
+attr(,"variance proportions")
+Residual          
+  0.2686   0.7314 
+Time          5.0,          6.3. Max ll:   -1699.3578,   -1699.3561
+
+(Intercept)  Continuous      Binary             
+    -2.7637      0.9000      1.9396      0.8837 
+(Intercept)  Continuous      Binary             
+    -2.7726      0.9028      1.9460      0.8924 
+attr(,"variance proportions")
+Residual          
+  0.2906   0.7094 
+Time          5.1,          8.5. Max ll:   -1615.5320,   -1615.5305
+
+(Intercept)  Continuous      Binary             
+     -3.190       1.169       2.173       1.370 
+(Intercept)  Continuous      Binary             
+     -3.179       1.165       2.164       1.362 
+attr(,"variance proportions")
+Residual          
+  0.2039   0.7961 
+Time          5.6,         13.0. Max ll:   -1608.8413,   -1608.8405
+
+(Intercept)  Continuous      Binary             
+    -2.6756      0.8857      1.8309      0.6906 
+(Intercept)  Continuous      Binary             
+    -2.6788      0.8868      1.8332      0.6940 
+attr(,"variance proportions")
+Residual          
+  0.3331   0.6669 
+Time          5.2,          5.1. Max ll:   -1577.1618,   -1577.1616
+
+(Intercept)  Continuous      Binary             
+    -2.9307      0.9919      1.9318      1.1919 
+(Intercept)  Continuous      Binary             
+    -2.9386      0.9945      1.9368      1.1983 
+attr(,"variance proportions")
+Residual          
+  0.2318   0.7682 
+Time          4.7,          5.6. Max ll:   -1650.7065,   -1650.7056
+
+(Intercept)  Continuous      Binary             
+    -2.5901      0.8567      1.6904      0.7512 
+(Intercept)  Continuous      Binary             
+    -2.5874      0.8558      1.6887      0.7479 
+attr(,"variance proportions")
+Residual          
+  0.3213   0.6787 
+Time          9.6,          5.3. Max ll:   -1611.1538,   -1611.1544
+
+(Intercept)  Continuous      Binary             
+     -3.882       1.309       2.673       1.666 
+(Intercept)  Continuous      Binary             
+     -3.861       1.302       2.659       1.654 
+attr(,"variance proportions")
+Residual          
+  0.1606   0.8394 
+Time         10.8,          9.0. Max ll:   -1543.1585,   -1543.1572
+
+(Intercept)  Continuous      Binary             
+     -3.302       1.002       2.224       1.390 
+(Intercept)  Continuous      Binary             
+    -3.2826      0.9965      2.2103      1.3753 
+attr(,"variance proportions")
+Residual          
+  0.2018   0.7982 
+Time         10.3,          9.7. Max ll:   -1643.4977,   -1643.4958
+
+(Intercept)  Continuous      Binary             
+    -2.8096      0.8574      1.9157      0.7994 
+(Intercept)  Continuous      Binary             
+    -2.8133      0.8585      1.9181      0.8032 
+attr(,"variance proportions")
+Residual          
+  0.3093   0.6907 
+Time         10.4,          9.0. Max ll:   -1574.7349,   -1574.7348
+
+(Intercept)  Continuous      Binary             
+    -2.6379      0.8634      1.7388      0.6046 
+(Intercept)  Continuous      Binary             
+    -2.6388      0.8637      1.7394      0.6058 
+attr(,"variance proportions")
+Residual          
+   0.353    0.647 
+Time         10.7,         11.0. Max ll:   -1544.2522,   -1544.2522
+
+(Intercept)  Continuous      Binary             
+     -3.732       1.313       2.482       1.562 
+(Intercept)  Continuous      Binary             
+     -3.768       1.325       2.505       1.585 
+attr(,"variance proportions")
+Residual          
+  0.1701   0.8299 
+Time          5.8,         12.7. Max ll:   -1517.1693,   -1517.1691
+
+(Intercept)  Continuous      Binary             
+    -2.7397      0.9550      1.8515      0.8856 
+(Intercept)  Continuous      Binary             
+    -2.7538      0.9595      1.8619      0.9001 
+attr(,"variance proportions")
+Residual          
+   0.289    0.711 
+Time          8.9,          9.2. Max ll:   -1606.8305,   -1606.8306
+
+(Intercept)  Continuous      Binary             
+     -3.119       1.042       2.045       1.021 
+(Intercept)  Continuous      Binary             
+     -3.111       1.039       2.040       1.014 
+attr(,"variance proportions")
+Residual          
+  0.2662   0.7338 
+Time          4.7,          8.7. Max ll:   -1530.2611,   -1530.2607
+
+(Intercept)  Continuous      Binary             
+    -2.7945      0.9446      1.8856      1.0420 
+(Intercept)  Continuous      Binary             
+     -2.795       0.945       1.886       1.043 
+attr(,"variance proportions")
+Residual          
+  0.2606   0.7394 
+Time          8.9,          8.4. Max ll:   -1643.2979,   -1643.2979
+
+(Intercept)  Continuous      Binary             
+     -3.086       1.082       2.090       1.240 
+(Intercept)  Continuous      Binary             
+     -3.088       1.082       2.091       1.242 
+attr(,"variance proportions")
+Residual          
+  0.2242   0.7758 
+Time          4.5,          9.4. Max ll:   -1637.9652,   -1637.9651
+
+(Intercept)  Continuous      Binary             
+     -2.962       1.050       1.794       1.221 
+(Intercept)  Continuous      Binary             
+     -2.959       1.049       1.792       1.218 
+attr(,"variance proportions")
+Residual          
+  0.2283   0.7717 
+Time          9.8,         10.5. Max ll:   -1626.8064,   -1626.8063
+
+(Intercept)  Continuous      Binary             
+     -2.932       1.007       2.074       1.009 
+(Intercept)  Continuous      Binary             
+     -2.930       1.006       2.074       1.008 
+attr(,"variance proportions")
+Residual          
+  0.2673   0.7327 
+Time          9.6,         10.4. Max ll:   -1624.0941,   -1624.0939
+
+(Intercept)  Continuous      Binary             
+    -2.8140      0.9323      1.9071      0.7796 
+(Intercept)  Continuous      Binary             
+    -2.8165      0.9331      1.9086      0.7823 
+attr(,"variance proportions")
+Residual          
+  0.3138   0.6862 
+Time          6.3,          5.8. Max ll:   -1582.0835,   -1582.0837
+
+(Intercept)  Continuous      Binary             
+     -3.614       1.133       2.193       1.512 
+(Intercept)  Continuous      Binary             
+     -3.621       1.135       2.198       1.517 
+attr(,"variance proportions")
+Residual          
+  0.1799   0.8201 
+Time          6.2,          6.7. Max ll:   -1512.1259,   -1512.1256
+
+(Intercept)  Continuous      Binary             
+    -2.8741      0.9475      1.9688      0.9152 
+(Intercept)  Continuous      Binary             
+    -2.8739      0.9474      1.9686      0.9149 
+attr(,"variance proportions")
+Residual          
+   0.286    0.714 
+Time          8.1,         13.2. Max ll:   -1577.6617,   -1577.6617
+
+(Intercept)  Continuous      Binary             
+     -2.899       1.033       1.859       1.081 
+(Intercept)  Continuous      Binary             
+     -2.885       1.028       1.849       1.068 
+attr(,"variance proportions")
+Residual          
+  0.2558   0.7442 
+Time          6.1,          6.9. Max ll:   -1630.5539,   -1630.5533
+
+(Intercept)  Continuous      Binary             
+     -3.205       1.057       2.110       1.293 
+(Intercept)  Continuous      Binary             
+     -3.200       1.056       2.107       1.290 
+attr(,"variance proportions")
+Residual          
+  0.2159   0.7841 
+Time          7.0,          6.3. Max ll:   -1585.6072,   -1585.6071
+
+(Intercept)  Continuous      Binary             
+    -2.9610      0.9663      2.0263      1.1579 
+(Intercept)  Continuous      Binary             
+    -2.9718      0.9701      2.0319      1.1672 
+attr(,"variance proportions")
+Residual          
+  0.2374   0.7626 
+Time          9.2,          8.6. Max ll:   -1643.4114,   -1643.4113
+
+  |                                                                              |..............................                                        |  42%
+  ordinary text without R code
+
+  |                                                                              |..............................                                        |  43%
+label: clean_pre_simple_w_ev (with options) 
+List of 1
+ $ echo: logi FALSE
+
+  |                                                                              |...............................                                       |  44%
+  ordinary text without R code
+
+  |                                                                              |...............................                                       |  45%
+label: xtra_mat_simple_w_ev
+  |                                                                              |................................                                      |  45%
+  ordinary text without R code
+
+  |                                                                              |................................                                      |  46%
+label: simple_w_ev_assign_sim_dat
+  |                                                                              |.................................                                     |  47%
+  ordinary text without R code
+
+
+label: simple_w_ev_sim (with options) 
+List of 1
+ $ cache: num 1
+
+  |                                                                              |..................................                                    |  48%
+  ordinary text without R code
+
+  |                                                                              |..................................                                    |  49%
+label: est_simple_w_res
+  |                                                                              |...................................                                   |  50%
+  ordinary text without R code
+
+
+label: std_simple_w_ev_sim (with options) 
+List of 1
+ $ cache: num 1
+
+  |                                                                              |....................................                                  |  51%
+  ordinary text without R code
+
+  |                                                                              |....................................                                  |  52%
+label: continued_std_simple_w_ev_sim (with options) 
+List of 1
+ $ cache: num 1
+
+  |                                                                              |.....................................                                 |  53%
+  ordinary text without R code
+
+
+label: simple_w_ev_ex_profile_likelihood (with options) 
+List of 1
+ $ cache: num 1
+
+  |                                                                              |......................................                                |  54%
+  ordinary text without R code
+
+  |                                                                              |......................................                                |  55%
+label: draw_simple_w_ev_ex_profile_likelihood
+  |                                                                              |.......................................                               |  55%
+  ordinary text without R code
+
+  |                                                                              |.......................................                               |  56%
+label: pre_env_pl_curves (with options) 
+List of 1
+ $ echo: logi FALSE
+
+  |                                                                              |........................................                              |  57%
+  ordinary text without R code
+
+  |                                                                              |........................................                              |  58%
+label: env_pl_curves (with options) 
+List of 2
+ $ cache  : num 1
+ $ message: logi TRUE
+
+  |                                                                              |.........................................                             |  58%
+  ordinary text without R code
+
+  |                                                                              |.........................................                             |  59%
+label: plot_env_pl_curves
+  |                                                                              |..........................................                            |  60%
+  ordinary text without R code
+
+
+label: pre_prop_var_conf (with options) 
+List of 1
+ $ echo: logi FALSE
+
+  |                                                                              |...........................................                           |  61%
+  ordinary text without R code
+
+  |                                                                              |...........................................                           |  62%
+label: prop_var_conf (with options) 
+List of 2
+ $ cache  : num 1
+ $ message: logi TRUE
+
+  |                                                                              |............................................                          |  63%
+  ordinary text without R code
+
+
+label: plot_prop_var_conf
+  |                                                                              |.............................................                         |  64%
+  ordinary text without R code
+
+  |                                                                              |.............................................                         |  65%
+label: clean_pre_sim_simple_w_ev (with options) 
+List of 1
+ $ echo: logi FALSE
+
+  |                                                                              |..............................................                        |  65%
+  ordinary text without R code
+
+  |                                                                              |..............................................                        |  66%
+label: sim_study_simple_w
+(Intercept)      Binary                         
+    -2.6481      3.6237      0.4520     -0.3163 
+(Intercept)      Binary                         
+    -2.6494      3.6255      0.4550     -0.3181 
+attr(,"variance proportions")
+Residual                   
+  0.3027   0.4771   0.2202 
+Time         13.9,         11.9. Max ll:   -2873.6880,   -2873.6880
+
+(Intercept)      Binary                         
+    -3.1239      4.3575      0.9219     -0.0400 
+(Intercept)      Binary                         
+   -3.14096     4.38187     0.93442    -0.02373 
+attr(,"variance proportions")
+Residual                   
+  0.2211   0.5629   0.2159 
+Time          6.2,          5.9. Max ll:   -2779.6528,   -2779.6490
+
+(Intercept)      Binary                         
+    -2.8415      3.7622      0.2716      0.2028 
+(Intercept)      Binary                         
+    -2.8435      3.7648      0.2741      0.2039 
+attr(,"variance proportions")
+Residual                   
+  0.2824   0.3714   0.3462 
+Time         10.8,         10.9. Max ll:   -2711.1825,   -2711.1824
+
+(Intercept)      Binary                         
+    -2.6060      3.5515      0.2742     -0.2248 
+(Intercept)      Binary                         
+    -2.6100      3.5565      0.2771     -0.2187 
+attr(,"variance proportions")
+Residual                   
+  0.3202   0.4225   0.2573 
+Time          8.2,         17.5. Max ll:   -2808.3757,   -2808.3754
+
+(Intercept)      Binary                         
+   -2.88444     4.02697     0.63506    -0.01787 
+(Intercept)      Binary                         
+   -2.88579     4.02873     0.63836    -0.02096 
+attr(,"variance proportions")
+Residual                   
+  0.2582   0.4889   0.2529 
+Time         22.5,         21.7. Max ll:   -2806.5809,   -2806.5807
+
+(Intercept)      Binary                         
+    -3.3957      4.5568      0.9988      0.2835 
+(Intercept)      Binary                         
+    -3.4331      4.6061      1.0251      0.3133 
+attr(,"variance proportions")
+Residual                   
+  0.1940   0.5407   0.2654 
+Time         40.5,          6.3. Max ll:   -2709.5480,   -2709.5473
+
+(Intercept)      Binary                         
+   -2.92890     3.87255     0.63523     0.05416 
+(Intercept)      Binary                         
+   -2.93490     3.88068     0.64162     0.05832 
+attr(,"variance proportions")
+Residual                   
+  0.2526   0.4797   0.2677 
+Time         28.0,         23.1. Max ll:   -2823.8290,   -2823.8293
+
+(Intercept)      Binary                         
+    -2.5719      3.3543      0.2517     -0.4231 
+(Intercept)      Binary                         
+    -2.5770      3.3611      0.2584     -0.4188 
+attr(,"variance proportions")
+Residual                   
+  0.3387   0.4385   0.2228 
+Time         18.1,         18.4. Max ll:   -2753.4429,   -2753.4427
+
+(Intercept)      Binary                         
+    -2.5207      3.4087      0.2612     -0.5451 
+(Intercept)      Binary                         
+    -2.5101      3.3956      0.2535     -0.5687 
+attr(,"variance proportions")
+Residual                   
+  0.3503   0.4513   0.1984 
+Time         14.8,          5.3. Max ll:   -2800.0163,   -2800.0188
+
+(Intercept)      Binary                         
+   -2.75972     3.65591     0.25050    -0.09371 
+(Intercept)      Binary                         
+   -2.76491     3.66279     0.25590    -0.08809 
+attr(,"variance proportions")
+Residual                   
+  0.3118   0.4027   0.2855 
+Time         20.8,         26.2. Max ll:   -2641.9371,   -2641.9372
+
+(Intercept)      Binary                         
+    -3.0379      4.1667      0.5716      0.3603 
+(Intercept)      Binary                         
+    -3.0274      4.1525      0.5625      0.3510 
+attr(,"variance proportions")
+Residual                   
+  0.2395   0.4203   0.3402 
+Time         10.5,          7.6. Max ll:   -2767.1644,   -2767.1643
+
+(Intercept)      Binary                         
+   -2.72371     3.51815     0.24602    -0.08211 
+(Intercept)      Binary                         
+   -2.71727     3.50906     0.24165    -0.09278 
+attr(,"variance proportions")
+Residual                   
+  0.3140   0.3998   0.2862 
+Time         15.2,         12.6. Max ll:   -2719.1933,   -2719.1929
+
+(Intercept)      Binary                         
+   -2.98297     3.88486     0.65546    -0.01686 
+(Intercept)      Binary                         
+  -2.993169    3.898462    0.665999   -0.009816 
+attr(,"variance proportions")
+Residual                   
+  0.2540   0.4944   0.2515 
+Time         18.5,         19.9. Max ll:   -2716.4606,   -2716.4600
+
+(Intercept)      Binary                         
+    -2.7699      3.8082      0.6410     -0.3775 
+(Intercept)      Binary                         
+    -2.7661      3.8027      0.6356     -0.3772 
+attr(,"variance proportions")
+Residual                   
+  0.2798   0.5283   0.1919 
+Time         26.5,         21.9. Max ll:   -2842.7168,   -2842.7170
+
+(Intercept)      Binary                         
+    -2.6527      3.5657      0.2886     -0.2409 
+(Intercept)      Binary                         
+    -2.6601      3.5751      0.2956     -0.2308 
+attr(,"variance proportions")
+Residual                   
+  0.3187   0.4283   0.2530 
+Time         17.8,         14.9. Max ll:   -2737.0265,   -2737.0259
+
+(Intercept)      Binary                         
+    -2.9122      3.8533      0.6993     -0.1953 
+(Intercept)      Binary                         
+    -2.9182      3.8616      0.7052     -0.1908 
+attr(,"variance proportions")
+Residual                   
+  0.2597   0.5257   0.2146 
+Time         20.2,         17.9. Max ll:   -2789.6682,   -2789.6677
+
+(Intercept)      Binary                         
+    -2.4991      3.3502      0.1687     -0.4777 
+(Intercept)      Binary                         
+    -2.5001      3.3515      0.1724     -0.4812 
+attr(,"variance proportions")
+Residual                   
+  0.3564   0.4234   0.2202 
+Time         25.6,         14.7. Max ll:   -2803.0912,   -2803.0911
+
+(Intercept)      Binary                         
+  -3.138572    4.212868    0.865131    0.006645 
+(Intercept)      Binary                         
+    -3.1742      4.2606      0.8952      0.0355 
+attr(,"variance proportions")
+Residual                   
+  0.2230   0.5459   0.2311 
+Time         14.9,         16.9. Max ll:   -2709.9648,   -2709.9612
+
+(Intercept)      Binary                         
+    -3.6355      4.9108      1.2837      0.2779 
+(Intercept)      Binary                         
+    -3.6054      4.8702      1.2638      0.2581 
+attr(,"variance proportions")
+Residual                   
+  0.1714   0.6067   0.2219 
+Time         13.1,          6.1. Max ll:   -2731.5370,   -2731.5334
+
+(Intercept)      Binary                         
+    -3.2488      4.3348      0.9021      0.1601 
+(Intercept)      Binary                         
+    -3.2375      4.3194      0.8935      0.1503 
+attr(,"variance proportions")
+Residual                   
+  0.2171   0.5306   0.2523 
+Time         16.5,         17.2. Max ll:   -2719.6435,   -2719.6428
+
+(Intercept)      Binary                         
+    -4.4644      6.1794      1.7044      0.9144 
+(Intercept)      Binary                         
+    -4.4027      6.0944      1.6731      0.8815 
+attr(,"variance proportions")
+Residual                   
+  0.1144   0.6095   0.2762 
+Time         12.8,          9.1. Max ll:   -2702.0254,   -2702.0253
+
+(Intercept)      Binary                         
+    -2.8297      3.7021      0.3139      0.1611 
+(Intercept)      Binary                         
+    -2.8342      3.7075      0.3192      0.1633 
+attr(,"variance proportions")
+Residual                   
+  0.2814   0.3872   0.3313 
+Time         19.6,         10.3. Max ll:   -2743.2772,   -2743.2771
+
+(Intercept)      Binary                         
+    -3.0707      4.0870      0.9175     -0.1502 
+(Intercept)      Binary                         
+    -3.0505      4.0601      0.9016     -0.1716 
+attr(,"variance proportions")
+Residual                   
+  0.2322   0.5721   0.1956 
+Time         17.7,         25.1. Max ll:   -2832.3663,   -2832.3646
+
+(Intercept)      Binary                         
+    -3.1727      4.1588      0.6502      0.3095 
+(Intercept)      Binary                         
+    -3.1702      4.1560      0.6473      0.3075 
+attr(,"variance proportions")
+Residual                   
+  0.2342   0.4474   0.3185 
+Time          5.2,          6.4. Max ll:   -2655.4698,   -2655.4703
+
+(Intercept)      Binary                         
+    -3.5638      4.8269      1.0583      0.5324 
+(Intercept)      Binary                         
+    -3.4844      4.7181      1.0034      0.4745 
+attr(,"variance proportions")
+Residual                   
+  0.1875   0.5113   0.3013 
+Time         15.0,          5.2. Max ll:   -2710.7684,   -2710.7672
+
+(Intercept)      Binary                         
+    -2.5484      3.4448      0.1328     -0.2769 
+(Intercept)      Binary                         
+    -2.5450      3.4389      0.1228     -0.2753 
+attr(,"variance proportions")
+Residual                   
+  0.3460   0.3912   0.2627 
+Time         13.2,          5.0. Max ll:   -2782.1826,   -2782.1855
+
+(Intercept)      Binary                         
+    -2.6874      3.5791      0.4774     -0.3116 
+(Intercept)      Binary                         
+    -2.6967      3.5912      0.4918     -0.3119 
+attr(,"variance proportions")
+Residual                   
+  0.2970   0.4856   0.2174 
+Time         15.2,          6.2. Max ll:   -2857.1727,   -2857.1719
+
+(Intercept)      Binary                         
+    -3.5197      4.5932      1.0615      0.5975 
+(Intercept)      Binary                         
+    -3.5345      4.6120      1.0708      0.6089 
+attr(,"variance proportions")
+Residual                   
+  0.1737   0.5069   0.3194 
+Time         24.4,         20.9. Max ll:   -2849.6794,   -2849.6787
+
+(Intercept)      Binary                         
+   -2.99804     3.99226     0.76219     0.01046 
+(Intercept)      Binary                         
+  -2.993245    3.984808    0.756769    0.005723 
+attr(,"variance proportions")
+Residual                   
+  0.2417   0.5152   0.2431 
+Time          5.1,          5.1. Max ll:   -2821.0137,   -2821.0145
+
+(Intercept)      Binary                         
+    -2.9105      3.7849      0.7159     -0.5208 
+(Intercept)      Binary                         
+    -2.9180      3.7949      0.7222     -0.5116 
+attr(,"variance proportions")
+Residual                   
+  0.2733   0.5628   0.1639 
+Time         21.4,         21.8. Max ll:   -2654.8796,   -2654.8795
+
+(Intercept)      Binary                         
+   -3.13175     4.15935     0.88408     0.09016 
+(Intercept)      Binary                         
+   -3.14311     4.17529     0.89347     0.09897 
+attr(,"variance proportions")
+Residual                   
+  0.2199   0.5373   0.2428 
+Time          7.0,          8.7. Max ll:   -2801.1225,   -2801.1213
+
+(Intercept)      Binary                         
+    -3.3559      4.5460      0.9768      0.2464 
+(Intercept)      Binary                         
+    -3.4527      4.6770      1.0457      0.3223 
+attr(,"variance proportions")
+Residual                   
+  0.1914   0.5445   0.2641 
+Time          7.4,         16.3. Max ll:   -2697.2636,   -2697.2459
+
+(Intercept)      Binary                         
+    -3.5680      4.4687      1.1718      0.3754 
+(Intercept)      Binary                         
+    -3.5541      4.4519      1.1616      0.3662 
+attr(,"variance proportions")
+Residual                   
+  0.1774   0.5668   0.2558 
+Time          9.2,          6.0. Max ll:   -2762.9871,   -2762.9884
+
+(Intercept)      Binary                         
+    -3.0594      3.9578      0.8123     -0.3610 
+(Intercept)      Binary                         
+    -3.0444      3.9381      0.7969     -0.3681 
+attr(,"variance proportions")
+Residual                   
+  0.2557   0.5673   0.1770 
+Time         20.5,         24.5. Max ll:   -2623.0103,   -2623.0092
+
+(Intercept)      Binary                         
+   -2.92019     3.99500     0.60893    -0.08805 
+(Intercept)      Binary                         
+   -2.91969     3.99520     0.60793    -0.08754 
+attr(,"variance proportions")
+Residual                   
+  0.2665   0.4894   0.2441 
+Time         12.2,         12.9. Max ll:   -2741.6145,   -2741.6146
+
+(Intercept)      Binary                         
+    -3.0171      4.1442      0.6049      0.2525 
+(Intercept)      Binary                         
+    -3.0158      4.1426      0.6036      0.2516 
+attr(,"variance proportions")
+Residual                   
+  0.2430   0.4444   0.3125 
+Time         16.9,         10.8. Max ll:   -2754.9104,   -2754.9104
+
+(Intercept)      Binary                         
+    -3.1113      3.9482      0.8101     -0.1061 
+(Intercept)      Binary                         
+   -3.14104     3.98559     0.83164    -0.07186 
+attr(,"variance proportions")
+Residual                   
+  0.2365   0.5433   0.2201 
+Time         10.2,         16.1. Max ll:   -2686.3897,   -2686.3850
+
+(Intercept)      Binary                         
+    -2.8393      3.7168      0.5725     -0.1982 
+(Intercept)      Binary                         
+    -2.8452      3.7246      0.5780     -0.1919 
+attr(,"variance proportions")
+Residual                   
+  0.2772   0.4940   0.2288 
+Time         22.6,         15.3. Max ll:   -2757.3076,   -2757.3082
+
+(Intercept)      Binary                         
+   -3.10187     4.13678     0.78083     0.02054 
+(Intercept)      Binary                         
+  -3.087071    4.116978    0.768161    0.007932 
+attr(,"variance proportions")
+Residual                   
+  0.2402   0.5178   0.2421 
+Time         18.5,         15.5. Max ll:   -2712.5176,   -2712.5161
+
+(Intercept)      Binary                         
+    -3.7393      5.0751      1.2741      0.4224 
+(Intercept)      Binary                         
+     -3.765       5.111       1.291       0.440 
+attr(,"variance proportions")
+Residual                   
+  0.1616   0.5875   0.2509 
+Time         23.2,         18.6. Max ll:   -2650.1481,   -2650.1477
+
+(Intercept)      Binary                         
+   -3.19204     4.29838     0.94724     0.05537 
+(Intercept)      Binary                         
+   -3.16787     4.26653     0.92976     0.02959 
+attr(,"variance proportions")
+Residual                   
+  0.2191   0.5552   0.2257 
+Time         23.8,         12.4. Max ll:   -2768.4679,   -2768.4735
+
+(Intercept)      Binary                         
+   -3.00454     4.01815     0.64918     0.05757 
+(Intercept)      Binary                         
+   -2.97403     3.97999     0.62111     0.02973 
+attr(,"variance proportions")
+Residual                   
+  0.2570   0.4783   0.2647 
+Time         19.9,         11.8. Max ll:   -2703.6490,   -2703.6541
+
+(Intercept)      Binary                         
+     -4.965       6.620       1.813       1.373 
+(Intercept)      Binary                         
+     -4.923       6.565       1.794       1.354 
+attr(,"variance proportions")
+Residual                   
+ 0.09186  0.55248  0.35566 
+Time          8.1,         13.4. Max ll:   -2704.0546,   -2704.0577
+
+(Intercept)      Binary                         
+    -3.0483      4.0841      0.5768      0.2105 
+(Intercept)      Binary                         
+    -3.0708      4.1144      0.5962      0.2306 
+attr(,"variance proportions")
+Residual                   
+  0.2454   0.4455   0.3091 
+Time          9.9,         18.0. Max ll:   -2681.1892,   -2681.1869
+
+(Intercept)      Binary                         
+   -2.99664     3.90846     0.60526     0.08917 
+(Intercept)      Binary                         
+   -2.99940     3.91291     0.61028     0.08726 
+attr(,"variance proportions")
+Residual                   
+  0.2543   0.4682   0.2775 
+Time         16.7,         15.4. Max ll:   -2697.4757,   -2697.4757
+
+(Intercept)      Binary                         
+   -2.90238     4.00198     0.62882    -0.01734 
+(Intercept)      Binary                         
+  -2.917657    4.023222    0.642297   -0.002034 
+attr(,"variance proportions")
+Residual                   
+  0.2565   0.4875   0.2560 
+Time         10.7,         22.5. Max ll:   -2788.8708,   -2788.8686
+
+(Intercept)      Binary                         
+    -2.7053      3.6784      0.2292     -0.1311 
+(Intercept)      Binary                         
+    -2.7068      3.6805      0.2301     -0.1285 
+attr(,"variance proportions")
+Residual                   
+  0.3187   0.4011   0.2802 
+Time         25.8,         18.2. Max ll:   -2663.0191,   -2663.0192
+
+(Intercept)      Binary                         
+    -2.8351      3.6617      0.5623     -0.3803 
+(Intercept)      Binary                         
+    -2.8297      3.6546      0.5579     -0.3884 
+attr(,"variance proportions")
+Residual                   
+   0.292    0.510    0.198 
+Time         22.1,         21.4. Max ll:   -2683.9444,   -2683.9442
+
+(Intercept)      Binary                         
+    -2.7685      3.7055      0.4611     -0.2187 
+(Intercept)      Binary                         
+    -2.7758      3.7155      0.4691     -0.2117 
+attr(,"variance proportions")
+Residual                   
+  0.2935   0.4691   0.2375 
+Time         21.2,         20.3. Max ll:   -2745.8377,   -2745.8383
+
+(Intercept)      Binary                         
+    -3.1543      4.2108      0.7239      0.2752 
+(Intercept)      Binary                         
+    -3.1803      4.2464      0.7473      0.2937 
+attr(,"variance proportions")
+Residual                   
+  0.2246   0.4742   0.3013 
+Time          9.1,         18.6. Max ll:   -2711.1000,   -2711.0964
+
+  |                                                                              |...............................................                       |  67%
+  ordinary text without R code
+
+  |                                                                              |...............................................                       |  68%
+label: clean_pre_loading (with options) 
+List of 1
+ $ echo: logi FALSE
+
+  |                                                                              |................................................                      |  68%
+  ordinary text without R code
+
+  |                                                                              |................................................                      |  69%
+label: loading_assign_sim_dat
+  |                                                                              |.................................................                     |  70%
+  ordinary text without R code
+
+  |                                                                              |.................................................                     |  71%
+label: loading_one_dat (with options) 
+List of 1
+ $ cache: num 1
+
+  |                                                                              |..................................................                    |  71%
+  ordinary text without R code
+
+  |                                                                              |..................................................                    |  72%
+label: loading_show_res
+  |                                                                              |...................................................                   |  73%
+  ordinary text without R code
+
+
+label: loadings_sim_study
+         (Intercept) Binary                                           
+Estimate      -2.053  4.193 -0.2298 0.9849 0.8875 -0.5781 0.6671 -1.19
+Truth         -2.000  4.000 -0.3942 1.1274 1.0000 -0.5058 0.6496 -1.00
+Time         72.1. Max ll:   -4395.5206
+
+         (Intercept) Binary                                            
+Estimate      -2.041  4.122 -0.2802 0.9964 0.9152 -0.6492 0.6032 -1.222
+Truth         -2.000  4.000 -0.3942 1.1274 1.0000 -0.5058 0.6496 -1.000
+Time         76.8. Max ll:   -4292.2899
+
+         (Intercept) Binary                                          
+Estimate      -1.954  3.957 -0.4962 1.125 1.064 -0.5981 0.6764 -1.144
+Truth         -2.000  4.000 -0.3942 1.127 1.000 -0.5058 0.6496 -1.000
+Time         73.8. Max ll:   -4326.5815
+
+         (Intercept) Binary                                           
+Estimate      -2.081   4.21 -0.4313 1.196 1.079 -0.3455 0.6563 -0.9428
+Truth         -2.000   4.00 -0.3942 1.127 1.000 -0.5058 0.6496 -1.0000
+Time         74.2. Max ll:   -4363.1704
+
+         (Intercept) Binary                                          
+Estimate      -1.761  3.673 -0.7327 1.320 1.168 -0.7034 0.8034 -1.002
+Truth         -2.000  4.000 -0.3942 1.127 1.000 -0.5058 0.6496 -1.000
+Time         70.6. Max ll:   -4427.5856
+
+         (Intercept) Binary                                          
+Estimate      -1.912  3.818 -0.3517 1.174 0.8831 -0.8667 0.8055 -1.11
+Truth         -2.000  4.000 -0.3942 1.127 1.0000 -0.5058 0.6496 -1.00
+Time         71.5. Max ll:   -4319.9260
+
+         (Intercept) Binary                                          
+Estimate      -1.855  3.539 -0.5836 1.320 1.031 -0.6889 0.6438 -1.224
+Truth         -2.000  4.000 -0.3942 1.127 1.000 -0.5058 0.6496 -1.000
+Time         73.7. Max ll:   -4473.3598
+
+         (Intercept) Binary                                           
+Estimate      -1.972  3.827 -0.4241 1.115 1.033 -0.3852 0.5416 -0.8847
+Truth         -2.000  4.000 -0.3942 1.127 1.000 -0.5058 0.6496 -1.0000
+Time         63.0. Max ll:   -4392.1278
+
+         (Intercept) Binary                                          
+Estimate      -1.758  3.655 -0.6797 1.208 1.142 -0.7824 0.7729 -1.123
+Truth         -2.000  4.000 -0.3942 1.127 1.000 -0.5058 0.6496 -1.000
+Time         76.2. Max ll:   -4402.6644
+
+         (Intercept) Binary                                            
+Estimate      -2.071  4.072 -0.4300 1.271 0.9176 -0.2868 0.5098 -0.8079
+Truth         -2.000  4.000 -0.3942 1.127 1.0000 -0.5058 0.6496 -1.0000
+Time         75.6. Max ll:   -4290.3400
+
+         (Intercept) Binary                                           
+Estimate       -1.88  3.936 -0.4741 1.124 0.9737 -0.6571 0.7954 -1.051
+Truth          -2.00  4.000 -0.3942 1.127 1.0000 -0.5058 0.6496 -1.000
+Time         74.4. Max ll:   -4392.1055
+
+         (Intercept) Binary                                          
+Estimate      -2.112  4.097 -0.4200 1.251 1.094 -0.5048 0.6629 -1.112
+Truth         -2.000  4.000 -0.3942 1.127 1.000 -0.5058 0.6496 -1.000
+Time        100.8. Max ll:   -4316.2796
+
+         (Intercept) Binary                                           
+Estimate       -2.05   3.98 -0.4284 1.075 0.9944 -0.4427 0.5961 -1.054
+Truth          -2.00   4.00 -0.3942 1.127 1.0000 -0.5058 0.6496 -1.000
+Time         76.3. Max ll:   -4308.1808
+
+         (Intercept) Binary                                           
+Estimate      -2.067   4.29 -0.2698 1.121 0.9817 -0.5124 0.5458 -1.139
+Truth         -2.000   4.00 -0.3942 1.127 1.0000 -0.5058 0.6496 -1.000
+Time         78.6. Max ll:   -4393.9034
+
+         (Intercept) Binary                                           
+Estimate      -2.032  4.117 -0.3868 1.182 1.003 -0.3404 0.5515 -0.7907
+Truth         -2.000  4.000 -0.3942 1.127 1.000 -0.5058 0.6496 -1.0000
+Time         73.7. Max ll:   -4337.5184
+
+         (Intercept) Binary                                            
+Estimate      -1.816  3.584 -0.4684 1.081 0.8506 -0.6493 0.7018 -0.9337
+Truth         -2.000  4.000 -0.3942 1.127 1.0000 -0.5058 0.6496 -1.0000
+Time         75.3. Max ll:   -4390.6236
+
+         (Intercept) Binary                                          
+Estimate      -2.171  4.325 -0.2060 1.008 1.038 -0.5262 0.6707 -1.224
+Truth         -2.000  4.000 -0.3942 1.127 1.000 -0.5058 0.6496 -1.000
+Time         77.5. Max ll:   -4380.6590
+
+         (Intercept) Binary                                            
+Estimate      -1.852  3.707 -0.5354 1.181 0.9674 -0.6312 0.6697 -0.9591
+Truth         -2.000  4.000 -0.3942 1.127 1.0000 -0.5058 0.6496 -1.0000
+Time         74.5. Max ll:   -4321.1143
+
+         (Intercept) Binary                                          
+Estimate      -1.837  3.739 -0.3843 1.149 0.8793 -0.9356 0.6531 -1.37
+Truth         -2.000  4.000 -0.3942 1.127 1.0000 -0.5058 0.6496 -1.00
+Time        122.7. Max ll:   -4430.8984
+
+         (Intercept) Binary                                           
+Estimate      -2.048  4.304 -0.3624 1.118 0.9561 -0.5290 0.6725 -1.114
+Truth         -2.000  4.000 -0.3942 1.127 1.0000 -0.5058 0.6496 -1.000
+Time         70.9. Max ll:   -4294.5649
+
+         (Intercept) Binary                                           
+Estimate      -1.934  3.961 -0.3022 1.123 0.8777 -0.6057 0.5885 -1.022
+Truth         -2.000  4.000 -0.3942 1.127 1.0000 -0.5058 0.6496 -1.000
+Time         86.1. Max ll:   -4399.1707
+
+         (Intercept) Binary                                          
+Estimate      -1.958  3.749 -0.5025 1.106 1.073 -0.5677 0.6526 -1.107
+Truth         -2.000  4.000 -0.3942 1.127 1.000 -0.5058 0.6496 -1.000
+Time         88.3. Max ll:   -4356.5822
+
+         (Intercept) Binary                                            
+Estimate      -2.061  4.043 -0.2275 0.9665 0.9189 -0.6237 0.7219 -1.172
+Truth         -2.000  4.000 -0.3942 1.1274 1.0000 -0.5058 0.6496 -1.000
+Time         76.4. Max ll:   -4373.2042
+
+         (Intercept) Binary                                          
+Estimate      -1.873   3.85 -0.5279 1.108 1.064 -0.6430 0.5668 -1.056
+Truth         -2.000   4.00 -0.3942 1.127 1.000 -0.5058 0.6496 -1.000
+Time         77.2. Max ll:   -4309.0397
+
+         (Intercept) Binary                                        
+Estimate      -2.071  4.259 -0.3689 1.177 1.01 -0.4911 0.5890 -1.15
+Truth         -2.000  4.000 -0.3942 1.127 1.00 -0.5058 0.6496 -1.00
+Time         87.8. Max ll:   -4347.8675
+
+         (Intercept) Binary                                          
+Estimate      -1.693  3.509 -0.8653 1.390 1.132 -0.9271 0.8370 -1.208
+Truth         -2.000  4.000 -0.3942 1.127 1.000 -0.5058 0.6496 -1.000
+Time         72.8. Max ll:   -4375.8549
+
+         (Intercept) Binary                                          
+Estimate      -2.042  4.328 -0.2748 1.084 1.031 -0.6428 0.7044 -1.186
+Truth         -2.000  4.000 -0.3942 1.127 1.000 -0.5058 0.6496 -1.000
+Time         79.3. Max ll:   -4363.7035
+
+         (Intercept) Binary                                           
+Estimate      -1.934  3.978 -0.2393 1.013 0.8374 -0.7019 0.8612 -1.111
+Truth         -2.000  4.000 -0.3942 1.127 1.0000 -0.5058 0.6496 -1.000
+Time         86.3. Max ll:   -4466.5790
+
+         (Intercept) Binary                                           
+Estimate      -1.986  3.864 -0.5248 1.131 1.124 -0.4335 0.6876 -0.9752
+Truth         -2.000  4.000 -0.3942 1.127 1.000 -0.5058 0.6496 -1.0000
+Time         90.1. Max ll:   -4373.6275
+
+         (Intercept) Binary                                            
+Estimate      -1.765  3.447 -0.5916 1.165 0.9087 -0.8215 0.7575 -0.9905
+Truth         -2.000  4.000 -0.3942 1.127 1.0000 -0.5058 0.6496 -1.0000
+Time         66.7. Max ll:   -4318.9956
+
+         (Intercept) Binary                                           
+Estimate      -1.769  3.596 -0.6388 1.201 0.9826 -0.8140 0.6811 -1.161
+Truth         -2.000  4.000 -0.3942 1.127 1.0000 -0.5058 0.6496 -1.000
+Time         74.7. Max ll:   -4338.8528
+
+         (Intercept) Binary                                             
+Estimate      -2.579  5.095 -0.1128 1.101 0.9658  0.04665 0.4953 -0.7177
+Truth         -2.000  4.000 -0.3942 1.127 1.0000 -0.50580 0.6496 -1.0000
+Time         84.4. Max ll:   -4224.2779
+
+         (Intercept) Binary                                           
+Estimate        -1.9  3.676 -0.4001 1.043 0.9241 -0.5890 0.6056 -1.153
+Truth           -2.0  4.000 -0.3942 1.127 1.0000 -0.5058 0.6496 -1.000
+Time         85.3. Max ll:   -4471.9661
+
+         (Intercept) Binary                                           
+Estimate       -2.13  4.149 -0.2481 1.079 0.9239 -0.5418 0.6210 -1.093
+Truth          -2.00  4.000 -0.3942 1.127 1.0000 -0.5058 0.6496 -1.000
+Time         93.6. Max ll:   -4276.7022
+
+         (Intercept) Binary                                          
+Estimate      -2.129  4.317 -0.3403 1.257 1.103 -0.5524 0.5002 -1.217
+Truth         -2.000  4.000 -0.3942 1.127 1.000 -0.5058 0.6496 -1.000
+Time         89.9. Max ll:   -4332.3312
+
+         (Intercept) Binary                                            
+Estimate      -2.063  4.098 -0.4089 1.212 0.9922 -0.3152 0.4545 -0.9248
+Truth         -2.000  4.000 -0.3942 1.127 1.0000 -0.5058 0.6496 -1.0000
+Time         90.3. Max ll:   -4339.0285
+
+         (Intercept) Binary                                            
+Estimate      -2.086  3.819 -0.4173 1.139 0.9889 -0.3475 0.5232 -0.9504
+Truth         -2.000  4.000 -0.3942 1.127 1.0000 -0.5058 0.6496 -1.0000
+Time         75.7. Max ll:   -4316.2749
+
+         (Intercept) Binary                                           
+Estimate      -2.191  4.254 -0.5258 1.306 1.113 -0.1926 0.5441 -0.8696
+Truth         -2.000  4.000 -0.3942 1.127 1.000 -0.5058 0.6496 -1.0000
+Time         75.1. Max ll:   -4268.1531
+
+         (Intercept) Binary                                           
+Estimate       -2.04   4.02 -0.2637 0.9665 0.9791 -0.9439 0.8186 -1.46
+Truth          -2.00   4.00 -0.3942 1.1274 1.0000 -0.5058 0.6496 -1.00
+Time         69.0. Max ll:   -4268.2668
+
+         (Intercept) Binary                                          
+Estimate      -2.045   4.11 -0.2804 1.030 0.92 -0.4226 0.6616 -0.9568
+Truth         -2.000   4.00 -0.3942 1.127 1.00 -0.5058 0.6496 -1.0000
+Time        119.4. Max ll:   -4388.3865
+
+         (Intercept) Binary                                           
+Estimate      -1.966  3.983 -0.3808 1.187 0.8906 -0.5510 0.5453 -1.127
+Truth         -2.000  4.000 -0.3942 1.127 1.0000 -0.5058 0.6496 -1.000
+Time         77.7. Max ll:   -4407.2292
+
+         (Intercept) Binary                                           
+Estimate      -2.112   4.17 -0.4109 1.236 1.028 -0.2814 0.5557 -0.8248
+Truth         -2.000   4.00 -0.3942 1.127 1.000 -0.5058 0.6496 -1.0000
+Time         91.5. Max ll:   -4332.2359
+
+         (Intercept) Binary                                            
+Estimate      -2.244    4.7 -0.05866 1.006 0.8425 -0.2309 0.5947 -0.824
+Truth         -2.000    4.0 -0.39423 1.127 1.0000 -0.5058 0.6496 -1.000
+Time         91.9. Max ll:   -4385.8508
+
+         (Intercept) Binary                                           
+Estimate      -2.009  4.154 -0.3381 1.074 1.008 -0.5128 0.7617 -0.9153
+Truth         -2.000  4.000 -0.3942 1.127 1.000 -0.5058 0.6496 -1.0000
+Time         89.9. Max ll:   -4385.7186
+
+         (Intercept) Binary                                           
+Estimate      -1.951  3.842 -0.5735 1.346 1.112 -0.4395 0.5613 -0.9494
+Truth         -2.000  4.000 -0.3942 1.127 1.000 -0.5058 0.6496 -1.0000
+Time         62.1. Max ll:   -4394.5320
+
+         (Intercept) Binary                                           
+Estimate      -2.168  4.395 -0.2106 1.091 0.9485 -0.3936 0.5238 -1.118
+Truth         -2.000  4.000 -0.3942 1.127 1.0000 -0.5058 0.6496 -1.000
+Time         81.0. Max ll:   -4390.1742
+
+         (Intercept) Binary                                           
+Estimate      -2.154  4.449 -0.4595 1.212 1.079 -0.1841 0.5060 -0.8118
+Truth         -2.000  4.000 -0.3942 1.127 1.000 -0.5058 0.6496 -1.0000
+Time         91.4. Max ll:   -4280.0757
+
+         (Intercept) Binary                                         
+Estimate      -1.837  3.533 -0.5455 1.164 1.04 -0.8977 0.6671 -1.353
+Truth         -2.000  4.000 -0.3942 1.127 1.00 -0.5058 0.6496 -1.000
+Time         74.9. Max ll:   -4387.5879
+
+         (Intercept) Binary                                           
+Estimate      -2.027  4.046 -0.2647 1.054 0.9153 -0.5476 0.5232 -1.092
+Truth         -2.000  4.000 -0.3942 1.127 1.0000 -0.5058 0.6496 -1.000
+Time         82.4. Max ll:   -4358.2662
+
+         (Intercept) Binary                                           
+Estimate      -1.958  3.946 -0.4975 1.127 1.045 -0.3939 0.6469 -0.8831
+Truth         -2.000  4.000 -0.3942 1.127 1.000 -0.5058 0.6496 -1.0000
+Time         76.1. Max ll:   -4400.4975
+
+  |                                                                              |....................................................                  |  74%
+  ordinary text without R code
+
+  |                                                                              |....................................................                  |  75%
+label: clean_up_complicated (with options) 
+List of 1
+ $ echo: logi FALSE
+
+  |                                                                              |.....................................................                 |  76%
+  ordinary text without R code
+
+
+label: source_sim_file
+  |                                                                              |......................................................                |  77%
+  ordinary text without R code
+
+  |                                                                              |......................................................                |  78%
+label: one_family
+   [[ suppressing 10 column names '9', '10', '15' ... ]]
+   [[ suppressing 10 column names '9', '10', '15' ... ]]
+  |                                                                              |.......................................................               |  78%
+  ordinary text without R code
+
+  |                                                                              |.......................................................               |  79%
+label: est_mod (with options) 
+List of 1
+ $ cache: num 1
+
+  |                                                                              |........................................................              |  80%
+  ordinary text without R code
+
+  |                                                                              |........................................................              |  81%
+label: show_est_mod
+  |                                                                              |.........................................................             |  81%
+  ordinary text without R code
+
+  |                                                                              |.........................................................             |  82%
+label: svrg (with options) 
+List of 2
+ $ eval: logi FALSE
+ $ echo: logi FALSE
+
+  |                                                                              |..........................................................            |  83%
+  ordinary text without R code
+
+
+label: pre_comp_par (with options) 
+List of 1
+ $ echo: logi FALSE
+
+  |                                                                              |...........................................................           |  84%
+  ordinary text without R code
+
+  |                                                                              |...........................................................           |  85%
+label: time_mult (with options) 
+List of 1
+ $ cache: num 1
+
+  |                                                                              |............................................................          |  86%
+  ordinary text without R code
+
+
+label: re_create_ptr (with options) 
+List of 1
+ $ echo: logi FALSE
+
+  |                                                                              |.............................................................         |  87%
+  ordinary text without R code
+
+  |                                                                              |.............................................................         |  88%
+label: use_adam (with options) 
+List of 1
+ $ cache: num 1
+
+  |                                                                              |..............................................................        |  88%
+  ordinary text without R code
+
+  |                                                                              |..............................................................        |  89%
+label: adam_re_create_ptr (with options) 
+List of 1
+ $ echo: logi FALSE
+
+  |                                                                              |...............................................................       |  90%
+  ordinary text without R code
+
+  |                                                                              |...............................................................       |  91%
+label: res_adam
+  |                                                                              |................................................................      |  91%
+  ordinary text without R code
+
+  |                                                                              |................................................................      |  92%
+label: compare_w_mvtnorm (with options) 
+List of 1
+ $ cache: num 1
+
+  |                                                                              |.................................................................     |  93%
+  ordinary text without R code
+
+  |                                                                              |.................................................................     |  94%
+label: show_averge_rel_err (with options) 
+List of 1
+ $ fig.height: num 5.33
+
+  |                                                                              |..................................................................    |  94%
+  ordinary text without R code
+
+  |                                                                              |..................................................................    |  95%
+label: use_new_impl (with options) 
+List of 1
+ $ fig.height: num 5.33
+
+  |                                                                              |...................................................................   |  96%
+  ordinary text without R code
+
+
+label: botev_example (with options) 
+List of 1
+ $ cache: num 1
+
+  |                                                                              |....................................................................  |  97%
+  ordinary text without R code
+
+  |                                                                              |....................................................................  |  98%
+label: err_botev_example (with options) 
+List of 1
+ $ fig.height: num 5.33
+
+  |                                                                              |..................................................................... |  99%
+  ordinary text without R code
+
+
+label: time_botev_example (with options) 
+List of 1
+ $ fig.height: num 5.33
+
+  |                                                                              |......................................................................| 100%
+  ordinary text without R code
+
+
+output file: pedmod.knit.md
+
+/usr/bin/pandoc +RTS -K512m -RTS pedmod.knit.md --to gfm --from markdown+autolink_bare_uris+tex_math_single_backslash --output README.md --atx-headers '--webtex=https://render.githubusercontent.com/render/math?math=' --template /home/boennecd/R/x86_64-pc-linux-gnu-library/4.1/rmarkdown/rmarkdown/templates/github_document/resources/default.md --filter /usr/bin/pandoc-citeproc 
+/usr/bin/pandoc +RTS -K512m -RTS README.md --to html4 --from gfm --output README.html --standalone --self-contained --highlight-style pygments --template /home/boennecd/R/x86_64-pc-linux-gnu-library/4.1/rmarkdown/rmarkdown/templates/github_document/resources/preview.html --variable 'github-markdown-css:/home/boennecd/R/x86_64-pc-linux-gnu-library/4.1/rmarkdown/rmarkdown/templates/github_document/resources/github.css' --metadata pagetitle=PREVIEW 
+
+Preview created: README.html
+
+Output created: README.md
+> 
+> proc.time()
+   user  system elapsed 
+159.718   1.167 264.661 

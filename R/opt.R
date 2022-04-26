@@ -21,9 +21,9 @@ get_n_terms <- function(ptr){
 #' Optimizes \code{\link{eval_pedigree_ll}} and \code{\link{eval_pedigree_grad}}
 #' using a passed optimization function.
 #'
-#' \code{pedmod_start} yields starting values which can be used for
-#' \code{pedmod_opt}. The method is based on a heuristic where we make the
-#' assumption that the fixed effects are unrelated to the random effects.
+#' \code{pedmod_start} and \code{pedmod_start_loadings}
+#' yield starting values which can be used for
+#' \code{pedmod_opt}. The methods are based on a heuristics.
 #'
 #' @inheritParams eval_pedigree_ll
 #' @param par starting values passed to \code{opt_func}.

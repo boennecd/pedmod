@@ -39,6 +39,14 @@ to these matrices as it is hardly ever justified to not include the
 intercept (the exceptions being e.g. when splines are used which include
 the intercept and with certain dummy designs). This equally holds for
 the \code{Z} matrices with \code{pedigree_ll_terms_loadings}.
+
+\code{pedigree_ll_terms_loadings} relax the assumption that the scale
+parameter is the same for all individuals. \code{pedigree_ll_terms_loadings}
+and \code{pedigree_ll_terms} yield the same model if \code{"Z"} is an
+intercept column for all families but with a different parameterization.
+In this case, \code{pedigree_ll_terms} will be
+faster. See \code{vignette("pedmod", "pedmod")} for examples of using
+\code{pedigree_ll_terms_loadings}.
 }
 \examples{
 # three families as an example
@@ -85,5 +93,13 @@ dat_arg <- lapply(fam_dat, function(x){
 
 # get a pointer to the C++ object
 ptr <- pedigree_ll_terms(dat_arg, max_threads = 1L)
+
+# get the argument for a the version with loadings
+dat_arg_loadings <- lapply(fam_dat, function(x){
+  list(y = as.numeric(x$y), X = x$X, Z = x$X[, 1:2],
+       scale_mats = list(x$rel_mat, x$met_mat))
+})
+
+ptr <- pedigree_ll_terms_loadings(dat_arg_loadings, max_threads = 1L)
 
 }

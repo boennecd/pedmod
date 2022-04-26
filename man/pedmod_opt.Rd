@@ -110,7 +110,7 @@ at \code{vignette("pedmod", package = "pedmod")}.}
 lattice rules while one yields scrambled Sobol sequences.}
 
 \item{use_tilting}{\code{TRUE} if the minimax tilting method suggested
-by Botev (2017). See \url{https://doi.org/10.1111/rssb.12162}.}
+by Botev (2017). See \doi{10.1111/rssb.12162}.}
 
 \item{vls_scales}{can be a numeric vector with a positive scalar for each
 cluster. Then \code{vls_scales[i] * minvls} and
@@ -160,9 +160,9 @@ Optimizes \code{\link{eval_pedigree_ll}} and \code{\link{eval_pedigree_grad}}
 using a passed optimization function.
 }
 \details{
-\code{pedmod_start} yields starting values which can be used for
-\code{pedmod_opt}. The method is based on a heuristic where we make the
-assumption that the fixed effects are unrelated to the random effects.
+\code{pedmod_start} and \code{pedmod_start_loadings}
+yield starting values which can be used for
+\code{pedmod_opt}. The methods are based on a heuristics.
 }
 \examples{
 \donttest{

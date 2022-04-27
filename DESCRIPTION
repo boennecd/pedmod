@@ -21,9 +21,9 @@ Authors@R: c(
          role = c("cph")),
   person("R-core", email = "R-core@R-project.org",
          role = "cph"),
-  person("Leo Belzile", 
+  person("Leo", "Belzile", 
          role = "cph"),
-  person("Zdravko Botev ", 
+  person("Zdravko", "Botev", 
          role = "cph"))
 Maintainer: Benjamin Christoffersen <boennecd@gmail.com>
 Description: Provides functions to estimate mixed probit models using, for 

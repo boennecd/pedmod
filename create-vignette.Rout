@@ -178,21 +178,21 @@ label: unconnected_largest_ex
 
 output file: pedigree_partitioning.knit.md
 
-/usr/bin/pandoc +RTS -K512m -RTS pedigree_partitioning.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output pedigree_partitioning.html --lua-filter /home/boennecd/R/x86_64-pc-linux-gnu-library/4.1/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /home/boennecd/R/x86_64-pc-linux-gnu-library/4.1/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --standalone --section-divs --template /home/boennecd/R/x86_64-pc-linux-gnu-library/4.1/rmarkdown/rmd/h/default.html --no-highlight --variable highlightjs=1 --variable theme=bootstrap --include-in-header /tmp/RtmpPLH5cn/rmarkdown-str2d936d1523a.html --mathjax --variable 'mathjax-url:https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --filter /usr/bin/pandoc-citeproc 
+/usr/bin/pandoc +RTS -K512m -RTS pedigree_partitioning.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output pedigree_partitioning.html --lua-filter /home/boennecd/R/x86_64-pc-linux-gnu-library/4.1/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /home/boennecd/R/x86_64-pc-linux-gnu-library/4.1/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --standalone --section-divs --template /home/boennecd/R/x86_64-pc-linux-gnu-library/4.1/rmarkdown/rmd/h/default.html --no-highlight --variable highlightjs=1 --variable theme=bootstrap --include-in-header /tmp/RtmpmMSRxr/rmarkdown-stra30d28fbb75d.html --mathjax --variable 'mathjax-url:https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --filter /usr/bin/pandoc-citeproc 
 
 Output created: pedigree_partitioning.html
 
 
 processing file: pedmod.Rmd
-  |                                                                              |                                                                      |   0%  |                                                                              |.                                                                     |   1%
+  |                                                                              |                                                                      |   0%  |                                                                              |                                                                      |   1%
   ordinary text without R code
 
-
+  |                                                                              |.                                                                     |   1%
 label: setup (with options) 
 List of 1
  $ include: logi FALSE
 
-  |                                                                              |..                                                                    |   2%
+  |                                                                              |.                                                                     |   2%
   ordinary text without R code
 
   |                                                                              |..                                                                    |   3%
@@ -200,63 +200,68 @@ label: how_to_install (with options)
 List of 1
  $ eval: logi FALSE
 
-  |                                                                              |...                                                                   |   4%
+
   ordinary text without R code
 
-
+  |                                                                              |...                                                                   |   4%
 label: cran_how_to_install (with options) 
 List of 1
  $ eval: logi FALSE
 
-  |                                                                              |....                                                                  |   5%
+  |                                                                              |...                                                                   |   5%
   ordinary text without R code
 
-  |                                                                              |....                                                                  |   6%
+  |                                                                              |....                                                                  |   5%
 label: setup_simple
-  |                                                                              |.....                                                                 |   6%
+  |                                                                              |....                                                                  |   6%
   ordinary text without R code
 
   |                                                                              |.....                                                                 |   7%
 label: assign_sim_dat
-  |                                                                              |......                                                                |   8%
+
   ordinary text without R code
 
-  |                                                                              |......                                                                |   9%
+  |                                                                              |......                                                                |   8%
 label: est_simple (with options) 
 List of 1
  $ cache: num 1
 
-  |                                                                              |.......                                                               |   9%
+  |                                                                              |......                                                                |   9%
   ordinary text without R code
 
-  |                                                                              |.......                                                               |  10%
+
 label: est_simple_res
-  |                                                                              |........                                                              |  11%
+  |                                                                              |.......                                                               |  10%
   ordinary text without R code
 
-  |                                                                              |........                                                              |  12%
+  |                                                                              |.......                                                               |  11%
 label: tilt_est_simple (with options) 
 List of 1
  $ cache: num 1
 
-  |                                                                              |.........                                                             |  12%
+  |                                                                              |........                                                              |  11%
   ordinary text without R code
 
-  |                                                                              |.........                                                             |  13%
+  |                                                                              |........                                                              |  12%
 label: tilt_est_simple_res
-  |                                                                              |..........                                                            |  14%
+  |                                                                              |.........                                                             |  13%
   ordinary text without R code
 
 
-label: std_est_simple (with options) 
+label: nlminb_tilt_est_simple (with options) 
 List of 1
  $ cache: num 1
 
+  |                                                                              |..........                                                            |  14%
+  ordinary text without R code
+
+  |                                                                              |..........                                                            |  15%
+label: nlminb_tilt_est_simple_res
   |                                                                              |...........                                                           |  15%
   ordinary text without R code
 
   |                                                                              |...........                                                           |  16%
-label: continued_std_est_simple (with options) 
+label: std_est_simple (with options) 
 List of 1
  $ cache: num 1
 
@@ -264,49 +269,57 @@ List of 1
   ordinary text without R code
 
 
-label: pre_use_pedmod_psqn (with options) 
+label: continued_std_est_simple (with options) 
 List of 1
- $ echo: logi FALSE
+ $ cache: num 1
 
   |                                                                              |.............                                                         |  18%
   ordinary text without R code
 
   |                                                                              |.............                                                         |  19%
+label: pre_use_pedmod_psqn (with options) 
+List of 1
+ $ echo: logi FALSE
+
+
+  ordinary text without R code
+
+  |                                                                              |..............                                                        |  20%
 label: use_pedmod_sqn (with options) 
 List of 2
  $ cache   : num 1
  $ fig.keep: chr "last"
 
-  |                                                                              |..............                                                        |  19%
+  |                                                                              |..............                                                        |  21%
   ordinary text without R code
 
-  |                                                                              |..............                                                        |  20%
+  |                                                                              |...............                                                       |  21%
 label: simple_ex_profile_likelihood (with options) 
 List of 1
  $ cache: num 1
 
-  |                                                                              |...............                                                       |  21%
-  ordinary text without R code
-
   |                                                                              |...............                                                       |  22%
-label: conf_int_simple_ex
-  |                                                                              |................                                                      |  22%
   ordinary text without R code
 
   |                                                                              |................                                                      |  23%
-label: plot_simple_ex_profile_likelihood
-  |                                                                              |.................                                                     |  24%
+label: conf_int_simple_ex
+
   ordinary text without R code
 
+  |                                                                              |.................                                                     |  24%
+label: plot_simple_ex_profile_likelihood
+  |                                                                              |.................                                                     |  25%
+  ordinary text without R code
 
+  |                                                                              |..................                                                    |  25%
 label: pre_simple_pedmod_profile (with options) 
 List of 1
  $ echo: logi FALSE
 
-  |                                                                              |..................                                                    |  25%
+  |                                                                              |..................                                                    |  26%
   ordinary text without R code
 
-  |                                                                              |..................                                                    |  26%
+  |                                                                              |...................                                                   |  26%
 label: simple_pedmod_profile (with options) 
 List of 3
  $ cache   : num 1
@@ -316,7 +329,7 @@ List of 3
   |                                                                              |...................                                                   |  27%
   ordinary text without R code
 
-
+  |                                                                              |...................                                                   |  28%
 label: binary_simple_pedmod_profile (with options) 
 List of 3
  $ cache   : num 1
@@ -331,10 +344,10 @@ label: simple_ex_more_profile_likelihood (with options)
 List of 1
  $ cache: num 1
 
-  |                                                                              |.....................                                                 |  29%
+  |                                                                              |.....................                                                 |  30%
   ordinary text without R code
 
-  |                                                                              |.....................                                                 |  30%
+
 label: draw_mult_pf_curves
   |                                                                              |......................                                                |  31%
   ordinary text without R code
@@ -355,7 +368,7 @@ List of 1
   |                                                                              |........................                                              |  34%
   ordinary text without R code
 
-  |                                                                              |........................                                              |  35%
+
 label: show_res_rqmc
   |                                                                              |.........................                                             |  35%
   ordinary text without R code
@@ -365,31 +378,31 @@ label: rqmc_likelihood (with options)
 List of 1
  $ cache: num 1
 
+
+  ordinary text without R code
+
   |                                                                              |..........................                                            |  37%
-  ordinary text without R code
-
-
 label: show_rqmc_likelihood
-  |                                                                              |...........................                                           |  38%
+  |                                                                              |..........................                                            |  38%
   ordinary text without R code
 
-  |                                                                              |...........................                                           |  39%
+  |                                                                              |...........................                                           |  38%
 label: rqmc_est_simple (with options) 
 List of 1
  $ cache: num 1
 
-  |                                                                              |............................                                          |  40%
+  |                                                                              |...........................                                           |  39%
   ordinary text without R code
 
-
+  |                                                                              |............................                                          |  40%
 label: clean_pre_sim_study_simple (with options) 
 List of 1
  $ echo: logi FALSE
 
-  |                                                                              |.............................                                         |  41%
+
   ordinary text without R code
 
-  |                                                                              |.............................                                         |  42%
+  |                                                                              |.............................                                         |  41%
 label: sim_study_simple
 (Intercept)  Continuous      Binary             
      -3.226       1.039       2.158       1.243 
@@ -841,25 +854,25 @@ Residual
   0.2374   0.7626 
 Time          9.2,          8.6. Max ll:   -1643.4114,   -1643.4113
 
-  |                                                                              |..............................                                        |  42%
+  |                                                                              |.............................                                         |  42%
   ordinary text without R code
 
-  |                                                                              |..............................                                        |  43%
+  |                                                                              |..............................                                        |  42%
 label: clean_pre_simple_w_ev (with options) 
 List of 1
  $ echo: logi FALSE
 
+  |                                                                              |..............................                                        |  43%
+  ordinary text without R code
+
   |                                                                              |...............................                                       |  44%
-  ordinary text without R code
-
-  |                                                                              |...............................                                       |  45%
 label: xtra_mat_simple_w_ev
-  |                                                                              |................................                                      |  45%
+
   ordinary text without R code
 
-  |                                                                              |................................                                      |  46%
+  |                                                                              |................................                                      |  45%
 label: simple_w_ev_assign_sim_dat
-  |                                                                              |.................................                                     |  47%
+  |                                                                              |................................                                      |  46%
   ordinary text without R code
 
 
@@ -867,16 +880,24 @@ label: simple_w_ev_sim (with options)
 List of 1
  $ cache: num 1
 
+  |                                                                              |.................................                                     |  47%
+  ordinary text without R code
+
+  |                                                                              |.................................                                     |  48%
+label: est_simple_w_res
   |                                                                              |..................................                                    |  48%
   ordinary text without R code
 
   |                                                                              |..................................                                    |  49%
-label: est_simple_w_res
+label: std_simple_w_ev_sim (with options) 
+List of 1
+ $ cache: num 1
+
   |                                                                              |...................................                                   |  50%
   ordinary text without R code
 
 
-label: std_simple_w_ev_sim (with options) 
+label: continued_std_simple_w_ev_sim (with options) 
 List of 1
  $ cache: num 1
 
@@ -884,79 +905,71 @@ List of 1
   ordinary text without R code
 
   |                                                                              |....................................                                  |  52%
-label: continued_std_simple_w_ev_sim (with options) 
-List of 1
- $ cache: num 1
-
-  |                                                                              |.....................................                                 |  53%
-  ordinary text without R code
-
-
 label: simple_w_ev_ex_profile_likelihood (with options) 
 List of 1
  $ cache: num 1
 
+  |                                                                              |.....................................                                 |  52%
+  ordinary text without R code
+
+  |                                                                              |.....................................                                 |  53%
+label: draw_simple_w_ev_ex_profile_likelihood
   |                                                                              |......................................                                |  54%
   ordinary text without R code
 
-  |                                                                              |......................................                                |  55%
-label: draw_simple_w_ev_ex_profile_likelihood
-  |                                                                              |.......................................                               |  55%
-  ordinary text without R code
 
-  |                                                                              |.......................................                               |  56%
 label: pre_env_pl_curves (with options) 
 List of 1
  $ echo: logi FALSE
 
-  |                                                                              |........................................                              |  57%
+  |                                                                              |......................................                                |  55%
   ordinary text without R code
 
-  |                                                                              |........................................                              |  58%
+  |                                                                              |.......................................                               |  56%
 label: env_pl_curves (with options) 
 List of 2
  $ cache  : num 1
  $ message: logi TRUE
 
-  |                                                                              |.........................................                             |  58%
+
   ordinary text without R code
 
-  |                                                                              |.........................................                             |  59%
+  |                                                                              |........................................                              |  57%
 label: plot_env_pl_curves
-  |                                                                              |..........................................                            |  60%
+  |                                                                              |........................................                              |  58%
   ordinary text without R code
 
-
+  |                                                                              |.........................................                             |  58%
 label: pre_prop_var_conf (with options) 
 List of 1
  $ echo: logi FALSE
 
-  |                                                                              |...........................................                           |  61%
+  |                                                                              |.........................................                             |  59%
   ordinary text without R code
 
-  |                                                                              |...........................................                           |  62%
+  |                                                                              |..........................................                            |  60%
 label: prop_var_conf (with options) 
 List of 2
  $ cache  : num 1
  $ message: logi TRUE
 
-  |                                                                              |............................................                          |  63%
+
   ordinary text without R code
 
-
+  |                                                                              |...........................................                           |  61%
 label: plot_prop_var_conf
-  |                                                                              |.............................................                         |  64%
+  |                                                                              |...........................................                           |  62%
   ordinary text without R code
 
-  |                                                                              |.............................................                         |  65%
+  |                                                                              |............................................                          |  62%
 label: clean_pre_sim_simple_w_ev (with options) 
 List of 1
  $ echo: logi FALSE
 
-  |                                                                              |..............................................                        |  65%
+  |                                                                              |............................................                          |  63%
   ordinary text without R code
 
-  |                                                                              |..............................................                        |  66%
+  |                                                                              |.............................................                         |  64%
 label: sim_study_simple_w
 (Intercept)      Binary                         
     -2.6481      3.6237      0.4520     -0.3163 
@@ -1408,36 +1421,64 @@ Residual
   0.2246   0.4742   0.3013 
 Time          9.1,         18.6. Max ll:   -2711.1000,   -2711.0964
 
+
+  ordinary text without R code
+
+  |                                                                              |.............................................                         |  65%
+label: clean_pre_loading (with options) 
+List of 1
+ $ echo: logi FALSE
+
+  |                                                                              |..............................................                        |  66%
+  ordinary text without R code
+
+
+label: loading_assign_sim_dat
   |                                                                              |...............................................                       |  67%
   ordinary text without R code
 
   |                                                                              |...............................................                       |  68%
-label: clean_pre_loading (with options) 
+label: loading_one_dat (with options) 
 List of 1
- $ echo: logi FALSE
+ $ cache: num 1
 
   |                                                                              |................................................                      |  68%
   ordinary text without R code
 
   |                                                                              |................................................                      |  69%
-label: loading_assign_sim_dat
+label: loading_show_res
   |                                                                              |.................................................                     |  70%
   ordinary text without R code
 
-  |                                                                              |.................................................                     |  71%
-label: loading_one_dat (with options) 
-List of 1
- $ cache: num 1
+
+label: loadings_pl (with options) 
+List of 2
+ $ cache  : num 1
+ $ message: logi TRUE
 
   |                                                                              |..................................................                    |  71%
   ordinary text without R code
 
   |                                                                              |..................................................                    |  72%
-label: loading_show_res
-  |                                                                              |...................................................                   |  73%
+label: show_loadings_pl_show
+  |                                                                              |...................................................                   |  72%
   ordinary text without R code
 
+  |                                                                              |...................................................                   |  73%
+label: loadings_nleq_pl (with options) 
+List of 2
+ $ cache  : num 1
+ $ message: logi TRUE
 
+  |                                                                              |...................................................                   |  74%
+  ordinary text without R code
+
+  |                                                                              |....................................................                  |  74%
+label: show_loadings_nleq_pl
+  |                                                                              |....................................................                  |  75%
+  ordinary text without R code
+
+  |                                                                              |.....................................................                 |  75%
 label: loadings_sim_study
          (Intercept) Binary                                           
 Estimate      -2.053  4.193 -0.2298 0.9849 0.8875 -0.5781 0.6671 -1.19
@@ -1689,65 +1730,65 @@ Estimate      -1.958  3.946 -0.4975 1.127 1.045 -0.3939 0.6469 -0.8831
 Truth         -2.000  4.000 -0.3942 1.127 1.000 -0.5058 0.6496 -1.0000
 Time         76.1. Max ll:   -4400.4975
 
-  |                                                                              |....................................................                  |  74%
+  |                                                                              |.....................................................                 |  76%
   ordinary text without R code
 
-  |                                                                              |....................................................                  |  75%
+  |                                                                              |......................................................                |  77%
 label: clean_up_complicated (with options) 
 List of 1
  $ echo: logi FALSE
 
-  |                                                                              |.....................................................                 |  76%
+
   ordinary text without R code
 
-
+  |                                                                              |.......................................................               |  78%
 label: source_sim_file
-  |                                                                              |......................................................                |  77%
+  |                                                                              |.......................................................               |  79%
   ordinary text without R code
 
-  |                                                                              |......................................................                |  78%
+  |                                                                              |........................................................              |  79%
 label: one_family
    [[ suppressing 10 column names '9', '10', '15' ... ]]
    [[ suppressing 10 column names '9', '10', '15' ... ]]
-  |                                                                              |.......................................................               |  78%
+  |                                                                              |........................................................              |  80%
   ordinary text without R code
 
-  |                                                                              |.......................................................               |  79%
+  |                                                                              |.........................................................             |  81%
 label: est_mod (with options) 
 List of 1
  $ cache: num 1
 
-  |                                                                              |........................................................              |  80%
-  ordinary text without R code
 
-  |                                                                              |........................................................              |  81%
-label: show_est_mod
-  |                                                                              |.........................................................             |  81%
   ordinary text without R code
 
   |                                                                              |.........................................................             |  82%
-label: svrg (with options) 
-List of 2
- $ eval: logi FALSE
- $ echo: logi FALSE
-
+label: show_est_mod
   |                                                                              |..........................................................            |  83%
   ordinary text without R code
 
 
-label: pre_comp_par (with options) 
-List of 1
+label: svrg (with options) 
+List of 2
+ $ eval: logi FALSE
  $ echo: logi FALSE
 
   |                                                                              |...........................................................           |  84%
   ordinary text without R code
 
   |                                                                              |...........................................................           |  85%
+label: pre_comp_par (with options) 
+List of 1
+ $ echo: logi FALSE
+
+  |                                                                              |............................................................          |  85%
+  ordinary text without R code
+
+  |                                                                              |............................................................          |  86%
 label: time_mult (with options) 
 List of 1
  $ cache: num 1
 
-  |                                                                              |............................................................          |  86%
+  |                                                                              |.............................................................         |  87%
   ordinary text without R code
 
 
@@ -1755,47 +1796,47 @@ label: re_create_ptr (with options)
 List of 1
  $ echo: logi FALSE
 
-  |                                                                              |.............................................................         |  87%
-  ordinary text without R code
-
-  |                                                                              |.............................................................         |  88%
-label: use_adam (with options) 
-List of 1
- $ cache: num 1
-
   |                                                                              |..............................................................        |  88%
   ordinary text without R code
 
   |                                                                              |..............................................................        |  89%
+label: use_adam (with options) 
+List of 1
+ $ cache: num 1
+
+  |                                                                              |...............................................................       |  89%
+  ordinary text without R code
+
+  |                                                                              |...............................................................       |  90%
 label: adam_re_create_ptr (with options) 
 List of 1
  $ echo: logi FALSE
 
-  |                                                                              |...............................................................       |  90%
-  ordinary text without R code
-
-  |                                                                              |...............................................................       |  91%
-label: res_adam
   |                                                                              |................................................................      |  91%
   ordinary text without R code
 
+
+label: res_adam
   |                                                                              |................................................................      |  92%
+  ordinary text without R code
+
+  |                                                                              |.................................................................     |  93%
 label: compare_w_mvtnorm (with options) 
 List of 1
  $ cache: num 1
 
-  |                                                                              |.................................................................     |  93%
+
   ordinary text without R code
 
-  |                                                                              |.................................................................     |  94%
+  |                                                                              |..................................................................    |  94%
 label: show_averge_rel_err (with options) 
 List of 1
  $ fig.height: num 5.33
 
-  |                                                                              |..................................................................    |  94%
+  |                                                                              |..................................................................    |  95%
   ordinary text without R code
 
-  |                                                                              |..................................................................    |  95%
+  |                                                                              |...................................................................   |  95%
 label: use_new_impl (with options) 
 List of 1
  $ fig.height: num 5.33
@@ -1803,15 +1844,15 @@ List of 1
   |                                                                              |...................................................................   |  96%
   ordinary text without R code
 
-
+  |                                                                              |....................................................................  |  97%
 label: botev_example (with options) 
 List of 1
  $ cache: num 1
 
-  |                                                                              |....................................................................  |  97%
+
   ordinary text without R code
 
-  |                                                                              |....................................................................  |  98%
+  |                                                                              |..................................................................... |  98%
 label: err_botev_example (with options) 
 List of 1
  $ fig.height: num 5.33
@@ -1819,7 +1860,7 @@ List of 1
   |                                                                              |..................................................................... |  99%
   ordinary text without R code
 
-
+  |                                                                              |......................................................................|  99%
 label: time_botev_example (with options) 
 List of 1
  $ fig.height: num 5.33
@@ -1830,7 +1871,7 @@ List of 1
 
 output file: pedmod.knit.md
 
-/usr/bin/pandoc +RTS -K512m -RTS pedmod.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output pedmod.html --lua-filter /home/boennecd/R/x86_64-pc-linux-gnu-library/4.1/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /home/boennecd/R/x86_64-pc-linux-gnu-library/4.1/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --standalone --section-divs --template /home/boennecd/R/x86_64-pc-linux-gnu-library/4.1/rmarkdown/rmd/h/default.html --no-highlight --variable highlightjs=1 --variable theme=bootstrap --include-in-header /tmp/RtmpPLH5cn/rmarkdown-str2d9331580ad3.html --mathjax --variable 'mathjax-url:https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --filter /usr/bin/pandoc-citeproc 
+/usr/bin/pandoc +RTS -K512m -RTS pedmod.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output pedmod.html --lua-filter /home/boennecd/R/x86_64-pc-linux-gnu-library/4.1/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /home/boennecd/R/x86_64-pc-linux-gnu-library/4.1/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --standalone --section-divs --template /home/boennecd/R/x86_64-pc-linux-gnu-library/4.1/rmarkdown/rmd/h/default.html --no-highlight --variable highlightjs=1 --variable theme=bootstrap --include-in-header /tmp/RtmpmMSRxr/rmarkdown-stra30d38639c9e.html --mathjax --variable 'mathjax-url:https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --filter /usr/bin/pandoc-citeproc 
 [WARNING] This document format requires a nonempty <title> element.
   Please specify either 'title' or 'pagetitle' in the metadata,
   e.g. by using --metadata pagetitle="..." on the command line.
@@ -1840,15 +1881,15 @@ Output created: pedmod.html
 
 
 processing file: pedmod.Rmd
-  |                                                                              |                                                                      |   0%  |                                                                              |.                                                                     |   1%
+  |                                                                              |                                                                      |   0%  |                                                                              |                                                                      |   1%
   ordinary text without R code
 
-
+  |                                                                              |.                                                                     |   1%
 label: setup (with options) 
 List of 1
  $ include: logi FALSE
 
-  |                                                                              |..                                                                    |   2%
+  |                                                                              |.                                                                     |   2%
   ordinary text without R code
 
   |                                                                              |..                                                                    |   3%
@@ -1856,63 +1897,68 @@ label: how_to_install (with options)
 List of 1
  $ eval: logi FALSE
 
-  |                                                                              |...                                                                   |   4%
+
   ordinary text without R code
 
-
+  |                                                                              |...                                                                   |   4%
 label: cran_how_to_install (with options) 
 List of 1
  $ eval: logi FALSE
 
-  |                                                                              |....                                                                  |   5%
+  |                                                                              |...                                                                   |   5%
   ordinary text without R code
 
-  |                                                                              |....                                                                  |   6%
+  |                                                                              |....                                                                  |   5%
 label: setup_simple
-  |                                                                              |.....                                                                 |   6%
+  |                                                                              |....                                                                  |   6%
   ordinary text without R code
 
   |                                                                              |.....                                                                 |   7%
 label: assign_sim_dat
-  |                                                                              |......                                                                |   8%
+
   ordinary text without R code
 
-  |                                                                              |......                                                                |   9%
+  |                                                                              |......                                                                |   8%
 label: est_simple (with options) 
 List of 1
  $ cache: num 1
 
-  |                                                                              |.......                                                               |   9%
+  |                                                                              |......                                                                |   9%
   ordinary text without R code
 
-  |                                                                              |.......                                                               |  10%
+
 label: est_simple_res
-  |                                                                              |........                                                              |  11%
+  |                                                                              |.......                                                               |  10%
   ordinary text without R code
 
-  |                                                                              |........                                                              |  12%
+  |                                                                              |.......                                                               |  11%
 label: tilt_est_simple (with options) 
 List of 1
  $ cache: num 1
 
-  |                                                                              |.........                                                             |  12%
+  |                                                                              |........                                                              |  11%
   ordinary text without R code
 
-  |                                                                              |.........                                                             |  13%
+  |                                                                              |........                                                              |  12%
 label: tilt_est_simple_res
-  |                                                                              |..........                                                            |  14%
+  |                                                                              |.........                                                             |  13%
   ordinary text without R code
 
 
-label: std_est_simple (with options) 
+label: nlminb_tilt_est_simple (with options) 
 List of 1
  $ cache: num 1
 
+  |                                                                              |..........                                                            |  14%
+  ordinary text without R code
+
+  |                                                                              |..........                                                            |  15%
+label: nlminb_tilt_est_simple_res
   |                                                                              |...........                                                           |  15%
   ordinary text without R code
 
   |                                                                              |...........                                                           |  16%
-label: continued_std_est_simple (with options) 
+label: std_est_simple (with options) 
 List of 1
  $ cache: num 1
 
@@ -1920,49 +1966,57 @@ List of 1
   ordinary text without R code
 
 
-label: pre_use_pedmod_psqn (with options) 
+label: continued_std_est_simple (with options) 
 List of 1
- $ echo: logi FALSE
+ $ cache: num 1
 
   |                                                                              |.............                                                         |  18%
   ordinary text without R code
 
   |                                                                              |.............                                                         |  19%
+label: pre_use_pedmod_psqn (with options) 
+List of 1
+ $ echo: logi FALSE
+
+
+  ordinary text without R code
+
+  |                                                                              |..............                                                        |  20%
 label: use_pedmod_sqn (with options) 
 List of 2
  $ cache   : num 1
  $ fig.keep: chr "last"
 
-  |                                                                              |..............                                                        |  19%
+  |                                                                              |..............                                                        |  21%
   ordinary text without R code
 
-  |                                                                              |..............                                                        |  20%
+  |                                                                              |...............                                                       |  21%
 label: simple_ex_profile_likelihood (with options) 
 List of 1
  $ cache: num 1
 
-  |                                                                              |...............                                                       |  21%
-  ordinary text without R code
-
   |                                                                              |...............                                                       |  22%
-label: conf_int_simple_ex
-  |                                                                              |................                                                      |  22%
   ordinary text without R code
 
   |                                                                              |................                                                      |  23%
-label: plot_simple_ex_profile_likelihood
-  |                                                                              |.................                                                     |  24%
+label: conf_int_simple_ex
+
   ordinary text without R code
 
+  |                                                                              |.................                                                     |  24%
+label: plot_simple_ex_profile_likelihood
+  |                                                                              |.................                                                     |  25%
+  ordinary text without R code
 
+  |                                                                              |..................                                                    |  25%
 label: pre_simple_pedmod_profile (with options) 
 List of 1
  $ echo: logi FALSE
 
-  |                                                                              |..................                                                    |  25%
+  |                                                                              |..................                                                    |  26%
   ordinary text without R code
 
-  |                                                                              |..................                                                    |  26%
+  |                                                                              |...................                                                   |  26%
 label: simple_pedmod_profile (with options) 
 List of 3
  $ cache   : num 1
@@ -1972,7 +2026,7 @@ List of 3
   |                                                                              |...................                                                   |  27%
   ordinary text without R code
 
-
+  |                                                                              |...................                                                   |  28%
 label: binary_simple_pedmod_profile (with options) 
 List of 3
  $ cache   : num 1
@@ -1987,10 +2041,10 @@ label: simple_ex_more_profile_likelihood (with options)
 List of 1
  $ cache: num 1
 
-  |                                                                              |.....................                                                 |  29%
+  |                                                                              |.....................                                                 |  30%
   ordinary text without R code
 
-  |                                                                              |.....................                                                 |  30%
+
 label: draw_mult_pf_curves
   |                                                                              |......................                                                |  31%
   ordinary text without R code
@@ -2011,7 +2065,7 @@ List of 1
   |                                                                              |........................                                              |  34%
   ordinary text without R code
 
-  |                                                                              |........................                                              |  35%
+
 label: show_res_rqmc
   |                                                                              |.........................                                             |  35%
   ordinary text without R code
@@ -2021,31 +2075,31 @@ label: rqmc_likelihood (with options)
 List of 1
  $ cache: num 1
 
+
+  ordinary text without R code
+
   |                                                                              |..........................                                            |  37%
-  ordinary text without R code
-
-
 label: show_rqmc_likelihood
-  |                                                                              |...........................                                           |  38%
+  |                                                                              |..........................                                            |  38%
   ordinary text without R code
 
-  |                                                                              |...........................                                           |  39%
+  |                                                                              |...........................                                           |  38%
 label: rqmc_est_simple (with options) 
 List of 1
  $ cache: num 1
 
-  |                                                                              |............................                                          |  40%
+  |                                                                              |...........................                                           |  39%
   ordinary text without R code
 
-
+  |                                                                              |............................                                          |  40%
 label: clean_pre_sim_study_simple (with options) 
 List of 1
  $ echo: logi FALSE
 
-  |                                                                              |.............................                                         |  41%
+
   ordinary text without R code
 
-  |                                                                              |.............................                                         |  42%
+  |                                                                              |.............................                                         |  41%
 label: sim_study_simple
 (Intercept)  Continuous      Binary             
      -3.226       1.039       2.158       1.243 
@@ -2497,25 +2551,25 @@ Residual
   0.2374   0.7626 
 Time          9.2,          8.6. Max ll:   -1643.4114,   -1643.4113
 
-  |                                                                              |..............................                                        |  42%
+  |                                                                              |.............................                                         |  42%
   ordinary text without R code
 
-  |                                                                              |..............................                                        |  43%
+  |                                                                              |..............................                                        |  42%
 label: clean_pre_simple_w_ev (with options) 
 List of 1
  $ echo: logi FALSE
 
+  |                                                                              |..............................                                        |  43%
+  ordinary text without R code
+
   |                                                                              |...............................                                       |  44%
-  ordinary text without R code
-
-  |                                                                              |...............................                                       |  45%
 label: xtra_mat_simple_w_ev
-  |                                                                              |................................                                      |  45%
+
   ordinary text without R code
 
-  |                                                                              |................................                                      |  46%
+  |                                                                              |................................                                      |  45%
 label: simple_w_ev_assign_sim_dat
-  |                                                                              |.................................                                     |  47%
+  |                                                                              |................................                                      |  46%
   ordinary text without R code
 
 
@@ -2523,16 +2577,24 @@ label: simple_w_ev_sim (with options)
 List of 1
  $ cache: num 1
 
+  |                                                                              |.................................                                     |  47%
+  ordinary text without R code
+
+  |                                                                              |.................................                                     |  48%
+label: est_simple_w_res
   |                                                                              |..................................                                    |  48%
   ordinary text without R code
 
   |                                                                              |..................................                                    |  49%
-label: est_simple_w_res
+label: std_simple_w_ev_sim (with options) 
+List of 1
+ $ cache: num 1
+
   |                                                                              |...................................                                   |  50%
   ordinary text without R code
 
 
-label: std_simple_w_ev_sim (with options) 
+label: continued_std_simple_w_ev_sim (with options) 
 List of 1
  $ cache: num 1
 
@@ -2540,79 +2602,71 @@ List of 1
   ordinary text without R code
 
   |                                                                              |....................................                                  |  52%
-label: continued_std_simple_w_ev_sim (with options) 
-List of 1
- $ cache: num 1
-
-  |                                                                              |.....................................                                 |  53%
-  ordinary text without R code
-
-
 label: simple_w_ev_ex_profile_likelihood (with options) 
 List of 1
  $ cache: num 1
 
+  |                                                                              |.....................................                                 |  52%
+  ordinary text without R code
+
+  |                                                                              |.....................................                                 |  53%
+label: draw_simple_w_ev_ex_profile_likelihood
   |                                                                              |......................................                                |  54%
   ordinary text without R code
 
-  |                                                                              |......................................                                |  55%
-label: draw_simple_w_ev_ex_profile_likelihood
-  |                                                                              |.......................................                               |  55%
-  ordinary text without R code
 
-  |                                                                              |.......................................                               |  56%
 label: pre_env_pl_curves (with options) 
 List of 1
  $ echo: logi FALSE
 
-  |                                                                              |........................................                              |  57%
+  |                                                                              |......................................                                |  55%
   ordinary text without R code
 
-  |                                                                              |........................................                              |  58%
+  |                                                                              |.......................................                               |  56%
 label: env_pl_curves (with options) 
 List of 2
  $ cache  : num 1
  $ message: logi TRUE
 
-  |                                                                              |.........................................                             |  58%
+
   ordinary text without R code
 
-  |                                                                              |.........................................                             |  59%
+  |                                                                              |........................................                              |  57%
 label: plot_env_pl_curves
-  |                                                                              |..........................................                            |  60%
+  |                                                                              |........................................                              |  58%
   ordinary text without R code
 
-
+  |                                                                              |.........................................                             |  58%
 label: pre_prop_var_conf (with options) 
 List of 1
  $ echo: logi FALSE
 
-  |                                                                              |...........................................                           |  61%
+  |                                                                              |.........................................                             |  59%
   ordinary text without R code
 
-  |                                                                              |...........................................                           |  62%
+  |                                                                              |..........................................                            |  60%
 label: prop_var_conf (with options) 
 List of 2
  $ cache  : num 1
  $ message: logi TRUE
 
-  |                                                                              |............................................                          |  63%
+
   ordinary text without R code
 
-
+  |                                                                              |...........................................                           |  61%
 label: plot_prop_var_conf
-  |                                                                              |.............................................                         |  64%
+  |                                                                              |...........................................                           |  62%
   ordinary text without R code
 
-  |                                                                              |.............................................                         |  65%
+  |                                                                              |............................................                          |  62%
 label: clean_pre_sim_simple_w_ev (with options) 
 List of 1
  $ echo: logi FALSE
 
-  |                                                                              |..............................................                        |  65%
+  |                                                                              |............................................                          |  63%
   ordinary text without R code
 
-  |                                                                              |..............................................                        |  66%
+  |                                                                              |.............................................                         |  64%
 label: sim_study_simple_w
 (Intercept)      Binary                         
     -2.6481      3.6237      0.4520     -0.3163 
@@ -3064,36 +3118,64 @@ Residual
   0.2246   0.4742   0.3013 
 Time          9.1,         18.6. Max ll:   -2711.1000,   -2711.0964
 
+
+  ordinary text without R code
+
+  |                                                                              |.............................................                         |  65%
+label: clean_pre_loading (with options) 
+List of 1
+ $ echo: logi FALSE
+
+  |                                                                              |..............................................                        |  66%
+  ordinary text without R code
+
+
+label: loading_assign_sim_dat
   |                                                                              |...............................................                       |  67%
   ordinary text without R code
 
   |                                                                              |...............................................                       |  68%
-label: clean_pre_loading (with options) 
+label: loading_one_dat (with options) 
 List of 1
- $ echo: logi FALSE
+ $ cache: num 1
 
   |                                                                              |................................................                      |  68%
   ordinary text without R code
 
   |                                                                              |................................................                      |  69%
-label: loading_assign_sim_dat
+label: loading_show_res
   |                                                                              |.................................................                     |  70%
   ordinary text without R code
 
-  |                                                                              |.................................................                     |  71%
-label: loading_one_dat (with options) 
-List of 1
- $ cache: num 1
+
+label: loadings_pl (with options) 
+List of 2
+ $ cache  : num 1
+ $ message: logi TRUE
 
   |                                                                              |..................................................                    |  71%
   ordinary text without R code
 
   |                                                                              |..................................................                    |  72%
-label: loading_show_res
-  |                                                                              |...................................................                   |  73%
+label: show_loadings_pl_show
+  |                                                                              |...................................................                   |  72%
   ordinary text without R code
 
+  |                                                                              |...................................................                   |  73%
+label: loadings_nleq_pl (with options) 
+List of 2
+ $ cache  : num 1
+ $ message: logi TRUE
 
+  |                                                                              |...................................................                   |  74%
+  ordinary text without R code
+
+  |                                                                              |....................................................                  |  74%
+label: show_loadings_nleq_pl
+  |                                                                              |....................................................                  |  75%
+  ordinary text without R code
+
+  |                                                                              |.....................................................                 |  75%
 label: loadings_sim_study
          (Intercept) Binary                                           
 Estimate      -2.053  4.193 -0.2298 0.9849 0.8875 -0.5781 0.6671 -1.19
@@ -3345,65 +3427,65 @@ Estimate      -1.958  3.946 -0.4975 1.127 1.045 -0.3939 0.6469 -0.8831
 Truth         -2.000  4.000 -0.3942 1.127 1.000 -0.5058 0.6496 -1.0000
 Time         76.1. Max ll:   -4400.4975
 
-  |                                                                              |....................................................                  |  74%
+  |                                                                              |.....................................................                 |  76%
   ordinary text without R code
 
-  |                                                                              |....................................................                  |  75%
+  |                                                                              |......................................................                |  77%
 label: clean_up_complicated (with options) 
 List of 1
  $ echo: logi FALSE
 
-  |                                                                              |.....................................................                 |  76%
+
   ordinary text without R code
 
-
+  |                                                                              |.......................................................               |  78%
 label: source_sim_file
-  |                                                                              |......................................................                |  77%
+  |                                                                              |.......................................................               |  79%
   ordinary text without R code
 
-  |                                                                              |......................................................                |  78%
+  |                                                                              |........................................................              |  79%
 label: one_family
    [[ suppressing 10 column names '9', '10', '15' ... ]]
    [[ suppressing 10 column names '9', '10', '15' ... ]]
-  |                                                                              |.......................................................               |  78%
+  |                                                                              |........................................................              |  80%
   ordinary text without R code
 
-  |                                                                              |.......................................................               |  79%
+  |                                                                              |.........................................................             |  81%
 label: est_mod (with options) 
 List of 1
  $ cache: num 1
 
-  |                                                                              |........................................................              |  80%
-  ordinary text without R code
 
-  |                                                                              |........................................................              |  81%
-label: show_est_mod
-  |                                                                              |.........................................................             |  81%
   ordinary text without R code
 
   |                                                                              |.........................................................             |  82%
-label: svrg (with options) 
-List of 2
- $ eval: logi FALSE
- $ echo: logi FALSE
-
+label: show_est_mod
   |                                                                              |..........................................................            |  83%
   ordinary text without R code
 
 
-label: pre_comp_par (with options) 
-List of 1
+label: svrg (with options) 
+List of 2
+ $ eval: logi FALSE
  $ echo: logi FALSE
 
   |                                                                              |...........................................................           |  84%
   ordinary text without R code
 
   |                                                                              |...........................................................           |  85%
+label: pre_comp_par (with options) 
+List of 1
+ $ echo: logi FALSE
+
+  |                                                                              |............................................................          |  85%
+  ordinary text without R code
+
+  |                                                                              |............................................................          |  86%
 label: time_mult (with options) 
 List of 1
  $ cache: num 1
 
-  |                                                                              |............................................................          |  86%
+  |                                                                              |.............................................................         |  87%
   ordinary text without R code
 
 
@@ -3411,47 +3493,47 @@ label: re_create_ptr (with options)
 List of 1
  $ echo: logi FALSE
 
-  |                                                                              |.............................................................         |  87%
-  ordinary text without R code
-
-  |                                                                              |.............................................................         |  88%
-label: use_adam (with options) 
-List of 1
- $ cache: num 1
-
   |                                                                              |..............................................................        |  88%
   ordinary text without R code
 
   |                                                                              |..............................................................        |  89%
+label: use_adam (with options) 
+List of 1
+ $ cache: num 1
+
+  |                                                                              |...............................................................       |  89%
+  ordinary text without R code
+
+  |                                                                              |...............................................................       |  90%
 label: adam_re_create_ptr (with options) 
 List of 1
  $ echo: logi FALSE
 
-  |                                                                              |...............................................................       |  90%
-  ordinary text without R code
-
-  |                                                                              |...............................................................       |  91%
-label: res_adam
   |                                                                              |................................................................      |  91%
   ordinary text without R code
 
+
+label: res_adam
   |                                                                              |................................................................      |  92%
+  ordinary text without R code
+
+  |                                                                              |.................................................................     |  93%
 label: compare_w_mvtnorm (with options) 
 List of 1
  $ cache: num 1
 
-  |                                                                              |.................................................................     |  93%
+
   ordinary text without R code
 
-  |                                                                              |.................................................................     |  94%
+  |                                                                              |..................................................................    |  94%
 label: show_averge_rel_err (with options) 
 List of 1
  $ fig.height: num 5.33
 
-  |                                                                              |..................................................................    |  94%
+  |                                                                              |..................................................................    |  95%
   ordinary text without R code
 
-  |                                                                              |..................................................................    |  95%
+  |                                                                              |...................................................................   |  95%
 label: use_new_impl (with options) 
 List of 1
  $ fig.height: num 5.33
@@ -3459,15 +3541,15 @@ List of 1
   |                                                                              |...................................................................   |  96%
   ordinary text without R code
 
-
+  |                                                                              |....................................................................  |  97%
 label: botev_example (with options) 
 List of 1
  $ cache: num 1
 
-  |                                                                              |....................................................................  |  97%
+
   ordinary text without R code
 
-  |                                                                              |....................................................................  |  98%
+  |                                                                              |..................................................................... |  98%
 label: err_botev_example (with options) 
 List of 1
  $ fig.height: num 5.33
@@ -3475,7 +3557,7 @@ List of 1
   |                                                                              |..................................................................... |  99%
   ordinary text without R code
 
-
+  |                                                                              |......................................................................|  99%
 label: time_botev_example (with options) 
 List of 1
  $ fig.height: num 5.33
@@ -3495,4 +3577,4 @@ Output created: README.md
 > 
 > proc.time()
    user  system elapsed 
-159.718   1.167 264.661 
+166.436   1.055 257.309 

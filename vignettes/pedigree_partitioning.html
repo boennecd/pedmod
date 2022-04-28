@@ -955,7 +955,7 @@ system.time(
 #&gt; Found perfect balanced connected partition early. Balance criterion is 500
 #&gt; Found approximately balanced connected partition. Balance criterion is 500
 #&gt;    user  system elapsed 
-#&gt;   0.079   0.000   0.079
+#&gt;   0.081   0.000   0.081
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 500
 NROW(max_part$removed_edges) # number of removed edges
@@ -986,7 +986,7 @@ system.time(
 #&gt; Keept 0 moves
 #&gt; The cut cost is 99
 #&gt;    user  system elapsed 
-#&gt;   0.818   0.000   0.818
+#&gt;   0.839   0.000   0.839
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 500
 NROW(max_part$removed_edges) # number of removed edges
@@ -1132,7 +1132,7 @@ system.time(
 #&gt; Keept 0 moves
 #&gt; The cut cost is 48
 #&gt;    user  system elapsed 
-#&gt;   0.010   0.000   0.009
+#&gt;    0.01    0.00    0.01
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 500
 NROW(max_part$removed_edges) # number of removed edges
@@ -1163,7 +1163,7 @@ system.time(
 #&gt; Found perfect balanced connected partition early. Balance criterion is 50000
 #&gt; Found approximately balanced connected partition. Balance criterion is 50000
 #&gt;    user  system elapsed 
-#&gt;   4.523   0.000   4.523
+#&gt;   4.711   0.000   4.711
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 50000
 NROW(max_part$removed_edges) # number of removed edges
@@ -1214,7 +1214,7 @@ system.time(
 #&gt; Keept 0 moves
 #&gt; The cut cost is 317
 #&gt;    user  system elapsed 
-#&gt;   22.53    0.00   22.53
+#&gt;   22.93    0.00   22.94
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 50000
 NROW(max_part$removed_edges) # number of removed edges
@@ -1253,7 +1253,7 @@ system.time(
 #&gt; Keept 0 moves
 #&gt; The cut cost is 356
 #&gt;    user  system elapsed 
-#&gt;   23.10    0.00   23.12
+#&gt;   23.58    0.00   23.59
 max_part_shuffled$balance_criterion # the balance criterion
 #&gt; [1] 50000
 NROW(max_part_shuffled$removed_edges) # number of removed edges
@@ -1288,7 +1288,7 @@ system.time(
 #&gt; Keept 0 moves
 #&gt; The cut cost is 356
 #&gt;    user  system elapsed 
-#&gt;   19.85    0.00   19.86
+#&gt;   21.08    0.00   21.08
 
 # we got the same 
 all.equal(max_part_shuffled_and_ordered, max_part_shuffled)
@@ -1415,7 +1415,7 @@ system.time(
 #&gt; Keept 0 moves
 #&gt; The cut cost is 6717
 #&gt;    user  system elapsed 
-#&gt;   2.861   0.000   2.862
+#&gt;   2.764   0.000   2.765
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 40000
 NROW(max_part$removed_edges) # number of removed edges
@@ -1456,7 +1456,7 @@ system.time(
 #&gt; Keept 0 moves
 #&gt; The cut cost is 269
 #&gt;    user  system elapsed 
-#&gt;   0.579   0.000   0.579
+#&gt;   0.534   0.000   0.533
 max_part$balance_criterion # the balance criterion
 #&gt; [1] 49943
 NROW(max_part$removed_edges) # number of removed edges
@@ -1468,7 +1468,7 @@ NROW(max_part$removed_edges) # number of removed edges
 <h2>References</h2>
 <div id="refs" class="references">
 <div id="ref-Chlebíková96">
-<p>Chlebíková, Janka. 1996. “Approximating the Maximally Balanced Connected Partition Problem in Graphs.” <em>Information Processing Letters</em> 60 (5): 225–30. <a href="https://doi.org/https://doi.org/10.1016/S0020-0190(96)00175-5">https://doi.org/https://doi.org/10.1016/S0020-0190(96)00175-5</a>.</p>
+<p>Chlebíková, Janka. 1996. “Approximating the Maximally Balanced Connected Partition Problem in Graphs.” <em>Information Processing Letters</em> 60 (5): 225–30. <a href="https://doi.org/10.1016/S0020-0190(96)00175-5">https://doi.org/10.1016/S0020-0190(96)00175-5</a>.</p>
 </div>
 <div id="ref-Fiduccia82">
 <p>Fiduccia, C.M., and R.M. Mattheyses. 1982. “A Linear-Time Heuristic for Improving Network Partitions.” In <em>19th Design Automation Conference</em>, 175–81. <a href="https://doi.org/10.1109/DAC.1982.1585498">https://doi.org/10.1109/DAC.1982.1585498</a>.</p>

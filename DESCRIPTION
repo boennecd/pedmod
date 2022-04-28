@@ -47,7 +47,8 @@ LinkingTo:
     testthat,
     psqn
 Imports: 
-    Rcpp
+    Rcpp, 
+    alabama
 Suggests: 
     testthat,
     mvtnorm,

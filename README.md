@@ -362,7 +362,7 @@ library(pedmod)
 ll_terms <- pedigree_ll_terms(dat, max_threads = 4L)
 system.time(start <- pedmod_start(ptr = ll_terms, data = dat, n_threads = 4L))
 #>    user  system elapsed 
-#>  15.623   0.020   3.945
+#>  16.823   0.004   4.246
 
 # log likelihood without the random effects and at the starting values
 start$logLik_no_rng
@@ -377,7 +377,7 @@ system.time(
     n_threads = 4L, 
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 #>    user  system elapsed 
-#>  45.853   0.003  11.554
+#>  51.286   0.012  12.903
 ```
 
 The results of the estimation are shown below:
@@ -439,35 +439,36 @@ We estimate the model below with the minimax tilting using the
 # perform the optimization. We start with finding the starting values
 set.seed(60941821)
 system.time(
-  start_tilt <- pedmod_start(ptr = ll_terms, data = dat, n_threads = 4L, 
-                             use_tilting = TRUE))
+  start_tilt <- pedmod_start(
+    ptr = ll_terms, data = dat, n_threads = 4L, use_tilting = TRUE, 
+    use_aprx = FALSE))
 #>    user  system elapsed 
-#>  19.812   0.000   4.982
+#>  23.177   0.000   5.825
 
 # estimate the model
 system.time(
   opt_out_tilt <- pedmod_opt(
-    ptr = ll_terms, par = start_tilt$par, abs_eps = 0, use_aprx = TRUE, 
+    ptr = ll_terms, par = start_tilt$par, abs_eps = 0, use_aprx = FALSE, 
     n_threads = 4L, use_tilting = TRUE,
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 #>    user  system elapsed 
-#> 120.978   0.012  30.381
+#>  177.40    0.02   45.60
 ```
 
 The results of the estimation are shown below:
 
 ``` r
 # parameter estimates versus the truth
-rbind(opt_out_tilt  = head(opt_out_tilt$par, -1),
-      opt_out       = head(opt_out$par     , -1),
-      truth         = attr(dat, "beta"))
+rbind(opt_out_tilt = head(opt_out_tilt$par, -1),
+      opt_out      = head(opt_out$par     , -1),
+      truth        = attr(dat, "beta"))
 #>              (Intercept) Continuous Binary
 #> opt_out_tilt      -2.874     0.9694  1.879
 #> opt_out           -2.872     0.9689  1.878
 #> truth             -3.000     1.0000  2.000
-c(opt_out_tilt  = exp(tail(opt_out_tilt$par, 1)),
-  opt_out       = exp(tail(opt_out$par, 1)), 
-  truth         = attr(dat, "sig_sq"))
+c(opt_out_tilt = exp(tail(opt_out_tilt$par, 1)),
+  opt_out      = exp(tail(opt_out$par, 1)), 
+  truth        = attr(dat, "sig_sq"))
 #> opt_out_tilt      opt_out        truth 
 #>        2.912        2.908        3.000
 
@@ -480,7 +481,64 @@ print(start_tilt   $logLik_est, digits = 8) # this is unreliably/imprecise
 print(-opt_out     $value     , digits = 8)
 #> [1] -1618.4045
 print(-opt_out_tilt$value     , digits = 8)
-#> [1] -1618.4068
+#> [1] -1618.4067
+```
+
+### Different Optimizer
+
+As the gradient is an approximation, some nonlinear optimizer may give
+better results than others. We illustrate this below by using the
+`nlminb` function.
+
+``` r
+# create a wrapper function
+nlminb_wrapper <- function(
+  par, fn, gr = NULL, control = list(eval.max = 1000L, iter.max = 1000L), ...){
+  out <- nlminb(
+    start = par, objective = fn, gradient = gr, control = control, ...)
+  within(out, {
+    counts <- evaluations
+    value <- objective
+  })
+}
+
+# estimate the model
+system.time(
+  opt_out_tilt_nlminb <- pedmod_opt(
+    ptr = ll_terms, par = start_tilt$par, abs_eps = 0, use_aprx = FALSE, 
+    n_threads = 4L, use_tilting = TRUE,
+    maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L, opt_func = nlminb_wrapper))
+#>    user  system elapsed 
+#> 644.558   0.092 162.500
+```
+
+The results of the estimation are shown below:
+
+``` r
+# parameter estimates versus the truth
+rbind(opt_out_tilt_nlminb = head(opt_out_tilt_nlminb$par, -1),
+      opt_out_tilt        = head(opt_out_tilt$par, -1),
+      opt_out             = head(opt_out$par     , -1),
+      truth               = attr(dat, "beta"))
+#>                     (Intercept) Continuous Binary
+#> opt_out_tilt_nlminb      -2.860     0.9649  1.870
+#> opt_out_tilt             -2.874     0.9694  1.879
+#> opt_out                  -2.872     0.9689  1.878
+#> truth                    -3.000     1.0000  2.000
+c(opt_out_tilt_nlminb = exp(tail(opt_out_tilt_nlminb$par, 1)),
+  opt_out_tilt        = exp(tail(opt_out_tilt$par, 1)),
+  opt_out             = exp(tail(opt_out$par, 1)), 
+  truth               = attr(dat, "sig_sq"))
+#> opt_out_tilt_nlminb        opt_out_tilt             opt_out               truth 
+#>               2.874               2.912               2.908               3.000
+
+# log marginal likelihoods
+print(-opt_out            $value, digits = 8)
+#> [1] -1618.4045
+print(-opt_out_tilt       $value, digits = 8)
+#> [1] -1618.4067
+print(-opt_out_tilt_nlminb$value, digits = 8)
+#> [1] -1618.408
 ```
 
 ### Alternative Parameterization
@@ -557,7 +615,7 @@ The model can also be estimated with the standardized parameterization:
 system.time(start_std <- pedmod_start(
   ptr = ll_terms, data = dat, n_threads = 4L, standardized = TRUE))
 #>    user  system elapsed 
-#>   5.688   0.000   1.431
+#>   6.105   0.004   1.536
 
 # the starting values are close
 standardized_to_direct(start_std$par, n_scales = 1L)
@@ -585,7 +643,7 @@ system.time(
     n_threads = 4L, standardized = TRUE,
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 #>    user  system elapsed 
-#>  32.580   0.000   8.227
+#>  35.136   0.003   8.823
 
 # we get the same
 standardized_to_direct(opt_out_std$par, n_scales = 1L)
@@ -627,7 +685,7 @@ system.time(
     minvls = 1000L, n_it = 400L, n_grad_steps = 10L, n_grad = 100L, 
     n_hess = 400L))
 #>    user  system elapsed 
-#> 342.704   0.008  85.981
+#> 383.374   0.055  96.206
 
 # show the log marginal likelihood
 ll_wrapper <- function(x)
@@ -678,7 +736,7 @@ system.time(
     # but use fewer samples in each iteration
     n_grad = 20L, n_hess = 100L))
 #>    user  system elapsed 
-#> 339.594   0.008  84.987
+#> 374.266   0.032  93.630
 
 # compute the marginal log likelihood and compare the parameter estimates
 print(ll_wrapper(sqn_out_few$par), digits = 8)
@@ -813,20 +871,20 @@ prof_res <- pedmod_profile(
 #> LogLike: -1619.7602 at         0.567300
 #> LogLike: -1624.4396 at         0.067300
 #> LogLike: -1624.4340 at         0.067300
-#> LogLike: -1620.8786 at         0.405931. Lb, target, ub: -1620.8786, -1620.3315, -1619.7602
-#> LogLike: -1620.8729 at         0.405931. Lb, target, ub: -1620.8729, -1620.3315, -1619.7602
-#> LogLike: -1620.3400 at         0.477023. Lb, target, ub: -1620.3400, -1620.3315, -1619.7602
-#> LogLike: -1620.3378 at         0.477023. Lb, target, ub: -1620.3378, -1620.3315, -1619.7602
+#> LogLike: -1620.8744 at         0.406401. Lb, target, ub: -1620.8744, -1620.3315, -1619.7602
+#> LogLike: -1620.8691 at         0.406401. Lb, target, ub: -1620.8691, -1620.3315, -1619.7602
+#> LogLike: -1620.3400 at         0.477029. Lb, target, ub: -1620.3400, -1620.3315, -1619.7602
+#> LogLike: -1620.3377 at         0.477029. Lb, target, ub: -1620.3377, -1620.3315, -1619.7602
 #> 
 #> Finding the upper limit of the profile likelihood curve
 #> LogLike: -1619.3169 at         1.567300
 #> LogLike: -1619.3037 at         1.567300
 #> LogLike: -1621.2055 at         2.067300
 #> LogLike: -1621.1781 at         2.067300
-#> LogLike: -1620.2903 at         1.838320. Lb, target, ub: -1621.1781, -1620.3315, -1620.2903
-#> LogLike: -1620.2683 at         1.838320. Lb, target, ub: -1621.1781, -1620.3315, -1620.2683
-#> LogLike: -1620.4497 at         1.878615. Lb, target, ub: -1620.4497, -1620.3315, -1620.2683
-#> LogLike: -1620.4236 at         1.878615. Lb, target, ub: -1620.4236, -1620.3315, -1620.2683
+#> LogLike: -1620.2901 at         1.838266. Lb, target, ub: -1621.1781, -1620.3315, -1620.2901
+#> LogLike: -1620.2681 at         1.838266. Lb, target, ub: -1621.1781, -1620.3315, -1620.2681
+#> LogLike: -1620.4497 at         1.878606. Lb, target, ub: -1620.4497, -1620.3315, -1620.2681
+#> LogLike: -1620.4236 at         1.878606. Lb, target, ub: -1620.4236, -1620.3315, -1620.2681
 #> LogLike: -1618.4107 at         1.067300
 
 # the confidence interval for the scale parameter
@@ -865,20 +923,20 @@ prof_res <- pedmod_profile(
 #> LogLike: -1618.4107 at         1.878256
 #> LogLike: -1619.2925 at         1.606492. Lb, target, ub: -1622.3591, -1620.3315, -1619.2925
 #> LogLike: -1619.2884 at         1.606492. Lb, target, ub: -1622.3591, -1620.3315, -1619.2884
-#> LogLike: -1620.4844 at         1.490049. Lb, target, ub: -1620.4844, -1620.3315, -1619.2884
-#> LogLike: -1620.4816 at         1.490049. Lb, target, ub: -1620.4816, -1620.3315, -1619.2884
-#> LogLike: -1620.1984 at         1.512492. Lb, target, ub: -1620.4816, -1620.3315, -1620.1984
-#> LogLike: -1620.1982 at         1.512492. Lb, target, ub: -1620.4816, -1620.3315, -1620.1982
+#> LogLike: -1620.4820 at         1.490233. Lb, target, ub: -1620.4820, -1620.3315, -1619.2884
+#> LogLike: -1620.4792 at         1.490233. Lb, target, ub: -1620.4792, -1620.3315, -1619.2884
+#> LogLike: -1620.1981 at         1.512517. Lb, target, ub: -1620.4792, -1620.3315, -1620.1981
+#> LogLike: -1620.1979 at         1.512517. Lb, target, ub: -1620.4792, -1620.3315, -1620.1979
 #> 
 #> Finding the upper limit of the profile likelihood curve
 #> LogLike: -1619.6178 at         2.378256
 #> LogLike: -1619.5991 at         2.378256
 #> LogLike: -1621.3787 at         2.878256
 #> LogLike: -1621.3504 at         2.878256
-#> LogLike: -1620.5401 at         2.634563. Lb, target, ub: -1620.5401, -1620.3315, -1619.5991
-#> LogLike: -1620.5161 at         2.634563. Lb, target, ub: -1620.5161, -1620.3315, -1619.5991
-#> LogLike: -1620.2801 at         2.561453. Lb, target, ub: -1620.5161, -1620.3315, -1620.2801
-#> LogLike: -1620.2571 at         2.561453. Lb, target, ub: -1620.5161, -1620.3315, -1620.2571
+#> LogLike: -1620.5401 at         2.634567. Lb, target, ub: -1620.5401, -1620.3315, -1619.5991
+#> LogLike: -1620.5161 at         2.634567. Lb, target, ub: -1620.5161, -1620.3315, -1619.5991
+#> LogLike: -1620.2801 at         2.561444. Lb, target, ub: -1620.5161, -1620.3315, -1620.2801
+#> LogLike: -1620.2571 at         2.561444. Lb, target, ub: -1620.5161, -1620.3315, -1620.2571
 #> LogLike: -1618.4107 at         1.878256
 
 # the confidence interval for the slope of the binary covariate
@@ -923,11 +981,11 @@ below:
 # the profile likelihood based confidence intervals
 print(exp(t(sapply(pl_curve_res, `[[`, "confs"))), digits = 8)
 #>      2.50 pct. 97.50 pct.
-#> [1,] 1.6129060  6.3925594
-#> [2,] 1.6113411  6.4126763
-#> [3,] 1.6126743  6.3943564
-#> [4,] 1.6125941  6.3911922
-#> [5,] 1.6124628  6.4165030
+#> [1,] 1.6129059  6.3925616
+#> [2,] 1.6113409  6.4126719
+#> [3,] 1.6126734  6.3943559
+#> [4,] 1.6125946  6.3911927
+#> [5,] 1.6124623  6.4165032
 ```
 
 ### Randomized Quasi-Monte Carlo
@@ -1220,7 +1278,7 @@ system.time(
     n_threads = 4L, 
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L, method = 1L))
 #>    user  system elapsed 
-#>  48.004   0.008  12.046
+#>  53.475   0.012  13.695
 
 # compare the result. We start with the log likelihood
 print(-opt_out_sobol$value, digits = 8)
@@ -1522,12 +1580,12 @@ system.time(ll_res <- eval_pedigree_ll(
   ll_terms_wo_weights, c(beta_true, log(sig_sq_true)), maxvls = 100000L, 
   abs_eps = 0, rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4))
 #>    user  system elapsed 
-#>   0.588   0.000   0.150
+#>   0.743   0.000   0.191
 system.time(grad_res <- eval_pedigree_grad(
   ll_terms_wo_weights, c(beta_true, log(sig_sq_true)), maxvls = 100000L, 
   abs_eps = 0, rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4))
 #>    user  system elapsed 
-#>  14.426   0.000   3.668
+#>  16.897   0.004   4.325
 
 # find the duplicated combinations of pedigrees, covariates, and outcomes. One 
 # likely needs to change this code if the pedigrees are not identical but are 
@@ -1550,13 +1608,13 @@ system.time(ll_res_fast <- eval_pedigree_ll(
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4, 
   cluster_weights = c_weights))
 #>    user  system elapsed 
-#>   0.241   0.000   0.062
+#>   0.285   0.000   0.073
 system.time(grad_res_fast <- eval_pedigree_grad(
   ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4, 
   cluster_weights = c_weights))
 #>    user  system elapsed 
-#>   6.104   0.000   1.598
+#>   7.051   0.000   1.827
 
 # show that we get the same (up to a Monte Carlo error)
 print(c(redundant = ll_res, fast = ll_res_fast), digits = 6)
@@ -1625,20 +1683,20 @@ system.time(ll_res_fast <- eval_pedigree_ll(
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4, 
   cluster_weights = c_weights, vls_scales = sqrt(c_weights)))
 #>    user  system elapsed 
-#>   0.364   0.000   0.122
+#>   0.414   0.000   0.135
 system.time(grad_res_fast <- eval_pedigree_grad(
   ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4, 
   cluster_weights = c_weights, vls_scales = sqrt(c_weights)))
 #>    user  system elapsed 
-#>   6.435   0.000   1.696
+#>   7.662   0.004   2.028
 
 # find the starting values
 system.time(start <- pedmod_start(
   ptr = ll_terms, data = dat_unqiue, cluster_weights = c_weights, 
   vls_scales = sqrt(c_weights)))
 #>    user  system elapsed 
-#>   7.393   0.000   7.392
+#>   8.780   0.000   8.779
 
 # optimize
 system.time(
@@ -1648,7 +1706,7 @@ system.time(
     maxvls = 5000L, rel_eps = 1e-2, minvls = 500L, 
     vls_scales = sqrt(c_weights)))
 #>    user  system elapsed 
-#>   6.423   0.000   1.688
+#>   6.824   0.000   1.781
 system.time(
   opt_out <- pedmod_opt(
     ptr = ll_terms, par = opt_out_quick$par, abs_eps = 0, use_aprx = TRUE, 
@@ -1656,7 +1714,7 @@ system.time(
     # we changed these parameters
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 #>    user  system elapsed 
-#>   32.58    0.00   10.23
+#>   35.23    0.00   11.08
 ```
 
 The results are shown below:
@@ -1845,7 +1903,7 @@ system.time(start_std <- pedmod_start(
   ptr = ll_terms, data = dat_unqiue, cluster_weights = c_weights, 
   vls_scales = sqrt(c_weights), standardized = TRUE))
 #>    user  system elapsed 
-#>   7.119   0.004   7.124
+#>   8.252   0.000   8.253
 
 # are the starting values similar?
 standardized_to_direct(start_std$par, n_scales = 2L)
@@ -1874,7 +1932,7 @@ system.time(
     maxvls = 5000L, rel_eps = 1e-2, minvls = 500L, 
     vls_scales = sqrt(c_weights)))
 #>    user  system elapsed 
-#>   6.107   0.000   1.606
+#>   6.825   0.000   1.816
 system.time(
   opt_out_std <- pedmod_opt(
     ptr = ll_terms, par = opt_out_quick_std$par, abs_eps = 0, use_aprx = TRUE, 
@@ -1883,7 +1941,7 @@ system.time(
     # we changed these parameters
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 #>    user  system elapsed 
-#>   5.459   0.000   1.727
+#>   6.077   0.012   1.933
 
 # we get the same
 standardized_to_direct(opt_out_std$par, n_scales = 2L)
@@ -2020,18 +2078,18 @@ pl_genetic <- pedmod_profile(
 #> LogLike: -2697.0228 at         0.216585
 #> LogLike: -2700.0528 at        -0.183415
 #> LogLike: -2699.9954 at        -0.183415
-#> LogLike: -2698.2136 at         0.035738. Lb, target, ub: -2698.2136, -2698.0349, -2697.0228
-#> LogLike: -2698.1042 at         0.035738. Lb, target, ub: -2698.1042, -2698.0349, -2697.0228
-#> LogLike: -2697.9976 at         0.064199. Lb, target, ub: -2698.1042, -2698.0349, -2697.9976
-#> LogLike: -2697.9048 at         0.064199. Lb, target, ub: -2698.1042, -2698.0349, -2697.9048
+#> LogLike: -2698.2119 at         0.035980. Lb, target, ub: -2698.2119, -2698.0349, -2697.0228
+#> LogLike: -2698.1024 at         0.035980. Lb, target, ub: -2698.1024, -2698.0349, -2697.0228
+#> LogLike: -2697.9974 at         0.064227. Lb, target, ub: -2698.1024, -2698.0349, -2697.9974
+#> LogLike: -2697.9046 at         0.064227. Lb, target, ub: -2698.1024, -2698.0349, -2697.9046
 #> 
 #> Finding the upper limit of the profile likelihood curve
 #> LogLike: -2696.9381 at         1.016585
 #> LogLike: -2696.8584 at         1.016585
 #> LogLike: -2698.6228 at         1.416585
 #> LogLike: -2698.5185 at         1.416585
-#> LogLike: -2697.9933 at         1.281728. Lb, target, ub: -2698.5185, -2698.0349, -2697.9933
-#> LogLike: -2697.9007 at         1.281728. Lb, target, ub: -2698.5185, -2698.0349, -2697.9007
+#> LogLike: -2697.9934 at         1.281745. Lb, target, ub: -2698.5185, -2698.0349, -2697.9934
+#> LogLike: -2697.9008 at         1.281745. Lb, target, ub: -2698.5185, -2698.0349, -2697.9008
 #> LogLike: -2696.1142 at         0.616585
 exp(pl_genetic$confs) # the confidence interval
 #>  2.50 pct. 97.50 pct. 
@@ -2050,24 +2108,24 @@ pl_env <- pedmod_profile(
 #> LogLike: -2697.0908 at        -0.774517
 #> LogLike: -2699.2470 at        -1.374517
 #> LogLike: -2699.1931 at        -1.374517
-#> LogLike: -2698.0600 at        -1.055912. Lb, target, ub: -2698.0600, -2698.0349, -2697.0908
-#> LogLike: -2698.0274 at        -1.055912. Lb, target, ub: -2699.1931, -2698.0349, -2698.0274
-#> LogLike: -2698.2211 at        -1.093264. Lb, target, ub: -2698.2211, -2698.0349, -2698.0274
-#> LogLike: -2698.1601 at        -1.093264. Lb, target, ub: -2698.1601, -2698.0349, -2698.0274
+#> LogLike: -2698.0602 at        -1.055793. Lb, target, ub: -2698.0602, -2698.0349, -2697.0908
+#> LogLike: -2698.0266 at        -1.055793. Lb, target, ub: -2699.1931, -2698.0349, -2698.0266
+#> LogLike: -2698.2213 at        -1.093313. Lb, target, ub: -2698.2213, -2698.0349, -2698.0266
+#> LogLike: -2698.1603 at        -1.093313. Lb, target, ub: -2698.1603, -2698.0349, -2698.0266
 #> 
 #> Finding the upper limit of the profile likelihood curve
 #> LogLike: -2697.4329 at         0.425483
 #> LogLike: -2697.3165 at         0.425483
 #> LogLike: -2700.2495 at         1.025483
 #> LogLike: -2700.1160 at         1.025483
-#> LogLike: -2698.4945 at         0.679198. Lb, target, ub: -2698.4945, -2698.0349, -2697.3165
-#> LogLike: -2698.3993 at         0.679198. Lb, target, ub: -2698.3993, -2698.0349, -2697.3165
-#> LogLike: -2698.0695 at         0.587005. Lb, target, ub: -2698.0695, -2698.0349, -2697.3165
-#> LogLike: -2697.9768 at         0.587005. Lb, target, ub: -2698.3993, -2698.0349, -2697.9768
+#> LogLike: -2698.4941 at         0.679117. Lb, target, ub: -2698.4941, -2698.0349, -2697.3165
+#> LogLike: -2698.3989 at         0.679117. Lb, target, ub: -2698.3989, -2698.0349, -2697.3165
+#> LogLike: -2698.0695 at         0.586996. Lb, target, ub: -2698.0695, -2698.0349, -2697.3165
+#> LogLike: -2697.9767 at         0.586996. Lb, target, ub: -2698.3989, -2698.0349, -2697.9767
 #> LogLike: -2696.1142 at        -0.174517
 exp(pl_env$confs) # the confidence interval
 #>  2.50 pct. 97.50 pct. 
-#>     0.3469     1.8229
+#>     0.3468     1.8229
 ```
 
 We plot the two profile likelihood curves below:
@@ -2168,33 +2226,33 @@ pl_genetic_prop <- pedmod_profile_prop(
 #> 
 #> Finding the upper limit of the profile likelihood curve
 #> LogLike: -2746.5869 at         0.990000
-#> LogLike: -2746.5869 at         0.990000
+#> LogLike: -2746.6352 at         0.990000
 #> LogLike: -2696.1142 at         0.501724
-#> LogLike: -2696.8690 at         0.572493. Lb, target, ub: -2746.5869, -2698.0349, -2696.8690
-#> LogLike: -2696.8690 at         0.572493. Lb, target, ub: -2746.5869, -2698.0349, -2696.8690
-#> LogLike: -2699.1758 at         0.643121. Lb, target, ub: -2699.1758, -2698.0349, -2696.8690
-#> LogLike: -2699.1758 at         0.643121. Lb, target, ub: -2699.1758, -2698.0349, -2696.8690
-#> LogLike: -2698.1043 at         0.615218. Lb, target, ub: -2698.1043, -2698.0349, -2696.8690
-#> LogLike: -2698.1043 at         0.615218. Lb, target, ub: -2698.1043, -2698.0349, -2696.8690
-#> LogLike: -2697.8874 at         0.608674. Lb, target, ub: -2698.1043, -2698.0349, -2697.8874
-#> LogLike: -2697.8874 at         0.608674. Lb, target, ub: -2698.1043, -2698.0349, -2697.8874
+#> LogLike: -2696.8704 at         0.572477. Lb, target, ub: -2746.6352, -2698.0349, -2696.8704
+#> LogLike: -2696.8704 at         0.572477. Lb, target, ub: -2746.6352, -2698.0349, -2696.8704
+#> LogLike: -2699.1657 at         0.643055. Lb, target, ub: -2699.1657, -2698.0349, -2696.8704
+#> LogLike: -2699.1860 at         0.643055. Lb, target, ub: -2699.1860, -2698.0349, -2696.8704
+#> LogLike: -2698.0581 at         0.615064. Lb, target, ub: -2698.0581, -2698.0349, -2696.8704
+#> LogLike: -2698.0790 at         0.615064. Lb, target, ub: -2698.0790, -2698.0349, -2696.8704
+#> LogLike: -2697.9009 at         0.609183. Lb, target, ub: -2698.0790, -2698.0349, -2697.9009
+#> LogLike: -2697.8773 at         0.609183. Lb, target, ub: -2698.0790, -2698.0349, -2697.8773
 #> 
 #> Finding the lower limit of the profile likelihood curve
 #> LogLike: -2730.9048 at         0.010000
-#> LogLike: -2730.9048 at         0.010000
+#> LogLike: -2730.9120 at         0.010000
 #> LogLike: -2696.1142 at         0.501724
-#> LogLike: -2696.9654 at         0.422957. Lb, target, ub: -2730.9048, -2698.0349, -2696.9654
-#> LogLike: -2696.9654 at         0.422957. Lb, target, ub: -2730.9048, -2698.0349, -2696.9654
-#> LogLike: -2699.5407 at         0.345364. Lb, target, ub: -2699.5407, -2698.0349, -2696.9654
-#> LogLike: -2699.5407 at         0.345364. Lb, target, ub: -2699.5407, -2698.0349, -2696.9654
-#> LogLike: -2698.1165 at         0.381943. Lb, target, ub: -2698.1165, -2698.0349, -2696.9654
-#> LogLike: -2698.1165 at         0.381943. Lb, target, ub: -2698.1165, -2698.0349, -2696.9654
-#> LogLike: -2697.8902 at         0.388627. Lb, target, ub: -2698.1165, -2698.0349, -2697.8902
-#> LogLike: -2697.8902 at         0.388627. Lb, target, ub: -2698.1165, -2698.0349, -2697.8902
+#> LogLike: -2696.9653 at         0.422962. Lb, target, ub: -2730.9120, -2698.0349, -2696.9653
+#> LogLike: -2696.9725 at         0.422962. Lb, target, ub: -2730.9120, -2698.0349, -2696.9725
+#> LogLike: -2699.5307 at         0.345593. Lb, target, ub: -2699.5307, -2698.0349, -2696.9725
+#> LogLike: -2699.5306 at         0.345593. Lb, target, ub: -2699.5306, -2698.0349, -2696.9725
+#> LogLike: -2698.1049 at         0.382243. Lb, target, ub: -2698.1049, -2698.0349, -2696.9725
+#> LogLike: -2698.1162 at         0.382243. Lb, target, ub: -2698.1162, -2698.0349, -2696.9725
+#> LogLike: -2697.8817 at         0.388895. Lb, target, ub: -2698.1162, -2698.0349, -2697.8817
+#> LogLike: -2697.8968 at         0.388895. Lb, target, ub: -2698.1162, -2698.0349, -2697.8968
 #> LogLike: -2696.1142 at         0.501724
 pl_genetic_prop$confs # the confidence interval
 #>  2.50 pct. 97.50 pct. 
-#>     0.3844     0.6134
+#>     0.3846     0.6138
 
 # confidence interval for the proportion of variance for the environment
 # effect
@@ -2207,33 +2265,33 @@ pl_env_prop <- pedmod_profile_prop(
 #> 
 #> Finding the upper limit of the profile likelihood curve
 #> LogLike: -3045.1118 at         0.990000
-#> LogLike: -3045.1118 at         0.990000
+#> LogLike: -3045.0714 at         0.990000
 #> LogLike: -2696.1142 at         0.227454
-#> LogLike: -2697.5497 at         0.315912. Lb, target, ub: -3045.1118, -2698.0349, -2697.5497
-#> LogLike: -2697.5497 at         0.315912. Lb, target, ub: -3045.1118, -2698.0349, -2697.5497
-#> LogLike: -2701.2389 at         0.393178. Lb, target, ub: -2701.2389, -2698.0349, -2697.5497
-#> LogLike: -2701.2389 at         0.393178. Lb, target, ub: -2701.2389, -2698.0349, -2697.5497
-#> LogLike: -2698.4804 at         0.340873. Lb, target, ub: -2698.4804, -2698.0349, -2697.5497
-#> LogLike: -2698.4804 at         0.340873. Lb, target, ub: -2698.4804, -2698.0349, -2697.5497
-#> LogLike: -2698.0252 at         0.329620. Lb, target, ub: -2698.4804, -2698.0349, -2698.0252
-#> LogLike: -2698.0252 at         0.329620. Lb, target, ub: -2698.4804, -2698.0349, -2698.0252
+#> LogLike: -2697.5497 at         0.315912. Lb, target, ub: -3045.0714, -2698.0349, -2697.5497
+#> LogLike: -2697.5601 at         0.315912. Lb, target, ub: -3045.0714, -2698.0349, -2697.5601
+#> LogLike: -2701.2357 at         0.393128. Lb, target, ub: -2701.2357, -2698.0349, -2697.5601
+#> LogLike: -2701.2439 at         0.393128. Lb, target, ub: -2701.2439, -2698.0349, -2697.5601
+#> LogLike: -2698.4639 at         0.340479. Lb, target, ub: -2698.4639, -2698.0349, -2697.5601
+#> LogLike: -2698.4825 at         0.340479. Lb, target, ub: -2698.4825, -2698.0349, -2697.5601
+#> LogLike: -2698.0125 at         0.329265. Lb, target, ub: -2698.4825, -2698.0349, -2698.0125
+#> LogLike: -2698.0278 at         0.329265. Lb, target, ub: -2698.4825, -2698.0349, -2698.0278
 #> 
 #> Finding the lower limit of the profile likelihood curve
 #> LogLike: -2704.2333 at         0.010000
-#> LogLike: -2704.2333 at         0.010000
+#> LogLike: -2704.2423 at         0.010000
 #> LogLike: -2696.1142 at         0.227454
-#> LogLike: -2696.9447 at         0.157565. Lb, target, ub: -2704.2333, -2698.0349, -2696.9447
-#> LogLike: -2696.9443 at         0.157565. Lb, target, ub: -2704.2333, -2698.0349, -2696.9443
-#> LogLike: -2698.9361 at         0.099247. Lb, target, ub: -2698.9361, -2698.0349, -2696.9443
-#> LogLike: -2698.9361 at         0.099247. Lb, target, ub: -2698.9361, -2698.0349, -2696.9443
-#> LogLike: -2698.0145 at         0.122255. Lb, target, ub: -2698.9361, -2698.0349, -2698.0145
-#> LogLike: -2698.0140 at         0.122255. Lb, target, ub: -2698.9361, -2698.0349, -2698.0140
-#> LogLike: -2698.1326 at         0.119162. Lb, target, ub: -2698.1326, -2698.0349, -2698.0140
-#> LogLike: -2698.1326 at         0.119162. Lb, target, ub: -2698.1326, -2698.0349, -2698.0140
+#> LogLike: -2696.9430 at         0.157616. Lb, target, ub: -2704.2423, -2698.0349, -2696.9430
+#> LogLike: -2696.9561 at         0.157616. Lb, target, ub: -2704.2423, -2698.0349, -2696.9561
+#> LogLike: -2698.8995 at         0.100105. Lb, target, ub: -2698.8995, -2698.0349, -2696.9561
+#> LogLike: -2698.9137 at         0.100105. Lb, target, ub: -2698.9137, -2698.0349, -2696.9561
+#> LogLike: -2697.9942 at         0.122804. Lb, target, ub: -2698.9137, -2698.0349, -2697.9942
+#> LogLike: -2698.0086 at         0.122804. Lb, target, ub: -2698.9137, -2698.0349, -2698.0086
+#> LogLike: -2698.1112 at         0.119607. Lb, target, ub: -2698.1112, -2698.0349, -2698.0086
+#> LogLike: -2698.1259 at         0.119607. Lb, target, ub: -2698.1259, -2698.0349, -2698.0086
 #> LogLike: -2696.1142 at         0.227454
 pl_env_prop$confs # the confidence interval
 #>  2.50 pct. 97.50 pct. 
-#>     0.1215     0.3296
+#>     0.1220     0.3293
 ```
 
 A wrong approach is to use the confidence interval for
@@ -2838,17 +2896,16 @@ c(`Without weights` = sd(ll_ests), `With weights` = sd(ll_ests_fast),
 system.time(start <- pedmod_start_loadings(
   ll_terms, data = dat_unqiue, cluster_weights = c_weights))
 #>    user  system elapsed 
-#>   0.010   0.000   0.009
+#>   0.010   0.000   0.011
 
 # find the maximum likelihood estimator
-set.seed(1)
 system.time(
   opt_res <- pedmod_opt(
     ll_terms, par = start$par, maxvls = 25000L, minvls = 5000L, 
     abs_eps = 0, rel_eps = 1e-3, n_threads = 4L, use_aprx = TRUE, 
     cluster_weights = c_weights, vls_scales = sqrt(c_weights)))
 #>    user  system elapsed 
-#> 440.982   0.004 133.753
+#>   434.3     0.0   131.0
 ```
 
 We compare the maximum likelihood estimator with the true values below.
@@ -2929,6 +2986,168 @@ print(logLik_truth_weighted, digits = 8)
 print(-opt_res$value, digits = 8)
 #> [1] -4370.6815
 ```
+
+### Profile Likelihood
+
+We can construct a profile likelihood for the parameters like before.
+For instance, we can look at the scale parameter for the heritability
+shift for the males with the following code.
+
+``` r
+system.time(
+  pl_curve <- pedmod_profile(
+    ll_terms, par = opt_res$par, maxvls = 25000L, minvls = 5000L, 
+    abs_eps = 0, rel_eps = 1e-3, n_threads = 4L, use_aprx = TRUE, 
+    cluster_weights = c_weights, vls_scales = sqrt(c_weights), 
+    delta = .2, verbose = TRUE, which_prof = 4L))
+#> The estimate of the standard error of the log likelihood is 0.00189664. Preferably this should be below 0.001
+#> 
+#> Finding the lower limit of the profile likelihood curve
+#> LogLike: -4374.9109 at         0.894952
+#> LogLike: -4373.9116 at         0.894952
+#> LogLike: -4370.6815 at         1.094952
+#> LogLike: -4371.7804 at         0.989239. Lb, target, ub: -4373.9116, -4372.6022, -4371.7804
+#> LogLike: -4371.4939 at         0.989239. Lb, target, ub: -4373.9116, -4372.6022, -4371.4939
+#> LogLike: -4372.8734 at         0.937691. Lb, target, ub: -4372.8734, -4372.6022, -4371.4939
+#> LogLike: -4372.5926 at         0.937691. Lb, target, ub: -4373.9116, -4372.6022, -4372.5926
+#> LogLike: -4372.9987 at         0.932610. Lb, target, ub: -4372.9987, -4372.6022, -4372.5926
+#> LogLike: -4372.7283 at         0.932610. Lb, target, ub: -4372.7283, -4372.6022, -4372.5926
+#> 
+#> Finding the upper limit of the profile likelihood curve
+#> LogLike: -4373.2335 at         1.294952
+#> LogLike: -4373.1099 at         1.294952
+#> LogLike: -4370.6815 at         1.094952
+#> LogLike: -4371.9157 at         1.235563. Lb, target, ub: -4373.1099, -4372.6022, -4371.9157
+#> LogLike: -4371.9529 at         1.235563. Lb, target, ub: -4373.1099, -4372.6022, -4371.9529
+#> LogLike: -4372.5866 at         1.268475. Lb, target, ub: -4373.1099, -4372.6022, -4372.5866
+#> LogLike: -4372.5552 at         1.268475. Lb, target, ub: -4373.1099, -4372.6022, -4372.5552
+#> LogLike: -4370.6815 at         1.094952
+#>     user   system  elapsed 
+#> 1756.799    0.012  439.685
+```
+
+The confidence interval is shown below along with a plot of the profile
+likelihood curve.
+
+``` r
+pl_curve$confs # the confidence interval
+#>  2.50 pct. 97.50 pct. 
+#>     0.9373     1.2709
+
+# plot the profile likelihood curve
+local({
+  max_diff <- 4
+  xs <- pl_curve$xs
+  pls <- pl_curve$p_log_Lik
+  keep <- pls > max(pls) - max_diff
+  xs <- xs[keep]
+  pls <- pls[keep]
+
+  par(mar = c(5, 5, 1, 1))  
+  plot(xs, pls, bty = "l", pch = 16, xlab = expression(theta[2]), 
+       ylab = "Profile likelihood")
+  grid()
+  abline(v = opt_res$par[4], lty = 2) # the estimate
+  # mark the critical value
+  abline(h = max(pls) - qchisq(.95, 1) / 2, lty = 3) 
+  
+  lines(spline(xs, pls, n = 100L))
+})
+```
+
+<img src="man/figures/README-show_loadings_pl_show-1.png" width="100%" />
+
+Some of the quantities of interest are nonlinear functions of the
+parameters, however. For instance, we may be interested in the
+difference in the proportion of variance for males at `cov = 0`. We can
+construct a profile likelihood based confidence interval for this
+difference but this requires an optimizer that supports nonlinear
+equality constraints. The `pedmod_profile_nleq` function is created for
+this purpose and an example of using it to compute the aforementioned
+difference is shown below.
+
+``` r
+# computes the difference between the male and females heritability at 
+# cov = 0
+heq <- function(par){
+  theta <- matrix(tail(par, 6), 3)
+  scs <- matrix(c(1, 1, 0, 1, 0, 0), 2) %*% theta
+  scs <- exp(scs)
+  prop_genetic <- scs[, 1]^2 / (1 + rowSums(scs^2))
+  diff(prop_genetic)
+}
+heq(opt_res$par)
+#> [1] 0.4107
+
+# construct the profile likelihood curve
+system.time(
+  pl_curve_nleq <- pedmod_profile_nleq(
+    ll_terms, par = opt_res$par, maxvls = 5000L, minvls = 1000L, 
+    abs_eps = 0, rel_eps = 1e-3, n_threads = 4L, use_aprx = TRUE, 
+    cluster_weights = c_weights, vls_scales = sqrt(c_weights), 
+    delta = .2, verbose = TRUE, heq = heq, heq_bounds = c(-1, 1)))
+#> The estimate of the standard error of the log likelihood is 0.00814429. Preferably this should be below 0.001
+#> 
+#> Finding the upper limit of the profile likelihood curve
+#> LogLike: -4385.8240 at         0.610651
+#> LogLike: -4385.8109 at         0.610651
+#> LogLike: -4370.6861 at         0.410651
+#> LogLike: -4371.3561 at         0.455450. Lb, target, ub: -4385.8109, -4372.6068, -4371.3561
+#> LogLike: -4371.3330 at         0.455450. Lb, target, ub: -4385.8109, -4372.6068, -4371.3330
+#> LogLike: -4374.1833 at         0.511991. Lb, target, ub: -4374.1833, -4372.6068, -4371.3330
+#> LogLike: -4374.1706 at         0.511991. Lb, target, ub: -4374.1706, -4372.6068, -4371.3330
+#> LogLike: -4372.7182 at         0.488065. Lb, target, ub: -4372.7182, -4372.6068, -4371.3330
+#> LogLike: -4372.7055 at         0.488065. Lb, target, ub: -4372.7055, -4372.6068, -4371.3330
+#> LogLike: -4372.4733 at         0.482780. Lb, target, ub: -4372.7055, -4372.6068, -4372.4733
+#> LogLike: -4372.4617 at         0.482780. Lb, target, ub: -4372.7055, -4372.6068, -4372.4617
+#> 
+#> Finding the lower limit of the profile likelihood curve
+#> LogLike: -4379.6087 at         0.210651
+#> LogLike: -4379.6656 at         0.210651
+#> LogLike: -4370.6861 at         0.410651
+#> LogLike: -4371.7179 at         0.350402. Lb, target, ub: -4379.6656, -4372.6068, -4371.7179
+#> LogLike: -4371.7305 at         0.350402. Lb, target, ub: -4379.6656, -4372.6068, -4371.7305
+#> LogLike: -4373.3426 at         0.308860. Lb, target, ub: -4373.3426, -4372.6068, -4371.7305
+#> LogLike: -4373.3346 at         0.308860. Lb, target, ub: -4373.3346, -4372.6068, -4371.7305
+#> LogLike: -4372.4498 at         0.326686. Lb, target, ub: -4373.3346, -4372.6068, -4372.4498
+#> LogLike: -4372.4474 at         0.326686. Lb, target, ub: -4373.3346, -4372.6068, -4372.4474
+#> LogLike: -4372.6961 at         0.321195. Lb, target, ub: -4372.6961, -4372.6068, -4372.4474
+#> LogLike: -4372.6941 at         0.321195. Lb, target, ub: -4372.6941, -4372.6068, -4372.4474
+#> LogLike: -4370.6861 at         0.410651
+#>    user  system elapsed 
+#> 6088.68    0.28 1633.93
+```
+
+The confidence interval is shown below along with a plot of the profile
+likelihood curve.
+
+``` r
+pl_curve_nleq$confs # the confidence interval
+#>  2.50 pct. 97.50 pct. 
+#>     0.3231     0.4859
+
+# plot the profile likelihood curve
+local({
+  max_diff <- 4
+  xs <- pl_curve_nleq$xs
+  pls <- pl_curve_nleq$p_log_Lik
+  keep <- pls > max(pls) - max_diff
+  xs <- xs[keep]
+  pls <- pls[keep]
+
+  par(mar = c(5, 5, 1, 1))  
+  plot(xs, pls, bty = "l", pch = 16, ylab = "Profile likelihood",
+       xlab = "Heritability difference at cov = 0")
+  grid()
+  abline(v = opt_res$par[4], lty = 2) # the estimate
+  # mark the critical value
+  abline(h = max(pls) - qchisq(.95, 1) / 2, lty = 3) 
+  
+  lines(spline(xs, pls, n = 100L))
+})
+```
+
+<img src="man/figures/README-show_loadings_nleq_pl-1.png" width="100%" />
 
 ### Simulation Study
 
@@ -3234,7 +3453,7 @@ gr <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE,
 # check output at the starting values
 system.time(ll <- -fn(c(beta, sc)))
 #>    user  system elapsed 
-#>   3.772   0.000   0.960
+#>   4.200   0.000   1.067
 ll # the log likelihood at the starting values
 #> [1] -26042
 #> attr(,"n_fails")
@@ -3243,7 +3462,7 @@ ll # the log likelihood at the starting values
 #> [1] 0.05963
 system.time(gr_val <- gr(c(beta, sc)))
 #>    user  system elapsed 
-#>  37.866   0.000   9.528
+#>  39.532   0.000   9.973
 gr_val # the gradient at the starting values
 #> [1] 1894.83 -549.43 -235.73   47.21  -47.84
 #> attr(,"value")
@@ -3284,7 +3503,7 @@ rbind(numDeriv = numDeriv::grad(fn, c(beta, sc), indices = 0:10),
 # optimize the log likelihood approximation
 system.time(opt <- optim(c(beta, sc), fn, gr, method = "BFGS"))
 #>     user   system  elapsed 
-#> 1564.086    0.008  397.599
+#> 1566.721    0.004  398.049
 ```
 
 The output from the optimization is shown below:
@@ -3325,14 +3544,14 @@ microbenchmark(
   `gr (2 threads)` = gr(c(beta, sc), n_threads = 2),
   `gr (4 threads)` = gr(c(beta, sc), n_threads = 4),
   times = 1)
-#> Unit: seconds
-#>            expr    min     lq   mean median     uq    max neval
-#>   fn (1 thread)  3.647  3.647  3.647  3.647  3.647  3.647     1
-#>  fn (2 threads)  1.848  1.848  1.848  1.848  1.848  1.848     1
-#>  fn (4 threads)  1.144  1.144  1.144  1.144  1.144  1.144     1
-#>   gr (1 thread) 34.407 34.407 34.407 34.407 34.407 34.407     1
-#>  gr (2 threads) 18.628 18.628 18.628 18.628 18.628 18.628     1
-#>  gr (4 threads)  9.274  9.274  9.274  9.274  9.274  9.274     1
+#> Unit: milliseconds
+#>            expr     min      lq    mean  median      uq     max neval
+#>   fn (1 thread)  3601.0  3601.0  3601.0  3601.0  3601.0  3601.0     1
+#>  fn (2 threads)  1962.0  1962.0  1962.0  1962.0  1962.0  1962.0     1
+#>  fn (4 threads)   975.3   975.3   975.3   975.3   975.3   975.3     1
+#>   gr (1 thread) 33315.2 33315.2 33315.2 33315.2 33315.2 33315.2     1
+#>  gr (2 threads) 18360.2 18360.2 18360.2 18360.2 18360.2 18360.2     1
+#>  gr (4 threads)  8974.9  8974.9  8974.9  8974.9  8974.9  8974.9     1
 ```
 
 ### Using ADAM
@@ -3434,7 +3653,7 @@ system.time(
                    verbose = FALSE, maxvls = maxpts_use, 
                    minvls = minvls))
 #>     user   system  elapsed 
-#> 1524.080    0.092  386.820
+#> 1484.077    0.032  376.504
 ```
 
 The result is shown below.
@@ -3601,13 +3820,13 @@ The new implementation is faster when the approximation is used:
 ``` r
 rowMeans(sim_res[, "time", ])
 #>                 mvtnorm         TruncatedNormal        no aprx; Korobov 
-#>                0.018004                0.030969                0.012669 
+#>                0.017871                0.030970                0.012452 
 #>          no aprx; Sobol        w/ aprx; Korobov          w/ aprx; Sobol 
-#>                0.015345                0.004706                0.006127 
+#>                0.015345                0.004689                0.006153 
 #> no aprx; Korobov (tilt)   no aprx; Sobol (tilt) w/ aprx; Korobov (tilt) 
-#>                0.012879                0.011855                0.009760 
+#>                0.012832                0.011811                0.009660 
 #>   w/ aprx; Sobol (tilt) 
-#>                0.008954
+#>                0.008810
 par(mar = c(9, 4, 1, 1), bty = "l")
 boxplot(t(sim_res[, "time", ]), log = "y", las = 2)
 grid()
@@ -3757,28 +3976,28 @@ A similar plot for the average estimation time is shown below.
 sim_res[, "time", ]
 #>                          Dimension
 #> Method                            3        5       10       15       20
-#>   mvtnorm                 0.0024505 0.005565 0.018839 0.042438 0.057002
-#>   TruncatedNormal         0.0110780 0.019446 0.043146 0.060507 0.081304
-#>   no aprx; Korobov        0.0035080 0.006293 0.013251 0.020245 0.027304
-#>   no aprx; Sobol          0.0027307 0.004726 0.009811 0.014886 0.019933
-#>   w/ aprx; Korobov        0.0009211 0.001592 0.003545 0.005614 0.008110
-#>   w/ aprx; Sobol          0.0009387 0.001533 0.003189 0.004846 0.006815
-#>   no aprx; Korobov (tilt) 0.0067410 0.011760 0.023368 0.035913 0.048310
-#>   no aprx; Sobol (tilt)   0.0049986 0.008549 0.016855 0.025775 0.034697
-#>   w/ aprx; Korobov (tilt) 0.0055268 0.009698 0.019252 0.034611 0.019063
-#>   w/ aprx; Sobol (tilt)   0.0041405 0.007138 0.013968 0.024894 0.014458
+#>   mvtnorm                 0.0024461 0.005400 0.018332 0.041587 0.056075
+#>   TruncatedNormal         0.0113102 0.018867 0.038791 0.059385 0.081551
+#>   no aprx; Korobov        0.0035718 0.006269 0.013325 0.020193 0.027290
+#>   no aprx; Sobol          0.0027850 0.004722 0.009864 0.014975 0.020040
+#>   w/ aprx; Korobov        0.0009316 0.001573 0.003524 0.005610 0.008086
+#>   w/ aprx; Sobol          0.0014162 0.001510 0.003143 0.004865 0.006810
+#>   no aprx; Korobov (tilt) 0.0067082 0.011482 0.022950 0.035112 0.047490
+#>   no aprx; Sobol (tilt)   0.0048289 0.008321 0.016450 0.025385 0.034017
+#>   w/ aprx; Korobov (tilt) 0.0054848 0.009650 0.019139 0.034143 0.018584
+#>   w/ aprx; Sobol (tilt)   0.0041148 0.007114 0.013922 0.024509 0.014316
 #>                          Dimension
 #> Method                          25
-#>   mvtnorm                 0.069435
-#>   TruncatedNormal         0.108166
-#>   no aprx; Korobov        0.033444
-#>   no aprx; Sobol          0.024487
-#>   w/ aprx; Korobov        0.010336
-#>   w/ aprx; Sobol          0.008687
-#>   no aprx; Korobov (tilt) 0.061000
-#>   no aprx; Sobol (tilt)   0.043835
-#>   w/ aprx; Korobov (tilt) 0.024140
-#>   w/ aprx; Sobol (tilt)   0.018446
+#>   mvtnorm                 0.069010
+#>   TruncatedNormal         0.104198
+#>   no aprx; Korobov        0.033675
+#>   no aprx; Sobol          0.024489
+#>   w/ aprx; Korobov        0.010328
+#>   w/ aprx; Sobol          0.008666
+#>   no aprx; Korobov (tilt) 0.059681
+#>   no aprx; Sobol (tilt)   0.042946
+#>   w/ aprx; Korobov (tilt) 0.023790
+#>   w/ aprx; Sobol (tilt)   0.018254
 
 # plot the computation time
 par(mar = c(5, 5, 1, 1), cex = .8)
@@ -3802,7 +4021,7 @@ grid()
 Botev, Z. I. 2017. “The Normal Law Under Linear Restrictions: Simulation
 and Estimation via Minimax Tilting.” *Journal of the Royal Statistical
 Society: Series B (Statistical Methodology)* 79 (1): 125–48.
-<https://doi.org/https://doi.org/10.1111/rssb.12162>.
+<https://doi.org/10.1111/rssb.12162>.
 
 </div>
 
@@ -3826,8 +4045,7 @@ Optimization.” *CoRR* abs/1412.6980.
 
 Liu, Xing-Rong, Yudi Pawitan, and Mark S. Clements. 2017. “Generalized
 Survival Models for Correlated Time-to-Event Data.” *Statistics in
-Medicine* 36 (29): 4743–62.
-<https://doi.org/https://doi.org/10.1002/sim.7451>.
+Medicine* 36 (29): 4743–62. <https://doi.org/10.1002/sim.7451>.
 
 </div>
 
@@ -3837,7 +4055,7 @@ Mahjani, Behrang, Lambertus Klei, Christina M. Hultman, Henrik Larsson,
 Bernie Devlin, Joseph D. Buxbaum, Sven Sandin, and Dorothy E. Grice.
 2020. “Maternal Effects as Causes of Risk for Obsessive-Compulsive
 Disorder.” *Biological Psychiatry* 87 (12): 1045–51.
-<https://doi.org/https://doi.org/10.1016/j.biopsych.2020.01.006>.
+<https://doi.org/10.1016/j.biopsych.2020.01.006>.
 
 </div>
 
@@ -3846,7 +4064,7 @@ Disorder.” *Biological Psychiatry* 87 (12): 1045–51.
 Pawitan, Y., M. Reilly, E. Nilsson, S. Cnattingius, and P. Lichtenstein.
 2004. “Estimation of Genetic and Environmental Factors for Binary Traits
 Using Family Data.” *Statistics in Medicine* 23 (3): 449–65.
-<https://doi.org/https://doi.org/10.1002/sim.1603>.
+<https://doi.org/10.1002/sim.1603>.
 
 </div>
 

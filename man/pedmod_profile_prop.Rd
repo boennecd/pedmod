@@ -209,6 +209,6 @@ abline(v = prof_out$confs, lty = 2)
 
 }
 \seealso{
-\code{\link{pedmod_opt}}, \code{\link{pedmod_sqn}}, and
-\code{\link{pedmod_profile}}.
+\code{\link{pedmod_opt}}, \code{\link{pedmod_sqn}},
+\code{\link{pedmod_profile}}, and \code{\link{pedmod_profile_nleq}}.
 }

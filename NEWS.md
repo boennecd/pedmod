@@ -1,3 +1,14 @@
+# pedmod 0.2.1
+* `pedmod_profile` works with object from `pedigree_ll_terms_loadings`.
+* `pedmod_profile_nleq` has been added to construct profile likelihood based 
+  confidence intervals for general non-linear transformation of the model 
+  parameters.
+* An undefined undefined behavior bug has been fixed in the C++ code which 
+  possibly effects cases where `use_aprx = TRUE` but only in very extreme 
+  settings.
+* A bug has been fixed in `pedmod_profile_prop`. `minvls_start` and 
+  `maxvls_start` were used instead of `minvls` and `maxvls`.
+
 # pedmod 0.2.0
 * `pedigree_ll_terms_loadings` is implemented to support models with individual 
   specific covariance scale parameters (e.g. individual specific 

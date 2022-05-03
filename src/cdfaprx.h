@@ -239,7 +239,7 @@ class cdf {
           lim_u[k] = *up - su[k];
 
       } else if(*infin_j == 1L){
-        std::fill(lim_u, lim_u  + n_draws,  with_tilting ? Inf : 1);
+        std::fill(lim_u, lim_u  + n_draws, with_tilting ? Inf : 1);
         for(unsigned k = 0; k < n_draws; ++k)
           lim_l[k] = *lw - su[k];
 
@@ -908,6 +908,130 @@ public:
     double likelihood;
     /// the derivative approximation
     arma::vec derivs;
+    /// the approximate standard errors
+    arma::vec sd_errs;
+  };
+
+  out_type get_output
+    (double * res,  double const * sdest, size_t const minvls,
+     int const inform, double const abserr, int const *indices);
+};
+
+/**
+ * functor classes used as template argument for cdf used to approximate the
+ * derivatives and Hessian of the log likelihood factor of each family like
+ * pedigree_l_factor for derivative for given matrices C and a design matrix X.
+ *
+ * The returned approximations is a) the likelihood factor and b) the
+ * derivative of log likelihood w.r.t. the fixed effect coefficients and w.r.t.
+ * each of the scale parameters.
+ */
+class pedigree_l_factor_Hessian {
+public:
+  /// the scale matrices for the different effects
+  std::vector<arma::mat> const scale_mats;
+  /// the number of members in this family
+  arma::uword const n_mem = scale_mats[0].n_rows;
+  /// design matrix for the fixed effects
+  arma::mat const X;
+  /// the number of fixed effects
+  arma::uword const n_fix = X.n_cols,
+                 n_scales = scale_mats.size(),
+       n_integrands_inner =
+         1 + n_mem * (1 + n_mem) + (n_fix + n_scales) * (n_fix + n_scales),
+       n_integrands_outer = 1 + (n_fix + n_scales) * (1 + n_fix + n_scales),
+             n_integrands = std::max(n_integrands_inner, n_integrands_outer);
+
+private:
+  /// working memory
+  static cache_mem<double> dmem;
+
+  /// working memory to be used by cdf
+  double * cdf_mem;
+
+  /**
+   * the upper triangular part of the Cholesky decomposition of the of the
+   * covariance matrix
+   */
+  double *vcov_chol;
+
+  /// the inverse of the covariance matrix
+  double *vcov_inv;
+
+  /// the permuted version of X
+  double *X_permu;
+
+  /// pointers to possibly permuted versions of scale_mats
+  std::vector<double*> scale_mats_permu = std::vector<double*>(n_scales);
+
+  /// working memory that can be used for anything
+  double *interal_mem;
+
+  /// the normalization constant
+  double norm_const = std::numeric_limits<double>::quiet_NaN();
+
+public:
+  /// sets the scale matrices. There are no checks on the validity
+  pedigree_l_factor_Hessian
+    (std::vector<arma::mat> const &scale_mats, unsigned const max_threads,
+     arma::mat const &X_in, unsigned const max_n_sequences);
+
+  unsigned get_n_integrands() PEDMOD_NOEXCEPT {
+    return n_integrands;
+  }
+
+  double * get_wk_mem() PEDMOD_NOEXCEPT {
+    return cdf_mem;
+  }
+
+  constexpr static bool needs_last_unif() PEDMOD_NOEXCEPT {
+    return true;
+  }
+
+  double get_norm_constant() PEDMOD_NOEXCEPT {
+    return norm_const;
+  }
+
+  /**
+   * setups the covariance matrix to use. This method must be called be
+   * prior to using the object in an approximation.
+   *
+   * Args:
+   *   sig: the covariance matrix.
+   *   scales: scale parameters.
+   *   norm_constant_arg: the normalization constant.
+   */
+  void setup
+    (arma::mat &sig, double const *scales, double const norm_constant_arg);
+
+  void prep_permutated(arma::mat const &sig, int const *indices);
+
+  void operator()
+    (double const * PEDMOD_RESTRICT draw, double * PEDMOD_RESTRICT out,
+     int const *, bool const, unsigned const n_draws);
+
+  void univariate(double * out, double const lw, double const ub);
+
+  struct out_type {
+    /**
+     * minvls Actual number of function evaluations used.
+     * inform INFORM = 0 for normal exit, when
+     *             ABSERR <= MAX(ABSEPS, RELEPS*||finest||)
+     *          and
+     *             INTVLS <= MAXCLS.
+     *        INFORM = 1 If MAXVLS was too small to obtain the required
+     *        accuracy. In this case a value finest is returned with
+     *        estimated absolute accuracy ABSERR. */
+    size_t minvls;
+    int inform;
+    /// maximum estimated absolute accuracy of finest
+    double abserr;
+    /// likelihood approximation
+    double likelihood;
+    /// the gradient approximation
+    arma::vec gradient;
+    /// the hessian approximation
+    arma::vec hessian;
     /// the approximate standard errors
     arma::vec sd_errs;
   };

@@ -1,6 +1,15 @@
 #include "cdfaprx.h"
+#include <R_ext/RS.h>
 
 namespace pedmod {
+
+extern "C" {
+  /// either performs a forward or backward solve
+  void F77_NAME(dtpsv)
+    (const char * /* uplo */, const char * /* trans */, const char * /* diag */,
+     const int * /* n */, const double * /* ap */, double * /* x */,
+     const int* /* incx */, size_t, size_t, size_t);
+}
 
 arma::ivec get_infin(
     arma::ivec &out, arma::vec const &lower, arma::vec const &upper){
@@ -372,6 +381,243 @@ pedigree_l_factor::out_type pedigree_l_factor::get_output
   return out;
 }
 
+pedigree_l_factor_Hessian::pedigree_l_factor_Hessian
+  (std::vector<arma::mat> const &scale_mats, unsigned const max_threads,
+   arma::mat const &X_in, unsigned const max_n_sequences):
+  scale_mats(scale_mats), X(X_in.t()) {
+  // checks
+  if(scale_mats.size() < 1)
+    throw std::invalid_argument("pedigree_l_factor_Hessian::pedigree_l_factor_Hessian: no scale matrices are passed");
+  arma::uword const u_mem = n_mem;
+  for(auto &S : scale_mats)
+    if(S.n_rows != u_mem or S.n_rows != u_mem)
+      throw std::invalid_argument("pedigree_l_factor_Hessian::pedigree_l_factor_Hessian: not all scale matrices are square matrices or have the same dimensions");
+  if(X.n_rows != u_mem)
+    throw std::invalid_argument("pedigree_l_factor_Hessian::pedigree_l_factor_Hessian: invalid X");
+
+  // setup working memory
+  rand_Korobov<cdf<pedigree_l_factor_Hessian> >::alloc_mem(
+      n_mem, get_n_integrands(), max_threads);
+  sobol_wrapper<cdf<pedigree_l_factor_Hessian> >::alloc_mem(
+      n_mem, get_n_integrands(), max_threads, max_n_sequences);
+
+  size_t const working_memory{n_fix + n_scales};
+  dmem.set_n_mem(
+    (n_mem * (n_mem + 1)) / 2 + // vcov_chol
+      n_mem * n_mem + // vcov_inv
+      n_mem * n_fix + // X_permu
+      n_mem * n_mem * n_scales + // scale_mats_permu
+      2 * get_n_integrands() +
+      working_memory,
+      max_threads);
+}
+
+void pedigree_l_factor_Hessian::setup
+  (arma::mat &sig, double const *scales, double const norm_constant_arg){
+  sig.zeros(n_mem, n_mem);
+  sig.diag() += 1;
+  for(unsigned i = 0; i < scale_mats.size(); ++i)
+    sig += scales[i] * scale_mats[i];
+  norm_const = norm_constant_arg;
+
+  vcov_chol = dmem.get_mem();
+  vcov_inv = vcov_chol + (n_mem * (n_mem + 1)) / 2;
+  X_permu = vcov_inv + n_mem * n_mem;
+
+  double * next_mem = X_permu + n_mem * n_fix;
+  for(arma::uword i = 0; i < n_scales; ++i, next_mem += n_mem * n_mem)
+    scale_mats_permu[i] = next_mem;
+
+  cdf_mem = next_mem;
+  interal_mem = cdf_mem + 2 * get_n_integrands();
+}
+
+void pedigree_l_factor_Hessian::prep_permutated
+  (arma::mat const &sig, int const *indices) {
+  arma::mat const sig_chol = arma::chol(sig);
+
+  {
+    double * vcov_chol_id{vcov_chol};
+    for(arma::uword id = 0; id < n_mem; ++id, vcov_chol_id += id)
+      std::copy(sig_chol.colptr(id), sig_chol.colptr(id) + id + 1, vcov_chol_id);
+  }
+
+  {
+    arma::mat const sig_inv = arma::inv_sympd(sig);
+    std::copy(sig_inv.begin(), sig_inv.end(), vcov_inv);
+  }
+
+  for(arma::uword fix = 0; fix < n_fix; ++fix)
+    for(arma::uword id = 0; id < n_mem; ++id)
+      X_permu[id + fix * n_mem] = X(indices[id], fix);
+
+  for(size_t scale = 0; scale < n_scales; ++scale)
+    for(arma::uword id1 = 0; id1 < n_mem; ++id1)
+      for(arma::uword id2 = 0; id2 < n_mem; ++id2)
+        *(scale_mats_permu[scale] + id2 + id1 * n_mem) =
+          scale_mats[scale](indices[id2], indices[id1]);
+}
+
+void pedigree_l_factor_Hessian::operator()
+  (double const * PEDMOD_RESTRICT draw, double * PEDMOD_RESTRICT out,
+   int const *, bool const, unsigned const n_draws) {
+  for(unsigned idx_draw = 0; idx_draw < n_draws; ++idx_draw)
+    out[idx_draw * n_integrands] = 1;
+
+  size_t const shift_scaled_res{1},
+               shift_outer_res{shift_scaled_res + n_mem},
+               shift_vec_outer_res{shift_outer_res + n_mem * n_mem};
+
+  /*
+   * let
+   *
+   *   Psi be the covariance matrix
+   *   S^TS = Psi be the Cholesky decomposition
+   *   U be the draws
+   *
+   * then we first compute S^(-1)u and (S^(-1)uu^TS^(-1) - Psi^(-1)) / 2
+   */
+
+  double * const outer_vec{interal_mem};
+  for(unsigned idx_draw = 0; idx_draw < n_draws; ++idx_draw){
+    // fill in S^(-1)u and (S^(-1)uu^TS^(-1) - Psi^(-1)) / 2
+    double * const res_i{out + idx_draw * get_n_integrands()};
+    double * const draw_scaled{res_i + shift_scaled_res};
+    {
+      for(unsigned id = 0; id < n_mem; ++id)
+        draw_scaled[id] = draw[id * n_draws + idx_draw];
+      constexpr char uplo{'U'},
+                    trans{'N'},
+                     diag{'N'};
+      int const n_mem_i = n_mem;
+      constexpr int incx{1};
+      F77_CALL(dtpsv)
+        (&uplo, &trans, &diag, &n_mem_i, vcov_chol, draw_scaled,
+         &incx, 1, 1, 1);
+    }
+
+    double * const outer_res{res_i + shift_outer_res};
+    for(unsigned id1 = 0; id1 < n_mem; ++id1)
+      for(unsigned id2 = 0; id2 < n_mem; ++id2)
+        outer_res[id2 + id1 * n_mem] =
+          (draw_scaled[id1] * draw_scaled[id2]
+             - vcov_inv[id2 + id1 * n_mem]) / 2;
+
+    /// compute the required outer product for the hessian
+    for(unsigned fix = 0; fix < n_fix; ++fix)
+      outer_vec[fix] = std::inner_product
+        (X_permu + fix * n_mem, X_permu + (fix + 1) * n_mem, draw_scaled, 0.);
+
+    for(size_t scale = 0; scale < n_scales; ++scale)
+      outer_vec[scale + n_fix] = std::inner_product
+        (outer_res, outer_res + n_mem * n_mem, scale_mats_permu[scale], 0.);
+
+    size_t const vec_outer_res_dim{n_fix + n_scales};
+    double * const vec_outer_res{res_i + shift_vec_outer_res};
+    for(size_t param1 = 0; param1 < vec_outer_res_dim; ++param1)
+      for(size_t param2 = 0; param2 < vec_outer_res_dim; ++param2)
+        vec_outer_res[param2 + param1 * vec_outer_res_dim] =
+          outer_vec[param1] * outer_vec[param2];
+  }
+}
+
+void pedigree_l_factor_Hessian::univariate
+  (double * out, double const lw, double const ub) {
+  throw std::runtime_error("implement");
+}
+
+pedigree_l_factor_Hessian::out_type pedigree_l_factor_Hessian::get_output
+  (double * res,  double const * sdest, size_t const minvls,
+   int const inform, double const abserr, int const *indices){
+  out_type out;
+  out.minvls = minvls;
+  out.inform = inform;
+  out.abserr = abserr;
+
+  size_t const hess_dim{n_fix + n_scales};
+  arma::vec &gr = out.gradient;
+  arma::mat &hess = out.hessian;
+  out.sd_errs.resize(1 + hess_dim * (hess_dim + 1));
+
+  if(n_mem > 1){
+    size_t const shift_scaled_res{1},
+                 shift_outer_res{shift_scaled_res + n_mem},
+                 shift_vec_outer_res{shift_outer_res + n_mem * n_mem};
+
+    out.sd_errs[0] = sdest[0] * norm_const;
+    std::fill
+      (out.sd_errs.begin() + 1, out.sd_errs.end(),
+       std::numeric_limits<double>::quiet_NaN());
+    out.likelihood = *res * norm_const;
+
+    double const rel_likelihood = norm_const / out.likelihood;
+
+    // compute the gradient
+    gr.zeros(hess_dim);
+
+    for(arma::uword fix = 0; fix < n_fix; ++fix)
+      gr[fix] += std::inner_product
+        (X_permu + fix * n_mem, X_permu + (fix + 1) * n_mem,
+         res + shift_scaled_res, 0.);
+
+    for(size_t scale = 0; scale < n_scales; ++scale)
+      gr[scale + n_fix] += std::inner_product
+        (res + shift_outer_res, res + shift_outer_res + n_mem * n_mem,
+         scale_mats_permu[scale], 0.);
+
+    // compute the Hessian
+    arma::mat X_permu_mat(X_permu, n_mem, n_fix, false),
+             vcov_inv_mat(vcov_inv, n_mem, n_mem, false); // TODO: solve instead
+
+    hess.resize(hess_dim, hess_dim);
+    std::copy
+      (res + shift_vec_outer_res,
+       res + shift_vec_outer_res + hess_dim * hess_dim, hess.begin());
+
+    std::vector<arma::mat> scale_mats_arma;
+    scale_mats_arma.reserve(n_scales);
+    for(auto permu_mat : scale_mats_permu)
+      scale_mats_arma.emplace_back(permu_mat, n_mem, n_mem, false);
+
+    hess.submat(0, 0, n_fix - 1, n_fix - 1) -=
+      (X_permu_mat.t() * vcov_inv_mat * X_permu_mat) / rel_likelihood;
+
+    {
+      arma::vec cross_vec(res + shift_scaled_res, n_mem, false);
+      for(size_t scale = 0; scale < n_scales; ++scale)
+        hess.submat(0, n_fix + scale, n_fix - 1, n_fix + scale) -=
+          X_permu_mat.t() * vcov_inv_mat * scale_mats_arma[scale] * cross_vec;
+    }
+    {
+      arma::mat outer_vec(res + shift_outer_res, n_mem, n_mem, false);
+      arma::mat prod1;
+
+      for(size_t scale1 = 0; scale1 < n_scales; ++scale1){
+        prod1.zeros(n_mem, n_mem);
+        prod1 += vcov_inv_mat * scale_mats_arma[scale1] * outer_vec;
+        prod1 += outer_vec * scale_mats_arma[scale1] * vcov_inv_mat;
+        prod1 +=
+          vcov_inv_mat * scale_mats_arma[scale1] * vcov_inv_mat /
+          (2 * rel_likelihood);
+
+        for(size_t scale2 = 0; scale2 <= scale1; ++scale2)
+          hess(n_fix + scale2, n_fix + scale1) -=
+            std::inner_product
+              (prod1.begin(), prod1.end(), scale_mats_permu[scale2], 0.);
+      }
+    }
+
+    gr *= rel_likelihood;
+    hess *= rel_likelihood;
+    hess -= gr * gr.t();
+    hess = arma::symmatu(hess);
+
+    return out;
+  }
+
+  throw std::runtime_error("implement");
+}
+
 void generic_l_factor::alloc_mem
     (unsigned const max_dim, unsigned const max_threads,
      unsigned const max_n_sequences){
@@ -523,9 +769,13 @@ generic_l_factor::out_type generic_l_factor::get_output
   return out;
 }
 
+
 cache_mem<double> likelihood::dmen;
 cache_mem<double> pedigree_l_factor::dmem;
+cache_mem<double> pedigree_l_factor_Hessian::dmem;
 cache_mem<double> generic_l_factor::dmem;
 cache_mem<int> pedigree_l_factor::imem;
 
-} // namespace pedmod {
+template class cdf<pedigree_l_factor_Hessian>;
+
+} // namespace pedmod

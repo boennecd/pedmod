@@ -18,7 +18,7 @@ Y\_{ij} \\mid \\epsilon\_{ij} = e
 &\\sim
 N^{(n\_i)}\\left(\\vec 0, \\sum\_{l = 1}^K\\sigma\_l^2 C\_{il}
 \\right)
-\\end{align\*}](https://render.githubusercontent.com/render/math?math=%5Cbegin%7Balign%2A%7D%0AY_%7Bij%7D%20%5Cmid%20%5Cepsilon_%7Bij%7D%20%3D%20e%20%0A%20%20%26%5Csim%20%5Ctext%7BBin%7D%28%5CPhi%28%5Cvec%5Cbeta%5E%5Ctop%5Cvec%20x_%7Bij%7D%20%2B%20e%29%2C%201%29%20%5C%5C%0A%5Cvec%5Cepsilon_i%20%3D%20%28%5Cepsilon_%7Bi1%7D%2C%20%5Cdots%2C%20%5Cepsilon_%7Bin_i%7D%29%5E%5Ctop%20%26%5Csim%0A%20%20N%5E%7B%28n_i%29%7D%5Cleft%28%5Cvec%200%2C%20%5Csum_%7Bl%20%3D%201%7D%5EK%5Csigma_l%5E2%20C_%7Bil%7D%0A%20%20%5Cright%29%0A%5Cend%7Balign%2A%7D
+\\end{align\*}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cbegin%7Balign%2A%7D%0AY_%7Bij%7D%20%5Cmid%20%5Cepsilon_%7Bij%7D%20%3D%20e%20%0A%20%20%26%5Csim%20%5Ctext%7BBin%7D%28%5CPhi%28%5Cvec%5Cbeta%5E%5Ctop%5Cvec%20x_%7Bij%7D%20%2B%20e%29%2C%201%29%20%5C%5C%0A%5Cvec%5Cepsilon_i%20%3D%20%28%5Cepsilon_%7Bi1%7D%2C%20%5Cdots%2C%20%5Cepsilon_%7Bin_i%7D%29%5E%5Ctop%20%26%5Csim%0A%20%20N%5E%7B%28n_i%29%7D%5Cleft%28%5Cvec%200%2C%20%5Csum_%7Bl%20%3D%201%7D%5EK%5Csigma_l%5E2%20C_%7Bil%7D%0A%20%20%5Cright%29%0A%5Cend%7Balign%2A%7D
 "\\begin{align*}
 Y_{ij} \\mid \\epsilon_{ij} = e 
   &\\sim \\text{Bin}(\\Phi(\\vec\\beta^\\top\\vec x_{ij} + e), 1) \\\\
@@ -28,26 +28,27 @@ Y_{ij} \\mid \\epsilon_{ij} = e
 \\end{align*}")  
 
 where
-![Y\_{ij}](https://render.githubusercontent.com/render/math?math=Y_%7Bij%7D
+![Y\_{ij}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;Y_%7Bij%7D
 "Y_{ij}") is the binary outcome of interest for individual
-![j](https://render.githubusercontent.com/render/math?math=j "j") in
-family/cluster
-![i](https://render.githubusercontent.com/render/math?math=i "i"),
-![\\vec
-x\_{ij}](https://render.githubusercontent.com/render/math?math=%5Cvec%20x_%7Bij%7D
+![j](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;j
+"j") in family/cluster
+![i](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;i
+"i"), ![\\vec
+x\_{ij}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cvec%20x_%7Bij%7D
 "\\vec x_{ij}") is the individual’s known covariates,
-![\\Phi](https://render.githubusercontent.com/render/math?math=%5CPhi
+![\\Phi](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5CPhi
 "\\Phi") is the standard normal distribution’s CDF, and
-![\\text{Bin}](https://render.githubusercontent.com/render/math?math=%5Ctext%7BBin%7D
+![\\text{Bin}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Ctext%7BBin%7D
 "\\text{Bin}") implies a binomial distribution such if ![z\\sim
 \\text{Bin}(p,
-n)](https://render.githubusercontent.com/render/math?math=z%5Csim%20%5Ctext%7BBin%7D%28p%2C%20n%29
+n)](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;z%5Csim%20%5Ctext%7BBin%7D%28p%2C%20n%29
 "z\\sim \\text{Bin}(p, n)") then the density of
-![z](https://render.githubusercontent.com/render/math?math=z "z") is:
+![z](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;z
+"z") is:
 
   
 ![f(z) = \\begin{pmatrix} n \\\\ z \\end{pmatrix}p^z(1 -
-p)^{n-z}](https://render.githubusercontent.com/render/math?math=f%28z%29%20%3D%20%5Cbegin%7Bpmatrix%7D%20n%20%5C%5C%20z%20%5Cend%7Bpmatrix%7Dp%5Ez%281%20-%20p%29%5E%7Bn-z%7D
+p)^{n-z}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;f%28z%29%20%3D%20%5Cbegin%7Bpmatrix%7D%20n%20%5C%5C%20z%20%5Cend%7Bpmatrix%7Dp%5Ez%281%20-%20p%29%5E%7Bn-z%7D
 "f(z) = \\begin{pmatrix} n \\\\ z \\end{pmatrix}p^z(1 - p)^{n-z}")  
 
 A different and equivalent way of writing the model is as:
@@ -64,7 +65,7 @@ Y\_{ij} \\mid \\epsilon\_{ij} = e
 N^{(n\_i)}\\left(\\vec 0, I\_{n\_i} + \\sum\_{l = 1}^K\\sigma\_l^2
 C\_{il}
 \\right)
-\\end{align\*}](https://render.githubusercontent.com/render/math?math=%5Cbegin%7Balign%2A%7D%0AY_%7Bij%7D%20%5Cmid%20%5Cepsilon_%7Bij%7D%20%3D%20e%20%0A%20%20%26%3D%20%5Cbegin%7Bcases%7D%0A%20%20%20%201%20%26%20%5Cvec%5Cbeta%5E%5Ctop%5Cvec%20x_%7Bij%7D%20%2B%20e%20%3E%200%20%5C%5C%0A%20%20%20%200%20%26%20%5Ctext%7Botherwise%7D%0A%20%20%20%20%5Cend%7Bcases%7D%20%5C%5C%0A%5Cvec%5Cepsilon_i%20%3D%20%28%5Cepsilon_%7Bi1%7D%2C%20%5Cdots%2C%20%5Cepsilon_%7Bin_i%7D%29%5E%5Ctop%20%26%5Csim%0A%20%20N%5E%7B%28n_i%29%7D%5Cleft%28%5Cvec%200%2C%20I_%7Bn_i%7D%20%2B%20%5Csum_%7Bl%20%3D%201%7D%5EK%5Csigma_l%5E2%20C_%7Bil%7D%0A%20%20%5Cright%29%0A%5Cend%7Balign%2A%7D
+\\end{align\*}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cbegin%7Balign%2A%7D%0AY_%7Bij%7D%20%5Cmid%20%5Cepsilon_%7Bij%7D%20%3D%20e%20%0A%20%20%26%3D%20%5Cbegin%7Bcases%7D%0A%20%20%20%201%20%26%20%5Cvec%5Cbeta%5E%5Ctop%5Cvec%20x_%7Bij%7D%20%2B%20e%20%3E%200%20%5C%5C%0A%20%20%20%200%20%26%20%5Ctext%7Botherwise%7D%0A%20%20%20%20%5Cend%7Bcases%7D%20%5C%5C%0A%5Cvec%5Cepsilon_i%20%3D%20%28%5Cepsilon_%7Bi1%7D%2C%20%5Cdots%2C%20%5Cepsilon_%7Bin_i%7D%29%5E%5Ctop%20%26%5Csim%0A%20%20N%5E%7B%28n_i%29%7D%5Cleft%28%5Cvec%200%2C%20I_%7Bn_i%7D%20%2B%20%5Csum_%7Bl%20%3D%201%7D%5EK%5Csigma_l%5E2%20C_%7Bil%7D%0A%20%20%5Cright%29%0A%5Cend%7Balign%2A%7D
 "\\begin{align*}
 Y_{ij} \\mid \\epsilon_{ij} = e 
   &= \\begin{cases}
@@ -77,36 +78,38 @@ Y_{ij} \\mid \\epsilon_{ij} = e
 \\end{align*}")  
 
 where
-![I\_{n\_i}](https://render.githubusercontent.com/render/math?math=I_%7Bn_i%7D
+![I\_{n\_i}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;I_%7Bn_i%7D
 "I_{n_i}") is the
-![n\_i](https://render.githubusercontent.com/render/math?math=n_i "n_i")
-dimensional identity matrix which comes from the unshared/individual
-specific random effect. This effect is always included. The models are
-commonly known as liability threshold models or mixed probit models.
+![n\_i](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;n_i
+"n_i") dimensional identity matrix which comes from the
+unshared/individual specific random effect. This effect is always
+included. The models are commonly known as liability threshold models or
+mixed probit models.
 
 The
-![C\_{il}](https://render.githubusercontent.com/render/math?math=C_%7Bil%7D
+![C\_{il}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;C_%7Bil%7D
 "C_{il}")s are known scale/correlation matrices where each of the
-![l](https://render.githubusercontent.com/render/math?math=l "l")’th
-types correspond to a type of effect. An arbitrary number of such
-matrices can be passed to include e.g. a genetic effect, a maternal
+![l](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;l
+"l")’th types correspond to a type of effect. An arbitrary number of
+such matrices can be passed to include e.g. a genetic effect, a maternal
 effect, a paternal, an effect of a shared adult environment etc.
 Usually, these matrices are correlation matrices as this simplifies
 later interpretation and we will assume that all the matrices are
 correlation matrices. A typical example is that
-![C\_{il}](https://render.githubusercontent.com/render/math?math=C_%7Bil%7D
+![C\_{il}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;C_%7Bil%7D
 "C_{il}") is two times the kinship matrix in which case we call:
 
   
 ![\\frac{\\sigma\_l^2}{1 + \\sum\_{k
-= 1}^K\\sigma\_k^2}](https://render.githubusercontent.com/render/math?math=%5Cfrac%7B%5Csigma_l%5E2%7D%7B1%20%2B%20%5Csum_%7Bk%20%3D%201%7D%5EK%5Csigma_k%5E2%7D
+= 1}^K\\sigma\_k^2}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cfrac%7B%5Csigma_l%5E2%7D%7B1%20%2B%20%5Csum_%7Bk%20%3D%201%7D%5EK%5Csigma_k%5E2%7D
 "\\frac{\\sigma_l^2}{1 + \\sum_{k = 1}^K\\sigma_k^2}")  
 
 the heritability. That is, the proportion of the variance attributable
-to the the ![l](https://render.githubusercontent.com/render/math?math=l
+to the the
+![l](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;l
 "l")’th effect which in this case is the direct genetic effect. The
 scale parameters, the
-![\\sigma\_k^2](https://render.githubusercontent.com/render/math?math=%5Csigma_k%5E2
+![\\sigma\_k^2](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Csigma_k%5E2
 "\\sigma_k^2")s, may be the primary interest in an analysis. The scale
 in the model cannot be identified. That is, an equivalent model is:
 
@@ -122,7 +125,7 @@ Y\_{ij} \\mid \\epsilon\_{ij} = e
 N^{(n\_i)}\\left(\\vec 0, 
 \\phi\\left(I\_{n\_i} + \\sum\_{l = 1}^K\\sigma\_l^2 C\_{il}\\right)
 \\right)
-\\end{align\*}](https://render.githubusercontent.com/render/math?math=%5Cbegin%7Balign%2A%7D%0AY_%7Bij%7D%20%5Cmid%20%5Cepsilon_%7Bij%7D%20%3D%20e%20%0A%20%20%26%3D%20%5Cbegin%7Bcases%7D%0A%20%20%20%201%20%26%20%5Csqrt%5Cphi%5Cvec%5Cbeta%5E%5Ctop%5Cvec%20x_%7Bij%7D%20%2B%20e%20%3E%200%20%5C%5C%0A%20%20%20%200%20%26%20%5Ctext%7Botherwise%7D%0A%20%20%20%20%5Cend%7Bcases%7D%20%5C%5C%0A%5Cvec%5Cepsilon_i%20%3D%20%28%5Cepsilon_%7Bi1%7D%2C%20%5Cdots%2C%20%5Cepsilon_%7Bin_i%7D%29%5E%5Ctop%20%26%5Csim%0A%20%20N%5E%7B%28n_i%29%7D%5Cleft%28%5Cvec%200%2C%20%0A%20%20%5Cphi%5Cleft%28I_%7Bn_i%7D%20%2B%20%5Csum_%7Bl%20%3D%201%7D%5EK%5Csigma_l%5E2%20C_%7Bil%7D%5Cright%29%0A%20%20%5Cright%29%0A%5Cend%7Balign%2A%7D
+\\end{align\*}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cbegin%7Balign%2A%7D%0AY_%7Bij%7D%20%5Cmid%20%5Cepsilon_%7Bij%7D%20%3D%20e%20%0A%20%20%26%3D%20%5Cbegin%7Bcases%7D%0A%20%20%20%201%20%26%20%5Csqrt%5Cphi%5Cvec%5Cbeta%5E%5Ctop%5Cvec%20x_%7Bij%7D%20%2B%20e%20%3E%200%20%5C%5C%0A%20%20%20%200%20%26%20%5Ctext%7Botherwise%7D%0A%20%20%20%20%5Cend%7Bcases%7D%20%5C%5C%0A%5Cvec%5Cepsilon_i%20%3D%20%28%5Cepsilon_%7Bi1%7D%2C%20%5Cdots%2C%20%5Cepsilon_%7Bin_i%7D%29%5E%5Ctop%20%26%5Csim%0A%20%20N%5E%7B%28n_i%29%7D%5Cleft%28%5Cvec%200%2C%20%0A%20%20%5Cphi%5Cleft%28I_%7Bn_i%7D%20%2B%20%5Csum_%7Bl%20%3D%201%7D%5EK%5Csigma_l%5E2%20C_%7Bil%7D%5Cright%29%0A%20%20%5Cright%29%0A%5Cend%7Balign%2A%7D
 "\\begin{align*}
 Y_{ij} \\mid \\epsilon_{ij} = e 
   &= \\begin{cases}
@@ -136,39 +139,39 @@ Y_{ij} \\mid \\epsilon_{ij} = e
 \\end{align*}")  
 
 for any ![\\phi
-\> 0](https://render.githubusercontent.com/render/math?math=%5Cphi%20%3E%200
+\> 0](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cphi%20%3E%200
 "\\phi \> 0"). A common option other than ![\\phi
-= 1](https://render.githubusercontent.com/render/math?math=%5Cphi%20%3D%201
+= 1](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cphi%20%3D%201
 "\\phi = 1") is to set ![\\phi = (1 + \\sum\_{l = 1}^K
-\\sigma\_l^2)^{-1}](https://render.githubusercontent.com/render/math?math=%5Cphi%20%3D%20%281%20%2B%20%5Csum_%7Bl%20%3D%201%7D%5EK%20%5Csigma_l%5E2%29%5E%7B-1%7D
+\\sigma\_l^2)^{-1}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cphi%20%3D%20%281%20%2B%20%5Csum_%7Bl%20%3D%201%7D%5EK%20%5Csigma_l%5E2%29%5E%7B-1%7D
 "\\phi = (1 + \\sum_{l = 1}^K \\sigma_l^2)^{-1}"). This has the effect
 that
 
   
 ![\\frac{\\sigma\_l^2}{1 + \\sum\_{k = 1}^K\\sigma\_k^2} =
-\\phi\\sigma\_l^2](https://render.githubusercontent.com/render/math?math=%5Cfrac%7B%5Csigma_l%5E2%7D%7B1%20%2B%20%5Csum_%7Bk%20%3D%201%7D%5EK%5Csigma_k%5E2%7D%20%3D%20%5Cphi%5Csigma_l%5E2
+\\phi\\sigma\_l^2](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cfrac%7B%5Csigma_l%5E2%7D%7B1%20%2B%20%5Csum_%7Bk%20%3D%201%7D%5EK%5Csigma_k%5E2%7D%20%3D%20%5Cphi%5Csigma_l%5E2
 "\\frac{\\sigma_l^2}{1 + \\sum_{k = 1}^K\\sigma_k^2} = \\phi\\sigma_l^2")  
 
 is the proportion of variance attributable to the
-![l](https://render.githubusercontent.com/render/math?math=l "l")’th
-effect (assuming all
-![C\_{il}](https://render.githubusercontent.com/render/math?math=C_%7Bil%7D
+![l](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;l
+"l")’th effect (assuming all
+![C\_{il}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;C_%7Bil%7D
 "C_{il}") matrices are correlation matrices). Moreover,
-![\\phi](https://render.githubusercontent.com/render/math?math=%5Cphi
+![\\phi](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cphi
 "\\phi") is the proportion of variance attributable to the individual
 specific effect.
 
 The parameterizations used in the package are ![\\phi
-= 1](https://render.githubusercontent.com/render/math?math=%5Cphi%20%3D%201
+= 1](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cphi%20%3D%201
 "\\phi = 1") which we call the direct parameterizations and ![(1 +
 \\sum\_{l = 1}^K
-\\sigma\_l^2)^{-1}](https://render.githubusercontent.com/render/math?math=%281%20%2B%20%5Csum_%7Bl%20%3D%201%7D%5EK%20%5Csigma_l%5E2%29%5E%7B-1%7D
+\\sigma\_l^2)^{-1}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%281%20%2B%20%5Csum_%7Bl%20%3D%201%7D%5EK%20%5Csigma_l%5E2%29%5E%7B-1%7D
 "(1 + \\sum_{l = 1}^K \\sigma_l^2)^{-1}") which we call the standardized
 parameterizations. The latter have the advantage that it is easier to
 interpret as the scale parameters are the proportion of variance
 attributable to each effect (assuming that only correlation matrices are
 used) and the
-![\\sqrt\\phi\\vec\\beta](https://render.githubusercontent.com/render/math?math=%5Csqrt%5Cphi%5Cvec%5Cbeta
+![\\sqrt\\phi\\vec\\beta](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Csqrt%5Cphi%5Cvec%5Cbeta
 "\\sqrt\\phi\\vec\\beta") are often very close the estimate from a GLM
 (that is, the model without the other random effects) when the
 covariates are unrelated to random effects that are added to the model.
@@ -176,39 +179,39 @@ The latter makes it easy to find starting values.
 
 For the above reason, two parameterization are used. For the direct
 parameterization where ![\\phi
-= 1](https://render.githubusercontent.com/render/math?math=%5Cphi%20%3D%201
+= 1](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cphi%20%3D%201
 "\\phi = 1"), we work directly with
-![\\vec\\beta](https://render.githubusercontent.com/render/math?math=%5Cvec%5Cbeta
+![\\vec\\beta](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cvec%5Cbeta
 "\\vec\\beta"), and we use ![\\theta\_l =
-\\log\\sigma\_l^2](https://render.githubusercontent.com/render/math?math=%5Ctheta_l%20%3D%20%5Clog%5Csigma_l%5E2
+\\log\\sigma\_l^2](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Ctheta_l%20%3D%20%5Clog%5Csigma_l%5E2
 "\\theta_l = \\log\\sigma_l^2"). For the standardized parameterization
 where ![\\phi = (1 + \\sum\_{l = 1}^K
-\\sigma\_l^2)^{-1}](https://render.githubusercontent.com/render/math?math=%5Cphi%20%3D%20%281%20%2B%20%5Csum_%7Bl%20%3D%201%7D%5EK%20%5Csigma_l%5E2%29%5E%7B-1%7D
+\\sigma\_l^2)^{-1}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cphi%20%3D%20%281%20%2B%20%5Csum_%7Bl%20%3D%201%7D%5EK%20%5Csigma_l%5E2%29%5E%7B-1%7D
 "\\phi = (1 + \\sum_{l = 1}^K \\sigma_l^2)^{-1}"), we work with ![\\phi
 = (1 + \\sum\_{l = 1}^K
-\\sigma\_l^2)^{-1}](https://render.githubusercontent.com/render/math?math=%5Cphi%20%3D%20%281%20%2B%20%5Csum_%7Bl%20%3D%201%7D%5EK%20%5Csigma_l%5E2%29%5E%7B-1%7D
+\\sigma\_l^2)^{-1}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cphi%20%3D%20%281%20%2B%20%5Csum_%7Bl%20%3D%201%7D%5EK%20%5Csigma_l%5E2%29%5E%7B-1%7D
 "\\phi = (1 + \\sum_{l = 1}^K \\sigma_l^2)^{-1}"), ![\\vec\\gamma =
-\\sqrt\\phi\\vec\\beta](https://render.githubusercontent.com/render/math?math=%5Cvec%5Cgamma%20%3D%20%5Csqrt%5Cphi%5Cvec%5Cbeta
+\\sqrt\\phi\\vec\\beta](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cvec%5Cgamma%20%3D%20%5Csqrt%5Cphi%5Cvec%5Cbeta
 "\\vec\\gamma = \\sqrt\\phi\\vec\\beta"), and
 
   
 ![\\phi\\sigma\_l^2 = \\frac{\\exp(\\psi\_l)}{1 +\\sum\_{l
 = 1}^k\\exp(\\psi\_l)}\\Leftrightarrow\\sigma\_l^2 =
-\\exp(\\psi\_l).](https://render.githubusercontent.com/render/math?math=%5Cphi%5Csigma_l%5E2%20%3D%20%5Cfrac%7B%5Cexp%28%5Cpsi_l%29%7D%7B1%20%2B%5Csum_%7Bl%20%3D%201%7D%5Ek%5Cexp%28%5Cpsi_l%29%7D%5CLeftrightarrow%5Csigma_l%5E2%20%3D%20%5Cexp%28%5Cpsi_l%29.
+\\exp(\\psi\_l).](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cphi%5Csigma_l%5E2%20%3D%20%5Cfrac%7B%5Cexp%28%5Cpsi_l%29%7D%7B1%20%2B%5Csum_%7Bl%20%3D%201%7D%5Ek%5Cexp%28%5Cpsi_l%29%7D%5CLeftrightarrow%5Csigma_l%5E2%20%3D%20%5Cexp%28%5Cpsi_l%29.
 "\\phi\\sigma_l^2 = \\frac{\\exp(\\psi_l)}{1 +\\sum_{l = 1}^k\\exp(\\psi_l)}\\Leftrightarrow\\sigma_l^2 = \\exp(\\psi_l).")  
 
 This package provides randomized quasi-Monte Carlo methods to
 approximate the log marginal likelihood for these types of models with
 an arbitrary number scale matrices,
-![K](https://render.githubusercontent.com/render/math?math=K "K"), and
-the derivatives with respect to
-![(\\vec\\beta^\\top, 2\\log\\sigma\_1,\\dots, 2\\log\\sigma\_K)^\\top](https://render.githubusercontent.com/render/math?math=%28%5Cvec%5Cbeta%5E%5Ctop%2C%202%5Clog%5Csigma_1%2C%5Cdots%2C%202%5Clog%5Csigma_K%29%5E%5Ctop
+![K](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;K
+"K"), and the derivatives with respect to
+![(\\vec\\beta^\\top, 2\\log\\sigma\_1,\\dots, 2\\log\\sigma\_K)^\\top](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%28%5Cvec%5Cbeta%5E%5Ctop%2C%202%5Clog%5Csigma_1%2C%5Cdots%2C%202%5Clog%5Csigma_K%29%5E%5Ctop
 "(\\vec\\beta^\\top, 2\\log\\sigma_1,\\dots, 2\\log\\sigma_K)^\\top")
 (that is, we work with ![\\psi\_k
-= 2\\log\\sigma\_k](https://render.githubusercontent.com/render/math?math=%5Cpsi_k%20%3D%202%5Clog%5Csigma_k
+= 2\\log\\sigma\_k](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cpsi_k%20%3D%202%5Clog%5Csigma_k
 "\\psi_k = 2\\log\\sigma_k")) or ![(\\vec\\gamma^\\top, \\psi\_1,
 \\dots,
-\\psi\_K)](https://render.githubusercontent.com/render/math?math=%28%5Cvec%5Cgamma%5E%5Ctop%2C%20%5Cpsi_1%2C%20%5Cdots%2C%20%5Cpsi_K%29
+\\psi\_K)](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%28%5Cvec%5Cgamma%5E%5Ctop%2C%20%5Cpsi_1%2C%20%5Cdots%2C%20%5Cpsi_K%29
 "(\\vec\\gamma^\\top, \\psi_1, \\dots, \\psi_K)").
 
 In some cases, it may be hypothesized that some individuals are less
@@ -221,9 +224,9 @@ We have re-written the Fortran code by Genz and Bretz (2002) in C++,
 made it easy to extend from a log marginal likelihood approximation to
 other approximations such as the derivatives, and added less precise but
 faster approximations of the
-![\\Phi](https://render.githubusercontent.com/render/math?math=%5CPhi
+![\\Phi](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5CPhi
 "\\Phi") and
-![\\Phi^{-1}](https://render.githubusercontent.com/render/math?math=%5CPhi%5E%7B-1%7D
+![\\Phi^{-1}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5CPhi%5E%7B-1%7D
 "\\Phi^{-1}"). Our own experience suggests that using the latter has a
 small effect on the precision of the result but can yield substantial
 reduction in computation times for moderate sized families/clusters.
@@ -335,7 +338,7 @@ B\_{ij} &\\sim \\text{Bin}(0.5, 1) \\\\
 (G\_{i1}, \\dots, G\_{in\_{i}})^\\top &\\sim N^{(n\_i)}(\\vec 0,
 \\sigma^2 C\_{i1}) \\\\
 R\_{ij} &\\sim
-N(0, 1)\\end{align\*}](https://render.githubusercontent.com/render/math?math=%5Cbegin%7Balign%2A%7D%0A%20Y_%7Bij%7D%20%26%3D%20%5Cbegin%7Bcases%7D%201%20%26%20%5Cbeta_0%20%2B%20%5Cbeta_1%20X_%7Bij%7D%20%2B%20%5Cbeta_2%20B_%7Bij%7D%20%2B%20G_%7Bij%7D%20%2B%20R_%7Bij%7D%20%3E%200%20%5C%5C%200%20%26%20%5Ctext%7Botherwise%7D%20%5Cend%7Bcases%7D%20%5C%5C%0A%20X_%7Bij%7D%20%26%5Csim%20N%280%2C%201%29%20%5C%5C%0A%20B_%7Bij%7D%20%26%5Csim%20%5Ctext%7BBin%7D%280.5%2C%201%29%20%5C%5C%0A%20%28G_%7Bi1%7D%2C%20%5Cdots%2C%20G_%7Bin_%7Bi%7D%7D%29%5E%5Ctop%20%26%5Csim%20N%5E%7B%28n_i%29%7D%28%5Cvec%200%2C%20%5Csigma%5E2%20C_%7Bi1%7D%29%20%5C%5C%0A%20R_%7Bij%7D%20%26%5Csim%20N%280%2C%201%29%5Cend%7Balign%2A%7D
+N(0, 1)\\end{align\*}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cbegin%7Balign%2A%7D%0A%20Y_%7Bij%7D%20%26%3D%20%5Cbegin%7Bcases%7D%201%20%26%20%5Cbeta_0%20%2B%20%5Cbeta_1%20X_%7Bij%7D%20%2B%20%5Cbeta_2%20B_%7Bij%7D%20%2B%20G_%7Bij%7D%20%2B%20R_%7Bij%7D%20%3E%200%20%5C%5C%200%20%26%20%5Ctext%7Botherwise%7D%20%5Cend%7Bcases%7D%20%5C%5C%0A%20X_%7Bij%7D%20%26%5Csim%20N%280%2C%201%29%20%5C%5C%0A%20B_%7Bij%7D%20%26%5Csim%20%5Ctext%7BBin%7D%280.5%2C%201%29%20%5C%5C%0A%20%28G_%7Bi1%7D%2C%20%5Cdots%2C%20G_%7Bin_%7Bi%7D%7D%29%5E%5Ctop%20%26%5Csim%20N%5E%7B%28n_i%29%7D%28%5Cvec%200%2C%20%5Csigma%5E2%20C_%7Bi1%7D%29%20%5C%5C%0A%20R_%7Bij%7D%20%26%5Csim%20N%280%2C%201%29%5Cend%7Balign%2A%7D
 "\\begin{align*}
  Y_{ij} &= \\begin{cases} 1 & \\beta_0 + \\beta_1 X_{ij} + \\beta_2 B_{ij} + G_{ij} + R_{ij} \> 0 \\\\ 0 & \\text{otherwise} \\end{cases} \\\\
  X_{ij} &\\sim N(0, 1) \\\\
@@ -344,11 +347,11 @@ N(0, 1)\\end{align\*}](https://render.githubusercontent.com/render/math?math=%5C
  R_{ij} &\\sim N(0, 1)\\end{align*}")  
 
 where
-![C\_{i1}](https://render.githubusercontent.com/render/math?math=C_%7Bi1%7D
+![C\_{i1}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;C_%7Bi1%7D
 "C_{i1}") is two times the kinship matrix and
-![X\_{ij}](https://render.githubusercontent.com/render/math?math=X_%7Bij%7D
+![X\_{ij}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;X_%7Bij%7D
 "X_{ij}") and
-![B\_{ij}](https://render.githubusercontent.com/render/math?math=B_%7Bij%7D
+![B\_{ij}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;B_%7Bij%7D
 "B_{ij}") are observed covariates. We can now estimate the model with a
 simulated data set as follows:
 
@@ -407,16 +410,16 @@ print(-opt_out$value     , digits = 8)
 We emphasize that we set the `rel_eps` parameter to `1e-3` above which
 perhaps is fine for this size of a data set but may not be fine for
 larger data sets for the following reason. Suppose that we have ![i
-= 1,\\dots,m](https://render.githubusercontent.com/render/math?math=i%20%3D%201%2C%5Cdots%2Cm
+= 1,\\dots,m](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;i%20%3D%201%2C%5Cdots%2Cm
 "i = 1,\\dots,m") families/clusters and suppose that we estimate the log
 likelihood term for each family with a variance of
-![\\zeta](https://render.githubusercontent.com/render/math?math=%5Czeta
+![\\zeta](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Czeta
 "\\zeta"). This implies that the variance of the log likelihood for all
 the families is ![\\zeta
-m](https://render.githubusercontent.com/render/math?math=%5Czeta%20m
+m](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Czeta%20m
 "\\zeta m"). Thus, the precision we require for each family’s log
 likelihood term needs to be proportional to ![\\mathcal
-O(m^{-1/2})](https://render.githubusercontent.com/render/math?math=%5Cmathcal%20O%28m%5E%7B-1%2F2%7D%29
+O(m^{-1/2})](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cmathcal%20O%28m%5E%7B-1%2F2%7D%29
 "\\mathcal O(m^{-1/2})") if we want a fixed number of precise digits for
 the log likelihood for all number of families. The latter is important
 e.g.  for the profile likelihood curve we compute later and also for the
@@ -829,10 +832,10 @@ c(lb, ub)^2 # on the variance scale
 ```
 
 A caveat is that issues with the
-![\\chi^2](https://render.githubusercontent.com/render/math?math=%5Cchi%5E2
+![\\chi^2](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cchi%5E2
 "\\chi^2") approximation may arise on the boundary of the scale
 parameter (![\\sigma
-= 0](https://render.githubusercontent.com/render/math?math=%5Csigma%20%3D%200
+= 0](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Csigma%20%3D%200
 "\\sigma = 0"); e.g.  see
 <https://stats.stackexchange.com/a/4894/81865>). Notice that the above
 may fail if the estimated profile likelihood is not smooth e.g. because
@@ -890,7 +893,7 @@ prof_res <- pedmod_profile(
 # the confidence interval for the scale parameter
 exp(prof_res$confs)
 #>  2.50 pct. 97.50 pct. 
-#>      1.613      6.393
+#>      1.613      6.390
 
 # plot the estimated profile likelihood curve and check that everything looks 
 # fine
@@ -942,7 +945,7 @@ prof_res <- pedmod_profile(
 # the confidence interval for the slope of the binary covariate
 prof_res$confs
 #>  2.50 pct. 97.50 pct. 
-#>      1.502      2.583
+#>      1.502      2.582
 ```
 
 ``` r
@@ -981,11 +984,11 @@ below:
 # the profile likelihood based confidence intervals
 print(exp(t(sapply(pl_curve_res, `[[`, "confs"))), digits = 8)
 #>      2.50 pct. 97.50 pct.
-#> [1,] 1.6129059  6.3925616
-#> [2,] 1.6113409  6.4126719
-#> [3,] 1.6126734  6.3943559
-#> [4,] 1.6125946  6.3911927
-#> [5,] 1.6124623  6.4165032
+#> [1,] 1.6127142  6.3902930
+#> [2,] 1.6111401  6.4102724
+#> [3,] 1.6124553  6.3921109
+#> [4,] 1.6122517  6.3889698
+#> [5,] 1.6122009  6.4139313
 ```
 
 ### Randomized Quasi-Monte Carlo
@@ -1120,12 +1123,12 @@ matlines(n_samp, t(res["sd", , "Sobol", ]), col = "darkgray", lty = 3)
 
 The above seems to suggest that the randomized Korobov rules are
 preferable and that both method achieve close to a ![O(n^{-1 +
-\\epsilon})](https://render.githubusercontent.com/render/math?math=O%28n%5E%7B-1%20%2B%20%5Cepsilon%7D%29
+\\epsilon})](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;O%28n%5E%7B-1%20%2B%20%5Cepsilon%7D%29
 "O(n^{-1 + \\epsilon})") rate for some small
-![\\epsilon](https://render.githubusercontent.com/render/math?math=%5Cepsilon
+![\\epsilon](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cepsilon
 "\\epsilon"). Notice that we have to set `minvls` equal to `maxvls` to
 achieve the ![O(n^{-1 +
-\\epsilon})](https://render.githubusercontent.com/render/math?math=O%28n%5E%7B-1%20%2B%20%5Cepsilon%7D%29
+\\epsilon})](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;O%28n%5E%7B-1%20%2B%20%5Cepsilon%7D%29
 "O(n^{-1 + \\epsilon})") rate with randomized Korobov rules.
 
 We can also consider the convergence rate for the log likelihood. This
@@ -1469,7 +1472,7 @@ apply(time_vals, 1:2, quantile)
 
 As an extension, we can add a child environment effect. The new scale
 matrix, the
-![C\_{i2}](https://render.githubusercontent.com/render/math?math=C_%7Bi2%7D
+![C\_{i2}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;C_%7Bi2%7D
 "C_{i2}")’s, can be written as:
 
 ``` r
@@ -1543,7 +1546,7 @@ B\_{ij} &\\sim \\text{Bin}(0.1, 1) \\\\
 (E\_{i1}, \\dots, E\_{in\_{i}})^\\top &\\sim N^{(n\_i)}(\\vec 0,
 \\sigma^2\_E C\_{i2}) \\\\
 R\_{ij} &\\sim
-N(0, 1)\\end{align\*}](https://render.githubusercontent.com/render/math?math=%5Cbegin%7Balign%2A%7D%0A%20Y_%7Bij%7D%20%26%3D%20%5Cbegin%7Bcases%7D%201%20%26%20%5Cbeta_0%20%2B%20%5Cbeta_1%20B_%7Bij%7D%20%2B%20E_%7Bij%7D%20%2B%20G_%7Bij%7D%20%2B%20R_%7Bij%7D%20%3E%200%20%5C%5C%200%20%26%20%5Ctext%7Botherwise%7D%20%5Cend%7Bcases%7D%20%5C%5C%0A%20X_%7Bij%7D%20%26%5Csim%20N%280%2C%201%29%20%5C%5C%0A%20B_%7Bij%7D%20%26%5Csim%20%5Ctext%7BBin%7D%280.1%2C%201%29%20%5C%5C%0A%20%28G_%7Bi1%7D%2C%20%5Cdots%2C%20G_%7Bin_%7Bi%7D%7D%29%5E%5Ctop%20%26%5Csim%20N%5E%7B%28n_i%29%7D%28%5Cvec%200%2C%20%5Csigma%5E2_G%20C_%7Bi1%7D%29%20%5C%5C%0A%28E_%7Bi1%7D%2C%20%5Cdots%2C%20E_%7Bin_%7Bi%7D%7D%29%5E%5Ctop%20%26%5Csim%20N%5E%7B%28n_i%29%7D%28%5Cvec%200%2C%20%5Csigma%5E2_E%20C_%7Bi2%7D%29%20%5C%5C%0A%20R_%7Bij%7D%20%26%5Csim%20N%280%2C%201%29%5Cend%7Balign%2A%7D
+N(0, 1)\\end{align\*}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cbegin%7Balign%2A%7D%0A%20Y_%7Bij%7D%20%26%3D%20%5Cbegin%7Bcases%7D%201%20%26%20%5Cbeta_0%20%2B%20%5Cbeta_1%20B_%7Bij%7D%20%2B%20E_%7Bij%7D%20%2B%20G_%7Bij%7D%20%2B%20R_%7Bij%7D%20%3E%200%20%5C%5C%200%20%26%20%5Ctext%7Botherwise%7D%20%5Cend%7Bcases%7D%20%5C%5C%0A%20X_%7Bij%7D%20%26%5Csim%20N%280%2C%201%29%20%5C%5C%0A%20B_%7Bij%7D%20%26%5Csim%20%5Ctext%7BBin%7D%280.1%2C%201%29%20%5C%5C%0A%20%28G_%7Bi1%7D%2C%20%5Cdots%2C%20G_%7Bin_%7Bi%7D%7D%29%5E%5Ctop%20%26%5Csim%20N%5E%7B%28n_i%29%7D%28%5Cvec%200%2C%20%5Csigma%5E2_G%20C_%7Bi1%7D%29%20%5C%5C%0A%28E_%7Bi1%7D%2C%20%5Cdots%2C%20E_%7Bin_%7Bi%7D%7D%29%5E%5Ctop%20%26%5Csim%20N%5E%7B%28n_i%29%7D%28%5Cvec%200%2C%20%5Csigma%5E2_E%20C_%7Bi2%7D%29%20%5C%5C%0A%20R_%7Bij%7D%20%26%5Csim%20N%280%2C%201%29%5Cend%7Balign%2A%7D
 "\\begin{align*}
  Y_{ij} &= \\begin{cases} 1 & \\beta_0 + \\beta_1 B_{ij} + E_{ij} + G_{ij} + R_{ij} \> 0 \\\\ 0 & \\text{otherwise} \\end{cases} \\\\
  X_{ij} &\\sim N(0, 1) \\\\
@@ -1553,11 +1556,11 @@ N(0, 1)\\end{align\*}](https://render.githubusercontent.com/render/math?math=%5C
  R_{ij} &\\sim N(0, 1)\\end{align*}")  
 
 where
-![C\_{i1}](https://render.githubusercontent.com/render/math?math=C_%7Bi1%7D
+![C\_{i1}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;C_%7Bi1%7D
 "C_{i1}") is two times the kinship matrix,
-![C\_{i2}](https://render.githubusercontent.com/render/math?math=C_%7Bi2%7D
+![C\_{i2}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;C_%7Bi2%7D
 "C_{i2}") is singular matrix for the environment effect, and
-![B\_{ij}](https://render.githubusercontent.com/render/math?math=B_%7Bij%7D
+![B\_{ij}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;B_%7Bij%7D
 "B_{ij}") is an observed covariate. In this case, we exploit that some
 of log marginal likelihood terms are identical. That is, some of the
 combinations of pedigrees, covariates, and outcomes match. Therefor, we
@@ -1747,80 +1750,81 @@ print(-opt_out$value     , digits = 8)
 
 We use the `cluster_weights` argument above to exploit that some of the
 log marginal likelihood terms are identical. Specifically, let
-![l\_j](https://render.githubusercontent.com/render/math?math=l_j "l_j")
-be the ![j](https://render.githubusercontent.com/render/math?math=j
+![l\_j](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;l_j
+"l_j") be the
+![j](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;j
 "j")th distinct log marginal likelihood term and
-![\\vec\\theta](https://render.githubusercontent.com/render/math?math=%5Cvec%5Ctheta
+![\\vec\\theta](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cvec%5Ctheta
 "\\vec\\theta") be the model parameters, then we use that the log
 marginal likelihood is
 
   
 ![l(\\vec\\theta) = \\sum\_{j = 1}^L\\sum\_{i
 = 1}^{w\_j}l\_j(\\vec\\theta) = \\sum\_{j
-= 1}^Lw\_jl\_j(\\vec\\theta).](https://render.githubusercontent.com/render/math?math=l%28%5Cvec%5Ctheta%29%20%3D%20%5Csum_%7Bj%20%3D%201%7D%5EL%5Csum_%7Bi%20%3D%201%7D%5E%7Bw_j%7Dl_j%28%5Cvec%5Ctheta%29%20%3D%20%5Csum_%7Bj%20%3D%201%7D%5ELw_jl_j%28%5Cvec%5Ctheta%29.
+= 1}^Lw\_jl\_j(\\vec\\theta).](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;l%28%5Cvec%5Ctheta%29%20%3D%20%5Csum_%7Bj%20%3D%201%7D%5EL%5Csum_%7Bi%20%3D%201%7D%5E%7Bw_j%7Dl_j%28%5Cvec%5Ctheta%29%20%3D%20%5Csum_%7Bj%20%3D%201%7D%5ELw_jl_j%28%5Cvec%5Ctheta%29.
 "l(\\vec\\theta) = \\sum_{j = 1}^L\\sum_{i = 1}^{w_j}l_j(\\vec\\theta) = \\sum_{j = 1}^Lw_jl_j(\\vec\\theta).")  
 
 The unweighted version is the left hand side and the weighted version is
 the right hand side. The two have different variances. Our
 quasi-Monte-Carlo method has (almost) a variance for each ![\\exp
-l\_j](https://render.githubusercontent.com/render/math?math=%5Cexp%20l_j
+l\_j](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cexp%20l_j
 "\\exp l_j") which is
-![\\mathcal{O}(m^{-2})](https://render.githubusercontent.com/render/math?math=%5Cmathcal%7BO%7D%28m%5E%7B-2%7D%29
+![\\mathcal{O}(m^{-2})](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cmathcal%7BO%7D%28m%5E%7B-2%7D%29
 "\\mathcal{O}(m^{-2})") with
-![m](https://render.githubusercontent.com/render/math?math=m "m") being
-the number of samples we use for each
-![l\_j](https://render.githubusercontent.com/render/math?math=l_j
+![m](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;m
+"m") being the number of samples we use for each
+![l\_j](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;l_j
 "l_j"). Thus, the variance of the unweighted version is
 
   
 ![\\sum\_{l = j}^L\\sum\_{i
-= 1}^{w\_j}\\text{Var}(l\_j(\\vec\\theta))](https://render.githubusercontent.com/render/math?math=%5Csum_%7Bl%20%3D%20j%7D%5EL%5Csum_%7Bi%20%3D%201%7D%5E%7Bw_j%7D%5Ctext%7BVar%7D%28l_j%28%5Cvec%5Ctheta%29%29
+= 1}^{w\_j}\\text{Var}(l\_j(\\vec\\theta))](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Csum_%7Bl%20%3D%20j%7D%5EL%5Csum_%7Bi%20%3D%201%7D%5E%7Bw_j%7D%5Ctext%7BVar%7D%28l_j%28%5Cvec%5Ctheta%29%29
 "\\sum_{l = j}^L\\sum_{i = 1}^{w_j}\\text{Var}(l_j(\\vec\\theta))")  
 
 which is
 
   
 ![\\mathcal{O}\\left(\\sum\_{j = 1}^L
-\\frac{w\_j}{m^2}\\right)](https://render.githubusercontent.com/render/math?math=%5Cmathcal%7BO%7D%5Cleft%28%5Csum_%7Bj%20%3D%201%7D%5EL%20%5Cfrac%7Bw_j%7D%7Bm%5E2%7D%5Cright%29
+\\frac{w\_j}{m^2}\\right)](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cmathcal%7BO%7D%5Cleft%28%5Csum_%7Bj%20%3D%201%7D%5EL%20%5Cfrac%7Bw_j%7D%7Bm%5E2%7D%5Cright%29
 "\\mathcal{O}\\left(\\sum_{j = 1}^L \\frac{w_j}{m^2}\\right)")  
 
 However, the variance of the weighted version is
 
   
 ![\\sum\_{j
-= 1}^L\\text{Var}(w\_jl\_j(\\vec\\theta))](https://render.githubusercontent.com/render/math?math=%5Csum_%7Bj%20%3D%201%7D%5EL%5Ctext%7BVar%7D%28w_jl_j%28%5Cvec%5Ctheta%29%29
+= 1}^L\\text{Var}(w\_jl\_j(\\vec\\theta))](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Csum_%7Bj%20%3D%201%7D%5EL%5Ctext%7BVar%7D%28w_jl_j%28%5Cvec%5Ctheta%29%29
 "\\sum_{j = 1}^L\\text{Var}(w_jl_j(\\vec\\theta))")  
 
 which is
 
   
 ![\\mathcal{O}\\left(\\sum\_{j = 1}^L
-\\frac{w\_j^2}{m^2}\\right)](https://render.githubusercontent.com/render/math?math=%5Cmathcal%7BO%7D%5Cleft%28%5Csum_%7Bj%20%3D%201%7D%5EL%20%5Cfrac%7Bw_j%5E2%7D%7Bm%5E2%7D%5Cright%29
+\\frac{w\_j^2}{m^2}\\right)](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cmathcal%7BO%7D%5Cleft%28%5Csum_%7Bj%20%3D%201%7D%5EL%20%5Cfrac%7Bw_j%5E2%7D%7Bm%5E2%7D%5Cright%29
 "\\mathcal{O}\\left(\\sum_{j = 1}^L \\frac{w_j^2}{m^2}\\right)")  
 
 Though, we can get a similar variance by using
-![\\sqrt{w\_j}m](https://render.githubusercontent.com/render/math?math=%5Csqrt%7Bw_j%7Dm
+![\\sqrt{w\_j}m](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Csqrt%7Bw_j%7Dm
 "\\sqrt{w_j}m") samples for term
-![j](https://render.githubusercontent.com/render/math?math=j "j"). The
-variance then becomes
+![j](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;j
+"j"). The variance then becomes
 
   
 ![\\mathcal{O}\\left(\\sum\_{j = 1}^L \\frac{w\_j^2}{w\_jm^2}\\right) =
 \\mathcal{O}\\left(\\sum\_{j = 1}^L
-\\frac{w\_j}{m^2}\\right)](https://render.githubusercontent.com/render/math?math=%5Cmathcal%7BO%7D%5Cleft%28%5Csum_%7Bj%20%3D%201%7D%5EL%20%5Cfrac%7Bw_j%5E2%7D%7Bw_jm%5E2%7D%5Cright%29%20%3D%20%5Cmathcal%7BO%7D%5Cleft%28%5Csum_%7Bj%20%3D%201%7D%5EL%20%5Cfrac%7Bw_j%7D%7Bm%5E2%7D%5Cright%29
+\\frac{w\_j}{m^2}\\right)](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cmathcal%7BO%7D%5Cleft%28%5Csum_%7Bj%20%3D%201%7D%5EL%20%5Cfrac%7Bw_j%5E2%7D%7Bw_jm%5E2%7D%5Cright%29%20%3D%20%5Cmathcal%7BO%7D%5Cleft%28%5Csum_%7Bj%20%3D%201%7D%5EL%20%5Cfrac%7Bw_j%7D%7Bm%5E2%7D%5Cright%29
 "\\mathcal{O}\\left(\\sum_{j = 1}^L \\frac{w_j^2}{w_jm^2}\\right) = \\mathcal{O}\\left(\\sum_{j = 1}^L \\frac{w_j}{m^2}\\right)")  
 but we do so using only
 
   
 ![m\\sum\_{j
-= 1}^L\\sqrt{w\_j}](https://render.githubusercontent.com/render/math?math=m%5Csum_%7Bj%20%3D%201%7D%5EL%5Csqrt%7Bw_j%7D
+= 1}^L\\sqrt{w\_j}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;m%5Csum_%7Bj%20%3D%201%7D%5EL%5Csqrt%7Bw_j%7D
 "m\\sum_{j = 1}^L\\sqrt{w_j}")  
 
 samples rather than
 
   
 ![m\\sum\_{j
-= 1}^Lw\_j.](https://render.githubusercontent.com/render/math?math=m%5Csum_%7Bj%20%3D%201%7D%5ELw_j.
+= 1}^Lw\_j.](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;m%5Csum_%7Bj%20%3D%201%7D%5ELw_j.
 "m\\sum_{j = 1}^Lw_j.")  
 
 ### Alternative Parameterization
@@ -2093,7 +2097,7 @@ pl_genetic <- pedmod_profile(
 #> LogLike: -2696.1142 at         0.616585
 exp(pl_genetic$confs) # the confidence interval
 #>  2.50 pct. 97.50 pct. 
-#>      1.047      3.715
+#>      1.046      3.713
 
 # then we compute the curve for the environment effect
 pl_env <- pedmod_profile(
@@ -2125,7 +2129,7 @@ pl_env <- pedmod_profile(
 #> LogLike: -2696.1142 at        -0.174517
 exp(pl_env$confs) # the confidence interval
 #>  2.50 pct. 97.50 pct. 
-#>     0.3468     1.8229
+#>     0.3471     1.8223
 ```
 
 We plot the two profile likelihood curves below:
@@ -2168,16 +2172,16 @@ do_plot(pl_env, expression(sigma[E]), exp(opt_out$par[4] / 2))
 
 Suppose that we want a profile likelihood curve for the proportion of
 variance explained by each random effect. If ![K
-= 1](https://render.githubusercontent.com/render/math?math=K%20%3D%201
+= 1](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;K%20%3D%201
 "K = 1") then we can use the profile likelihood curve for
-![\\sigma\_1^2](https://render.githubusercontent.com/render/math?math=%5Csigma_1%5E2
+![\\sigma\_1^2](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Csigma_1%5E2
 "\\sigma_1^2") as the proportion of variance for the first effect when
 ![K
-= 1](https://render.githubusercontent.com/render/math?math=K%20%3D%201
+= 1](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;K%20%3D%201
 "K = 1") is a monotone transformation of this parameter only and thus we
 can use the scale invariance of the likelihood ratio. However, this is
 not true for more effects, ![K
-\> 1](https://render.githubusercontent.com/render/math?math=K%20%3E%201
+\> 1](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;K%20%3E%201
 "K \> 1"). To see this, notice that proportion of variance is given by
 
   
@@ -2185,17 +2189,18 @@ not true for more effects, ![K
 = 1}^K\\sigma\_k^2\\right)^{-1}\\sigma\_i^2\\Leftrightarrow 
 \\sigma\_i^2 = 
 \\frac{h\_i}{1 - h\_i}\\left(1 + \\sum\_{k \\in
-\\{1,\\dots,K\\}\\setminus\\{i\\}}\\sigma\_k^2\\right)](https://render.githubusercontent.com/render/math?math=h_i%20%3D%20%5Cleft%281%20%2B%20%5Csum_%7Bk%20%3D%201%7D%5EK%5Csigma_k%5E2%5Cright%29%5E%7B-1%7D%5Csigma_i%5E2%5CLeftrightarrow%20%0A%20%20%5Csigma_i%5E2%20%3D%20%0A%20%20%20%20%5Cfrac%7Bh_i%7D%7B1%20-%20h_i%7D%5Cleft%281%20%2B%20%5Csum_%7Bk%20%5Cin%20%5C%7B1%2C%5Cdots%2CK%5C%7D%5Csetminus%5C%7Bi%5C%7D%7D%5Csigma_k%5E2%5Cright%29
+\\{1,\\dots,K\\}\\setminus\\{i\\}}\\sigma\_k^2\\right)](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;h_i%20%3D%20%5Cleft%281%20%2B%20%5Csum_%7Bk%20%3D%201%7D%5EK%5Csigma_k%5E2%5Cright%29%5E%7B-1%7D%5Csigma_i%5E2%5CLeftrightarrow%20%0A%20%20%5Csigma_i%5E2%20%3D%20%0A%20%20%20%20%5Cfrac%7Bh_i%7D%7B1%20-%20h_i%7D%5Cleft%281%20%2B%20%5Csum_%7Bk%20%5Cin%20%5C%7B1%2C%5Cdots%2CK%5C%7D%5Csetminus%5C%7Bi%5C%7D%7D%5Csigma_k%5E2%5Cright%29
 "h_i = \\left(1 + \\sum_{k = 1}^K\\sigma_k^2\\right)^{-1}\\sigma_i^2\\Leftrightarrow 
   \\sigma_i^2 = 
     \\frac{h_i}{1 - h_i}\\left(1 + \\sum_{k \\in \\{1,\\dots,K\\}\\setminus\\{i\\}}\\sigma_k^2\\right)")  
 
 Let ![l(\\vec\\beta,
-\\sigma\_1^2,\\dots,\\sigma\_K^2)](https://render.githubusercontent.com/render/math?math=l%28%5Cvec%5Cbeta%2C%20%5Csigma_1%5E2%2C%5Cdots%2C%5Csigma_K%5E2%29
+\\sigma\_1^2,\\dots,\\sigma\_K^2)](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;l%28%5Cvec%5Cbeta%2C%20%5Csigma_1%5E2%2C%5Cdots%2C%5Csigma_K%5E2%29
 "l(\\vec\\beta, \\sigma_1^2,\\dots,\\sigma_K^2)") be the log likelihood.
 Then the profile likelihood in the proportion of variance explained by
-the ![i](https://render.githubusercontent.com/render/math?math=i "i")th
-effect is
+the
+![i](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;i
+"i")th effect is
 
   
 ![\\tilde l\_i(h\_i) =
@@ -2203,7 +2208,7 @@ effect is
 l\\left(\\vec\\beta,\\sigma\_1,\\dots,\\sigma\_{k-1},
 \\frac{h\_i}{1 - h\_i}\\left(1 + \\sum\_{k \\in
 \\{1,\\dots,K\\}\\setminus\\{i\\}}\\sigma\_k^2\\right),
-\\sigma\_{k+1},\\dots,\\sigma\_K\\right)](https://render.githubusercontent.com/render/math?math=%5Ctilde%20l_i%28h_i%29%20%3D%20%5Cmax_%7B%5Cvec%5Cbeta%2C%5Csigma_1%2C%5Cdots%2C%5Csigma_%7Bk-1%7D%2C%5Csigma_%7Bk%2B1%7D%2C%5Cdots%2C%5Csigma_K%7D%0A%20%20l%5Cleft%28%5Cvec%5Cbeta%2C%5Csigma_1%2C%5Cdots%2C%5Csigma_%7Bk-1%7D%2C%0A%20%20%5Cfrac%7Bh_i%7D%7B1%20-%20h_i%7D%5Cleft%281%20%2B%20%5Csum_%7Bk%20%5Cin%20%5C%7B1%2C%5Cdots%2CK%5C%7D%5Csetminus%5C%7Bi%5C%7D%7D%5Csigma_k%5E2%5Cright%29%2C%0A%20%20%5Csigma_%7Bk%2B1%7D%2C%5Cdots%2C%5Csigma_K%5Cright%29
+\\sigma\_{k+1},\\dots,\\sigma\_K\\right)](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Ctilde%20l_i%28h_i%29%20%3D%20%5Cmax_%7B%5Cvec%5Cbeta%2C%5Csigma_1%2C%5Cdots%2C%5Csigma_%7Bk-1%7D%2C%5Csigma_%7Bk%2B1%7D%2C%5Cdots%2C%5Csigma_K%7D%0A%20%20l%5Cleft%28%5Cvec%5Cbeta%2C%5Csigma_1%2C%5Cdots%2C%5Csigma_%7Bk-1%7D%2C%0A%20%20%5Cfrac%7Bh_i%7D%7B1%20-%20h_i%7D%5Cleft%281%20%2B%20%5Csum_%7Bk%20%5Cin%20%5C%7B1%2C%5Cdots%2CK%5C%7D%5Csetminus%5C%7Bi%5C%7D%7D%5Csigma_k%5E2%5Cright%29%2C%0A%20%20%5Csigma_%7Bk%2B1%7D%2C%5Cdots%2C%5Csigma_K%5Cright%29
 "\\tilde l_i(h_i) = \\max_{\\vec\\beta,\\sigma_1,\\dots,\\sigma_{k-1},\\sigma_{k+1},\\dots,\\sigma_K}
   l\\left(\\vec\\beta,\\sigma_1,\\dots,\\sigma_{k-1},
   \\frac{h_i}{1 - h_i}\\left(1 + \\sum_{k \\in \\{1,\\dots,K\\}\\setminus\\{i\\}}\\sigma_k^2\\right),
@@ -2212,7 +2217,7 @@ l\\left(\\vec\\beta,\\sigma\_1,\\dots,\\sigma\_{k-1},
 As these proportions are often the interest of the analysis, the
 `pedmod_profile_prop` function is implemented to produce profile
 likelihood based confidence intervals for ![K
-\> 1](https://render.githubusercontent.com/render/math?math=K%20%3E%201
+\> 1](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;K%20%3E%201
 "K \> 1"). We provide an example of using `pedmod_profile_prop` below.
 
 ``` r
@@ -2252,7 +2257,7 @@ pl_genetic_prop <- pedmod_profile_prop(
 #> LogLike: -2696.1142 at         0.501724
 pl_genetic_prop$confs # the confidence interval
 #>  2.50 pct. 97.50 pct. 
-#>     0.3846     0.6138
+#>     0.3847     0.6138
 
 # confidence interval for the proportion of variance for the environment
 # effect
@@ -2291,13 +2296,13 @@ pl_env_prop <- pedmod_profile_prop(
 #> LogLike: -2696.1142 at         0.227454
 pl_env_prop$confs # the confidence interval
 #>  2.50 pct. 97.50 pct. 
-#>     0.1220     0.3293
+#>     0.1221     0.3295
 ```
 
 A wrong approach is to use the confidence interval for
-![\\sigma\_i^2](https://render.githubusercontent.com/render/math?math=%5Csigma_i%5E2
+![\\sigma\_i^2](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Csigma_i%5E2
 "\\sigma_i^2") to attempt to construct a confidence interval for
-![h\_i](https://render.githubusercontent.com/render/math?math=h_i
+![h\_i](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;h_i
 "h_i"). To see that this is wrong, let
 
   
@@ -2312,7 +2317,7 @@ l\\left(\\vec\\beta,\\sigma\_1^2,\\dots,\\sigma\_K^2\\right) \\\\
 v\_{i,i-1}(\\sigma\_i^2), \\sigma\_i^2, 
 v\_{i,i+1}(\\sigma\_i^2),\\dots,
 v\_{i,K-1}(\\sigma\_i^2)\\right)^\\top
-\\end{align\*}](https://render.githubusercontent.com/render/math?math=%5Cbegin%7Balign%2A%7D%0A%5Cvec%20v_%7Bi%7D%28%5Csigma_i%5E2%29%20%26%3D%20%0A%20%20%5Ctext%7Barg%20max%7D_%7B%5Csigma_1%5E2%2C%5Cdots%2C%5Csigma_%7Bi%20%20-1%7D%5E2%2C%20%5Csigma_%7Bi%20%2B%201%7D%5E2%2C%5Cdots%2C%5Csigma_K%5E2%7D%0A%20%20%5Cmax_%7B%5Cvec%5Cbeta%7D%0A%20%20l%5Cleft%28%5Cvec%5Cbeta%2C%5Csigma_1%5E2%2C%5Cdots%2C%5Csigma_K%5E2%5Cright%29%20%5C%5C%0A%5Cvec%20s_i%28%5Csigma_i%5E2%29%20%26%3D%20%0A%20%20%5Cleft%28v_%7Bi1%7D%28%5Csigma_i%5E2%29%2C%5Cdots%2C%0A%20%20%20%20%20%20%20%20v_%7Bi%2Ci-1%7D%28%5Csigma_i%5E2%29%2C%20%5Csigma_i%5E2%2C%20%0A%20%20%20%20%20%20%20%20v_%7Bi%2Ci%2B1%7D%28%5Csigma_i%5E2%29%2C%5Cdots%2C%0A%20%20%20%20%20%20%20%20v_%7Bi%2CK-1%7D%28%5Csigma_i%5E2%29%5Cright%29%5E%5Ctop%0A%5Cend%7Balign%2A%7D
+\\end{align\*}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cbegin%7Balign%2A%7D%0A%5Cvec%20v_%7Bi%7D%28%5Csigma_i%5E2%29%20%26%3D%20%0A%20%20%5Ctext%7Barg%20max%7D_%7B%5Csigma_1%5E2%2C%5Cdots%2C%5Csigma_%7Bi%20%20-1%7D%5E2%2C%20%5Csigma_%7Bi%20%2B%201%7D%5E2%2C%5Cdots%2C%5Csigma_K%5E2%7D%0A%20%20%5Cmax_%7B%5Cvec%5Cbeta%7D%0A%20%20l%5Cleft%28%5Cvec%5Cbeta%2C%5Csigma_1%5E2%2C%5Cdots%2C%5Csigma_K%5E2%5Cright%29%20%5C%5C%0A%5Cvec%20s_i%28%5Csigma_i%5E2%29%20%26%3D%20%0A%20%20%5Cleft%28v_%7Bi1%7D%28%5Csigma_i%5E2%29%2C%5Cdots%2C%0A%20%20%20%20%20%20%20%20v_%7Bi%2Ci-1%7D%28%5Csigma_i%5E2%29%2C%20%5Csigma_i%5E2%2C%20%0A%20%20%20%20%20%20%20%20v_%7Bi%2Ci%2B1%7D%28%5Csigma_i%5E2%29%2C%5Cdots%2C%0A%20%20%20%20%20%20%20%20v_%7Bi%2CK-1%7D%28%5Csigma_i%5E2%29%5Cright%29%5E%5Ctop%0A%5Cend%7Balign%2A%7D
 "\\begin{align*}
 \\vec v_{i}(\\sigma_i^2) &= 
   \\text{arg max}_{\\sigma_1^2,\\dots,\\sigma_{i  -1}^2, \\sigma_{i + 1}^2,\\dots,\\sigma_K^2}
@@ -2325,28 +2330,28 @@ v\_{i,K-1}(\\sigma\_i^2)\\right)^\\top
         v_{i,K-1}(\\sigma_i^2)\\right)^\\top
 \\end{align*}")  
 Now, suppose that exists a function
-![g:\\,(0,1)\\rightarrow(0,\\infty)](https://render.githubusercontent.com/render/math?math=g%3A%5C%2C%280%2C1%29%5Crightarrow%280%2C%5Cinfty%29
+![g:\\,(0,1)\\rightarrow(0,\\infty)](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;g%3A%5C%2C%280%2C1%29%5Crightarrow%280%2C%5Cinfty%29
 "g:\\,(0,1)\\rightarrow(0,\\infty)") such that
 
   
 ![h\_i = \\frac{g\_i(h\_i)}{1+\\sum\_{k = 0}^K
-s\_{ik}(g\_i(h\_i))}](https://render.githubusercontent.com/render/math?math=h_i%20%3D%20%5Cfrac%7Bg_i%28h_i%29%7D%7B1%2B%5Csum_%7Bk%20%3D%200%7D%5EK%20s_%7Bik%7D%28g_i%28h_i%29%29%7D
+s\_{ik}(g\_i(h\_i))}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;h_i%20%3D%20%5Cfrac%7Bg_i%28h_i%29%7D%7B1%2B%5Csum_%7Bk%20%3D%200%7D%5EK%20s_%7Bik%7D%28g_i%28h_i%29%29%7D
 "h_i = \\frac{g_i(h_i)}{1+\\sum_{k = 0}^K s_{ik}(g_i(h_i))}")  
 
 Then it follows that
 
   
 ![\\tilde l\_i(h\_i) \\geq \\max\_{\\vec\\beta} l(\\vec\\beta, \\vec
-s\_i(g\_i(h\_i)))](https://render.githubusercontent.com/render/math?math=%5Ctilde%20l_i%28h_i%29%20%5Cgeq%20%5Cmax_%7B%5Cvec%5Cbeta%7D%20l%28%5Cvec%5Cbeta%2C%20%5Cvec%20s_i%28g_i%28h_i%29%29%29
+s\_i(g\_i(h\_i)))](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Ctilde%20l_i%28h_i%29%20%5Cgeq%20%5Cmax_%7B%5Cvec%5Cbeta%7D%20l%28%5Cvec%5Cbeta%2C%20%5Cvec%20s_i%28g_i%28h_i%29%29%29
 "\\tilde l_i(h_i) \\geq \\max_{\\vec\\beta} l(\\vec\\beta, \\vec s_i(g_i(h_i)))")  
 
 Thus, if one uses the profile likelihood curve of
-![\\sigma\_i^2](https://render.githubusercontent.com/render/math?math=%5Csigma_i%5E2
+![\\sigma\_i^2](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Csigma_i%5E2
 "\\sigma_i^2") to attempt to construct a confidence interval for
-![h\_i](https://render.githubusercontent.com/render/math?math=h_i "h_i")
-then the result is anti-conservative. This is illustrated below where
-the black curves are the proper profile likelihoods and the gray curves
-are the invalid/attempted profile likelihood curves.
+![h\_i](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;h_i
+"h_i") then the result is anti-conservative. This is illustrated below
+where the black curves are the proper profile likelihoods and the gray
+curves are the invalid/attempted profile likelihood curves.
 
 ``` r
 # using the right approach 
@@ -2579,7 +2584,7 @@ R\_{ij} + \\sum\_{k = 1}^K \\sigma\_kU\_{ikj} \> 0 \\\\
 (U\_{ik1}, \\dots, U\_{ikn\_i})^\\top &\\sim N^{(n\_i)}(\\vec 0,
 C\_{ik}) \\\\
 R\_{ij} &\\sim
-N(0, 1)\\end{align\*}](https://render.githubusercontent.com/render/math?math=%5Cbegin%7Balign%2A%7D%0A%20Y_%7Bij%7D%20%26%3D%20%5Cbegin%7Bcases%7D%201%20%26%20%5Cvec%20x_%7Bij%7D%5E%5Ctop%5Cvec%5Cbeta%20%2B%20%0A%20%20%20R_%7Bij%7D%20%2B%20%5Csum_%7Bk%20%3D%201%7D%5EK%20%5Csigma_kU_%7Bikj%7D%20%3E%200%20%5C%5C%20%0A%20%20%200%20%26%20%5Ctext%7Botherwise%7D%20%5Cend%7Bcases%7D%20%5C%5C%0A%20%28U_%7Bik1%7D%2C%20%5Cdots%2C%20%20U_%7Bikn_i%7D%29%5E%5Ctop%20%26%5Csim%20N%5E%7B%28n_i%29%7D%28%5Cvec%200%2C%20C_%7Bik%7D%29%20%5C%5C%0A%20R_%7Bij%7D%20%26%5Csim%20N%280%2C%201%29%5Cend%7Balign%2A%7D
+N(0, 1)\\end{align\*}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cbegin%7Balign%2A%7D%0A%20Y_%7Bij%7D%20%26%3D%20%5Cbegin%7Bcases%7D%201%20%26%20%5Cvec%20x_%7Bij%7D%5E%5Ctop%5Cvec%5Cbeta%20%2B%20%0A%20%20%20R_%7Bij%7D%20%2B%20%5Csum_%7Bk%20%3D%201%7D%5EK%20%5Csigma_kU_%7Bikj%7D%20%3E%200%20%5C%5C%20%0A%20%20%200%20%26%20%5Ctext%7Botherwise%7D%20%5Cend%7Bcases%7D%20%5C%5C%0A%20%28U_%7Bik1%7D%2C%20%5Cdots%2C%20%20U_%7Bikn_i%7D%29%5E%5Ctop%20%26%5Csim%20N%5E%7B%28n_i%29%7D%28%5Cvec%200%2C%20C_%7Bik%7D%29%20%5C%5C%0A%20R_%7Bij%7D%20%26%5Csim%20N%280%2C%201%29%5Cend%7Balign%2A%7D
 "\\begin{align*}
  Y_{ij} &= \\begin{cases} 1 & \\vec x_{ij}^\\top\\vec\\beta + 
    R_{ij} + \\sum_{k = 1}^K \\sigma_kU_{ikj} \> 0 \\\\ 
@@ -2588,16 +2593,17 @@ N(0, 1)\\end{align\*}](https://render.githubusercontent.com/render/math?math=%5C
  R_{ij} &\\sim N(0, 1)\\end{align*}")  
 
 for known fixed effects covariates ![\\vec
-x\_{ij}](https://render.githubusercontent.com/render/math?math=%5Cvec%20x_%7Bij%7D
+x\_{ij}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cvec%20x_%7Bij%7D
 "\\vec x_{ij}") and scale matrices
-![C\_{ij}](https://render.githubusercontent.com/render/math?math=C_%7Bij%7D
+![C\_{ij}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;C_%7Bij%7D
 "C_{ij}"). The
-![U\_{ikj}](https://render.githubusercontent.com/render/math?math=U_%7Bikj%7D
+![U\_{ikj}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;U_%7Bikj%7D
 "U_{ikj}") is the
-![k](https://render.githubusercontent.com/render/math?math=k "k")’th
-effect on individual
-![j](https://render.githubusercontent.com/render/math?math=j "j") in
-cluster ![i](https://render.githubusercontent.com/render/math?math=i
+![k](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;k
+"k")’th effect on individual
+![j](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;j
+"j") in cluster
+![i](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;i
 "i"). For instance, this could be the genetic effect or an environmental
 effect.
 
@@ -2614,7 +2620,7 @@ R\_{ij} + \\sum\_{k = 1}^K \\sigma\_k(\\vec z\_{ij})U\_{ikj} \> 0 \\\\
 (U\_{ik1}, \\dots, U\_{ikn\_i})^\\top &\\sim N^{(n\_i)}(\\vec 0,
 C\_{ik}) \\\\
 R\_{ij} &\\sim
-N(0, 1)\\end{align\*}](https://render.githubusercontent.com/render/math?math=%5Cbegin%7Balign%2A%7D%0A%20Y_%7Bij%7D%20%26%3D%20%5Cbegin%7Bcases%7D%201%20%26%20%5Cvec%20x_%7Bij%7D%5E%5Ctop%5Cvec%5Cbeta%20%2B%20%0A%20%20%20R_%7Bij%7D%20%2B%20%5Csum_%7Bk%20%3D%201%7D%5EK%20%5Csigma_k%28%5Cvec%20z_%7Bij%7D%29U_%7Bikj%7D%20%3E%200%20%5C%5C%20%0A%20%20%200%20%26%20%5Ctext%7Botherwise%7D%20%5Cend%7Bcases%7D%20%5C%5C%0A%20%5Csigma_k%28%5Cvec%20z_%7Bij%7D%29%20%26%3D%20%5Cexp%28%5Cvec%5Ctheta_k%5E%5Ctop%5Cvec%20z_%7Bij%7D%29%20%5C%5C%0A%20%28U_%7Bik1%7D%2C%20%5Cdots%2C%20%20U_%7Bikn_i%7D%29%5E%5Ctop%20%26%5Csim%20N%5E%7B%28n_i%29%7D%28%5Cvec%200%2C%20C_%7Bik%7D%29%20%5C%5C%0A%20R_%7Bij%7D%20%26%5Csim%20N%280%2C%201%29%5Cend%7Balign%2A%7D
+N(0, 1)\\end{align\*}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cbegin%7Balign%2A%7D%0A%20Y_%7Bij%7D%20%26%3D%20%5Cbegin%7Bcases%7D%201%20%26%20%5Cvec%20x_%7Bij%7D%5E%5Ctop%5Cvec%5Cbeta%20%2B%20%0A%20%20%20R_%7Bij%7D%20%2B%20%5Csum_%7Bk%20%3D%201%7D%5EK%20%5Csigma_k%28%5Cvec%20z_%7Bij%7D%29U_%7Bikj%7D%20%3E%200%20%5C%5C%20%0A%20%20%200%20%26%20%5Ctext%7Botherwise%7D%20%5Cend%7Bcases%7D%20%5C%5C%0A%20%5Csigma_k%28%5Cvec%20z_%7Bij%7D%29%20%26%3D%20%5Cexp%28%5Cvec%5Ctheta_k%5E%5Ctop%5Cvec%20z_%7Bij%7D%29%20%5C%5C%0A%20%28U_%7Bik1%7D%2C%20%5Cdots%2C%20%20U_%7Bikn_i%7D%29%5E%5Ctop%20%26%5Csim%20N%5E%7B%28n_i%29%7D%28%5Cvec%200%2C%20C_%7Bik%7D%29%20%5C%5C%0A%20R_%7Bij%7D%20%26%5Csim%20N%280%2C%201%29%5Cend%7Balign%2A%7D
 "\\begin{align*}
  Y_{ij} &= \\begin{cases} 1 & \\vec x_{ij}^\\top\\vec\\beta + 
    R_{ij} + \\sum_{k = 1}^K \\sigma_k(\\vec z_{ij})U_{ikj} \> 0 \\\\ 
@@ -2624,26 +2630,27 @@ N(0, 1)\\end{align\*}](https://render.githubusercontent.com/render/math?math=%5C
  R_{ij} &\\sim N(0, 1)\\end{align*}")  
 
 where the ![\\vec
-z\_{ij}](https://render.githubusercontent.com/render/math?math=%5Cvec%20z_%7Bij%7D
+z\_{ij}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cvec%20z_%7Bij%7D
 "\\vec z_{ij}") are known covariates. If all the scale matrices are
 correlation matrices, then this implies that the proportion of variance
 attributable to the
-![l](https://render.githubusercontent.com/render/math?math=l "l")’th
-effect for individual
-![j](https://render.githubusercontent.com/render/math?math=j "j") in
-cluster ![i](https://render.githubusercontent.com/render/math?math=i
+![l](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;l
+"l")’th effect for individual
+![j](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;j
+"j") in cluster
+![i](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;i
 "i") is
 
   
 ![\\frac{\\sigma\_l^2(\\vec z\_{ij})^2}{1 + \\sum\_{k
 = 1}^K\\sigma\_k^2(\\vec
-z\_{ij})^2}](https://render.githubusercontent.com/render/math?math=%5Cfrac%7B%5Csigma_l%5E2%28%5Cvec%20z_%7Bij%7D%29%5E2%7D%7B1%20%2B%20%5Csum_%7Bk%20%3D%201%7D%5EK%5Csigma_k%5E2%28%5Cvec%20z_%7Bij%7D%29%5E2%7D
+z\_{ij})^2}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cfrac%7B%5Csigma_l%5E2%28%5Cvec%20z_%7Bij%7D%29%5E2%7D%7B1%20%2B%20%5Csum_%7Bk%20%3D%201%7D%5EK%5Csigma_k%5E2%28%5Cvec%20z_%7Bij%7D%29%5E2%7D
 "\\frac{\\sigma_l^2(\\vec z_{ij})^2}{1 + \\sum_{k = 1}^K\\sigma_k^2(\\vec z_{ij})^2}")  
 rather than
 
   
 ![\\frac{\\sigma\_l^2}{1 + \\sum\_{k
-= 1}^K\\sigma\_k^2}.](https://render.githubusercontent.com/render/math?math=%5Cfrac%7B%5Csigma_l%5E2%7D%7B1%20%2B%20%5Csum_%7Bk%20%3D%201%7D%5EK%5Csigma_k%5E2%7D.
+= 1}^K\\sigma\_k^2}.](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cfrac%7B%5Csigma_l%5E2%7D%7B1%20%2B%20%5Csum_%7Bk%20%3D%201%7D%5EK%5Csigma_k%5E2%7D.
 "\\frac{\\sigma_l^2}{1 + \\sum_{k = 1}^K\\sigma_k^2}.")  
 
 The model can equivalent be written as
@@ -2659,7 +2666,7 @@ D\_{ik} &= \\text{diag}(\\sigma\_k(\\vec z\_{i1}), \\dots,
 \\sigma\_k(\\vec z\_{in\_i}))\\\\
 (\\epsilon\_{i1}, \\dots, \\epsilon\_{in\_i})^\\top &\\sim 
 N^{(n\_i)}\\left(\\vec 0, I + \\sum\_{k = 1}^K
-D\_{ik}C\_{ik}D\_{ik}\\right)\\end{align\*}](https://render.githubusercontent.com/render/math?math=%5Cbegin%7Balign%2A%7D%0A%20Y_%7Bij%7D%20%26%3D%20%5Cbegin%7Bcases%7D%201%20%26%20%5Cvec%20x_%7Bij%7D%5E%5Ctop%5Cvec%5Cbeta%20%2B%20%0A%20%20%20%5Cepsilon_%7Bij%7D%20%3E%200%20%5C%5C%20%0A%20%20%200%20%26%20%5Ctext%7Botherwise%7D%20%5Cend%7Bcases%7D%20%5C%5C%0A%20%5Csigma_k%28%5Cvec%20z_%7Bij%7D%29%20%26%3D%20%5Cexp%28%5Cvec%5Ctheta_k%5E%5Ctop%5Cvec%20z_%7Bij%7D%29%20%5C%5C%0A%20D_%7Bik%7D%20%26%3D%20%5Ctext%7Bdiag%7D%28%5Csigma_k%28%5Cvec%20z_%7Bi1%7D%29%2C%20%5Cdots%2C%20%5Csigma_k%28%5Cvec%20z_%7Bin_i%7D%29%29%5C%5C%0A%20%28%5Cepsilon_%7Bi1%7D%2C%20%5Cdots%2C%20%20%5Cepsilon_%7Bin_i%7D%29%5E%5Ctop%20%26%5Csim%20%0A%20%20%20N%5E%7B%28n_i%29%7D%5Cleft%28%5Cvec%200%2C%20I%20%2B%20%5Csum_%7Bk%20%3D%201%7D%5EK%20D_%7Bik%7DC_%7Bik%7DD_%7Bik%7D%5Cright%29%5Cend%7Balign%2A%7D
+D\_{ik}C\_{ik}D\_{ik}\\right)\\end{align\*}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cbegin%7Balign%2A%7D%0A%20Y_%7Bij%7D%20%26%3D%20%5Cbegin%7Bcases%7D%201%20%26%20%5Cvec%20x_%7Bij%7D%5E%5Ctop%5Cvec%5Cbeta%20%2B%20%0A%20%20%20%5Cepsilon_%7Bij%7D%20%3E%200%20%5C%5C%20%0A%20%20%200%20%26%20%5Ctext%7Botherwise%7D%20%5Cend%7Bcases%7D%20%5C%5C%0A%20%5Csigma_k%28%5Cvec%20z_%7Bij%7D%29%20%26%3D%20%5Cexp%28%5Cvec%5Ctheta_k%5E%5Ctop%5Cvec%20z_%7Bij%7D%29%20%5C%5C%0A%20D_%7Bik%7D%20%26%3D%20%5Ctext%7Bdiag%7D%28%5Csigma_k%28%5Cvec%20z_%7Bi1%7D%29%2C%20%5Cdots%2C%20%5Csigma_k%28%5Cvec%20z_%7Bin_i%7D%29%29%5C%5C%0A%20%28%5Cepsilon_%7Bi1%7D%2C%20%5Cdots%2C%20%20%5Cepsilon_%7Bin_i%7D%29%5E%5Ctop%20%26%5Csim%20%0A%20%20%20N%5E%7B%28n_i%29%7D%5Cleft%28%5Cvec%200%2C%20I%20%2B%20%5Csum_%7Bk%20%3D%201%7D%5EK%20D_%7Bik%7DC_%7Bik%7DD_%7Bik%7D%5Cright%29%5Cend%7Balign%2A%7D
 "\\begin{align*}
  Y_{ij} &= \\begin{cases} 1 & \\vec x_{ij}^\\top\\vec\\beta + 
    \\epsilon_{ij} \> 0 \\\\ 
@@ -2670,7 +2677,7 @@ D\_{ik}C\_{ik}D\_{ik}\\right)\\end{align\*}](https://render.githubusercontent.co
    N^{(n_i)}\\left(\\vec 0, I + \\sum_{k = 1}^K D_{ik}C_{ik}D_{ik}\\right)\\end{align*}")  
 
 where
-![\\text{diag}(\\cdots)](https://render.githubusercontent.com/render/math?math=%5Ctext%7Bdiag%7D%28%5Ccdots%29
+![\\text{diag}(\\cdots)](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Ctext%7Bdiag%7D%28%5Ccdots%29
 "\\text{diag}(\\cdots)") returns a diagonal matrix. This form is useful
 for simulations.
 
@@ -2687,7 +2694,7 @@ C\_{i1}) \\\\
 (E\_{i1}, \\dots, E\_{in\_{i}})^\\top &\\sim N^{(n\_i)}(\\vec 0,
 C\_{i2}) \\\\
 R\_{ij} &\\sim
-N(0, 1)\\end{align\*}](https://render.githubusercontent.com/render/math?math=%5Cbegin%7Balign%2A%7D%0A%20Y_%7Bij%7D%20%26%3D%20%5Cbegin%7Bcases%7D%201%20%26%20%5Cbeta_0%20%2B%20%5Cbeta_1%20B_%7Bij%7D%20%2B%20%5Csigma_E%28%5Cvec%20z_%7Bij%7D%29E_%7Bij%7D%20%2B%20%5Csigma_G%28%5Cvec%20z_%7Bij%7D%29G_%7Bij%7D%20%2B%20R_%7Bij%7D%20%3E%200%20%5C%5C%200%20%26%20%5Ctext%7Botherwise%7D%20%5Cend%7Bcases%7D%20%5C%5C%0A%20B_%7Bij%7D%20%26%5Csim%20%5Ctext%7BBin%7D%280.1%2C%201%29%20%5C%5C%0A%20%28G_%7Bi1%7D%2C%20%5Cdots%2C%20G_%7Bin_%7Bi%7D%7D%29%5E%5Ctop%20%26%5Csim%20N%5E%7B%28n_i%29%7D%28%5Cvec%200%2C%20C_%7Bi1%7D%29%20%5C%5C%0A%28E_%7Bi1%7D%2C%20%5Cdots%2C%20E_%7Bin_%7Bi%7D%7D%29%5E%5Ctop%20%26%5Csim%20N%5E%7B%28n_i%29%7D%28%5Cvec%200%2C%20C_%7Bi2%7D%29%20%5C%5C%0A%20R_%7Bij%7D%20%26%5Csim%20N%280%2C%201%29%5Cend%7Balign%2A%7D
+N(0, 1)\\end{align\*}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cbegin%7Balign%2A%7D%0A%20Y_%7Bij%7D%20%26%3D%20%5Cbegin%7Bcases%7D%201%20%26%20%5Cbeta_0%20%2B%20%5Cbeta_1%20B_%7Bij%7D%20%2B%20%5Csigma_E%28%5Cvec%20z_%7Bij%7D%29E_%7Bij%7D%20%2B%20%5Csigma_G%28%5Cvec%20z_%7Bij%7D%29G_%7Bij%7D%20%2B%20R_%7Bij%7D%20%3E%200%20%5C%5C%200%20%26%20%5Ctext%7Botherwise%7D%20%5Cend%7Bcases%7D%20%5C%5C%0A%20B_%7Bij%7D%20%26%5Csim%20%5Ctext%7BBin%7D%280.1%2C%201%29%20%5C%5C%0A%20%28G_%7Bi1%7D%2C%20%5Cdots%2C%20G_%7Bin_%7Bi%7D%7D%29%5E%5Ctop%20%26%5Csim%20N%5E%7B%28n_i%29%7D%28%5Cvec%200%2C%20C_%7Bi1%7D%29%20%5C%5C%0A%28E_%7Bi1%7D%2C%20%5Cdots%2C%20E_%7Bin_%7Bi%7D%7D%29%5E%5Ctop%20%26%5Csim%20N%5E%7B%28n_i%29%7D%28%5Cvec%200%2C%20C_%7Bi2%7D%29%20%5C%5C%0A%20R_%7Bij%7D%20%26%5Csim%20N%280%2C%201%29%5Cend%7Balign%2A%7D
 "\\begin{align*}
  Y_{ij} &= \\begin{cases} 1 & \\beta_0 + \\beta_1 B_{ij} + \\sigma_E(\\vec z_{ij})E_{ij} + \\sigma_G(\\vec z_{ij})G_{ij} + R_{ij} \> 0 \\\\ 0 & \\text{otherwise} \\end{cases} \\\\
  B_{ij} &\\sim \\text{Bin}(0.1, 1) \\\\
@@ -2696,7 +2703,7 @@ N(0, 1)\\end{align\*}](https://render.githubusercontent.com/render/math?math=%5C
  R_{ij} &\\sim N(0, 1)\\end{align*}")  
 
 where ![\\vec
-z\_{ij}](https://render.githubusercontent.com/render/math?math=%5Cvec%20z_%7Bij%7D
+z\_{ij}](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Cvec%20z_%7Bij%7D
 "\\vec z_{ij}") is a vector containing an intercept, an indicator for
 whether the individual is a male, and a covariate between minus one and
 one. We will let the heritability for males be larger than for females
@@ -3022,8 +3029,8 @@ system.time(
 #> LogLike: -4372.5866 at         1.268475. Lb, target, ub: -4373.1099, -4372.6022, -4372.5866
 #> LogLike: -4372.5552 at         1.268475. Lb, target, ub: -4373.1099, -4372.6022, -4372.5552
 #> LogLike: -4370.6815 at         1.094952
-#>     user   system  elapsed 
-#> 1756.799    0.012  439.685
+#>    user  system elapsed 
+#>  1725.4     0.0   431.8
 ```
 
 The confidence interval is shown below along with a plot of the profile
@@ -3032,7 +3039,7 @@ likelihood curve.
 ``` r
 pl_curve$confs # the confidence interval
 #>  2.50 pct. 97.50 pct. 
-#>     0.9373     1.2709
+#>     0.9373     1.2708
 
 # plot the profile likelihood curve
 local({
@@ -3114,8 +3121,8 @@ system.time(
 #> LogLike: -4372.6961 at         0.321195. Lb, target, ub: -4372.6961, -4372.6068, -4372.4474
 #> LogLike: -4372.6941 at         0.321195. Lb, target, ub: -4372.6941, -4372.6068, -4372.4474
 #> LogLike: -4370.6861 at         0.410651
-#>    user  system elapsed 
-#> 6088.68    0.28 1633.93
+#>     user   system  elapsed 
+#> 6064.521    0.344 1627.429
 ```
 
 The confidence interval is shown below along with a plot of the profile
@@ -3124,7 +3131,7 @@ likelihood curve.
 ``` r
 pl_curve_nleq$confs # the confidence interval
 #>  2.50 pct. 97.50 pct. 
-#>     0.3231     0.4859
+#>     0.3231     0.4860
 
 # plot the profile likelihood curve
 local({

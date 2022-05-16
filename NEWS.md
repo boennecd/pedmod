@@ -8,6 +8,11 @@
   settings.
 * A bug has been fixed in `pedmod_profile_prop`. `minvls_start` and 
   `maxvls_start` were used instead of `minvls` and `maxvls`.
+* The code to compute the limits in `pedmod_profile` and `pedmod_profile_prop` 
+  has been changed. The previous code could give very wrong points for the 
+  `conf` element if a point was computed very far from one of the confidence 
+  limits. The issue was caused by using `approx` in combination with 
+  `spline` and with points with great distance.
 
 # pedmod 0.2.0
 * `pedigree_ll_terms_loadings` is implemented to support models with individual 

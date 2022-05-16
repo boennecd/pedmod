@@ -656,7 +656,6 @@ prof_res <- pedmod_profile(
 prof_res$confs
 ```
 
-
 ```{r binary_simple_pedmod_profile, cache = 1, message = TRUE, fig.keep="last"}
 # plot the estimated profile likelihood curve and check that everything looks 
 # fine
@@ -1993,6 +1992,10 @@ print(-opt_res$value, digits = 8)
 We can construct a profile likelihood for the parameters like before. 
 For instance, we can look at the scale parameter for the heritability shift 
 for the males with the following code. 
+
+```{r pre_loadings_pl, echo = FALSE}
+ll_terms <- pedigree_ll_terms_loadings(dat_unqiue, max_threads = 4L)
+```
 
 ```{r loadings_pl, cache=1, message=TRUE}
 system.time(

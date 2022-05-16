@@ -1108,13 +1108,22 @@ pedmod_profile <- function(ptr, par, delta, maxvls, minvls = -1L,
   xs  <- sapply(out, `[[`, "x")
   zs  <- sapply(out, `[[`, "z_val")
   pls <- sapply(out, `[[`, "value")
-  sp <- spline(xs, zs)
-  pvs <- c(alpha / 2, 1 - alpha/2)
-  confs <- setNames(approx(sp$y, sp$x, xout = qnorm(pvs))$y,
-                    sprintf("%.2f pct.", 100 * pvs))
 
-  # return
+  confs <- comp_confs(xs, zs, alpha)
+
   list(confs = confs, xs = xs, p_log_Lik = pls, data = out)
+}
+
+#' @importFrom stats setNames approx spline
+comp_confs <- function(xs, z_vals, alpha){
+  keep <- qnorm(alpha, lower.tail = FALSE) - abs(z_vals) > -4
+  xs <- xs[keep]
+  z_vals <- z_vals[keep]
+
+  sp <- spline(xs, z_vals, n = 1000)
+  pvs <- c(alpha / 2, 1 - alpha/2)
+  setNames(approx(sp$y, sp$x, xout = qnorm(pvs))$y,
+           sprintf("%.2f pct.", 100 * pvs))
 }
 
 #' Computes Profile Likelihood Based Confidence Intervals for the Proportion
@@ -1486,12 +1495,9 @@ pedmod_profile_prop <- function(
   xs  <- sapply(out, `[[`, "x")
   zs  <- sapply(out, `[[`, "z_val")
   pls <- sapply(out, `[[`, "value")
-  sp <- spline(xs, zs)
-  pvs <- c(alpha / 2, 1 - alpha/2)
-  confs <- setNames(approx(sp$y, sp$x, xout = qnorm(pvs))$y,
-                    sprintf("%.2f pct.", 100 * pvs))
 
-  # return
+  confs <- comp_confs(xs, zs, alpha)
+
   list(confs = confs, xs = xs, p_log_Lik = pls, data = out)
 }
 
@@ -1834,11 +1840,8 @@ pedmod_profile_nleq <- function(
   xs  <- sapply(out, `[[`, "x") + heq_shift
   zs  <- sapply(out, `[[`, "z_val")
   pls <- sapply(out, `[[`, "value")
-  sp <- spline(xs, zs)
-  pvs <- c(alpha / 2, 1 - alpha/2)
-  confs <- setNames(approx(sp$y, sp$x, xout = qnorm(pvs))$y,
-                    sprintf("%.2f pct.", 100 * pvs))
 
-  # return
+  confs <- comp_confs(xs, zs, alpha)
+
   list(confs = confs, xs = xs, p_log_Lik = pls, data = out)
 }

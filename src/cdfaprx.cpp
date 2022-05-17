@@ -305,13 +305,14 @@ void pedigree_l_factor::univariate
     return -x * x / 2. - log_sqrt_2_pi_inv;
   };
 
+  // TODO: the code does not seem correct if one of the limits are not Inf
   bool const f_ub = std::isinf(ub),
              f_lb = std::isinf(lw);
 
   double const p_ub = f_ub ? 1 : pnorm_std(ub, 1L, 0L),
                p_lb = f_lb ? 0 : pnorm_std(lw, 1L, 0L),
                d_ub = f_ub ? 0 : std::exp(log_dnrm(ub) - pnorm_std(ub, 1L, 1L)),
-               d_lb = f_lb ? 0 : std::exp(log_dnrm(lw) - pnorm_std(lw, 1L, 1L)),
+               d_lb = f_lb ? 0 : std::exp(log_dnrm(lw) - pnorm_std(-lw, 1L, 1L)),
             d_ub_ub = f_ub ? 0 : ub * d_ub,
             d_lb_lb = f_lb ? 0 : lw * d_lb,
              sd_inv = std::sqrt(*sig_inv);
@@ -523,7 +524,81 @@ void pedigree_l_factor_Hessian::operator()
 
 void pedigree_l_factor_Hessian::univariate
   (double * out, double const lw, double const ub) {
-  throw std::runtime_error("implement");
+  constexpr double log_sqrt_2_pi_inv{0.918938533204673};
+  auto log_dnrm = [&](double const x){
+    return -x * x / 2. - log_sqrt_2_pi_inv;
+  };
+
+  // TODO: the code does not seem correct if one of the limits are not Inf
+  bool const f_ub = std::isinf(ub),
+             f_lb = std::isinf(lw);
+
+  double const p_ub = f_ub ? 1 : pnorm_std(ub, 1L, 0L),
+               p_lb = f_lb ? 0 : pnorm_std(lw, 1L, 0L),
+               d_ub = f_ub ? 0 : std::exp(log_dnrm(ub) - pnorm_std(ub, 1L, 1L)),
+               d_lb = f_lb ? 0 : std::exp(log_dnrm(lw) - pnorm_std(-lw, 1L, 1L)),
+            d_ub_ub = f_ub ? 0 : ub * d_ub,
+            d_lb_lb = f_lb ? 0 : lw * d_lb,
+             sd_inv = std::sqrt(*vcov_inv);
+
+  out[0L] = p_ub - p_lb;
+
+  // the gradient
+  double const d_mu = -(d_ub - d_lb) * sd_inv;
+  for(arma::uword j = 0; j < n_fix; ++j)
+    out[j + 1] = X.at(0, j) * d_mu;
+
+  double const d_sig = -(d_ub_ub - d_lb_lb) / 2 * sd_inv * sd_inv;
+  for(size_t s = 0; s  < n_scales; ++s)
+    out[s + n_fix + 1] = d_sig * scale_mats.at(s).at(0, 0);
+
+  arma::uword const hess_dim{n_fix + n_scales};
+  double * const hess_begin{out + 1 + hess_dim};
+  std::fill(hess_begin, hess_begin + hess_dim * hess_dim, 0);
+
+
+  auto add_to_hess = [&](double const limit, double const ratio,
+                         bool const is_upper){
+    double const
+        d_num
+        {is_upper
+          ? -(limit * ratio + ratio * ratio) * *vcov_inv
+          : (limit * ratio - ratio * ratio) * *vcov_inv},
+        d_cross
+        {is_upper
+          ? (-limit * ratio * ratio + ratio - limit * limit * ratio) *
+              *vcov_inv * sd_inv / 2
+          : (-limit * ratio * ratio - ratio + limit * limit * ratio) *
+              *vcov_inv * sd_inv / 2},
+        d_denom
+        {is_upper
+          ? (-limit * limit * limit * ratio - limit * limit * ratio * ratio +
+              3 * limit * ratio) * *vcov_inv * *vcov_inv / 4
+          : (limit * limit * limit * ratio - limit * limit * ratio * ratio -
+            3 * limit * ratio) * *vcov_inv * *vcov_inv / 4};
+
+    for(arma::uword j = 0; j < n_fix; ++j)
+      for(arma::uword i = 0; i < n_fix; ++i)
+        hess_begin[i + j * hess_dim] += d_num * X.at(0, j) * X.at(0, i);
+
+    for(arma::uword s = 0; s < n_scales; ++s)
+      for(arma::uword i = 0; i < n_fix; ++i)
+        hess_begin[i + (s + n_fix) * hess_dim] +=
+          d_cross * X.at(0, i) * scale_mats.at(s).at(0, 0);
+
+    for(arma::uword s = 0; s < n_scales; ++s)
+      for(arma::uword k = 0; k < n_scales; ++k)
+        hess_begin[k + n_fix + (s + n_fix) * hess_dim] +=
+          d_denom * scale_mats.at(k).at(0, 0) * scale_mats.at(s).at(0, 0);
+   };
+
+  if(!f_ub)
+    add_to_hess(ub, d_ub, true);
+  if(!f_lb)
+    add_to_hess(lw, d_lb, false);
+
+   arma::mat hess(hess_begin, hess_dim, hess_dim, false);
+   hess = arma::symmatu(hess);
 }
 
 pedigree_l_factor_Hessian::out_type pedigree_l_factor_Hessian::get_output
@@ -615,7 +690,15 @@ pedigree_l_factor_Hessian::out_type pedigree_l_factor_Hessian::get_output
     return out;
   }
 
-  throw std::runtime_error("implement");
+  out.likelihood = *res;
+  gr.resize(hess_dim);
+  hess.resize(hess_dim, hess_dim);
+  std::copy(res + 1, res + 1 + hess_dim, gr.begin());
+  std::copy
+    (res + 1 + hess_dim, res + 1 + hess_dim * (1 + hess_dim), hess.begin());
+  out.sd_errs.zeros();
+
+  return out;
 }
 
 void generic_l_factor::alloc_mem
@@ -680,7 +763,7 @@ void generic_l_factor::univariate(double * out, double const lw, double const ub
   double const p_ub = f_ub ? 1 : pnorm_std(ub, 1L, 0L),
                p_lb = f_lb ? 0 : pnorm_std(lw, 1L, 0L),
                d_ub = f_ub ? 0 : std::exp(log_dnrm(ub) - pnorm_std(ub, 1L, 1L)),
-               d_lb = f_lb ? 0 : std::exp(log_dnrm(lw) - pnorm_std(lw, 1L, 1L)),
+               d_lb = f_lb ? 0 : std::exp(log_dnrm(lw) - pnorm_std(-lw, 1L, 1L)),
                d_ub_ub = f_ub ? 0 : ub * d_ub,
                d_lb_lb = f_lb ? 0 : lw * d_lb,
                sd_inv = 1 / *Sig_chol_tri();

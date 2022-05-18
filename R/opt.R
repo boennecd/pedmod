@@ -1712,7 +1712,7 @@ pedmod_profile_nleq <- function(
         method = method, use_tilting = use_tilting, vls_scales = vls_scales),
         silent = TRUE)
       if(inherits(out, "try-error"))
-        return(rep(NA_real_, length(par_vec) - 1L))
+        return(rep(NA_real_, length(par) - 1L))
 
       out
     }

@@ -1357,7 +1357,7 @@ opt_out_sobol$counts
 ### Simulation Study
 
 We make a small simulation study below where we are interested in the
-estimation time and bias.
+estimation time, bias and coverage of Wald type confidence intervals.
 
 ``` r
 # the seeds we will use
@@ -1396,7 +1396,17 @@ sim_study <- lapply(seeds, function(s){
         opt_out$par <- standardized_to_direct(opt_out$par, 1L)
       }
       
-      list(start = start, opt_out = opt_out, 
+      if(!standardized){
+        hess_time <- system.time(
+          hess <- eval_pedigree_hess(
+            ptr = ll_terms, par = opt_out$par, maxvls = 25000L, 
+            abs_eps = 0, minvls = 5000L, use_aprx = TRUE, 
+            rel_eps = 1e-4, n_threads = 4L))
+        attr(hess, "time") <- hess_time
+      } else
+        hess <- NULL
+      
+      list(start = start, opt_out = opt_out, hess = hess,
            ll_no_rng = start$logLik_no_rng)
     }
     
@@ -1409,6 +1419,13 @@ sim_study <- lapply(seeds, function(s){
   out <- readRDS(f)
   message(paste0(capture.output(out$fit_direct$opt_out$par), collapse = "\n"))
   message(paste0(capture.output(out$fit_std   $opt_out$par), collapse = "\n"))
+  
+  par <- out$fit_direct$opt_out$par
+  par[4] <- exp(par[4])
+  SEs <- sqrt(diag(solve(-out$fit_direct$hess)))
+  
+  message(paste0(capture.output(rbind(
+    Estimate = par, SE = SEs)), collapse = "\n"))
   message(sprintf(
     "Time %12.1f, %12.1f. Max ll: %12.4f, %12.4f\n",
     with(out$fit_direct, start$time["elapsed"] + opt_out$time["elapsed"]),
@@ -1481,40 +1498,68 @@ time_vals <- sapply(sim_study, function(x) {
         Standardized = .(x$fit_std))
 }, simplify = "array")
 apply(time_vals, 1:2, mean)
-#>              opt_out start total
-#> Direct         5.709 1.809 7.518
-#> Standardized   7.464 1.818 9.282
+#>              opt_out start  total
+#> Direct         6.621 2.104  8.725
+#> Standardized   8.537 2.062 10.599
 apply(time_vals, 1:2, sd)
 #>              opt_out start total
-#> Direct         3.201  1.03 3.499
-#> Standardized   2.294  1.18 2.491
+#> Direct         3.812 1.249 4.239
+#> Standardized   2.508 1.354 2.740
 apply(time_vals, 1:2, quantile)
 #> , , opt_out
 #> 
 #>      Direct Standardized
-#> 0%    2.540        3.746
-#> 25%   3.779        5.703
-#> 50%   4.145        7.796
-#> 75%   7.588        8.910
-#> 100% 20.125       12.145
+#> 0%    2.662        4.095
+#> 25%   4.124        6.485
+#> 50%   4.982        9.035
+#> 75%   8.733       10.112
+#> 100% 23.246       14.349
 #> 
 #> , , start
 #> 
 #>      Direct Standardized
-#> 0%    0.680        0.726
-#> 25%   1.170        1.105
-#> 50%   1.447        1.332
-#> 75%   2.019        1.993
-#> 100%  5.776        6.279
+#> 0%    0.849        0.751
+#> 25%   1.375        1.283
+#> 50%   1.650        1.551
+#> 75%   2.381        2.306
+#> 100%  7.193        7.537
 #> 
 #> , , total
 #> 
 #>      Direct Standardized
-#> 0%    3.759        5.069
-#> 25%   5.157        7.216
-#> 50%   6.336        9.308
-#> 75%   9.122       10.950
-#> 100% 23.930       14.392
+#> 0%    3.972        5.570
+#> 25%   5.964        8.432
+#> 50%   7.253       10.745
+#> 75%  11.382       11.972
+#> 100% 28.545       16.437
+
+# get the standardized errors
+ers_sds <- sapply(sim_study, function(x){
+  par <- x$fit_direct$opt_out$par
+  par[4] <- exp(par[4])
+  err <- par - c(attr(tmp, "beta"), attr(tmp, "sig_sq"))
+  
+  hess <- x$fit_direct$hess
+  SEs <- sqrt(diag(solve(-hess)))
+  
+  err / SEs
+})
+
+rowMeans(abs(ers_sds) < qnorm(.975)) # 95% coverage
+#> (Intercept)  Continuous      Binary             
+#>        0.98        0.98        0.98        0.96
+rowMeans(abs(ers_sds) < qnorm(.995)) # 99% coverage
+#> (Intercept)  Continuous      Binary             
+#>        1.00        0.98        0.98        0.98
+
+# stats for the computation time of the Hessian
+hess_time <- sapply(
+  sim_study, function(x) attr(x$fit_direct$hess, "time")["elapsed"])
+mean(hess_time)
+#> [1] 1.298
+quantile(hess_time, probs = seq(0, 1, .1))
+#>    0%   10%   20%   30%   40%   50%   60%   70%   80%   90%  100% 
+#> 1.051 1.130 1.175 1.185 1.216 1.290 1.382 1.413 1.430 1.450 1.598
 ```
 
 ## Example: Adding Child Environment Effects
@@ -2478,7 +2523,7 @@ do_plot(dum_pl, expression(h[E]), estimate[2], identity, col = "gray40",
 ### Simulation Study
 
 We make a small simulation study below where we are interested in the
-estimation time and bias.
+estimation time, bias and coverage of Wald type confidence intervals.
 
 ``` r
 # the seeds we will use
@@ -2537,8 +2582,19 @@ sim_study <- lapply(seeds, function(s){
         opt_out_quick$par <- standardized_to_direct(opt_out_quick$par, 2L)
       }
       
+      if(!standardized){
+        hess_time <- system.time(
+          hess <- eval_pedigree_hess(
+            ptr = ll_terms, par = opt_out$par, maxvls = 25000L, 
+            abs_eps = 0, minvls = 5000L, use_aprx = TRUE, 
+            rel_eps = 1e-4, n_threads = 4L, cluster_weights = c_weights,
+            vls_scales = sqrt(c_weights)))
+        attr(hess, "time") <- hess_time
+      } else
+        hess <- NULL
+      
       list(start = start, opt_out = opt_out, opt_out_quick = opt_out_quick, 
-           ll_no_rng = start$logLik_no_rng)
+           ll_no_rng = start$logLik_no_rng, hess = hess)
     }
     
     fit_direct <- do_fit(standardized = FALSE)
@@ -2551,6 +2607,13 @@ sim_study <- lapply(seeds, function(s){
   out <- readRDS(f)
   message(paste0(capture.output(out$fit_direct$opt_out$par), collapse = "\n"))
   message(paste0(capture.output(out$fit_std   $opt_out$par), collapse = "\n"))
+  
+  par <- out$fit_direct$opt_out$par
+  par[3:4] <- exp(par[3:4])
+  SEs <- sqrt(diag(solve(-out$fit_direct$hess)))
+  
+  message(paste0(capture.output(rbind(
+    Estimate = par, SE = SEs)), collapse = "\n"))
   message(sprintf(
     "Time %12.1f, %12.1f. Max ll: %12.4f, %12.4f\n",
     with(out$fit_direct, start$time["elapsed"] + opt_out$time["elapsed"] +
@@ -2626,39 +2689,65 @@ time_vals <- sapply(sim_study, function(x) {
 }, simplify = "array")
 apply(time_vals, 1:2, mean)
 #>              opt_out start total
-#> Direct         10.84 3.298 14.14
-#> Standardized    8.90 3.326 12.23
+#> Direct          13.1 4.068 17.17
+#> Standardized    10.8 4.125 14.92
 apply(time_vals, 1:2, sd)
 #>              opt_out start total
-#> Direct         6.276 1.963 6.523
-#> Standardized   5.300 1.563 5.584
+#> Direct         7.643 2.514 7.973
+#> Standardized   6.545 2.049 7.036
 apply(time_vals, 1:2, quantile)
 #> , , opt_out
 #> 
 #>      Direct Standardized
-#> 0%    1.287        1.267
-#> 25%   5.700        2.484
-#> 50%  11.579       10.638
-#> 75%  15.664       13.103
-#> 100% 27.763       16.480
+#> 0%    1.270        1.297
+#> 25%   6.666        3.005
+#> 50%  13.789       13.052
+#> 75%  18.053       15.838
+#> 100% 31.866       20.013
 #> 
 #> , , start
 #> 
 #>      Direct Standardized
-#> 0%    1.629        1.537
-#> 25%   2.260        2.364
-#> 50%   2.519        2.974
-#> 75%   3.807        3.751
-#> 100% 12.865       10.871
+#> 0%    1.627        1.862
+#> 25%   2.699        2.812
+#> 50%   3.094        3.522
+#> 75%   4.845        4.648
+#> 100% 16.322       13.203
 #> 
 #> , , total
 #> 
 #>      Direct Standardized
-#> 0%    3.469        3.574
-#> 25%   9.103        6.993
-#> 50%  14.342       13.515
-#> 75%  18.826       15.999
-#> 100% 33.986       21.078
+#> 0%    3.937        4.033
+#> 25%  10.705        9.006
+#> 50%  18.240       16.374
+#> 75%  22.408       21.110
+#> 100% 39.019       26.340
+
+# get the standardized errors
+ers_sds <- sapply(sim_study, function(x){
+  par <- x$fit_direct$opt_out$par
+  par[3:4] <- exp(par[3:4])
+  err <- par - c(attr(tmp, "beta"), attr(tmp, "sig_sq"))
+  SEs <- sqrt(diag(solve(-x$fit_direct$hess)))
+  
+  err / SEs
+})
+
+rowMeans(abs(ers_sds) < qnorm(.975)) # 95% coverage
+#> (Intercept)      Binary                         
+#>        0.94        0.90        0.90        0.98
+rowMeans(abs(ers_sds) < qnorm(.995)) # 99% coverage
+#> (Intercept)      Binary                         
+#>        1.00        1.00        0.96        1.00
+
+# stats for the computation time of the Hessian
+hess_time <- sapply(
+  sim_study, function(x) attr(x$fit_direct$hess, "time")["elapsed"])
+mean(hess_time)
+#> [1] 2.753
+quantile(hess_time, probs = seq(0, 1, .1))
+#>    0%   10%   20%   30%   40%   50%   60%   70%   80%   90%  100% 
+#> 2.328 2.523 2.628 2.680 2.705 2.746 2.797 2.842 2.913 3.015 3.105
 ```
 
 ## Individual Specific Loadings

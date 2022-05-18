@@ -17,3 +17,5 @@
 There were no WARNINGs or ERRORs.
 
 There is a NOTE about the package size in some cases.
+
+The error on CRAN has been fixed.

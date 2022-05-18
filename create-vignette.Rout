@@ -178,7 +178,7 @@ label: unconnected_largest_ex
 
 output file: pedigree_partitioning.knit.md
 
-/usr/bin/pandoc +RTS -K512m -RTS pedigree_partitioning.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output pedigree_partitioning.html --lua-filter /home/boennecd/R/x86_64-pc-linux-gnu-library/4.1/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /home/boennecd/R/x86_64-pc-linux-gnu-library/4.1/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --standalone --section-divs --template /home/boennecd/R/x86_64-pc-linux-gnu-library/4.1/rmarkdown/rmd/h/default.html --no-highlight --variable highlightjs=1 --variable theme=bootstrap --mathjax --variable 'mathjax-url=https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --include-in-header /tmp/RtmpEoiYF7/rmarkdown-str135f41f657d72.html --filter /usr/bin/pandoc-citeproc 
+/usr/bin/pandoc +RTS -K512m -RTS pedigree_partitioning.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output pedigree_partitioning.html --lua-filter /home/boennecd/R/x86_64-pc-linux-gnu-library/4.1/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /home/boennecd/R/x86_64-pc-linux-gnu-library/4.1/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --standalone --section-divs --template /home/boennecd/R/x86_64-pc-linux-gnu-library/4.1/rmarkdown/rmd/h/default.html --no-highlight --variable highlightjs=1 --variable theme=bootstrap --mathjax --variable 'mathjax-url=https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --include-in-header /tmp/Rtmpy6dQuo/rmarkdown-str37494ddb0ce2.html --filter /usr/bin/pandoc-citeproc 
 
 Output created: pedigree_partitioning.html
 
@@ -419,7 +419,10 @@ label: sim_study_simple
 attr(,"variance proportions")
 Residual          
   0.2262   0.7738 
-Time          7.1,          8.3. Max ll:   -1574.0667,   -1574.0658
+         (Intercept) Continuous Binary      
+Estimate     -3.2259     1.0385 2.1585 3.465
+SE            0.4296     0.1429 0.2982 1.193
+Time          7.1,          8.4. Max ll:   -1574.0667,   -1574.0658
 
 (Intercept)  Continuous      Binary             
      -3.291       1.107       2.137       1.305 
@@ -428,7 +431,10 @@ Time          7.1,          8.3. Max ll:   -1574.0667,   -1574.0658
 attr(,"variance proportions")
 Residual          
   0.2127   0.7873 
-Time          9.3,         12.5. Max ll:   -1569.6613,   -1569.6609
+         (Intercept) Continuous Binary      
+Estimate     -3.2908     1.1074 2.1374 3.690
+SE            0.4419     0.1521 0.2984 1.258
+Time          9.1,         13.1. Max ll:   -1569.6613,   -1569.6609
 
 (Intercept)  Continuous      Binary             
     -2.8068      0.9498      1.9047      1.0250 
@@ -437,7 +443,10 @@ Time          9.3,         12.5. Max ll:   -1569.6613,   -1569.6609
 attr(,"variance proportions")
 Residual          
   0.2623   0.7377 
-Time         10.9,         11.5. Max ll:   -1618.0764,   -1618.0755
+         (Intercept) Continuous Binary       
+Estimate     -2.8068     0.9498 1.9047 2.7870
+SE            0.3252     0.1179 0.2344 0.8713
+Time         11.8,         12.7. Max ll:   -1618.0764,   -1618.0755
 
 (Intercept)  Continuous      Binary             
     -2.7593      0.9823      1.8346      0.9390 
@@ -446,7 +455,10 @@ Time         10.9,         11.5. Max ll:   -1618.0764,   -1618.0755
 attr(,"variance proportions")
 Residual          
   0.2791   0.7209 
-Time          3.8,          9.5. Max ll:   -1616.7848,   -1616.7831
+         (Intercept) Continuous Binary       
+Estimate     -2.7593     0.9823 1.8346 2.5575
+SE            0.2881     0.1103 0.2031 0.7423
+Time          4.0,          9.9. Max ll:   -1616.7848,   -1616.7831
 
 (Intercept)  Continuous      Binary             
      -3.137       1.134       2.059       1.165 
@@ -455,7 +467,10 @@ Time          3.8,          9.5. Max ll:   -1616.7848,   -1616.7831
 attr(,"variance proportions")
 Residual          
   0.2381   0.7619 
-Time          4.8,          7.9. Max ll:   -1583.7124,   -1583.7126
+         (Intercept) Continuous Binary      
+Estimate     -3.1367     1.1344  2.059 3.206
+SE            0.3836     0.1432  0.263 1.033
+Time          5.3,          8.6. Max ll:   -1583.7124,   -1583.7126
 
 (Intercept)  Continuous      Binary             
      -3.298       1.041       2.182       1.360 
@@ -464,7 +479,10 @@ Time          4.8,          7.9. Max ll:   -1583.7124,   -1583.7126
 attr(,"variance proportions")
 Residual          
   0.2082   0.7918 
-Time         14.7,         10.5. Max ll:   -1615.3256,   -1615.3264
+         (Intercept) Continuous Binary      
+Estimate     -3.2985     1.0406 2.1824 3.895
+SE            0.4359     0.1438 0.3015 1.299
+Time         14.3,         10.3. Max ll:   -1615.3256,   -1615.3264
 
 (Intercept)  Continuous      Binary             
     -2.5151      0.7905      1.5948      0.4593 
@@ -473,7 +491,10 @@ Time         14.7,         10.5. Max ll:   -1615.3256,   -1615.3264
 attr(,"variance proportions")
 Residual          
   0.3871   0.6129 
-Time          8.8,         11.5. Max ll:   -1566.8999,   -1566.8999
+         (Intercept) Continuous Binary       
+Estimate     -2.5151    0.79046 1.5948 1.5830
+SE            0.2112    0.07521 0.1492 0.4242
+Time          8.9,         11.9. Max ll:   -1566.8999,   -1566.8999
 
 (Intercept)  Continuous      Binary             
      -3.323       1.096       2.071       1.469 
@@ -482,7 +503,10 @@ Time          8.8,         11.5. Max ll:   -1566.8999,   -1566.8999
 attr(,"variance proportions")
 Residual          
   0.1882   0.8118 
-Time          6.3,         10.7. Max ll:   -1590.2368,   -1590.2370
+         (Intercept) Continuous Binary      
+Estimate     -3.3225     1.0959  2.071 4.344
+SE            0.4932     0.1705  0.318 1.594
+Time          6.5,         11.3. Max ll:   -1590.2368,   -1590.2370
 
 (Intercept)  Continuous      Binary             
      -3.735       1.259       2.476       1.649 
@@ -491,7 +515,10 @@ Time          6.3,         10.7. Max ll:   -1590.2368,   -1590.2370
 attr(,"variance proportions")
 Residual          
   0.1633   0.8367 
-Time          6.6,         14.4. Max ll:   -1583.5849,   -1583.5846
+         (Intercept) Continuous Binary      
+Estimate     -3.7348     1.2586 2.4757 5.202
+SE            0.6267     0.2181 0.4269 2.088
+Time          6.9,         15.1. Max ll:   -1583.5849,   -1583.5846
 
 (Intercept)  Continuous      Binary             
     -2.8343      1.0366      1.8531      0.9601 
@@ -500,7 +527,10 @@ Time          6.6,         14.4. Max ll:   -1583.5849,   -1583.5846
 attr(,"variance proportions")
 Residual          
    0.278    0.722 
-Time          4.8,         11.6. Max ll:   -1573.0906,   -1573.0908
+         (Intercept) Continuous Binary       
+Estimate      -2.834     1.0366 1.8531 2.6120
+SE             0.304     0.1174 0.2102 0.7725
+Time          4.8,         11.7. Max ll:   -1573.0906,   -1573.0908
 
 (Intercept)  Continuous      Binary             
      -3.462       1.114       2.300       1.389 
@@ -509,7 +539,10 @@ Time          4.8,         11.6. Max ll:   -1573.0906,   -1573.0908
 attr(,"variance proportions")
 Residual          
   0.2004   0.7996 
-Time          7.1,          9.6. Max ll:   -1549.6444,   -1549.6443
+         (Intercept) Continuous Binary      
+Estimate     -3.4617     1.1138 2.3002 4.010
+SE            0.4582     0.1543 0.3131 1.331
+Time          7.8,         10.5. Max ll:   -1549.6444,   -1549.6443
 
 (Intercept)  Continuous      Binary             
      -3.275       1.095       2.262       1.258 
@@ -518,7 +551,10 @@ Time          7.1,          9.6. Max ll:   -1549.6444,   -1549.6443
 attr(,"variance proportions")
 Residual          
   0.2216   0.7784 
-Time          6.2,          7.0. Max ll:   -1580.3836,   -1580.3836
+         (Intercept) Continuous Binary      
+Estimate     -3.2749     1.0953 2.2617 3.519
+SE            0.4312     0.1502 0.3102 1.198
+Time          7.0,          7.7. Max ll:   -1580.3836,   -1580.3836
 
 (Intercept)  Continuous      Binary             
     -2.7584      0.9734      1.8345      0.8728 
@@ -527,7 +563,10 @@ Time          6.2,          7.0. Max ll:   -1580.3836,   -1580.3836
 attr(,"variance proportions")
 Residual          
   0.2953   0.7047 
-Time          5.3,          9.2. Max ll:   -1598.1032,   -1598.1023
+         (Intercept) Continuous Binary       
+Estimate     -2.7584     0.9734 1.8345 2.3937
+SE            0.2923     0.1101 0.2074 0.7176
+Time          5.8,         10.0. Max ll:   -1598.1032,   -1598.1023
 
 (Intercept)  Continuous      Binary             
      -3.019       1.002       2.126       1.173 
@@ -536,7 +575,10 @@ Time          5.3,          9.2. Max ll:   -1598.1032,   -1598.1023
 attr(,"variance proportions")
 Residual          
   0.2342   0.7658 
-Time          6.1,         14.1. Max ll:   -1647.5906,   -1647.5890
+         (Intercept) Continuous Binary      
+Estimate     -3.0191     1.0020 2.1265 3.231
+SE            0.3598     0.1262 0.2641 1.001
+Time          6.4,         14.8. Max ll:   -1647.5906,   -1647.5890
 
 (Intercept)  Continuous      Binary             
      -3.716       1.274       2.407       1.578 
@@ -545,7 +587,10 @@ Time          6.1,         14.1. Max ll:   -1647.5906,   -1647.5890
 attr(,"variance proportions")
 Residual          
   0.1705   0.8295 
-Time          3.8,         11.9. Max ll:   -1526.4827,   -1526.4814
+         (Intercept) Continuous Binary      
+Estimate     -3.7161     1.2741 2.4066 4.846
+SE            0.5744     0.2014 0.3818 1.818
+Time          4.0,         12.5. Max ll:   -1526.4827,   -1526.4814
 
 (Intercept)  Continuous      Binary             
      -2.934       1.055       1.911       1.126 
@@ -554,7 +599,10 @@ Time          3.8,         11.9. Max ll:   -1526.4827,   -1526.4814
 attr(,"variance proportions")
 Residual          
   0.2461   0.7539 
-Time         14.4,         10.2. Max ll:   -1613.5392,   -1613.5391
+         (Intercept) Continuous Binary       
+Estimate     -2.9341     1.0546  1.911 3.0828
+SE            0.3312     0.1252  0.229 0.9188
+Time         14.6,         10.4. Max ll:   -1613.5392,   -1613.5391
 
 (Intercept)  Continuous      Binary             
     -2.8034      0.9291      1.9383      1.0235 
@@ -563,7 +611,10 @@ Time         14.4,         10.2. Max ll:   -1613.5392,   -1613.5391
 attr(,"variance proportions")
 Residual          
   0.2637   0.7363 
-Time          8.8,          5.1. Max ll:   -1653.6128,   -1653.6129
+         (Intercept) Continuous Binary       
+Estimate     -2.8034     0.9291  1.938 2.7829
+SE            0.3012     0.1069  0.222 0.7982
+Time          9.4,          5.6. Max ll:   -1653.6128,   -1653.6129
 
 (Intercept)  Continuous      Binary             
     -2.8805      0.9265      1.8133      1.1205 
@@ -572,7 +623,10 @@ Time          8.8,          5.1. Max ll:   -1653.6128,   -1653.6129
 attr(,"variance proportions")
 Residual          
   0.2428   0.7572 
-Time          8.9,         11.6. Max ll:   -1625.5476,   -1625.5452
+         (Intercept) Continuous Binary      
+Estimate     -2.8805     0.9265 1.8133 3.066
+SE            0.3525     0.1199 0.2388 1.004
+Time          8.4,         11.5. Max ll:   -1625.5476,   -1625.5452
 
 (Intercept)  Continuous      Binary             
      -2.862       1.002       1.855       1.013 
@@ -581,7 +635,10 @@ Time          8.9,         11.6. Max ll:   -1625.5476,   -1625.5452
 attr(,"variance proportions")
 Residual          
   0.2669   0.7331 
-Time          5.3,          5.1. Max ll:   -1608.3804,   -1608.3804
+         (Intercept) Continuous Binary       
+Estimate     -2.8622     1.0020 1.8546 2.7531
+SE            0.3185     0.1169 0.2194 0.8264
+Time          5.5,          5.6. Max ll:   -1608.3804,   -1608.3804
 
 (Intercept)  Continuous      Binary             
     -2.9567      0.9662      2.0162      1.0261 
@@ -590,7 +647,10 @@ Time          5.3,          5.1. Max ll:   -1608.3804,   -1608.3804
 attr(,"variance proportions")
 Residual          
   0.2648   0.7352 
-Time          6.5,         10.5. Max ll:   -1589.7108,   -1589.7108
+         (Intercept) Continuous Binary       
+Estimate     -2.9567     0.9662 2.0162 2.7900
+SE            0.3316     0.1152 0.2376 0.8536
+Time          6.6,         11.3. Max ll:   -1589.7108,   -1589.7108
 
 (Intercept)  Continuous      Binary             
      -3.383       1.144       2.231       1.388 
@@ -599,7 +659,10 @@ Time          6.5,         10.5. Max ll:   -1589.7108,   -1589.7108
 attr(,"variance proportions")
 Residual          
   0.2003   0.7997 
-Time          5.1,          6.8. Max ll:   -1580.1220,   -1580.1218
+         (Intercept) Continuous Binary      
+Estimate      -3.383     1.1440 2.2313 4.008
+SE             0.487     0.1712 0.3303 1.444
+Time          5.4,          7.5. Max ll:   -1580.1220,   -1580.1218
 
 (Intercept)  Continuous      Binary             
     -2.7232      0.9308      1.7718      0.8454 
@@ -608,7 +671,10 @@ Time          5.1,          6.8. Max ll:   -1580.1220,   -1580.1218
 attr(,"variance proportions")
 Residual          
   0.2963   0.7037 
-Time          4.0,          8.3. Max ll:   -1595.5390,   -1595.5364
+         (Intercept) Continuous Binary       
+Estimate     -2.7232    0.93082 1.7718 2.3290
+SE            0.2679    0.09729 0.1896 0.6384
+Time          4.2,          9.3. Max ll:   -1595.5390,   -1595.5364
 
 (Intercept)  Continuous      Binary             
      -3.530       1.139       2.372       1.439 
@@ -617,7 +683,10 @@ Time          4.0,          8.3. Max ll:   -1595.5390,   -1595.5364
 attr(,"variance proportions")
 Residual          
   0.1933   0.8067 
-Time          5.0,          6.0. Max ll:   -1574.6020,   -1574.6036
+         (Intercept) Continuous Binary      
+Estimate     -3.5301     1.1390 2.3724 4.217
+SE            0.4915     0.1657 0.3395 1.467
+Time          5.5,          6.2. Max ll:   -1574.6020,   -1574.6036
 
 (Intercept)  Continuous      Binary             
     -2.6764      0.9196      1.7183      0.7708 
@@ -626,7 +695,10 @@ Time          5.0,          6.0. Max ll:   -1574.6020,   -1574.6036
 attr(,"variance proportions")
 Residual          
   0.3143   0.6857 
-Time          5.1,         10.0. Max ll:   -1581.5043,   -1581.5037
+         (Intercept) Continuous Binary       
+Estimate     -2.6764    0.91956 1.7183 2.1616
+SE            0.2624    0.09733 0.1823 0.6124
+Time          5.2,         10.4. Max ll:   -1581.5043,   -1581.5037
 
 (Intercept)  Continuous      Binary             
      -3.308       1.004       2.247       1.353 
@@ -635,7 +707,10 @@ Time          5.1,         10.0. Max ll:   -1581.5043,   -1581.5037
 attr(,"variance proportions")
 Residual          
   0.2056   0.7944 
-Time          5.4,         10.6. Max ll:   -1591.3680,   -1591.3679
+         (Intercept) Continuous Binary      
+Estimate     -3.3084     1.0040 2.2472 3.869
+SE            0.4503     0.1432 0.3148 1.327
+Time          5.2,         10.6. Max ll:   -1591.3680,   -1591.3679
 
 (Intercept)  Continuous      Binary             
      -3.984       1.288       2.559       1.984 
@@ -644,7 +719,10 @@ Time          5.4,         10.6. Max ll:   -1591.3680,   -1591.3679
 attr(,"variance proportions")
 Residual          
    0.121    0.879 
-Time         23.9,          8.2. Max ll:   -1641.9077,   -1641.9075
+         (Intercept) Continuous Binary      
+Estimate     -3.9837     1.2875 2.5588 7.269
+SE            0.7177     0.2395 0.4704 3.001
+Time         28.5,          9.4. Max ll:   -1641.9077,   -1641.9075
 
 (Intercept)  Continuous      Binary             
     -2.8043      0.9353      1.8464      0.9950 
@@ -653,7 +731,10 @@ Time         23.9,          8.2. Max ll:   -1641.9077,   -1641.9075
 attr(,"variance proportions")
 Residual          
    0.268    0.732 
-Time          5.4,         12.1. Max ll:   -1610.3250,   -1610.3232
+         (Intercept) Continuous Binary      
+Estimate     -2.8043     0.9353 1.8464 2.705
+SE            0.2993     0.1058 0.2106 0.786
+Time          6.4,         13.8. Max ll:   -1610.3250,   -1610.3232
 
 (Intercept)  Continuous      Binary             
     -2.7686      0.9774      1.9829      1.0085 
@@ -662,7 +743,10 @@ Time          5.4,         12.1. Max ll:   -1610.3250,   -1610.3232
 attr(,"variance proportions")
 Residual          
   0.2686   0.7314 
-Time          5.0,          6.3. Max ll:   -1699.3578,   -1699.3561
+         (Intercept) Continuous Binary       
+Estimate     -2.7686     0.9774 1.9829 2.7415
+SE            0.2976     0.1118 0.2213 0.7938
+Time          6.3,          8.0. Max ll:   -1699.3578,   -1699.3561
 
 (Intercept)  Continuous      Binary             
     -2.7637      0.9000      1.9396      0.8837 
@@ -671,7 +755,10 @@ Time          5.0,          6.3. Max ll:   -1699.3578,   -1699.3561
 attr(,"variance proportions")
 Residual          
   0.2906   0.7094 
-Time          5.1,          8.5. Max ll:   -1615.5320,   -1615.5305
+         (Intercept) Continuous Binary       
+Estimate     -2.7637    0.90003 1.9396 2.4197
+SE            0.2731    0.09476 0.2017 0.6678
+Time          6.4,         11.0. Max ll:   -1615.5320,   -1615.5305
 
 (Intercept)  Continuous      Binary             
      -3.190       1.169       2.173       1.370 
@@ -680,7 +767,10 @@ Time          5.1,          8.5. Max ll:   -1615.5320,   -1615.5305
 attr(,"variance proportions")
 Residual          
   0.2039   0.7961 
-Time          5.6,         13.0. Max ll:   -1608.8413,   -1608.8405
+         (Intercept) Continuous Binary      
+Estimate     -3.1904     1.1688 2.1725 3.935
+SE            0.4169     0.1574 0.2967 1.290
+Time          7.0,         15.9. Max ll:   -1608.8413,   -1608.8405
 
 (Intercept)  Continuous      Binary             
     -2.6756      0.8857      1.8309      0.6906 
@@ -689,7 +779,10 @@ Time          5.6,         13.0. Max ll:   -1608.8413,   -1608.8405
 attr(,"variance proportions")
 Residual          
   0.3331   0.6669 
-Time          5.2,          5.1. Max ll:   -1577.1618,   -1577.1616
+         (Intercept) Continuous Binary       
+Estimate     -2.6756    0.88574 1.8309 1.9948
+SE            0.2426    0.08818 0.1805 0.5267
+Time          6.2,          6.4. Max ll:   -1577.1618,   -1577.1616
 
 (Intercept)  Continuous      Binary             
     -2.9307      0.9919      1.9318      1.1919 
@@ -698,7 +791,10 @@ Time          5.2,          5.1. Max ll:   -1577.1618,   -1577.1616
 attr(,"variance proportions")
 Residual          
   0.2318   0.7682 
-Time          4.7,          5.6. Max ll:   -1650.7065,   -1650.7056
+         (Intercept) Continuous Binary      
+Estimate     -2.9307     0.9919 1.9318 3.293
+SE            0.3661     0.1304 0.2534 1.064
+Time          5.9,          6.9. Max ll:   -1650.7065,   -1650.7056
 
 (Intercept)  Continuous      Binary             
     -2.5901      0.8567      1.6904      0.7512 
@@ -707,7 +803,10 @@ Time          4.7,          5.6. Max ll:   -1650.7065,   -1650.7056
 attr(,"variance proportions")
 Residual          
   0.3213   0.6787 
-Time          9.6,          5.3. Max ll:   -1611.1538,   -1611.1544
+         (Intercept) Continuous Binary       
+Estimate     -2.5901    0.85672 1.6904 2.1194
+SE            0.2469    0.08792 0.1767 0.5789
+Time         12.0,          6.6. Max ll:   -1611.1538,   -1611.1544
 
 (Intercept)  Continuous      Binary             
      -3.882       1.309       2.673       1.666 
@@ -716,7 +815,10 @@ Time          9.6,          5.3. Max ll:   -1611.1538,   -1611.1544
 attr(,"variance proportions")
 Residual          
   0.1606   0.8394 
-Time         10.8,          9.0. Max ll:   -1543.1585,   -1543.1572
+         (Intercept) Continuous Binary      
+Estimate     -3.8815     1.3092 2.6728 5.291
+SE            0.6746     0.2347 0.4715 2.208
+Time         13.2,         11.5. Max ll:   -1543.1585,   -1543.1572
 
 (Intercept)  Continuous      Binary             
      -3.302       1.002       2.224       1.390 
@@ -725,7 +827,10 @@ Time         10.8,          9.0. Max ll:   -1543.1585,   -1543.1572
 attr(,"variance proportions")
 Residual          
   0.2018   0.7982 
-Time         10.3,          9.7. Max ll:   -1643.4977,   -1643.4958
+         (Intercept) Continuous Binary      
+Estimate     -3.3023     1.0024 2.2238 4.015
+SE            0.4586     0.1452 0.3179 1.392
+Time         13.5,         12.0. Max ll:   -1643.4977,   -1643.4958
 
 (Intercept)  Continuous      Binary             
     -2.8096      0.8574      1.9157      0.7994 
@@ -734,7 +839,10 @@ Time         10.3,          9.7. Max ll:   -1643.4977,   -1643.4958
 attr(,"variance proportions")
 Residual          
   0.3093   0.6907 
-Time         10.4,          9.0. Max ll:   -1574.7349,   -1574.7348
+         (Intercept) Continuous Binary      
+Estimate     -2.8096    0.85744 1.9157 2.224
+SE            0.2735    0.09135 0.1981 0.622
+Time         14.1,         11.0. Max ll:   -1574.7349,   -1574.7348
 
 (Intercept)  Continuous      Binary             
     -2.6379      0.8634      1.7388      0.6046 
@@ -743,7 +851,10 @@ Time         10.4,          9.0. Max ll:   -1574.7349,   -1574.7348
 attr(,"variance proportions")
 Residual          
    0.353    0.647 
-Time         10.7,         11.0. Max ll:   -1544.2522,   -1544.2522
+         (Intercept) Continuous Binary       
+Estimate     -2.6379    0.86345 1.7388 1.8305
+SE            0.2308    0.08611 0.1663 0.4818
+Time         13.7,         13.8. Max ll:   -1544.2522,   -1544.2522
 
 (Intercept)  Continuous      Binary             
      -3.732       1.313       2.482       1.562 
@@ -752,7 +863,10 @@ Time         10.7,         11.0. Max ll:   -1544.2522,   -1544.2522
 attr(,"variance proportions")
 Residual          
   0.1701   0.8299 
-Time          5.8,         12.7. Max ll:   -1517.1693,   -1517.1691
+         (Intercept) Continuous Binary      
+Estimate     -3.7322     1.3128 2.4816 4.767
+SE            0.5855     0.2134 0.4005 1.812
+Time          7.5,         15.9. Max ll:   -1517.1693,   -1517.1691
 
 (Intercept)  Continuous      Binary             
     -2.7397      0.9550      1.8515      0.8856 
@@ -761,7 +875,10 @@ Time          5.8,         12.7. Max ll:   -1517.1693,   -1517.1691
 attr(,"variance proportions")
 Residual          
    0.289    0.711 
-Time          8.9,          9.2. Max ll:   -1606.8305,   -1606.8306
+         (Intercept) Continuous Binary       
+Estimate     -2.7397     0.9550 1.8515 2.4244
+SE            0.2801     0.1041 0.2053 0.6885
+Time         11.4,         11.7. Max ll:   -1606.8305,   -1606.8306
 
 (Intercept)  Continuous      Binary             
      -3.119       1.042       2.045       1.021 
@@ -770,7 +887,10 @@ Time          8.9,          9.2. Max ll:   -1606.8305,   -1606.8306
 attr(,"variance proportions")
 Residual          
   0.2662   0.7338 
-Time          4.7,          8.7. Max ll:   -1530.2611,   -1530.2607
+         (Intercept) Continuous Binary       
+Estimate     -3.1189     1.0420 2.0451 2.7765
+SE            0.3547     0.1242 0.2451 0.8497
+Time          6.2,         10.4. Max ll:   -1530.2611,   -1530.2607
 
 (Intercept)  Continuous      Binary             
     -2.7945      0.9446      1.8856      1.0420 
@@ -779,7 +899,10 @@ Time          4.7,          8.7. Max ll:   -1530.2611,   -1530.2607
 attr(,"variance proportions")
 Residual          
   0.2606   0.7394 
-Time          8.9,          8.4. Max ll:   -1643.2979,   -1643.2979
+         (Intercept) Continuous Binary      
+Estimate      -2.794     0.9446 1.8856 2.835
+SE             0.299     0.1074 0.2139 0.823
+Time         11.7,         11.0. Max ll:   -1643.2979,   -1643.2979
 
 (Intercept)  Continuous      Binary             
      -3.086       1.082       2.090       1.240 
@@ -788,7 +911,10 @@ Time          8.9,          8.4. Max ll:   -1643.2979,   -1643.2979
 attr(,"variance proportions")
 Residual          
   0.2242   0.7758 
-Time          4.5,          9.4. Max ll:   -1637.9652,   -1637.9651
+         (Intercept) Continuous Binary      
+Estimate     -3.0857     1.0817 2.0899 3.455
+SE            0.3672     0.1356 0.2616 1.049
+Time          5.5,         11.8. Max ll:   -1637.9652,   -1637.9651
 
 (Intercept)  Continuous      Binary             
      -2.962       1.050       1.794       1.221 
@@ -797,7 +923,10 @@ Time          4.5,          9.4. Max ll:   -1637.9652,   -1637.9651
 attr(,"variance proportions")
 Residual          
   0.2283   0.7717 
-Time          9.8,         10.5. Max ll:   -1626.8064,   -1626.8063
+         (Intercept) Continuous Binary      
+Estimate     -2.9625     1.0502 1.7941 3.390
+SE            0.3821     0.1413 0.2458 1.121
+Time         13.9,         13.5. Max ll:   -1626.8064,   -1626.8063
 
 (Intercept)  Continuous      Binary             
      -2.932       1.007       2.074       1.009 
@@ -806,7 +935,10 @@ Time          9.8,         10.5. Max ll:   -1626.8064,   -1626.8063
 attr(,"variance proportions")
 Residual          
   0.2673   0.7327 
-Time          9.6,         10.4. Max ll:   -1624.0941,   -1624.0939
+         (Intercept) Continuous Binary       
+Estimate     -2.9317     1.0071 2.0743 2.7431
+SE            0.3144     0.1142 0.2339 0.7908
+Time         13.0,         13.1. Max ll:   -1624.0941,   -1624.0939
 
 (Intercept)  Continuous      Binary             
     -2.8140      0.9323      1.9071      0.7796 
@@ -815,7 +947,10 @@ Time          9.6,         10.4. Max ll:   -1624.0941,   -1624.0939
 attr(,"variance proportions")
 Residual          
   0.3138   0.6862 
-Time          6.3,          5.8. Max ll:   -1582.0835,   -1582.0837
+         (Intercept) Continuous Binary       
+Estimate     -2.8140    0.93230 1.9071 2.1805
+SE            0.2673    0.09447 0.1922 0.5893
+Time          8.2,          7.6. Max ll:   -1582.0835,   -1582.0837
 
 (Intercept)  Continuous      Binary             
      -3.614       1.133       2.193       1.512 
@@ -824,7 +959,10 @@ Time          6.3,          5.8. Max ll:   -1582.0835,   -1582.0837
 attr(,"variance proportions")
 Residual          
   0.1799   0.8201 
-Time          6.2,          6.7. Max ll:   -1512.1259,   -1512.1256
+         (Intercept) Continuous Binary      
+Estimate     -3.6136     1.1326 2.1933 4.534
+SE            0.5524     0.1778 0.3451 1.696
+Time          8.2,          8.4. Max ll:   -1512.1259,   -1512.1256
 
 (Intercept)  Continuous      Binary             
     -2.8741      0.9475      1.9688      0.9152 
@@ -833,7 +971,10 @@ Time          6.2,          6.7. Max ll:   -1512.1259,   -1512.1256
 attr(,"variance proportions")
 Residual          
    0.286    0.714 
-Time          8.1,         13.2. Max ll:   -1577.6617,   -1577.6617
+         (Intercept) Continuous Binary       
+Estimate     -2.8741     0.9475 1.9688 2.4974
+SE            0.3004     0.1054 0.2152 0.7279
+Time         10.2,         16.4. Max ll:   -1577.6617,   -1577.6617
 
 (Intercept)  Continuous      Binary             
      -2.899       1.033       1.859       1.081 
@@ -842,7 +983,10 @@ Time          8.1,         13.2. Max ll:   -1577.6617,   -1577.6617
 attr(,"variance proportions")
 Residual          
   0.2558   0.7442 
-Time          6.1,          6.9. Max ll:   -1630.5539,   -1630.5533
+         (Intercept) Continuous Binary       
+Estimate     -2.8988     1.0330  1.859 2.9463
+SE            0.3326     0.1241  0.228 0.9009
+Time          7.6,          8.9. Max ll:   -1630.5539,   -1630.5533
 
 (Intercept)  Continuous      Binary             
      -3.205       1.057       2.110       1.293 
@@ -851,7 +995,10 @@ Time          6.1,          6.9. Max ll:   -1630.5539,   -1630.5533
 attr(,"variance proportions")
 Residual          
   0.2159   0.7841 
-Time          7.0,          6.3. Max ll:   -1585.6072,   -1585.6071
+         (Intercept) Continuous Binary      
+Estimate     -3.2046     1.0571 2.1096 3.644
+SE            0.4221     0.1442 0.2912 1.225
+Time          8.7,          7.8. Max ll:   -1585.6072,   -1585.6071
 
 (Intercept)  Continuous      Binary             
     -2.9610      0.9663      2.0263      1.1579 
@@ -860,7 +1007,10 @@ Time          7.0,          6.3. Max ll:   -1585.6072,   -1585.6071
 attr(,"variance proportions")
 Residual          
   0.2374   0.7626 
-Time          9.2,          8.6. Max ll:   -1643.4114,   -1643.4113
+         (Intercept) Continuous Binary       
+Estimate     -2.9610     0.9663  2.026 3.1834
+SE            0.3529     0.1210  0.253 0.9971
+Time         11.4,         10.9. Max ll:   -1643.4114,   -1643.4113
 
 
   ordinary text without R code
@@ -994,7 +1144,10 @@ label: sim_study_simple_w
 attr(,"variance proportions")
 Residual                   
   0.3027   0.4771   0.2202 
-Time         13.9,         11.9. Max ll:   -2873.6880,   -2873.6880
+         (Intercept) Binary              
+Estimate     -2.6481 3.6237 1.5714 0.7289
+SE            0.2384 0.3302 0.4157 0.2490
+Time         13.0,         11.6. Max ll:   -2873.6880,   -2873.6880
 
 (Intercept)      Binary                         
     -3.1239      4.3575      0.9219     -0.0400 
@@ -1003,7 +1156,10 @@ Time         13.9,         11.9. Max ll:   -2873.6880,   -2873.6880
 attr(,"variance proportions")
 Residual                   
   0.2211   0.5629   0.2159 
-Time          6.2,          5.9. Max ll:   -2779.6528,   -2779.6490
+         (Intercept) Binary              
+Estimate     -3.1239 4.3575 2.5142 0.9608
+SE            0.3651 0.5156 0.7617 0.3692
+Time          5.6,          5.5. Max ll:   -2779.6528,   -2779.6490
 
 (Intercept)      Binary                         
     -2.8415      3.7622      0.2716      0.2028 
@@ -1012,7 +1168,10 @@ Time          6.2,          5.9. Max ll:   -2779.6528,   -2779.6490
 attr(,"variance proportions")
 Residual                   
   0.2824   0.3714   0.3462 
-Time         10.8,         10.9. Max ll:   -2711.1825,   -2711.1824
+         (Intercept) Binary             
+Estimate     -2.8415 3.7622 1.3121 1.225
+SE            0.2717 0.3636 0.4151 0.343
+Time         10.5,         11.5. Max ll:   -2711.1825,   -2711.1824
 
 (Intercept)      Binary                         
     -2.6060      3.5515      0.2742     -0.2248 
@@ -1021,7 +1180,10 @@ Time         10.8,         10.9. Max ll:   -2711.1825,   -2711.1824
 attr(,"variance proportions")
 Residual                   
   0.3202   0.4225   0.2573 
-Time          8.2,         17.5. Max ll:   -2808.3757,   -2808.3754
+         (Intercept) Binary              
+Estimate     -2.6060 3.5515 1.3155 0.7986
+SE            0.2183 0.3015 0.3518 0.2427
+Time          8.7,         16.7. Max ll:   -2808.3757,   -2808.3754
 
 (Intercept)      Binary                         
    -2.88444     4.02697     0.63506    -0.01787 
@@ -1030,7 +1192,10 @@ Time          8.2,         17.5. Max ll:   -2808.3757,   -2808.3754
 attr(,"variance proportions")
 Residual                   
   0.2582   0.4889   0.2529 
-Time         22.5,         21.7. Max ll:   -2806.5809,   -2806.5807
+         (Intercept) Binary              
+Estimate     -2.8844 4.0270 1.8871 0.9823
+SE            0.2975 0.4197 0.5446 0.3292
+Time         22.9,         22.5. Max ll:   -2806.5809,   -2806.5807
 
 (Intercept)      Binary                         
     -3.3957      4.5568      0.9988      0.2835 
@@ -1039,7 +1204,10 @@ Time         22.5,         21.7. Max ll:   -2806.5809,   -2806.5807
 attr(,"variance proportions")
 Residual                   
   0.1940   0.5407   0.2654 
-Time         40.5,          6.3. Max ll:   -2709.5480,   -2709.5473
+         (Intercept) Binary              
+Estimate     -3.3957 4.5568 2.7150 1.3277
+SE            0.4241 0.5735 0.8711 0.4776
+Time         46.6,          6.6. Max ll:   -2709.5480,   -2709.5473
 
 (Intercept)      Binary                         
    -2.92890     3.87255     0.63523     0.05416 
@@ -1048,7 +1216,10 @@ Time         40.5,          6.3. Max ll:   -2709.5480,   -2709.5473
 attr(,"variance proportions")
 Residual                   
   0.2526   0.4797   0.2677 
-Time         28.0,         23.1. Max ll:   -2823.8290,   -2823.8293
+         (Intercept) Binary              
+Estimate     -2.9289 3.8725 1.8875 1.0556
+SE            0.3013 0.4047 0.5544 0.3383
+Time         31.9,         26.5. Max ll:   -2823.8290,   -2823.8293
 
 (Intercept)      Binary                         
     -2.5719      3.3543      0.2517     -0.4231 
@@ -1057,7 +1228,10 @@ Time         28.0,         23.1. Max ll:   -2823.8290,   -2823.8293
 attr(,"variance proportions")
 Residual                   
   0.3387   0.4385   0.2228 
-Time         18.1,         18.4. Max ll:   -2753.4429,   -2753.4427
+         (Intercept) Binary              
+Estimate     -2.5719  3.354 1.2862 0.6550
+SE            0.2269  0.302 0.3609 0.2331
+Time         23.3,         23.1. Max ll:   -2753.4429,   -2753.4427
 
 (Intercept)      Binary                         
     -2.5207      3.4087      0.2612     -0.5451 
@@ -1066,7 +1240,10 @@ Time         18.1,         18.4. Max ll:   -2753.4429,   -2753.4427
 attr(,"variance proportions")
 Residual                   
   0.3503   0.4513   0.1984 
-Time         14.8,          5.3. Max ll:   -2800.0163,   -2800.0188
+         (Intercept) Binary              
+Estimate     -2.5207 3.4087 1.2985 0.5798
+SE            0.1991 0.2728 0.3276 0.2000
+Time         18.2,          6.4. Max ll:   -2800.0163,   -2800.0188
 
 (Intercept)      Binary                         
    -2.75972     3.65591     0.25050    -0.09371 
@@ -1075,7 +1252,10 @@ Time         14.8,          5.3. Max ll:   -2800.0163,   -2800.0188
 attr(,"variance proportions")
 Residual                   
   0.3118   0.4027   0.2855 
-Time         20.8,         26.2. Max ll:   -2641.9371,   -2641.9372
+         (Intercept) Binary              
+Estimate      -2.760 3.6559 1.2847 0.9105
+SE             0.247 0.3321 0.3765 0.2799
+Time         24.9,         30.2. Max ll:   -2641.9371,   -2641.9372
 
 (Intercept)      Binary                         
     -3.0379      4.1667      0.5716      0.3603 
@@ -1084,7 +1264,10 @@ Time         20.8,         26.2. Max ll:   -2641.9371,   -2641.9372
 attr(,"variance proportions")
 Residual                   
   0.2395   0.4203   0.3402 
-Time         10.5,          7.6. Max ll:   -2767.1644,   -2767.1643
+         (Intercept) Binary              
+Estimate     -3.0379 4.1667 1.7711 1.4337
+SE            0.3245 0.4495 0.5597 0.4183
+Time         13.5,          9.4. Max ll:   -2767.1644,   -2767.1643
 
 (Intercept)      Binary                         
    -2.72371     3.51815     0.24602    -0.08211 
@@ -1093,7 +1276,10 @@ Time         10.5,          7.6. Max ll:   -2767.1644,   -2767.1643
 attr(,"variance proportions")
 Residual                   
   0.3140   0.3998   0.2862 
-Time         15.2,         12.6. Max ll:   -2719.1933,   -2719.1929
+         (Intercept) Binary             
+Estimate     -2.7237 3.5181 1.279 0.9212
+SE            0.2521 0.3301 0.386 0.2838
+Time         18.2,         15.5. Max ll:   -2719.1933,   -2719.1929
 
 (Intercept)      Binary                         
    -2.98297     3.88486     0.65546    -0.01686 
@@ -1102,7 +1288,10 @@ Time         15.2,         12.6. Max ll:   -2719.1933,   -2719.1929
 attr(,"variance proportions")
 Residual                   
   0.2540   0.4944   0.2515 
-Time         18.5,         19.9. Max ll:   -2716.4606,   -2716.4600
+         (Intercept) Binary             
+Estimate     -2.9830 3.8849 1.926 0.9833
+SE            0.3259 0.4302 0.584 0.3541
+Time         22.9,         23.4. Max ll:   -2716.4606,   -2716.4600
 
 (Intercept)      Binary                         
     -2.7699      3.8082      0.6410     -0.3775 
@@ -1111,7 +1300,10 @@ Time         18.5,         19.9. Max ll:   -2716.4606,   -2716.4600
 attr(,"variance proportions")
 Residual                   
   0.2798   0.5283   0.1919 
-Time         26.5,         21.9. Max ll:   -2842.7168,   -2842.7170
+         (Intercept) Binary              
+Estimate     -2.7699 3.8082 1.8984 0.6856
+SE            0.2586 0.3588 0.4912 0.2560
+Time         32.7,         26.0. Max ll:   -2842.7168,   -2842.7170
 
 (Intercept)      Binary                         
     -2.6527      3.5657      0.2886     -0.2409 
@@ -1120,7 +1312,10 @@ Time         26.5,         21.9. Max ll:   -2842.7168,   -2842.7170
 attr(,"variance proportions")
 Residual                   
   0.3187   0.4283   0.2530 
-Time         17.8,         14.9. Max ll:   -2737.0265,   -2737.0259
+         (Intercept) Binary              
+Estimate     -2.6527 3.5657 1.3346 0.7859
+SE            0.2337 0.3192 0.3792 0.2478
+Time         22.2,         21.0. Max ll:   -2737.0265,   -2737.0259
 
 (Intercept)      Binary                         
     -2.9122      3.8533      0.6993     -0.1953 
@@ -1129,7 +1324,10 @@ Time         17.8,         14.9. Max ll:   -2737.0265,   -2737.0259
 attr(,"variance proportions")
 Residual                   
   0.2597   0.5257   0.2146 
-Time         20.2,         17.9. Max ll:   -2789.6682,   -2789.6677
+         (Intercept) Binary              
+Estimate     -2.9122 3.8533 2.0124 0.8226
+SE            0.2938 0.3933 0.5608 0.2955
+Time         24.6,         24.7. Max ll:   -2789.6682,   -2789.6677
 
 (Intercept)      Binary                         
     -2.4991      3.3502      0.1687     -0.4777 
@@ -1138,7 +1336,10 @@ Time         20.2,         17.9. Max ll:   -2789.6682,   -2789.6677
 attr(,"variance proportions")
 Residual                   
   0.3564   0.4234   0.2202 
-Time         25.6,         14.7. Max ll:   -2803.0912,   -2803.0911
+         (Intercept) Binary              
+Estimate     -2.4991 3.3502 1.1838 0.6202
+SE            0.1989 0.2727 0.3107 0.2054
+Time         34.3,         19.4. Max ll:   -2803.0912,   -2803.0911
 
 (Intercept)      Binary                         
   -3.138572    4.212868    0.865131    0.006645 
@@ -1147,7 +1348,10 @@ Time         25.6,         14.7. Max ll:   -2803.0912,   -2803.0911
 attr(,"variance proportions")
 Residual                   
   0.2230   0.5459   0.2311 
-Time         14.9,         16.9. Max ll:   -2709.9648,   -2709.9612
+         (Intercept) Binary              
+Estimate     -3.1386 4.2129 2.3753 1.0067
+SE            0.3772 0.5106 0.7431 0.3979
+Time         20.4,         22.9. Max ll:   -2709.9648,   -2709.9612
 
 (Intercept)      Binary                         
     -3.6355      4.9108      1.2837      0.2779 
@@ -1156,7 +1360,10 @@ Time         14.9,         16.9. Max ll:   -2709.9648,   -2709.9612
 attr(,"variance proportions")
 Residual                   
   0.1714   0.6067   0.2219 
-Time         13.1,          6.1. Max ll:   -2731.5370,   -2731.5334
+         (Intercept) Binary             
+Estimate     -3.6355 4.9108 3.610 1.3204
+SE            0.6044 0.8176 1.448 0.6194
+Time         16.0,          7.4. Max ll:   -2731.5370,   -2731.5334
 
 (Intercept)      Binary                         
     -3.2488      4.3348      0.9021      0.1601 
@@ -1165,7 +1372,10 @@ Time         13.1,          6.1. Max ll:   -2731.5370,   -2731.5334
 attr(,"variance proportions")
 Residual                   
   0.2171   0.5306   0.2523 
-Time         16.5,         17.2. Max ll:   -2719.6435,   -2719.6428
+         (Intercept) Binary              
+Estimate     -3.2488 4.3348 2.4648 1.1736
+SE            0.3649 0.4912 0.7259 0.4043
+Time         20.3,         21.6. Max ll:   -2719.6435,   -2719.6428
 
 (Intercept)      Binary                         
     -4.4644      6.1794      1.7044      0.9144 
@@ -1174,7 +1384,10 @@ Time         16.5,         17.2. Max ll:   -2719.6435,   -2719.6428
 attr(,"variance proportions")
 Residual                   
   0.1144   0.6095   0.2762 
-Time         12.8,          9.1. Max ll:   -2702.0254,   -2702.0253
+         (Intercept) Binary            
+Estimate      -4.464  6.179 5.498 2.495
+SE             0.782  1.087 2.189 1.088
+Time         17.4,         12.2. Max ll:   -2702.0254,   -2702.0253
 
 (Intercept)      Binary                         
     -2.8297      3.7021      0.3139      0.1611 
@@ -1183,7 +1396,10 @@ Time         12.8,          9.1. Max ll:   -2702.0254,   -2702.0253
 attr(,"variance proportions")
 Residual                   
   0.2814   0.3872   0.3313 
-Time         19.6,         10.3. Max ll:   -2743.2772,   -2743.2771
+         (Intercept) Binary              
+Estimate     -2.8297 3.7021 1.3688 1.1748
+SE            0.2748 0.3636 0.4302 0.3405
+Time         23.4,         12.0. Max ll:   -2743.2772,   -2743.2771
 
 (Intercept)      Binary                         
     -3.0707      4.0870      0.9175     -0.1502 
@@ -1192,7 +1408,10 @@ Time         19.6,         10.3. Max ll:   -2743.2772,   -2743.2771
 attr(,"variance proportions")
 Residual                   
   0.2322   0.5721   0.1956 
-Time         17.7,         25.1. Max ll:   -2832.3663,   -2832.3646
+         (Intercept) Binary              
+Estimate     -3.0707 4.0870 2.5031 0.8605
+SE            0.3803 0.5095 0.7961 0.3620
+Time         21.0,         30.2. Max ll:   -2832.3663,   -2832.3646
 
 (Intercept)      Binary                         
     -3.1727      4.1588      0.6502      0.3095 
@@ -1201,7 +1420,10 @@ Time         17.7,         25.1. Max ll:   -2832.3663,   -2832.3646
 attr(,"variance proportions")
 Residual                   
   0.2342   0.4474   0.3185 
-Time          5.2,          6.4. Max ll:   -2655.4698,   -2655.4703
+         (Intercept) Binary              
+Estimate     -3.1727  4.159 1.9160 1.3628
+SE            0.3646  0.481 0.6219 0.4445
+Time          6.0,          7.6. Max ll:   -2655.4698,   -2655.4703
 
 (Intercept)      Binary                         
     -3.5638      4.8269      1.0583      0.5324 
@@ -1210,7 +1432,10 @@ Time          5.2,          6.4. Max ll:   -2655.4698,   -2655.4703
 attr(,"variance proportions")
 Residual                   
   0.1875   0.5113   0.3013 
-Time         15.0,          5.2. Max ll:   -2710.7684,   -2710.7672
+         (Intercept) Binary             
+Estimate     -3.5638  4.827 2.882 1.7030
+SE            0.5117  0.698 1.046 0.6476
+Time         17.8,          6.0. Max ll:   -2710.7684,   -2710.7672
 
 (Intercept)      Binary                         
     -2.5484      3.4448      0.1328     -0.2769 
@@ -1219,7 +1444,10 @@ Time         15.0,          5.2. Max ll:   -2710.7684,   -2710.7672
 attr(,"variance proportions")
 Residual                   
   0.3460   0.3912   0.2627 
-Time         13.2,          5.0. Max ll:   -2782.1826,   -2782.1855
+         (Intercept) Binary             
+Estimate     -2.5484 3.4448 1.142 0.7581
+SE            0.2043 0.2811 0.309 0.2323
+Time         15.8,          6.1. Max ll:   -2782.1826,   -2782.1855
 
 (Intercept)      Binary                         
     -2.6874      3.5791      0.4774     -0.3116 
@@ -1228,7 +1456,10 @@ Time         13.2,          5.0. Max ll:   -2782.1826,   -2782.1855
 attr(,"variance proportions")
 Residual                   
   0.2970   0.4856   0.2174 
-Time         15.2,          6.2. Max ll:   -2857.1727,   -2857.1719
+         (Intercept) Binary              
+Estimate     -2.6874  3.579 1.6118 0.7323
+SE            0.2407  0.325 0.4298 0.2487
+Time         19.1,          7.3. Max ll:   -2857.1727,   -2857.1719
 
 (Intercept)      Binary                         
     -3.5197      4.5932      1.0615      0.5975 
@@ -1237,7 +1468,10 @@ Time         15.2,          6.2. Max ll:   -2857.1727,   -2857.1719
 attr(,"variance proportions")
 Residual                   
   0.1737   0.5069   0.3194 
-Time         24.4,         20.9. Max ll:   -2849.6794,   -2849.6787
+         (Intercept) Binary            
+Estimate     -3.5197 4.5932 2.891 1.818
+SE            0.4993 0.6562 1.051 0.650
+Time         30.8,         27.9. Max ll:   -2849.6794,   -2849.6787
 
 (Intercept)      Binary                         
    -2.99804     3.99226     0.76219     0.01046 
@@ -1246,7 +1480,10 @@ Time         24.4,         20.9. Max ll:   -2849.6794,   -2849.6787
 attr(,"variance proportions")
 Residual                   
   0.2417   0.5152   0.2431 
-Time          5.1,          5.1. Max ll:   -2821.0137,   -2821.0145
+         (Intercept) Binary              
+Estimate      -2.998 3.9923 2.1430 1.0105
+SE             0.313 0.4219 0.6139 0.3459
+Time          6.8,          6.4. Max ll:   -2821.0137,   -2821.0145
 
 (Intercept)      Binary                         
     -2.9105      3.7849      0.7159     -0.5208 
@@ -1255,7 +1492,10 @@ Time          5.1,          5.1. Max ll:   -2821.0137,   -2821.0145
 attr(,"variance proportions")
 Residual                   
   0.2733   0.5628   0.1639 
-Time         21.4,         21.8. Max ll:   -2654.8796,   -2654.8795
+         (Intercept) Binary             
+Estimate     -2.9105 3.7849 2.046 0.5941
+SE            0.3026 0.3974 0.577 0.2646
+Time         25.2,         27.0. Max ll:   -2654.8796,   -2654.8795
 
 (Intercept)      Binary                         
    -3.13175     4.15935     0.88408     0.09016 
@@ -1264,7 +1504,10 @@ Time         21.4,         21.8. Max ll:   -2654.8796,   -2654.8795
 attr(,"variance proportions")
 Residual                   
   0.2199   0.5373   0.2428 
-Time          7.0,          8.7. Max ll:   -2801.1225,   -2801.1213
+         (Intercept) Binary              
+Estimate     -3.1318 4.1593 2.4208 1.0943
+SE            0.3691 0.4957 0.7487 0.4019
+Time          8.5,         10.8. Max ll:   -2801.1225,   -2801.1213
 
 (Intercept)      Binary                         
     -3.3559      4.5460      0.9768      0.2464 
@@ -1273,7 +1516,10 @@ Time          7.0,          8.7. Max ll:   -2801.1225,   -2801.1213
 attr(,"variance proportions")
 Residual                   
   0.1914   0.5445   0.2641 
-Time          7.4,         16.3. Max ll:   -2697.2636,   -2697.2459
+         (Intercept) Binary              
+Estimate     -3.3559 4.5460 2.6560 1.2795
+SE            0.4206 0.5762 0.8691 0.4566
+Time          9.2,         20.1. Max ll:   -2697.2636,   -2697.2459
 
 (Intercept)      Binary                         
     -3.5680      4.4687      1.1718      0.3754 
@@ -1282,7 +1528,10 @@ Time          7.4,         16.3. Max ll:   -2697.2636,   -2697.2459
 attr(,"variance proportions")
 Residual                   
   0.1774   0.5668   0.2558 
-Time          9.2,          6.0. Max ll:   -2762.9871,   -2762.9884
+         (Intercept) Binary             
+Estimate     -3.5680 4.4687 3.228 1.4555
+SE            0.5242 0.6596 1.171 0.5975
+Time         10.8,          7.1. Max ll:   -2762.9871,   -2762.9884
 
 (Intercept)      Binary                         
     -3.0594      3.9578      0.8123     -0.3610 
@@ -1291,7 +1540,10 @@ Time          9.2,          6.0. Max ll:   -2762.9871,   -2762.9884
 attr(,"variance proportions")
 Residual                   
   0.2557   0.5673   0.1770 
-Time         20.5,         24.5. Max ll:   -2623.0103,   -2623.0092
+         (Intercept) Binary              
+Estimate     -3.0594 3.9578 2.2530 0.6970
+SE            0.3297 0.4297 0.6534 0.2872
+Time         24.6,         29.4. Max ll:   -2623.0103,   -2623.0092
 
 (Intercept)      Binary                         
    -2.92019     3.99500     0.60893    -0.08805 
@@ -1300,7 +1552,10 @@ Time         20.5,         24.5. Max ll:   -2623.0103,   -2623.0092
 attr(,"variance proportions")
 Residual                   
   0.2665   0.4894   0.2441 
-Time         12.2,         12.9. Max ll:   -2741.6145,   -2741.6146
+         (Intercept) Binary              
+Estimate     -2.9202 3.9950 1.8385 0.9157
+SE            0.2889 0.3974 0.5206 0.3035
+Time         15.1,         15.1. Max ll:   -2741.6145,   -2741.6146
 
 (Intercept)      Binary                         
     -3.0171      4.1442      0.6049      0.2525 
@@ -1309,7 +1564,10 @@ Time         12.2,         12.9. Max ll:   -2741.6145,   -2741.6146
 attr(,"variance proportions")
 Residual                   
   0.2430   0.4444   0.3125 
-Time         16.9,         10.8. Max ll:   -2754.9104,   -2754.9104
+         (Intercept) Binary             
+Estimate     -3.0171 4.1442 1.8310 1.287
+SE            0.3426 0.4732 0.6072 0.412
+Time         20.8,         12.9. Max ll:   -2754.9104,   -2754.9104
 
 (Intercept)      Binary                         
     -3.1113      3.9482      0.8101     -0.1061 
@@ -1318,7 +1576,10 @@ Time         16.9,         10.8. Max ll:   -2754.9104,   -2754.9104
 attr(,"variance proportions")
 Residual                   
   0.2365   0.5433   0.2201 
-Time         10.2,         16.1. Max ll:   -2686.3897,   -2686.3850
+         (Intercept) Binary              
+Estimate     -3.1113 3.9482 2.2481 0.8994
+SE            0.3382 0.4335 0.6466 0.3404
+Time         12.2,         19.6. Max ll:   -2686.3897,   -2686.3850
 
 (Intercept)      Binary                         
     -2.8393      3.7168      0.5725     -0.1982 
@@ -1327,7 +1588,10 @@ Time         10.2,         16.1. Max ll:   -2686.3897,   -2686.3850
 attr(,"variance proportions")
 Residual                   
   0.2772   0.4940   0.2288 
-Time         22.6,         15.3. Max ll:   -2757.3076,   -2757.3082
+         (Intercept) Binary              
+Estimate     -2.8393 3.7168 1.7727 0.8202
+SE            0.2793 0.3696 0.4957 0.2898
+Time         27.3,         18.2. Max ll:   -2757.3076,   -2757.3082
 
 (Intercept)      Binary                         
    -3.10187     4.13678     0.78083     0.02054 
@@ -1336,7 +1600,10 @@ Time         22.6,         15.3. Max ll:   -2757.3076,   -2757.3082
 attr(,"variance proportions")
 Residual                   
   0.2402   0.5178   0.2421 
-Time         18.5,         15.5. Max ll:   -2712.5176,   -2712.5161
+         (Intercept) Binary              
+Estimate     -3.1019 4.1368 2.1833 1.0208
+SE            0.3529 0.4727 0.6629 0.3712
+Time         22.7,         18.3. Max ll:   -2712.5176,   -2712.5161
 
 (Intercept)      Binary                         
     -3.7393      5.0751      1.2741      0.4224 
@@ -1345,7 +1612,10 @@ Time         18.5,         15.5. Max ll:   -2712.5176,   -2712.5161
 attr(,"variance proportions")
 Residual                   
   0.1616   0.5875   0.2509 
-Time         23.2,         18.6. Max ll:   -2650.1481,   -2650.1477
+         (Intercept) Binary             
+Estimate     -3.7393 5.0751 3.576 1.5256
+SE            0.6073 0.8292 1.406 0.6833
+Time         29.5,         24.7. Max ll:   -2650.1481,   -2650.1477
 
 (Intercept)      Binary                         
    -3.19204     4.29838     0.94724     0.05537 
@@ -1354,7 +1624,10 @@ Time         23.2,         18.6. Max ll:   -2650.1481,   -2650.1477
 attr(,"variance proportions")
 Residual                   
   0.2191   0.5552   0.2257 
-Time         23.8,         12.4. Max ll:   -2768.4679,   -2768.4735
+         (Intercept) Binary              
+Estimate     -3.1920 4.2984 2.5786 1.0569
+SE            0.4106 0.5563 0.8541 0.4235
+Time         29.5,         15.2. Max ll:   -2768.4679,   -2768.4735
 
 (Intercept)      Binary                         
    -3.00454     4.01815     0.64918     0.05757 
@@ -1363,7 +1636,10 @@ Time         23.8,         12.4. Max ll:   -2768.4679,   -2768.4735
 attr(,"variance proportions")
 Residual                   
   0.2570   0.4783   0.2647 
-Time         19.9,         11.8. Max ll:   -2703.6490,   -2703.6541
+         (Intercept) Binary              
+Estimate     -3.0045 4.0182 1.9140 1.0593
+SE            0.3356 0.4541 0.6092 0.3627
+Time         23.7,         14.4. Max ll:   -2703.6490,   -2703.6541
 
 (Intercept)      Binary                         
      -4.965       6.620       1.813       1.373 
@@ -1372,7 +1648,10 @@ Time         19.9,         11.8. Max ll:   -2703.6490,   -2703.6541
 attr(,"variance proportions")
 Residual                   
  0.09186  0.55248  0.35566 
-Time          8.1,         13.4. Max ll:   -2704.0546,   -2704.0577
+         (Intercept) Binary            
+Estimate      -4.965  6.620 6.127 3.946
+SE             1.116  1.493 3.153 1.952
+Time         10.4,         19.4. Max ll:   -2704.0546,   -2704.0577
 
 (Intercept)      Binary                         
     -3.0483      4.0841      0.5768      0.2105 
@@ -1381,7 +1660,10 @@ Time          8.1,         13.4. Max ll:   -2704.0546,   -2704.0577
 attr(,"variance proportions")
 Residual                   
   0.2454   0.4455   0.3091 
-Time          9.9,         18.0. Max ll:   -2681.1892,   -2681.1869
+         (Intercept) Binary              
+Estimate     -3.0483 4.0841 1.7804 1.2343
+SE            0.3222 0.4366 0.5468 0.3875
+Time         13.4,         23.8. Max ll:   -2681.1892,   -2681.1869
 
 (Intercept)      Binary                         
    -2.99664     3.90846     0.60526     0.08917 
@@ -1390,7 +1672,10 @@ Time          9.9,         18.0. Max ll:   -2681.1892,   -2681.1869
 attr(,"variance proportions")
 Residual                   
   0.2543   0.4682   0.2775 
-Time         16.7,         15.4. Max ll:   -2697.4757,   -2697.4757
+         (Intercept) Binary              
+Estimate     -2.9966 3.9085 1.8317 1.0933
+SE            0.3278 0.4335 0.5791 0.3652
+Time         21.7,         18.4. Max ll:   -2697.4757,   -2697.4757
 
 (Intercept)      Binary                         
    -2.90238     4.00198     0.62882    -0.01734 
@@ -1399,7 +1684,10 @@ Time         16.7,         15.4. Max ll:   -2697.4757,   -2697.4757
 attr(,"variance proportions")
 Residual                   
   0.2565   0.4875   0.2560 
-Time         10.7,         22.5. Max ll:   -2788.8708,   -2788.8686
+         (Intercept) Binary              
+Estimate     -2.9024  4.002 1.8754 0.9828
+SE            0.2915  0.406 0.5393 0.3159
+Time         13.5,         31.4. Max ll:   -2788.8708,   -2788.8686
 
 (Intercept)      Binary                         
     -2.7053      3.6784      0.2292     -0.1311 
@@ -1408,7 +1696,10 @@ Time         10.7,         22.5. Max ll:   -2788.8708,   -2788.8686
 attr(,"variance proportions")
 Residual                   
   0.3187   0.4011   0.2802 
-Time         25.8,         18.2. Max ll:   -2663.0191,   -2663.0192
+         (Intercept) Binary              
+Estimate     -2.7053 3.6784 1.2576 0.8772
+SE            0.2391 0.3295 0.3689 0.2676
+Time         32.1,         23.2. Max ll:   -2663.0191,   -2663.0192
 
 (Intercept)      Binary                         
     -2.8351      3.6617      0.5623     -0.3803 
@@ -1417,7 +1708,10 @@ Time         25.8,         18.2. Max ll:   -2663.0191,   -2663.0192
 attr(,"variance proportions")
 Residual                   
    0.292    0.510    0.198 
-Time         22.1,         21.4. Max ll:   -2683.9444,   -2683.9442
+         (Intercept) Binary             
+Estimate     -2.8351 3.6617 1.755 0.6837
+SE            0.2757 0.3608 0.485 0.2636
+Time         27.7,         28.1. Max ll:   -2683.9444,   -2683.9442
 
 (Intercept)      Binary                         
     -2.7685      3.7055      0.4611     -0.2187 
@@ -1426,7 +1720,10 @@ Time         22.1,         21.4. Max ll:   -2683.9444,   -2683.9442
 attr(,"variance proportions")
 Residual                   
   0.2935   0.4691   0.2375 
-Time         21.2,         20.3. Max ll:   -2745.8377,   -2745.8383
+         (Intercept) Binary              
+Estimate     -2.7685 3.7055 1.5858 0.8036
+SE            0.2618 0.3548 0.4512 0.2692
+Time         28.3,         24.7. Max ll:   -2745.8377,   -2745.8383
 
 (Intercept)      Binary                         
     -3.1543      4.2108      0.7239      0.2752 
@@ -1435,7 +1732,10 @@ Time         21.2,         20.3. Max ll:   -2745.8377,   -2745.8383
 attr(,"variance proportions")
 Residual                   
   0.2246   0.4742   0.3013 
-Time          9.1,         18.6. Max ll:   -2711.1000,   -2711.0964
+         (Intercept) Binary             
+Estimate     -3.1543 4.2108 2.0625 1.317
+SE            0.3627 0.4876 0.6519 0.440
+Time         11.3,         22.1. Max ll:   -2711.1000,   -2711.0964
 
 
   ordinary text without R code
@@ -1895,7 +2195,7 @@ List of 1
 
 output file: pedmod.knit.md
 
-/usr/bin/pandoc +RTS -K512m -RTS pedmod.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output pedmod.html --lua-filter /home/boennecd/R/x86_64-pc-linux-gnu-library/4.1/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /home/boennecd/R/x86_64-pc-linux-gnu-library/4.1/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --standalone --section-divs --template /home/boennecd/R/x86_64-pc-linux-gnu-library/4.1/rmarkdown/rmd/h/default.html --no-highlight --variable highlightjs=1 --variable theme=bootstrap --mathjax --variable 'mathjax-url=https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --include-in-header /tmp/RtmpEoiYF7/rmarkdown-str135f4694b5d49.html --filter /usr/bin/pandoc-citeproc 
+/usr/bin/pandoc +RTS -K512m -RTS pedmod.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output pedmod.html --lua-filter /home/boennecd/R/x86_64-pc-linux-gnu-library/4.1/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /home/boennecd/R/x86_64-pc-linux-gnu-library/4.1/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --standalone --section-divs --template /home/boennecd/R/x86_64-pc-linux-gnu-library/4.1/rmarkdown/rmd/h/default.html --no-highlight --variable highlightjs=1 --variable theme=bootstrap --mathjax --variable 'mathjax-url=https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --include-in-header /tmp/Rtmpy6dQuo/rmarkdown-str374979f1571c.html --filter /usr/bin/pandoc-citeproc 
 [WARNING] This document format requires a nonempty <title> element.
   Please specify either 'title' or 'pagetitle' in the metadata,
   e.g. by using --metadata pagetitle="..." on the command line.
@@ -2140,7 +2440,10 @@ label: sim_study_simple
 attr(,"variance proportions")
 Residual          
   0.2262   0.7738 
-Time          7.1,          8.3. Max ll:   -1574.0667,   -1574.0658
+         (Intercept) Continuous Binary      
+Estimate     -3.2259     1.0385 2.1585 3.465
+SE            0.4296     0.1429 0.2982 1.193
+Time          7.1,          8.4. Max ll:   -1574.0667,   -1574.0658
 
 (Intercept)  Continuous      Binary             
      -3.291       1.107       2.137       1.305 
@@ -2149,7 +2452,10 @@ Time          7.1,          8.3. Max ll:   -1574.0667,   -1574.0658
 attr(,"variance proportions")
 Residual          
   0.2127   0.7873 
-Time          9.3,         12.5. Max ll:   -1569.6613,   -1569.6609
+         (Intercept) Continuous Binary      
+Estimate     -3.2908     1.1074 2.1374 3.690
+SE            0.4419     0.1521 0.2984 1.258
+Time          9.1,         13.1. Max ll:   -1569.6613,   -1569.6609
 
 (Intercept)  Continuous      Binary             
     -2.8068      0.9498      1.9047      1.0250 
@@ -2158,7 +2464,10 @@ Time          9.3,         12.5. Max ll:   -1569.6613,   -1569.6609
 attr(,"variance proportions")
 Residual          
   0.2623   0.7377 
-Time         10.9,         11.5. Max ll:   -1618.0764,   -1618.0755
+         (Intercept) Continuous Binary       
+Estimate     -2.8068     0.9498 1.9047 2.7870
+SE            0.3252     0.1179 0.2344 0.8713
+Time         11.8,         12.7. Max ll:   -1618.0764,   -1618.0755
 
 (Intercept)  Continuous      Binary             
     -2.7593      0.9823      1.8346      0.9390 
@@ -2167,7 +2476,10 @@ Time         10.9,         11.5. Max ll:   -1618.0764,   -1618.0755
 attr(,"variance proportions")
 Residual          
   0.2791   0.7209 
-Time          3.8,          9.5. Max ll:   -1616.7848,   -1616.7831
+         (Intercept) Continuous Binary       
+Estimate     -2.7593     0.9823 1.8346 2.5575
+SE            0.2881     0.1103 0.2031 0.7423
+Time          4.0,          9.9. Max ll:   -1616.7848,   -1616.7831
 
 (Intercept)  Continuous      Binary             
      -3.137       1.134       2.059       1.165 
@@ -2176,7 +2488,10 @@ Time          3.8,          9.5. Max ll:   -1616.7848,   -1616.7831
 attr(,"variance proportions")
 Residual          
   0.2381   0.7619 
-Time          4.8,          7.9. Max ll:   -1583.7124,   -1583.7126
+         (Intercept) Continuous Binary      
+Estimate     -3.1367     1.1344  2.059 3.206
+SE            0.3836     0.1432  0.263 1.033
+Time          5.3,          8.6. Max ll:   -1583.7124,   -1583.7126
 
 (Intercept)  Continuous      Binary             
      -3.298       1.041       2.182       1.360 
@@ -2185,7 +2500,10 @@ Time          4.8,          7.9. Max ll:   -1583.7124,   -1583.7126
 attr(,"variance proportions")
 Residual          
   0.2082   0.7918 
-Time         14.7,         10.5. Max ll:   -1615.3256,   -1615.3264
+         (Intercept) Continuous Binary      
+Estimate     -3.2985     1.0406 2.1824 3.895
+SE            0.4359     0.1438 0.3015 1.299
+Time         14.3,         10.3. Max ll:   -1615.3256,   -1615.3264
 
 (Intercept)  Continuous      Binary             
     -2.5151      0.7905      1.5948      0.4593 
@@ -2194,7 +2512,10 @@ Time         14.7,         10.5. Max ll:   -1615.3256,   -1615.3264
 attr(,"variance proportions")
 Residual          
   0.3871   0.6129 
-Time          8.8,         11.5. Max ll:   -1566.8999,   -1566.8999
+         (Intercept) Continuous Binary       
+Estimate     -2.5151    0.79046 1.5948 1.5830
+SE            0.2112    0.07521 0.1492 0.4242
+Time          8.9,         11.9. Max ll:   -1566.8999,   -1566.8999
 
 (Intercept)  Continuous      Binary             
      -3.323       1.096       2.071       1.469 
@@ -2203,7 +2524,10 @@ Time          8.8,         11.5. Max ll:   -1566.8999,   -1566.8999
 attr(,"variance proportions")
 Residual          
   0.1882   0.8118 
-Time          6.3,         10.7. Max ll:   -1590.2368,   -1590.2370
+         (Intercept) Continuous Binary      
+Estimate     -3.3225     1.0959  2.071 4.344
+SE            0.4932     0.1705  0.318 1.594
+Time          6.5,         11.3. Max ll:   -1590.2368,   -1590.2370
 
 (Intercept)  Continuous      Binary             
      -3.735       1.259       2.476       1.649 
@@ -2212,7 +2536,10 @@ Time          6.3,         10.7. Max ll:   -1590.2368,   -1590.2370
 attr(,"variance proportions")
 Residual          
   0.1633   0.8367 
-Time          6.6,         14.4. Max ll:   -1583.5849,   -1583.5846
+         (Intercept) Continuous Binary      
+Estimate     -3.7348     1.2586 2.4757 5.202
+SE            0.6267     0.2181 0.4269 2.088
+Time          6.9,         15.1. Max ll:   -1583.5849,   -1583.5846
 
 (Intercept)  Continuous      Binary             
     -2.8343      1.0366      1.8531      0.9601 
@@ -2221,7 +2548,10 @@ Time          6.6,         14.4. Max ll:   -1583.5849,   -1583.5846
 attr(,"variance proportions")
 Residual          
    0.278    0.722 
-Time          4.8,         11.6. Max ll:   -1573.0906,   -1573.0908
+         (Intercept) Continuous Binary       
+Estimate      -2.834     1.0366 1.8531 2.6120
+SE             0.304     0.1174 0.2102 0.7725
+Time          4.8,         11.7. Max ll:   -1573.0906,   -1573.0908
 
 (Intercept)  Continuous      Binary             
      -3.462       1.114       2.300       1.389 
@@ -2230,7 +2560,10 @@ Time          4.8,         11.6. Max ll:   -1573.0906,   -1573.0908
 attr(,"variance proportions")
 Residual          
   0.2004   0.7996 
-Time          7.1,          9.6. Max ll:   -1549.6444,   -1549.6443
+         (Intercept) Continuous Binary      
+Estimate     -3.4617     1.1138 2.3002 4.010
+SE            0.4582     0.1543 0.3131 1.331
+Time          7.8,         10.5. Max ll:   -1549.6444,   -1549.6443
 
 (Intercept)  Continuous      Binary             
      -3.275       1.095       2.262       1.258 
@@ -2239,7 +2572,10 @@ Time          7.1,          9.6. Max ll:   -1549.6444,   -1549.6443
 attr(,"variance proportions")
 Residual          
   0.2216   0.7784 
-Time          6.2,          7.0. Max ll:   -1580.3836,   -1580.3836
+         (Intercept) Continuous Binary      
+Estimate     -3.2749     1.0953 2.2617 3.519
+SE            0.4312     0.1502 0.3102 1.198
+Time          7.0,          7.7. Max ll:   -1580.3836,   -1580.3836
 
 (Intercept)  Continuous      Binary             
     -2.7584      0.9734      1.8345      0.8728 
@@ -2248,7 +2584,10 @@ Time          6.2,          7.0. Max ll:   -1580.3836,   -1580.3836
 attr(,"variance proportions")
 Residual          
   0.2953   0.7047 
-Time          5.3,          9.2. Max ll:   -1598.1032,   -1598.1023
+         (Intercept) Continuous Binary       
+Estimate     -2.7584     0.9734 1.8345 2.3937
+SE            0.2923     0.1101 0.2074 0.7176
+Time          5.8,         10.0. Max ll:   -1598.1032,   -1598.1023
 
 (Intercept)  Continuous      Binary             
      -3.019       1.002       2.126       1.173 
@@ -2257,7 +2596,10 @@ Time          5.3,          9.2. Max ll:   -1598.1032,   -1598.1023
 attr(,"variance proportions")
 Residual          
   0.2342   0.7658 
-Time          6.1,         14.1. Max ll:   -1647.5906,   -1647.5890
+         (Intercept) Continuous Binary      
+Estimate     -3.0191     1.0020 2.1265 3.231
+SE            0.3598     0.1262 0.2641 1.001
+Time          6.4,         14.8. Max ll:   -1647.5906,   -1647.5890
 
 (Intercept)  Continuous      Binary             
      -3.716       1.274       2.407       1.578 
@@ -2266,7 +2608,10 @@ Time          6.1,         14.1. Max ll:   -1647.5906,   -1647.5890
 attr(,"variance proportions")
 Residual          
   0.1705   0.8295 
-Time          3.8,         11.9. Max ll:   -1526.4827,   -1526.4814
+         (Intercept) Continuous Binary      
+Estimate     -3.7161     1.2741 2.4066 4.846
+SE            0.5744     0.2014 0.3818 1.818
+Time          4.0,         12.5. Max ll:   -1526.4827,   -1526.4814
 
 (Intercept)  Continuous      Binary             
      -2.934       1.055       1.911       1.126 
@@ -2275,7 +2620,10 @@ Time          3.8,         11.9. Max ll:   -1526.4827,   -1526.4814
 attr(,"variance proportions")
 Residual          
   0.2461   0.7539 
-Time         14.4,         10.2. Max ll:   -1613.5392,   -1613.5391
+         (Intercept) Continuous Binary       
+Estimate     -2.9341     1.0546  1.911 3.0828
+SE            0.3312     0.1252  0.229 0.9188
+Time         14.6,         10.4. Max ll:   -1613.5392,   -1613.5391
 
 (Intercept)  Continuous      Binary             
     -2.8034      0.9291      1.9383      1.0235 
@@ -2284,7 +2632,10 @@ Time         14.4,         10.2. Max ll:   -1613.5392,   -1613.5391
 attr(,"variance proportions")
 Residual          
   0.2637   0.7363 
-Time          8.8,          5.1. Max ll:   -1653.6128,   -1653.6129
+         (Intercept) Continuous Binary       
+Estimate     -2.8034     0.9291  1.938 2.7829
+SE            0.3012     0.1069  0.222 0.7982
+Time          9.4,          5.6. Max ll:   -1653.6128,   -1653.6129
 
 (Intercept)  Continuous      Binary             
     -2.8805      0.9265      1.8133      1.1205 
@@ -2293,7 +2644,10 @@ Time          8.8,          5.1. Max ll:   -1653.6128,   -1653.6129
 attr(,"variance proportions")
 Residual          
   0.2428   0.7572 
-Time          8.9,         11.6. Max ll:   -1625.5476,   -1625.5452
+         (Intercept) Continuous Binary      
+Estimate     -2.8805     0.9265 1.8133 3.066
+SE            0.3525     0.1199 0.2388 1.004
+Time          8.4,         11.5. Max ll:   -1625.5476,   -1625.5452
 
 (Intercept)  Continuous      Binary             
      -2.862       1.002       1.855       1.013 
@@ -2302,7 +2656,10 @@ Time          8.9,         11.6. Max ll:   -1625.5476,   -1625.5452
 attr(,"variance proportions")
 Residual          
   0.2669   0.7331 
-Time          5.3,          5.1. Max ll:   -1608.3804,   -1608.3804
+         (Intercept) Continuous Binary       
+Estimate     -2.8622     1.0020 1.8546 2.7531
+SE            0.3185     0.1169 0.2194 0.8264
+Time          5.5,          5.6. Max ll:   -1608.3804,   -1608.3804
 
 (Intercept)  Continuous      Binary             
     -2.9567      0.9662      2.0162      1.0261 
@@ -2311,7 +2668,10 @@ Time          5.3,          5.1. Max ll:   -1608.3804,   -1608.3804
 attr(,"variance proportions")
 Residual          
   0.2648   0.7352 
-Time          6.5,         10.5. Max ll:   -1589.7108,   -1589.7108
+         (Intercept) Continuous Binary       
+Estimate     -2.9567     0.9662 2.0162 2.7900
+SE            0.3316     0.1152 0.2376 0.8536
+Time          6.6,         11.3. Max ll:   -1589.7108,   -1589.7108
 
 (Intercept)  Continuous      Binary             
      -3.383       1.144       2.231       1.388 
@@ -2320,7 +2680,10 @@ Time          6.5,         10.5. Max ll:   -1589.7108,   -1589.7108
 attr(,"variance proportions")
 Residual          
   0.2003   0.7997 
-Time          5.1,          6.8. Max ll:   -1580.1220,   -1580.1218
+         (Intercept) Continuous Binary      
+Estimate      -3.383     1.1440 2.2313 4.008
+SE             0.487     0.1712 0.3303 1.444
+Time          5.4,          7.5. Max ll:   -1580.1220,   -1580.1218
 
 (Intercept)  Continuous      Binary             
     -2.7232      0.9308      1.7718      0.8454 
@@ -2329,7 +2692,10 @@ Time          5.1,          6.8. Max ll:   -1580.1220,   -1580.1218
 attr(,"variance proportions")
 Residual          
   0.2963   0.7037 
-Time          4.0,          8.3. Max ll:   -1595.5390,   -1595.5364
+         (Intercept) Continuous Binary       
+Estimate     -2.7232    0.93082 1.7718 2.3290
+SE            0.2679    0.09729 0.1896 0.6384
+Time          4.2,          9.3. Max ll:   -1595.5390,   -1595.5364
 
 (Intercept)  Continuous      Binary             
      -3.530       1.139       2.372       1.439 
@@ -2338,7 +2704,10 @@ Time          4.0,          8.3. Max ll:   -1595.5390,   -1595.5364
 attr(,"variance proportions")
 Residual          
   0.1933   0.8067 
-Time          5.0,          6.0. Max ll:   -1574.6020,   -1574.6036
+         (Intercept) Continuous Binary      
+Estimate     -3.5301     1.1390 2.3724 4.217
+SE            0.4915     0.1657 0.3395 1.467
+Time          5.5,          6.2. Max ll:   -1574.6020,   -1574.6036
 
 (Intercept)  Continuous      Binary             
     -2.6764      0.9196      1.7183      0.7708 
@@ -2347,7 +2716,10 @@ Time          5.0,          6.0. Max ll:   -1574.6020,   -1574.6036
 attr(,"variance proportions")
 Residual          
   0.3143   0.6857 
-Time          5.1,         10.0. Max ll:   -1581.5043,   -1581.5037
+         (Intercept) Continuous Binary       
+Estimate     -2.6764    0.91956 1.7183 2.1616
+SE            0.2624    0.09733 0.1823 0.6124
+Time          5.2,         10.4. Max ll:   -1581.5043,   -1581.5037
 
 (Intercept)  Continuous      Binary             
      -3.308       1.004       2.247       1.353 
@@ -2356,7 +2728,10 @@ Time          5.1,         10.0. Max ll:   -1581.5043,   -1581.5037
 attr(,"variance proportions")
 Residual          
   0.2056   0.7944 
-Time          5.4,         10.6. Max ll:   -1591.3680,   -1591.3679
+         (Intercept) Continuous Binary      
+Estimate     -3.3084     1.0040 2.2472 3.869
+SE            0.4503     0.1432 0.3148 1.327
+Time          5.2,         10.6. Max ll:   -1591.3680,   -1591.3679
 
 (Intercept)  Continuous      Binary             
      -3.984       1.288       2.559       1.984 
@@ -2365,7 +2740,10 @@ Time          5.4,         10.6. Max ll:   -1591.3680,   -1591.3679
 attr(,"variance proportions")
 Residual          
    0.121    0.879 
-Time         23.9,          8.2. Max ll:   -1641.9077,   -1641.9075
+         (Intercept) Continuous Binary      
+Estimate     -3.9837     1.2875 2.5588 7.269
+SE            0.7177     0.2395 0.4704 3.001
+Time         28.5,          9.4. Max ll:   -1641.9077,   -1641.9075
 
 (Intercept)  Continuous      Binary             
     -2.8043      0.9353      1.8464      0.9950 
@@ -2374,7 +2752,10 @@ Time         23.9,          8.2. Max ll:   -1641.9077,   -1641.9075
 attr(,"variance proportions")
 Residual          
    0.268    0.732 
-Time          5.4,         12.1. Max ll:   -1610.3250,   -1610.3232
+         (Intercept) Continuous Binary      
+Estimate     -2.8043     0.9353 1.8464 2.705
+SE            0.2993     0.1058 0.2106 0.786
+Time          6.4,         13.8. Max ll:   -1610.3250,   -1610.3232
 
 (Intercept)  Continuous      Binary             
     -2.7686      0.9774      1.9829      1.0085 
@@ -2383,7 +2764,10 @@ Time          5.4,         12.1. Max ll:   -1610.3250,   -1610.3232
 attr(,"variance proportions")
 Residual          
   0.2686   0.7314 
-Time          5.0,          6.3. Max ll:   -1699.3578,   -1699.3561
+         (Intercept) Continuous Binary       
+Estimate     -2.7686     0.9774 1.9829 2.7415
+SE            0.2976     0.1118 0.2213 0.7938
+Time          6.3,          8.0. Max ll:   -1699.3578,   -1699.3561
 
 (Intercept)  Continuous      Binary             
     -2.7637      0.9000      1.9396      0.8837 
@@ -2392,7 +2776,10 @@ Time          5.0,          6.3. Max ll:   -1699.3578,   -1699.3561
 attr(,"variance proportions")
 Residual          
   0.2906   0.7094 
-Time          5.1,          8.5. Max ll:   -1615.5320,   -1615.5305
+         (Intercept) Continuous Binary       
+Estimate     -2.7637    0.90003 1.9396 2.4197
+SE            0.2731    0.09476 0.2017 0.6678
+Time          6.4,         11.0. Max ll:   -1615.5320,   -1615.5305
 
 (Intercept)  Continuous      Binary             
      -3.190       1.169       2.173       1.370 
@@ -2401,7 +2788,10 @@ Time          5.1,          8.5. Max ll:   -1615.5320,   -1615.5305
 attr(,"variance proportions")
 Residual          
   0.2039   0.7961 
-Time          5.6,         13.0. Max ll:   -1608.8413,   -1608.8405
+         (Intercept) Continuous Binary      
+Estimate     -3.1904     1.1688 2.1725 3.935
+SE            0.4169     0.1574 0.2967 1.290
+Time          7.0,         15.9. Max ll:   -1608.8413,   -1608.8405
 
 (Intercept)  Continuous      Binary             
     -2.6756      0.8857      1.8309      0.6906 
@@ -2410,7 +2800,10 @@ Time          5.6,         13.0. Max ll:   -1608.8413,   -1608.8405
 attr(,"variance proportions")
 Residual          
   0.3331   0.6669 
-Time          5.2,          5.1. Max ll:   -1577.1618,   -1577.1616
+         (Intercept) Continuous Binary       
+Estimate     -2.6756    0.88574 1.8309 1.9948
+SE            0.2426    0.08818 0.1805 0.5267
+Time          6.2,          6.4. Max ll:   -1577.1618,   -1577.1616
 
 (Intercept)  Continuous      Binary             
     -2.9307      0.9919      1.9318      1.1919 
@@ -2419,7 +2812,10 @@ Time          5.2,          5.1. Max ll:   -1577.1618,   -1577.1616
 attr(,"variance proportions")
 Residual          
   0.2318   0.7682 
-Time          4.7,          5.6. Max ll:   -1650.7065,   -1650.7056
+         (Intercept) Continuous Binary      
+Estimate     -2.9307     0.9919 1.9318 3.293
+SE            0.3661     0.1304 0.2534 1.064
+Time          5.9,          6.9. Max ll:   -1650.7065,   -1650.7056
 
 (Intercept)  Continuous      Binary             
     -2.5901      0.8567      1.6904      0.7512 
@@ -2428,7 +2824,10 @@ Time          4.7,          5.6. Max ll:   -1650.7065,   -1650.7056
 attr(,"variance proportions")
 Residual          
   0.3213   0.6787 
-Time          9.6,          5.3. Max ll:   -1611.1538,   -1611.1544
+         (Intercept) Continuous Binary       
+Estimate     -2.5901    0.85672 1.6904 2.1194
+SE            0.2469    0.08792 0.1767 0.5789
+Time         12.0,          6.6. Max ll:   -1611.1538,   -1611.1544
 
 (Intercept)  Continuous      Binary             
      -3.882       1.309       2.673       1.666 
@@ -2437,7 +2836,10 @@ Time          9.6,          5.3. Max ll:   -1611.1538,   -1611.1544
 attr(,"variance proportions")
 Residual          
   0.1606   0.8394 
-Time         10.8,          9.0. Max ll:   -1543.1585,   -1543.1572
+         (Intercept) Continuous Binary      
+Estimate     -3.8815     1.3092 2.6728 5.291
+SE            0.6746     0.2347 0.4715 2.208
+Time         13.2,         11.5. Max ll:   -1543.1585,   -1543.1572
 
 (Intercept)  Continuous      Binary             
      -3.302       1.002       2.224       1.390 
@@ -2446,7 +2848,10 @@ Time         10.8,          9.0. Max ll:   -1543.1585,   -1543.1572
 attr(,"variance proportions")
 Residual          
   0.2018   0.7982 
-Time         10.3,          9.7. Max ll:   -1643.4977,   -1643.4958
+         (Intercept) Continuous Binary      
+Estimate     -3.3023     1.0024 2.2238 4.015
+SE            0.4586     0.1452 0.3179 1.392
+Time         13.5,         12.0. Max ll:   -1643.4977,   -1643.4958
 
 (Intercept)  Continuous      Binary             
     -2.8096      0.8574      1.9157      0.7994 
@@ -2455,7 +2860,10 @@ Time         10.3,          9.7. Max ll:   -1643.4977,   -1643.4958
 attr(,"variance proportions")
 Residual          
   0.3093   0.6907 
-Time         10.4,          9.0. Max ll:   -1574.7349,   -1574.7348
+         (Intercept) Continuous Binary      
+Estimate     -2.8096    0.85744 1.9157 2.224
+SE            0.2735    0.09135 0.1981 0.622
+Time         14.1,         11.0. Max ll:   -1574.7349,   -1574.7348
 
 (Intercept)  Continuous      Binary             
     -2.6379      0.8634      1.7388      0.6046 
@@ -2464,7 +2872,10 @@ Time         10.4,          9.0. Max ll:   -1574.7349,   -1574.7348
 attr(,"variance proportions")
 Residual          
    0.353    0.647 
-Time         10.7,         11.0. Max ll:   -1544.2522,   -1544.2522
+         (Intercept) Continuous Binary       
+Estimate     -2.6379    0.86345 1.7388 1.8305
+SE            0.2308    0.08611 0.1663 0.4818
+Time         13.7,         13.8. Max ll:   -1544.2522,   -1544.2522
 
 (Intercept)  Continuous      Binary             
      -3.732       1.313       2.482       1.562 
@@ -2473,7 +2884,10 @@ Time         10.7,         11.0. Max ll:   -1544.2522,   -1544.2522
 attr(,"variance proportions")
 Residual          
   0.1701   0.8299 
-Time          5.8,         12.7. Max ll:   -1517.1693,   -1517.1691
+         (Intercept) Continuous Binary      
+Estimate     -3.7322     1.3128 2.4816 4.767
+SE            0.5855     0.2134 0.4005 1.812
+Time          7.5,         15.9. Max ll:   -1517.1693,   -1517.1691
 
 (Intercept)  Continuous      Binary             
     -2.7397      0.9550      1.8515      0.8856 
@@ -2482,7 +2896,10 @@ Time          5.8,         12.7. Max ll:   -1517.1693,   -1517.1691
 attr(,"variance proportions")
 Residual          
    0.289    0.711 
-Time          8.9,          9.2. Max ll:   -1606.8305,   -1606.8306
+         (Intercept) Continuous Binary       
+Estimate     -2.7397     0.9550 1.8515 2.4244
+SE            0.2801     0.1041 0.2053 0.6885
+Time         11.4,         11.7. Max ll:   -1606.8305,   -1606.8306
 
 (Intercept)  Continuous      Binary             
      -3.119       1.042       2.045       1.021 
@@ -2491,7 +2908,10 @@ Time          8.9,          9.2. Max ll:   -1606.8305,   -1606.8306
 attr(,"variance proportions")
 Residual          
   0.2662   0.7338 
-Time          4.7,          8.7. Max ll:   -1530.2611,   -1530.2607
+         (Intercept) Continuous Binary       
+Estimate     -3.1189     1.0420 2.0451 2.7765
+SE            0.3547     0.1242 0.2451 0.8497
+Time          6.2,         10.4. Max ll:   -1530.2611,   -1530.2607
 
 (Intercept)  Continuous      Binary             
     -2.7945      0.9446      1.8856      1.0420 
@@ -2500,7 +2920,10 @@ Time          4.7,          8.7. Max ll:   -1530.2611,   -1530.2607
 attr(,"variance proportions")
 Residual          
   0.2606   0.7394 
-Time          8.9,          8.4. Max ll:   -1643.2979,   -1643.2979
+         (Intercept) Continuous Binary      
+Estimate      -2.794     0.9446 1.8856 2.835
+SE             0.299     0.1074 0.2139 0.823
+Time         11.7,         11.0. Max ll:   -1643.2979,   -1643.2979
 
 (Intercept)  Continuous      Binary             
      -3.086       1.082       2.090       1.240 
@@ -2509,7 +2932,10 @@ Time          8.9,          8.4. Max ll:   -1643.2979,   -1643.2979
 attr(,"variance proportions")
 Residual          
   0.2242   0.7758 
-Time          4.5,          9.4. Max ll:   -1637.9652,   -1637.9651
+         (Intercept) Continuous Binary      
+Estimate     -3.0857     1.0817 2.0899 3.455
+SE            0.3672     0.1356 0.2616 1.049
+Time          5.5,         11.8. Max ll:   -1637.9652,   -1637.9651
 
 (Intercept)  Continuous      Binary             
      -2.962       1.050       1.794       1.221 
@@ -2518,7 +2944,10 @@ Time          4.5,          9.4. Max ll:   -1637.9652,   -1637.9651
 attr(,"variance proportions")
 Residual          
   0.2283   0.7717 
-Time          9.8,         10.5. Max ll:   -1626.8064,   -1626.8063
+         (Intercept) Continuous Binary      
+Estimate     -2.9625     1.0502 1.7941 3.390
+SE            0.3821     0.1413 0.2458 1.121
+Time         13.9,         13.5. Max ll:   -1626.8064,   -1626.8063
 
 (Intercept)  Continuous      Binary             
      -2.932       1.007       2.074       1.009 
@@ -2527,7 +2956,10 @@ Time          9.8,         10.5. Max ll:   -1626.8064,   -1626.8063
 attr(,"variance proportions")
 Residual          
   0.2673   0.7327 
-Time          9.6,         10.4. Max ll:   -1624.0941,   -1624.0939
+         (Intercept) Continuous Binary       
+Estimate     -2.9317     1.0071 2.0743 2.7431
+SE            0.3144     0.1142 0.2339 0.7908
+Time         13.0,         13.1. Max ll:   -1624.0941,   -1624.0939
 
 (Intercept)  Continuous      Binary             
     -2.8140      0.9323      1.9071      0.7796 
@@ -2536,7 +2968,10 @@ Time          9.6,         10.4. Max ll:   -1624.0941,   -1624.0939
 attr(,"variance proportions")
 Residual          
   0.3138   0.6862 
-Time          6.3,          5.8. Max ll:   -1582.0835,   -1582.0837
+         (Intercept) Continuous Binary       
+Estimate     -2.8140    0.93230 1.9071 2.1805
+SE            0.2673    0.09447 0.1922 0.5893
+Time          8.2,          7.6. Max ll:   -1582.0835,   -1582.0837
 
 (Intercept)  Continuous      Binary             
      -3.614       1.133       2.193       1.512 
@@ -2545,7 +2980,10 @@ Time          6.3,          5.8. Max ll:   -1582.0835,   -1582.0837
 attr(,"variance proportions")
 Residual          
   0.1799   0.8201 
-Time          6.2,          6.7. Max ll:   -1512.1259,   -1512.1256
+         (Intercept) Continuous Binary      
+Estimate     -3.6136     1.1326 2.1933 4.534
+SE            0.5524     0.1778 0.3451 1.696
+Time          8.2,          8.4. Max ll:   -1512.1259,   -1512.1256
 
 (Intercept)  Continuous      Binary             
     -2.8741      0.9475      1.9688      0.9152 
@@ -2554,7 +2992,10 @@ Time          6.2,          6.7. Max ll:   -1512.1259,   -1512.1256
 attr(,"variance proportions")
 Residual          
    0.286    0.714 
-Time          8.1,         13.2. Max ll:   -1577.6617,   -1577.6617
+         (Intercept) Continuous Binary       
+Estimate     -2.8741     0.9475 1.9688 2.4974
+SE            0.3004     0.1054 0.2152 0.7279
+Time         10.2,         16.4. Max ll:   -1577.6617,   -1577.6617
 
 (Intercept)  Continuous      Binary             
      -2.899       1.033       1.859       1.081 
@@ -2563,7 +3004,10 @@ Time          8.1,         13.2. Max ll:   -1577.6617,   -1577.6617
 attr(,"variance proportions")
 Residual          
   0.2558   0.7442 
-Time          6.1,          6.9. Max ll:   -1630.5539,   -1630.5533
+         (Intercept) Continuous Binary       
+Estimate     -2.8988     1.0330  1.859 2.9463
+SE            0.3326     0.1241  0.228 0.9009
+Time          7.6,          8.9. Max ll:   -1630.5539,   -1630.5533
 
 (Intercept)  Continuous      Binary             
      -3.205       1.057       2.110       1.293 
@@ -2572,7 +3016,10 @@ Time          6.1,          6.9. Max ll:   -1630.5539,   -1630.5533
 attr(,"variance proportions")
 Residual          
   0.2159   0.7841 
-Time          7.0,          6.3. Max ll:   -1585.6072,   -1585.6071
+         (Intercept) Continuous Binary      
+Estimate     -3.2046     1.0571 2.1096 3.644
+SE            0.4221     0.1442 0.2912 1.225
+Time          8.7,          7.8. Max ll:   -1585.6072,   -1585.6071
 
 (Intercept)  Continuous      Binary             
     -2.9610      0.9663      2.0263      1.1579 
@@ -2581,7 +3028,10 @@ Time          7.0,          6.3. Max ll:   -1585.6072,   -1585.6071
 attr(,"variance proportions")
 Residual          
   0.2374   0.7626 
-Time          9.2,          8.6. Max ll:   -1643.4114,   -1643.4113
+         (Intercept) Continuous Binary       
+Estimate     -2.9610     0.9663  2.026 3.1834
+SE            0.3529     0.1210  0.253 0.9971
+Time         11.4,         10.9. Max ll:   -1643.4114,   -1643.4113
 
 
   ordinary text without R code
@@ -2715,7 +3165,10 @@ label: sim_study_simple_w
 attr(,"variance proportions")
 Residual                   
   0.3027   0.4771   0.2202 
-Time         13.9,         11.9. Max ll:   -2873.6880,   -2873.6880
+         (Intercept) Binary              
+Estimate     -2.6481 3.6237 1.5714 0.7289
+SE            0.2384 0.3302 0.4157 0.2490
+Time         13.0,         11.6. Max ll:   -2873.6880,   -2873.6880
 
 (Intercept)      Binary                         
     -3.1239      4.3575      0.9219     -0.0400 
@@ -2724,7 +3177,10 @@ Time         13.9,         11.9. Max ll:   -2873.6880,   -2873.6880
 attr(,"variance proportions")
 Residual                   
   0.2211   0.5629   0.2159 
-Time          6.2,          5.9. Max ll:   -2779.6528,   -2779.6490
+         (Intercept) Binary              
+Estimate     -3.1239 4.3575 2.5142 0.9608
+SE            0.3651 0.5156 0.7617 0.3692
+Time          5.6,          5.5. Max ll:   -2779.6528,   -2779.6490
 
 (Intercept)      Binary                         
     -2.8415      3.7622      0.2716      0.2028 
@@ -2733,7 +3189,10 @@ Time          6.2,          5.9. Max ll:   -2779.6528,   -2779.6490
 attr(,"variance proportions")
 Residual                   
   0.2824   0.3714   0.3462 
-Time         10.8,         10.9. Max ll:   -2711.1825,   -2711.1824
+         (Intercept) Binary             
+Estimate     -2.8415 3.7622 1.3121 1.225
+SE            0.2717 0.3636 0.4151 0.343
+Time         10.5,         11.5. Max ll:   -2711.1825,   -2711.1824
 
 (Intercept)      Binary                         
     -2.6060      3.5515      0.2742     -0.2248 
@@ -2742,7 +3201,10 @@ Time         10.8,         10.9. Max ll:   -2711.1825,   -2711.1824
 attr(,"variance proportions")
 Residual                   
   0.3202   0.4225   0.2573 
-Time          8.2,         17.5. Max ll:   -2808.3757,   -2808.3754
+         (Intercept) Binary              
+Estimate     -2.6060 3.5515 1.3155 0.7986
+SE            0.2183 0.3015 0.3518 0.2427
+Time          8.7,         16.7. Max ll:   -2808.3757,   -2808.3754
 
 (Intercept)      Binary                         
    -2.88444     4.02697     0.63506    -0.01787 
@@ -2751,7 +3213,10 @@ Time          8.2,         17.5. Max ll:   -2808.3757,   -2808.3754
 attr(,"variance proportions")
 Residual                   
   0.2582   0.4889   0.2529 
-Time         22.5,         21.7. Max ll:   -2806.5809,   -2806.5807
+         (Intercept) Binary              
+Estimate     -2.8844 4.0270 1.8871 0.9823
+SE            0.2975 0.4197 0.5446 0.3292
+Time         22.9,         22.5. Max ll:   -2806.5809,   -2806.5807
 
 (Intercept)      Binary                         
     -3.3957      4.5568      0.9988      0.2835 
@@ -2760,7 +3225,10 @@ Time         22.5,         21.7. Max ll:   -2806.5809,   -2806.5807
 attr(,"variance proportions")
 Residual                   
   0.1940   0.5407   0.2654 
-Time         40.5,          6.3. Max ll:   -2709.5480,   -2709.5473
+         (Intercept) Binary              
+Estimate     -3.3957 4.5568 2.7150 1.3277
+SE            0.4241 0.5735 0.8711 0.4776
+Time         46.6,          6.6. Max ll:   -2709.5480,   -2709.5473
 
 (Intercept)      Binary                         
    -2.92890     3.87255     0.63523     0.05416 
@@ -2769,7 +3237,10 @@ Time         40.5,          6.3. Max ll:   -2709.5480,   -2709.5473
 attr(,"variance proportions")
 Residual                   
   0.2526   0.4797   0.2677 
-Time         28.0,         23.1. Max ll:   -2823.8290,   -2823.8293
+         (Intercept) Binary              
+Estimate     -2.9289 3.8725 1.8875 1.0556
+SE            0.3013 0.4047 0.5544 0.3383
+Time         31.9,         26.5. Max ll:   -2823.8290,   -2823.8293
 
 (Intercept)      Binary                         
     -2.5719      3.3543      0.2517     -0.4231 
@@ -2778,7 +3249,10 @@ Time         28.0,         23.1. Max ll:   -2823.8290,   -2823.8293
 attr(,"variance proportions")
 Residual                   
   0.3387   0.4385   0.2228 
-Time         18.1,         18.4. Max ll:   -2753.4429,   -2753.4427
+         (Intercept) Binary              
+Estimate     -2.5719  3.354 1.2862 0.6550
+SE            0.2269  0.302 0.3609 0.2331
+Time         23.3,         23.1. Max ll:   -2753.4429,   -2753.4427
 
 (Intercept)      Binary                         
     -2.5207      3.4087      0.2612     -0.5451 
@@ -2787,7 +3261,10 @@ Time         18.1,         18.4. Max ll:   -2753.4429,   -2753.4427
 attr(,"variance proportions")
 Residual                   
   0.3503   0.4513   0.1984 
-Time         14.8,          5.3. Max ll:   -2800.0163,   -2800.0188
+         (Intercept) Binary              
+Estimate     -2.5207 3.4087 1.2985 0.5798
+SE            0.1991 0.2728 0.3276 0.2000
+Time         18.2,          6.4. Max ll:   -2800.0163,   -2800.0188
 
 (Intercept)      Binary                         
    -2.75972     3.65591     0.25050    -0.09371 
@@ -2796,7 +3273,10 @@ Time         14.8,          5.3. Max ll:   -2800.0163,   -2800.0188
 attr(,"variance proportions")
 Residual                   
   0.3118   0.4027   0.2855 
-Time         20.8,         26.2. Max ll:   -2641.9371,   -2641.9372
+         (Intercept) Binary              
+Estimate      -2.760 3.6559 1.2847 0.9105
+SE             0.247 0.3321 0.3765 0.2799
+Time         24.9,         30.2. Max ll:   -2641.9371,   -2641.9372
 
 (Intercept)      Binary                         
     -3.0379      4.1667      0.5716      0.3603 
@@ -2805,7 +3285,10 @@ Time         20.8,         26.2. Max ll:   -2641.9371,   -2641.9372
 attr(,"variance proportions")
 Residual                   
   0.2395   0.4203   0.3402 
-Time         10.5,          7.6. Max ll:   -2767.1644,   -2767.1643
+         (Intercept) Binary              
+Estimate     -3.0379 4.1667 1.7711 1.4337
+SE            0.3245 0.4495 0.5597 0.4183
+Time         13.5,          9.4. Max ll:   -2767.1644,   -2767.1643
 
 (Intercept)      Binary                         
    -2.72371     3.51815     0.24602    -0.08211 
@@ -2814,7 +3297,10 @@ Time         10.5,          7.6. Max ll:   -2767.1644,   -2767.1643
 attr(,"variance proportions")
 Residual                   
   0.3140   0.3998   0.2862 
-Time         15.2,         12.6. Max ll:   -2719.1933,   -2719.1929
+         (Intercept) Binary             
+Estimate     -2.7237 3.5181 1.279 0.9212
+SE            0.2521 0.3301 0.386 0.2838
+Time         18.2,         15.5. Max ll:   -2719.1933,   -2719.1929
 
 (Intercept)      Binary                         
    -2.98297     3.88486     0.65546    -0.01686 
@@ -2823,7 +3309,10 @@ Time         15.2,         12.6. Max ll:   -2719.1933,   -2719.1929
 attr(,"variance proportions")
 Residual                   
   0.2540   0.4944   0.2515 
-Time         18.5,         19.9. Max ll:   -2716.4606,   -2716.4600
+         (Intercept) Binary             
+Estimate     -2.9830 3.8849 1.926 0.9833
+SE            0.3259 0.4302 0.584 0.3541
+Time         22.9,         23.4. Max ll:   -2716.4606,   -2716.4600
 
 (Intercept)      Binary                         
     -2.7699      3.8082      0.6410     -0.3775 
@@ -2832,7 +3321,10 @@ Time         18.5,         19.9. Max ll:   -2716.4606,   -2716.4600
 attr(,"variance proportions")
 Residual                   
   0.2798   0.5283   0.1919 
-Time         26.5,         21.9. Max ll:   -2842.7168,   -2842.7170
+         (Intercept) Binary              
+Estimate     -2.7699 3.8082 1.8984 0.6856
+SE            0.2586 0.3588 0.4912 0.2560
+Time         32.7,         26.0. Max ll:   -2842.7168,   -2842.7170
 
 (Intercept)      Binary                         
     -2.6527      3.5657      0.2886     -0.2409 
@@ -2841,7 +3333,10 @@ Time         26.5,         21.9. Max ll:   -2842.7168,   -2842.7170
 attr(,"variance proportions")
 Residual                   
   0.3187   0.4283   0.2530 
-Time         17.8,         14.9. Max ll:   -2737.0265,   -2737.0259
+         (Intercept) Binary              
+Estimate     -2.6527 3.5657 1.3346 0.7859
+SE            0.2337 0.3192 0.3792 0.2478
+Time         22.2,         21.0. Max ll:   -2737.0265,   -2737.0259
 
 (Intercept)      Binary                         
     -2.9122      3.8533      0.6993     -0.1953 
@@ -2850,7 +3345,10 @@ Time         17.8,         14.9. Max ll:   -2737.0265,   -2737.0259
 attr(,"variance proportions")
 Residual                   
   0.2597   0.5257   0.2146 
-Time         20.2,         17.9. Max ll:   -2789.6682,   -2789.6677
+         (Intercept) Binary              
+Estimate     -2.9122 3.8533 2.0124 0.8226
+SE            0.2938 0.3933 0.5608 0.2955
+Time         24.6,         24.7. Max ll:   -2789.6682,   -2789.6677
 
 (Intercept)      Binary                         
     -2.4991      3.3502      0.1687     -0.4777 
@@ -2859,7 +3357,10 @@ Time         20.2,         17.9. Max ll:   -2789.6682,   -2789.6677
 attr(,"variance proportions")
 Residual                   
   0.3564   0.4234   0.2202 
-Time         25.6,         14.7. Max ll:   -2803.0912,   -2803.0911
+         (Intercept) Binary              
+Estimate     -2.4991 3.3502 1.1838 0.6202
+SE            0.1989 0.2727 0.3107 0.2054
+Time         34.3,         19.4. Max ll:   -2803.0912,   -2803.0911
 
 (Intercept)      Binary                         
   -3.138572    4.212868    0.865131    0.006645 
@@ -2868,7 +3369,10 @@ Time         25.6,         14.7. Max ll:   -2803.0912,   -2803.0911
 attr(,"variance proportions")
 Residual                   
   0.2230   0.5459   0.2311 
-Time         14.9,         16.9. Max ll:   -2709.9648,   -2709.9612
+         (Intercept) Binary              
+Estimate     -3.1386 4.2129 2.3753 1.0067
+SE            0.3772 0.5106 0.7431 0.3979
+Time         20.4,         22.9. Max ll:   -2709.9648,   -2709.9612
 
 (Intercept)      Binary                         
     -3.6355      4.9108      1.2837      0.2779 
@@ -2877,7 +3381,10 @@ Time         14.9,         16.9. Max ll:   -2709.9648,   -2709.9612
 attr(,"variance proportions")
 Residual                   
   0.1714   0.6067   0.2219 
-Time         13.1,          6.1. Max ll:   -2731.5370,   -2731.5334
+         (Intercept) Binary             
+Estimate     -3.6355 4.9108 3.610 1.3204
+SE            0.6044 0.8176 1.448 0.6194
+Time         16.0,          7.4. Max ll:   -2731.5370,   -2731.5334
 
 (Intercept)      Binary                         
     -3.2488      4.3348      0.9021      0.1601 
@@ -2886,7 +3393,10 @@ Time         13.1,          6.1. Max ll:   -2731.5370,   -2731.5334
 attr(,"variance proportions")
 Residual                   
   0.2171   0.5306   0.2523 
-Time         16.5,         17.2. Max ll:   -2719.6435,   -2719.6428
+         (Intercept) Binary              
+Estimate     -3.2488 4.3348 2.4648 1.1736
+SE            0.3649 0.4912 0.7259 0.4043
+Time         20.3,         21.6. Max ll:   -2719.6435,   -2719.6428
 
 (Intercept)      Binary                         
     -4.4644      6.1794      1.7044      0.9144 
@@ -2895,7 +3405,10 @@ Time         16.5,         17.2. Max ll:   -2719.6435,   -2719.6428
 attr(,"variance proportions")
 Residual                   
   0.1144   0.6095   0.2762 
-Time         12.8,          9.1. Max ll:   -2702.0254,   -2702.0253
+         (Intercept) Binary            
+Estimate      -4.464  6.179 5.498 2.495
+SE             0.782  1.087 2.189 1.088
+Time         17.4,         12.2. Max ll:   -2702.0254,   -2702.0253
 
 (Intercept)      Binary                         
     -2.8297      3.7021      0.3139      0.1611 
@@ -2904,7 +3417,10 @@ Time         12.8,          9.1. Max ll:   -2702.0254,   -2702.0253
 attr(,"variance proportions")
 Residual                   
   0.2814   0.3872   0.3313 
-Time         19.6,         10.3. Max ll:   -2743.2772,   -2743.2771
+         (Intercept) Binary              
+Estimate     -2.8297 3.7021 1.3688 1.1748
+SE            0.2748 0.3636 0.4302 0.3405
+Time         23.4,         12.0. Max ll:   -2743.2772,   -2743.2771
 
 (Intercept)      Binary                         
     -3.0707      4.0870      0.9175     -0.1502 
@@ -2913,7 +3429,10 @@ Time         19.6,         10.3. Max ll:   -2743.2772,   -2743.2771
 attr(,"variance proportions")
 Residual                   
   0.2322   0.5721   0.1956 
-Time         17.7,         25.1. Max ll:   -2832.3663,   -2832.3646
+         (Intercept) Binary              
+Estimate     -3.0707 4.0870 2.5031 0.8605
+SE            0.3803 0.5095 0.7961 0.3620
+Time         21.0,         30.2. Max ll:   -2832.3663,   -2832.3646
 
 (Intercept)      Binary                         
     -3.1727      4.1588      0.6502      0.3095 
@@ -2922,7 +3441,10 @@ Time         17.7,         25.1. Max ll:   -2832.3663,   -2832.3646
 attr(,"variance proportions")
 Residual                   
   0.2342   0.4474   0.3185 
-Time          5.2,          6.4. Max ll:   -2655.4698,   -2655.4703
+         (Intercept) Binary              
+Estimate     -3.1727  4.159 1.9160 1.3628
+SE            0.3646  0.481 0.6219 0.4445
+Time          6.0,          7.6. Max ll:   -2655.4698,   -2655.4703
 
 (Intercept)      Binary                         
     -3.5638      4.8269      1.0583      0.5324 
@@ -2931,7 +3453,10 @@ Time          5.2,          6.4. Max ll:   -2655.4698,   -2655.4703
 attr(,"variance proportions")
 Residual                   
   0.1875   0.5113   0.3013 
-Time         15.0,          5.2. Max ll:   -2710.7684,   -2710.7672
+         (Intercept) Binary             
+Estimate     -3.5638  4.827 2.882 1.7030
+SE            0.5117  0.698 1.046 0.6476
+Time         17.8,          6.0. Max ll:   -2710.7684,   -2710.7672
 
 (Intercept)      Binary                         
     -2.5484      3.4448      0.1328     -0.2769 
@@ -2940,7 +3465,10 @@ Time         15.0,          5.2. Max ll:   -2710.7684,   -2710.7672
 attr(,"variance proportions")
 Residual                   
   0.3460   0.3912   0.2627 
-Time         13.2,          5.0. Max ll:   -2782.1826,   -2782.1855
+         (Intercept) Binary             
+Estimate     -2.5484 3.4448 1.142 0.7581
+SE            0.2043 0.2811 0.309 0.2323
+Time         15.8,          6.1. Max ll:   -2782.1826,   -2782.1855
 
 (Intercept)      Binary                         
     -2.6874      3.5791      0.4774     -0.3116 
@@ -2949,7 +3477,10 @@ Time         13.2,          5.0. Max ll:   -2782.1826,   -2782.1855
 attr(,"variance proportions")
 Residual                   
   0.2970   0.4856   0.2174 
-Time         15.2,          6.2. Max ll:   -2857.1727,   -2857.1719
+         (Intercept) Binary              
+Estimate     -2.6874  3.579 1.6118 0.7323
+SE            0.2407  0.325 0.4298 0.2487
+Time         19.1,          7.3. Max ll:   -2857.1727,   -2857.1719
 
 (Intercept)      Binary                         
     -3.5197      4.5932      1.0615      0.5975 
@@ -2958,7 +3489,10 @@ Time         15.2,          6.2. Max ll:   -2857.1727,   -2857.1719
 attr(,"variance proportions")
 Residual                   
   0.1737   0.5069   0.3194 
-Time         24.4,         20.9. Max ll:   -2849.6794,   -2849.6787
+         (Intercept) Binary            
+Estimate     -3.5197 4.5932 2.891 1.818
+SE            0.4993 0.6562 1.051 0.650
+Time         30.8,         27.9. Max ll:   -2849.6794,   -2849.6787
 
 (Intercept)      Binary                         
    -2.99804     3.99226     0.76219     0.01046 
@@ -2967,7 +3501,10 @@ Time         24.4,         20.9. Max ll:   -2849.6794,   -2849.6787
 attr(,"variance proportions")
 Residual                   
   0.2417   0.5152   0.2431 
-Time          5.1,          5.1. Max ll:   -2821.0137,   -2821.0145
+         (Intercept) Binary              
+Estimate      -2.998 3.9923 2.1430 1.0105
+SE             0.313 0.4219 0.6139 0.3459
+Time          6.8,          6.4. Max ll:   -2821.0137,   -2821.0145
 
 (Intercept)      Binary                         
     -2.9105      3.7849      0.7159     -0.5208 
@@ -2976,7 +3513,10 @@ Time          5.1,          5.1. Max ll:   -2821.0137,   -2821.0145
 attr(,"variance proportions")
 Residual                   
   0.2733   0.5628   0.1639 
-Time         21.4,         21.8. Max ll:   -2654.8796,   -2654.8795
+         (Intercept) Binary             
+Estimate     -2.9105 3.7849 2.046 0.5941
+SE            0.3026 0.3974 0.577 0.2646
+Time         25.2,         27.0. Max ll:   -2654.8796,   -2654.8795
 
 (Intercept)      Binary                         
    -3.13175     4.15935     0.88408     0.09016 
@@ -2985,7 +3525,10 @@ Time         21.4,         21.8. Max ll:   -2654.8796,   -2654.8795
 attr(,"variance proportions")
 Residual                   
   0.2199   0.5373   0.2428 
-Time          7.0,          8.7. Max ll:   -2801.1225,   -2801.1213
+         (Intercept) Binary              
+Estimate     -3.1318 4.1593 2.4208 1.0943
+SE            0.3691 0.4957 0.7487 0.4019
+Time          8.5,         10.8. Max ll:   -2801.1225,   -2801.1213
 
 (Intercept)      Binary                         
     -3.3559      4.5460      0.9768      0.2464 
@@ -2994,7 +3537,10 @@ Time          7.0,          8.7. Max ll:   -2801.1225,   -2801.1213
 attr(,"variance proportions")
 Residual                   
   0.1914   0.5445   0.2641 
-Time          7.4,         16.3. Max ll:   -2697.2636,   -2697.2459
+         (Intercept) Binary              
+Estimate     -3.3559 4.5460 2.6560 1.2795
+SE            0.4206 0.5762 0.8691 0.4566
+Time          9.2,         20.1. Max ll:   -2697.2636,   -2697.2459
 
 (Intercept)      Binary                         
     -3.5680      4.4687      1.1718      0.3754 
@@ -3003,7 +3549,10 @@ Time          7.4,         16.3. Max ll:   -2697.2636,   -2697.2459
 attr(,"variance proportions")
 Residual                   
   0.1774   0.5668   0.2558 
-Time          9.2,          6.0. Max ll:   -2762.9871,   -2762.9884
+         (Intercept) Binary             
+Estimate     -3.5680 4.4687 3.228 1.4555
+SE            0.5242 0.6596 1.171 0.5975
+Time         10.8,          7.1. Max ll:   -2762.9871,   -2762.9884
 
 (Intercept)      Binary                         
     -3.0594      3.9578      0.8123     -0.3610 
@@ -3012,7 +3561,10 @@ Time          9.2,          6.0. Max ll:   -2762.9871,   -2762.9884
 attr(,"variance proportions")
 Residual                   
   0.2557   0.5673   0.1770 
-Time         20.5,         24.5. Max ll:   -2623.0103,   -2623.0092
+         (Intercept) Binary              
+Estimate     -3.0594 3.9578 2.2530 0.6970
+SE            0.3297 0.4297 0.6534 0.2872
+Time         24.6,         29.4. Max ll:   -2623.0103,   -2623.0092
 
 (Intercept)      Binary                         
    -2.92019     3.99500     0.60893    -0.08805 
@@ -3021,7 +3573,10 @@ Time         20.5,         24.5. Max ll:   -2623.0103,   -2623.0092
 attr(,"variance proportions")
 Residual                   
   0.2665   0.4894   0.2441 
-Time         12.2,         12.9. Max ll:   -2741.6145,   -2741.6146
+         (Intercept) Binary              
+Estimate     -2.9202 3.9950 1.8385 0.9157
+SE            0.2889 0.3974 0.5206 0.3035
+Time         15.1,         15.1. Max ll:   -2741.6145,   -2741.6146
 
 (Intercept)      Binary                         
     -3.0171      4.1442      0.6049      0.2525 
@@ -3030,7 +3585,10 @@ Time         12.2,         12.9. Max ll:   -2741.6145,   -2741.6146
 attr(,"variance proportions")
 Residual                   
   0.2430   0.4444   0.3125 
-Time         16.9,         10.8. Max ll:   -2754.9104,   -2754.9104
+         (Intercept) Binary             
+Estimate     -3.0171 4.1442 1.8310 1.287
+SE            0.3426 0.4732 0.6072 0.412
+Time         20.8,         12.9. Max ll:   -2754.9104,   -2754.9104
 
 (Intercept)      Binary                         
     -3.1113      3.9482      0.8101     -0.1061 
@@ -3039,7 +3597,10 @@ Time         16.9,         10.8. Max ll:   -2754.9104,   -2754.9104
 attr(,"variance proportions")
 Residual                   
   0.2365   0.5433   0.2201 
-Time         10.2,         16.1. Max ll:   -2686.3897,   -2686.3850
+         (Intercept) Binary              
+Estimate     -3.1113 3.9482 2.2481 0.8994
+SE            0.3382 0.4335 0.6466 0.3404
+Time         12.2,         19.6. Max ll:   -2686.3897,   -2686.3850
 
 (Intercept)      Binary                         
     -2.8393      3.7168      0.5725     -0.1982 
@@ -3048,7 +3609,10 @@ Time         10.2,         16.1. Max ll:   -2686.3897,   -2686.3850
 attr(,"variance proportions")
 Residual                   
   0.2772   0.4940   0.2288 
-Time         22.6,         15.3. Max ll:   -2757.3076,   -2757.3082
+         (Intercept) Binary              
+Estimate     -2.8393 3.7168 1.7727 0.8202
+SE            0.2793 0.3696 0.4957 0.2898
+Time         27.3,         18.2. Max ll:   -2757.3076,   -2757.3082
 
 (Intercept)      Binary                         
    -3.10187     4.13678     0.78083     0.02054 
@@ -3057,7 +3621,10 @@ Time         22.6,         15.3. Max ll:   -2757.3076,   -2757.3082
 attr(,"variance proportions")
 Residual                   
   0.2402   0.5178   0.2421 
-Time         18.5,         15.5. Max ll:   -2712.5176,   -2712.5161
+         (Intercept) Binary              
+Estimate     -3.1019 4.1368 2.1833 1.0208
+SE            0.3529 0.4727 0.6629 0.3712
+Time         22.7,         18.3. Max ll:   -2712.5176,   -2712.5161
 
 (Intercept)      Binary                         
     -3.7393      5.0751      1.2741      0.4224 
@@ -3066,7 +3633,10 @@ Time         18.5,         15.5. Max ll:   -2712.5176,   -2712.5161
 attr(,"variance proportions")
 Residual                   
   0.1616   0.5875   0.2509 
-Time         23.2,         18.6. Max ll:   -2650.1481,   -2650.1477
+         (Intercept) Binary             
+Estimate     -3.7393 5.0751 3.576 1.5256
+SE            0.6073 0.8292 1.406 0.6833
+Time         29.5,         24.7. Max ll:   -2650.1481,   -2650.1477
 
 (Intercept)      Binary                         
    -3.19204     4.29838     0.94724     0.05537 
@@ -3075,7 +3645,10 @@ Time         23.2,         18.6. Max ll:   -2650.1481,   -2650.1477
 attr(,"variance proportions")
 Residual                   
   0.2191   0.5552   0.2257 
-Time         23.8,         12.4. Max ll:   -2768.4679,   -2768.4735
+         (Intercept) Binary              
+Estimate     -3.1920 4.2984 2.5786 1.0569
+SE            0.4106 0.5563 0.8541 0.4235
+Time         29.5,         15.2. Max ll:   -2768.4679,   -2768.4735
 
 (Intercept)      Binary                         
    -3.00454     4.01815     0.64918     0.05757 
@@ -3084,7 +3657,10 @@ Time         23.8,         12.4. Max ll:   -2768.4679,   -2768.4735
 attr(,"variance proportions")
 Residual                   
   0.2570   0.4783   0.2647 
-Time         19.9,         11.8. Max ll:   -2703.6490,   -2703.6541
+         (Intercept) Binary              
+Estimate     -3.0045 4.0182 1.9140 1.0593
+SE            0.3356 0.4541 0.6092 0.3627
+Time         23.7,         14.4. Max ll:   -2703.6490,   -2703.6541
 
 (Intercept)      Binary                         
      -4.965       6.620       1.813       1.373 
@@ -3093,7 +3669,10 @@ Time         19.9,         11.8. Max ll:   -2703.6490,   -2703.6541
 attr(,"variance proportions")
 Residual                   
  0.09186  0.55248  0.35566 
-Time          8.1,         13.4. Max ll:   -2704.0546,   -2704.0577
+         (Intercept) Binary            
+Estimate      -4.965  6.620 6.127 3.946
+SE             1.116  1.493 3.153 1.952
+Time         10.4,         19.4. Max ll:   -2704.0546,   -2704.0577
 
 (Intercept)      Binary                         
     -3.0483      4.0841      0.5768      0.2105 
@@ -3102,7 +3681,10 @@ Time          8.1,         13.4. Max ll:   -2704.0546,   -2704.0577
 attr(,"variance proportions")
 Residual                   
   0.2454   0.4455   0.3091 
-Time          9.9,         18.0. Max ll:   -2681.1892,   -2681.1869
+         (Intercept) Binary              
+Estimate     -3.0483 4.0841 1.7804 1.2343
+SE            0.3222 0.4366 0.5468 0.3875
+Time         13.4,         23.8. Max ll:   -2681.1892,   -2681.1869
 
 (Intercept)      Binary                         
    -2.99664     3.90846     0.60526     0.08917 
@@ -3111,7 +3693,10 @@ Time          9.9,         18.0. Max ll:   -2681.1892,   -2681.1869
 attr(,"variance proportions")
 Residual                   
   0.2543   0.4682   0.2775 
-Time         16.7,         15.4. Max ll:   -2697.4757,   -2697.4757
+         (Intercept) Binary              
+Estimate     -2.9966 3.9085 1.8317 1.0933
+SE            0.3278 0.4335 0.5791 0.3652
+Time         21.7,         18.4. Max ll:   -2697.4757,   -2697.4757
 
 (Intercept)      Binary                         
    -2.90238     4.00198     0.62882    -0.01734 
@@ -3120,7 +3705,10 @@ Time         16.7,         15.4. Max ll:   -2697.4757,   -2697.4757
 attr(,"variance proportions")
 Residual                   
   0.2565   0.4875   0.2560 
-Time         10.7,         22.5. Max ll:   -2788.8708,   -2788.8686
+         (Intercept) Binary              
+Estimate     -2.9024  4.002 1.8754 0.9828
+SE            0.2915  0.406 0.5393 0.3159
+Time         13.5,         31.4. Max ll:   -2788.8708,   -2788.8686
 
 (Intercept)      Binary                         
     -2.7053      3.6784      0.2292     -0.1311 
@@ -3129,7 +3717,10 @@ Time         10.7,         22.5. Max ll:   -2788.8708,   -2788.8686
 attr(,"variance proportions")
 Residual                   
   0.3187   0.4011   0.2802 
-Time         25.8,         18.2. Max ll:   -2663.0191,   -2663.0192
+         (Intercept) Binary              
+Estimate     -2.7053 3.6784 1.2576 0.8772
+SE            0.2391 0.3295 0.3689 0.2676
+Time         32.1,         23.2. Max ll:   -2663.0191,   -2663.0192
 
 (Intercept)      Binary                         
     -2.8351      3.6617      0.5623     -0.3803 
@@ -3138,7 +3729,10 @@ Time         25.8,         18.2. Max ll:   -2663.0191,   -2663.0192
 attr(,"variance proportions")
 Residual                   
    0.292    0.510    0.198 
-Time         22.1,         21.4. Max ll:   -2683.9444,   -2683.9442
+         (Intercept) Binary             
+Estimate     -2.8351 3.6617 1.755 0.6837
+SE            0.2757 0.3608 0.485 0.2636
+Time         27.7,         28.1. Max ll:   -2683.9444,   -2683.9442
 
 (Intercept)      Binary                         
     -2.7685      3.7055      0.4611     -0.2187 
@@ -3147,7 +3741,10 @@ Time         22.1,         21.4. Max ll:   -2683.9444,   -2683.9442
 attr(,"variance proportions")
 Residual                   
   0.2935   0.4691   0.2375 
-Time         21.2,         20.3. Max ll:   -2745.8377,   -2745.8383
+         (Intercept) Binary              
+Estimate     -2.7685 3.7055 1.5858 0.8036
+SE            0.2618 0.3548 0.4512 0.2692
+Time         28.3,         24.7. Max ll:   -2745.8377,   -2745.8383
 
 (Intercept)      Binary                         
     -3.1543      4.2108      0.7239      0.2752 
@@ -3156,7 +3753,10 @@ Time         21.2,         20.3. Max ll:   -2745.8377,   -2745.8383
 attr(,"variance proportions")
 Residual                   
   0.2246   0.4742   0.3013 
-Time          9.1,         18.6. Max ll:   -2711.1000,   -2711.0964
+         (Intercept) Binary             
+Estimate     -3.1543 4.2108 2.0625 1.317
+SE            0.3627 0.4876 0.6519 0.440
+Time         11.3,         22.1. Max ll:   -2711.1000,   -2711.0964
 
 
   ordinary text without R code
@@ -3625,4 +4225,4 @@ Output created: README.md
 > 
 > proc.time()
    user  system elapsed 
-305.252   1.094 291.310 
+168.666   1.148 258.416 

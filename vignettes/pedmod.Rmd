@@ -293,6 +293,29 @@ for the profile likelihood curve we compute later and also for the line search
 used by some optimization methods. Thus, one may need to reduce
 `rel_eps` and increase `maxvls` when there are many families.
 
+We can construct standard errors by computing the Hessian using the 
+`eval_pedigree_hess` function as shown below. Like `eval_pedigree_grad`, 
+the `eval_pedigree_hess` functions takes in the log of the scale parameters but
+the Hessian is computed on the scale of the scale parameters. 
+
+```{r hess_est_simple_res, cache = 1}
+set.seed(1)
+system.time(hess <- eval_pedigree_hess(
+  ptr = ll_terms, par = opt_out$par, maxvls = 25000L, minvls = 5000L, abs_eps = 0, 
+  rel_eps = 1e-4, do_reorder = TRUE, use_aprx = FALSE, n_threads = 4L))
+
+# the gradient is quite small
+sqrt(sum(attr(hess, "grad")^2))
+
+# compute the covariance matrix and show parameter estimates along with standard 
+# errors
+vcov_est <- solve(-hess)
+vcov_est
+
+rbind(Estimates = c(head(opt_out$par, -1), exp(tail(opt_out$par, 1))), 
+      SE = sqrt(diag(vcov_est)))
+```
+
 ### Minimax Tilting
 
 The minimax tilting method suggested by @Botev17 is also implemented. The 
@@ -633,6 +656,13 @@ prof_res <- pedmod_profile(
 # the confidence interval for the scale parameter
 exp(prof_res$confs)
 
+# Not too good agreement with the Wald type confidence interval on the square 
+# root scale
+scale_est <- exp(tail(opt_out$par, 1))
+Wald_conf <- sqrt(scale_est) + c(-1, 1) * qnorm(.975) *
+  sqrt(tail(diag(vcov_est), 1)) / (2 * sqrt(scale_est))
+rbind(Wald = Wald_conf, `Profile likelihood` = exp(prof_res$confs / 2))
+
 # plot the estimated profile likelihood curve and check that everything looks 
 # fine
 sigs <- exp(prof_res$xs / 2)
@@ -646,6 +676,10 @@ lines(predict(smooth_est, seq(min(sigs), max(sigs), length.out = 100)))
 abline(v = exp(tail(opt_out$par, 1) / 2), lty = 2) # the estimate
 abline(v = sqrt(attr(dat, "sig_sq")), lty = 3) # the true value
 abline(h = max(pls) - qchisq(.95, 1) / 2, lty = 3) # mark the critical value
+
+abline(v = Wald_conf, lty = 4) # Wald
+abline(v = exp(prof_res$confs / 2), lty = 3) # Profile likelihood
+
 # we can do the same for the slope of the binary covariates
 prof_res <- pedmod_profile(
   ptr = ll_terms, par = opt_out$par, delta = .5, maxvls = 10000L, 
@@ -1220,6 +1254,27 @@ print( start  $logLik_est, digits = 8)  # this is unreliably/imprecise
 print(-opt_out$value     , digits = 8)
 ```
 
+We compute the Hessian like before to get the standard errors.
+
+```{r hess_est_simple_w_emv, cache = 1}
+set.seed(1)
+system.time(hess <- eval_pedigree_hess(
+  ptr = ll_terms, par = opt_out$par, maxvls = 25000L, minvls = 5000L, abs_eps = 0, 
+  rel_eps = 1e-4, do_reorder = TRUE, use_aprx = FALSE, n_threads = 4L,
+  cluster_weights = c_weights, vls_scales = sqrt(c_weights)))
+
+# the gradient is quite small
+sqrt(sum(attr(hess, "grad")^2))
+
+# compute the covariance matrix and show parameter estimates along with standard 
+# errors
+vcov_est <- solve(-hess)
+vcov_est
+
+rbind(Estimates = c(head(opt_out$par, -2), exp(tail(opt_out$par, 2))), 
+      SE = sqrt(diag(vcov_est)))
+```
+
 ### Motivation of Different Number of Samples
 
 We use the `cluster_weights` argument above to exploit that some of the 
@@ -1461,6 +1516,9 @@ pl_genetic <- pedmod_profile(
   vls_scales = sqrt(c_weights))
 exp(pl_genetic$confs) # the confidence interval
 
+# compare with the Wald type
+exp(opt_out$par[3]) + c(-1, 1) * qnorm(.975) * sqrt(diag(vcov_est)[3])
+
 # then we compute the curve for the environment effect
 pl_env <- pedmod_profile(
   ptr = ll_terms, par = opt_out$par, delta = .6, maxvls = 20000L, 
@@ -1468,6 +1526,9 @@ pl_env <- pedmod_profile(
   use_aprx = TRUE, n_threads = 4L, verbose = TRUE, cluster_weights = c_weights, 
   vls_scales = sqrt(c_weights))
 exp(pl_env$confs) # the confidence interval
+
+# compare with the Wald type
+exp(opt_out$par[4]) + c(-1, 1) * qnorm(.975) * sqrt(diag(vcov_est)[4])
 ```
 
 We plot the two profile likelihood curves below:

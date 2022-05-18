@@ -1,4 +1,6 @@
 # pedmod 0.2.1
+* A hessian approximation of objects from `pedigree_ll_terms` is added in 
+  the `eval_pedigree_hess` function.
 * `pedmod_profile` works with object from `pedigree_ll_terms_loadings`.
 * `pedmod_profile_nleq` has been added to construct profile likelihood based 
   confidence intervals for general non-linear transformation of the model 

@@ -34,7 +34,7 @@ test_that("examples in manual pages gives the correct answer for eval_pedigree_[
                tolerance = 1e-4)
 })
 
-test_that("examples in manual pages gives the correct answer for eval_pedigree_[ll]/[grad]", {
+test_that("examples in manual pages gives the correct answer for eval_pedigree_[ll]/[grad]/[hess]", {
   # three families as an example
   fam_dat <- list(
     list(
@@ -118,6 +118,46 @@ test_that("examples in manual pages gives the correct answer for eval_pedigree_[
     rel_eps = 1e-3, minvls = 2000, use_aprx = TRUE,
     cluster_weights = c(1, 3, 0))
   expect_equal(c(ll_w_weight), attr(deriv_truth, "logLik"), tolerance = 1e-3)
+
+  # the hessian
+  # fn <- function(par){
+  #   par[4:5] <- log(par[4:5])
+  #   set.seed(1)
+  #   eval_pedigree_ll(
+  #       ptr = ptr, par = par, abs_eps = -1, maxvls = 1e6,
+  #       rel_eps = 1e-12, minvls = 1e6, use_aprx = FALSE,
+  #       cluster_weights = c(1, 3, 0))
+  # }
+  # hess_true <- numDeriv::hessian(fn, c(beta, scs),
+  #                                method.args = list(eps = 1e-3, r = 2))
+  # dput(hess_true)
+  hess_true <- structure(c(
+    -2.88891553189542, -0.372877416220607, -0.276971459436541, 0.0563308676050589, 0.104095006476072, -0.372877416220607, -1.04898316015941, 0.41871400203138, -0.0256252124640631, -0.057785767571208, -0.276971459436541, 0.41871400203138, -2.39137670342856, 0.248184857359668, 0.200219327614127, 0.0563308676050589, -0.0256252124640631, 0.248184857359668, 0.399117752341619, 0.51063693960504, 0.104095006476072, -0.057785767571208, 0.200219327614127, 0.51063693960504, 0.579967091261364),
+    .Dim = c(5L, 5L))
+
+  hess_w_weight <- eval_pedigree_hess(
+    ptr = ptr, par = c(beta, log(scs)), abs_eps = -1, maxvls = 1e6,
+    rel_eps = 1e-3, minvls = 2000, use_aprx = TRUE,
+    cluster_weights = c(1, 3, 0))
+
+  expect_equal(
+    hess_w_weight, hess_true, check.attributes = FALSE, tolerance = 1e-3)
+  hess_grad <- attr(hess_w_weight, "grad")
+  hess_grad[4:5] <- hess_grad[4:5] * scs
+
+  expect_equal(
+    hess_grad, deriv_w_weight, check.attributes = FALSE, tolerance = 1e-3)
+  expect_equal(
+    attr(hess_w_weight, "logLik"), c(ll_w_weight), tolerance = 1e-4)
+
+  dum_dat <- dat_arg[c(1, 2, 2, 2)]
+  dum_ptr <- pedigree_ll_terms(dum_dat, 1L)
+  hess_dum <- eval_pedigree_hess(
+    ptr = dum_ptr, par = c(beta, log(scs)), abs_eps = -1, maxvls = 1e6,
+    rel_eps = 1e-3, minvls = 2000, use_aprx = TRUE)
+  attr(hess_w_weight, "n_fails") <- attr(hess_dum, "n_fails") <- NULL
+  attr(hess_w_weight, "std") <- attr(hess_dum, "std") <- NULL
+  expect_equal(hess_dum, hess_w_weight, tolerance = 1e-3)
 
   # with loadings
   dat_arg_loadings <- lapply(fam_dat, function(x){

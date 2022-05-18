@@ -220,6 +220,10 @@ eval_pedigree_grad_cpp <- function(ptr, par, maxvls, abs_eps, rel_eps, indices =
     .Call(`_pedmod_eval_pedigree_grad`, ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder, use_aprx, n_threads, cluster_weights, method, use_tilting, vls_scales)
 }
 
+eval_pedigree_hess_cpp <- function(ptr, par, maxvls, abs_eps, rel_eps, indices = NULL, minvls = -1L, do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L, cluster_weights = NULL, method = 0L, use_tilting = FALSE, vls_scales = NULL) {
+    .Call(`_pedmod_eval_pedigree_hess`, ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder, use_aprx, n_threads, cluster_weights, method, use_tilting, vls_scales)
+}
+
 #' @rdname pedigree_ll_terms
 #'
 #' @export

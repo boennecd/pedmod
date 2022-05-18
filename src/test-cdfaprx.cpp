@@ -3,7 +3,292 @@
 #include <limits>
 #include "threat-safe-random.h"
 
-context("restrictcdf unit tests") {
+context("cdfaprx unit tests") {
+  test_that("cdf<pedigree_l_factor_Hessian> gives similar output as R with a multivariate example") {
+    /*
+     X <- matrix(c(1, 1, 1, .5, 0, 1), 3)
+     C1 <- matrix(c(1, 1, 0, 1, 1, 0, 0, 0, 1), 3)
+     C2 <- matrix(c(1, .5, .5, .5, 1, .5, .5, .5, 1), 3)
+
+     lbs <- c(-Inf, 0, -Inf)
+     ubs <- c(0, Inf, 0)
+
+     beta <- c(1, -.5)
+     sigs <- c(.25, .75)
+
+     library(mvtnorm)
+     f <- \(x){
+     set.seed(1)
+     S <- diag(3) + x[3] * C1 + x[4] * C2
+     pmvnorm(
+     lower = lbs, upper = ubs, mean = drop(X %*% head(x, 2)), sigma = S,
+     algorithm = GenzBretz(maxpts = 1000000L, abseps = 0, releps = 1e-10)) |>
+     log()
+     }
+
+     f(c(beta, sigs)) |> exp() |> dput()
+     numDeriv::grad(f, c(beta, sigs)) |> dput()
+     numDeriv::hessian(f, c(beta, sigs)) |> dput()
+     */
+    constexpr arma::uword n_mem{3},
+                          n_fixef{2},
+                          n_scales{2},
+                          hess_dim{n_fixef + n_scales};
+
+    constexpr double Inf = std::numeric_limits<double>::infinity(),
+        likelihood_truth{0.0781160409595038};
+
+    arma::vec const gr_truth{-1.03216414351651, -1.1021549879458, -0.171394026278093, 0.154479446468373},
+                  hess_truth{-0.782510675917859, -0.422515184613313, 0.341958572815166, 0.549001418475123, -0.422515184613313, -0.411823557000097, 0.208809432913472, 0.367567511381604, 0.341958572815166, 0.208809432913472, 0.0899748010215663, -0.0496726848474764, 0.549001418475123, 0.367567511381604, -0.0496726848474764, -0.235561384187514};
+
+    arma::mat X{1, 1, 1, .5, 0, 1},
+             C1{1, 1, 0, 1, 1, 0, 0, 0, 1},
+             C2{1, .5, .5, .5, 1, .5, .5, .5, 1};
+    X.reshape(n_mem, n_fixef);
+    C1.reshape(n_mem, n_mem);
+    C2.reshape(n_mem, n_mem);
+    std::vector<arma::mat> const scale_mats{C1, C2};
+
+    arma::vec const lb{-Inf, 0,-Inf}, ub{0, Inf, 0};
+
+    arma::vec const beta{1, -.5},
+                    sigs{.25, .75},
+                      mu = X * beta;
+
+    std::vector<unsigned> seeds{ 1L };
+    parallelrng::set_rng_seeds(seeds);
+
+    pedmod::pedigree_l_factor_Hessian l_factor{scale_mats, 1L, X.t(), 8};
+    pedmod::cdf<pedmod::pedigree_l_factor_Hessian>::alloc_mem(n_mem, 1);
+
+    arma::mat vcov_mat;
+    l_factor.setup(vcov_mat, sigs.begin(), 100);
+
+    constexpr double eps{1e-4};
+    {
+      auto const res = pedmod::cdf<pedmod::pedigree_l_factor_Hessian>(
+        l_factor, lb, ub, mu, vcov_mat, true, false, true).approximate(
+            1000000L, -1, eps, pedmod::cdf_methods::Korobov, 0, 8);
+
+      expect_true(res.gradient.size() == hess_dim);
+      expect_true(res.hessian.n_rows == hess_dim);
+      expect_true(res.hessian.n_cols == hess_dim);
+
+      expect_true
+        (std::abs(res.likelihood - likelihood_truth) <
+          eps * 10 * likelihood_truth);
+
+      for(size_t i = 0; i < hess_dim; ++i)
+        expect_true
+          (std::abs(res.gradient[i] - gr_truth[i])
+             < std::abs(gr_truth[i]) * 1e-3);
+
+      for(size_t i = 0; i < hess_dim * hess_dim; ++i)
+        expect_true
+          (std::abs(res.hessian.begin()[i] - hess_truth[i])
+             < std::abs(hess_truth[i]) * 1e-3);
+    }
+    {
+      auto const res = pedmod::cdf<pedmod::pedigree_l_factor_Hessian>(
+        l_factor, lb, ub, mu, vcov_mat, true, false, false).approximate(
+            1000000L, -1, eps, pedmod::cdf_methods::Korobov, 0, 8);
+
+      expect_true(res.gradient.size() == hess_dim);
+      expect_true(res.hessian.n_rows == hess_dim);
+      expect_true(res.hessian.n_cols == hess_dim);
+
+      expect_true
+        (std::abs(res.likelihood - likelihood_truth) <
+          eps * 10 * likelihood_truth);
+
+      for(size_t i = 0; i < hess_dim; ++i)
+        expect_true
+          (std::abs(res.gradient[i] - gr_truth[i])
+             < std::abs(gr_truth[i]) * 1e-3);
+
+      for(size_t i = 0; i < hess_dim * hess_dim; ++i)
+        expect_true
+          (std::abs(res.hessian.begin()[i] - hess_truth[i])
+             < std::abs(hess_truth[i]) * 1e-3);
+    }
+  }
+
+  test_that("cdf<pedigree_l_factor_Hessian> gives similar output as R with a univariate example") {
+    /*
+     X <- matrix(c(1, .5), 1)
+     C1 <- matrix(1)
+     C2 <- matrix(.75)
+
+     lbs <- -Inf
+     ubs <- 0
+
+     beta <- c(.5, -.75)
+     sigs <- c(.35, .55)
+
+     library(mvtnorm)
+     f <- \(x){
+     set.seed(1)
+     S <- 1 + x[3] * C1 + x[4] * C2
+     pmvnorm(
+     lower = lbs, upper = ubs, mean = drop(X %*% head(x, 2)), sigma = S,
+     algorithm = GenzBretz(maxpts = 1000000L, abseps = 0, releps = 1e-10)) |>
+     log()
+     }
+
+     f(c(beta, sigs)) |> exp() |> dput()
+     numDeriv::grad(f, c(beta, sigs)) |> dput()
+     numDeriv::hessian(f, c(beta, sigs)) |> dput()
+
+     lbs <- 0
+     ubs <- Inf
+
+     f(c(beta, sigs)) |> exp() |> dput()
+     numDeriv::grad(f, c(beta, sigs)) |> dput()
+     numDeriv::hessian(f, c(beta, sigs), method.args = list(eps = 1e-3, r = 5)) |> dput()
+     */
+    constexpr arma::uword n_mem{1},
+                        n_fixef{2},
+                       n_scales{2},
+                       hess_dim{n_fixef + n_scales};
+
+    constexpr double Inf{std::numeric_limits<double>::infinity()},
+                     eps{1e-8};
+
+    arma::mat X{1, .5},
+             C1{1.},
+             C2{.75};
+    X.reshape(n_mem, n_fixef);
+    std::vector<arma::mat> const scale_mats{C1, C2};
+
+    arma::vec const beta{.5, -.75},
+                    sigs{.35, .55},
+                    mu = X * beta;
+
+    std::vector<unsigned> seeds{ 1L };
+    parallelrng::set_rng_seeds(seeds);
+
+    {
+      constexpr double likelihood_truth{0.462492837757237};
+      arma::vec const gr_truth{-0.646867642116195, -0.323433821049096, 0.0229385688575181, 0.017203926656904},
+                    hess_truth{-0.37256060867889, -0.186280304344205, 0.196719920053968, 0.147539940039962, -0.186280304344205, -0.093140152171208, 0.0983599600280048, 0.0737699700222857, 0.196719920053968, 0.0983599600280048, -0.0199906745261838, -0.0149930059061747, 0.147539940039962, 0.0737699700222857, -0.0149930059061747, -0.0112447544265877};
+
+      arma::vec const lb{-Inf}, ub{0};
+
+      pedmod::pedigree_l_factor_Hessian l_factor{scale_mats, 1L, X.t(), 8};
+      pedmod::cdf<pedmod::pedigree_l_factor_Hessian>::alloc_mem(n_mem, 1);
+
+      arma::mat vcov_mat;
+      l_factor.setup(vcov_mat, sigs.begin(), 100);
+
+      {
+        auto const res = pedmod::cdf<pedmod::pedigree_l_factor_Hessian>(
+          l_factor, lb, ub, mu, vcov_mat, true, false, true).approximate(
+              1000000L, -1, eps, pedmod::cdf_methods::Korobov, 0, 8);
+
+        expect_true(res.gradient.size() == hess_dim);
+        expect_true(res.hessian.n_rows == hess_dim);
+        expect_true(res.hessian.n_cols == hess_dim);
+
+        expect_true
+          (std::abs(res.likelihood - likelihood_truth) <
+            eps * 10 * likelihood_truth);
+
+        for(size_t i = 0; i < hess_dim; ++i)
+          expect_true
+            (std::abs(res.gradient[i] - gr_truth[i])
+               < std::abs(gr_truth[i]) * 1e-3);
+
+        for(size_t i = 0; i < hess_dim * hess_dim; ++i)
+          expect_true
+            (std::abs(res.hessian.begin()[i] - hess_truth[i])
+               < std::abs(hess_truth[i]) * 1e-3);
+      }
+      {
+        auto const res = pedmod::cdf<pedmod::pedigree_l_factor_Hessian>(
+          l_factor, lb, ub, mu, vcov_mat, true, false, false).approximate(
+              1000000L, -1, eps, pedmod::cdf_methods::Korobov, 0, 8);
+
+        expect_true(res.gradient.size() == hess_dim);
+        expect_true(res.hessian.n_rows == hess_dim);
+        expect_true(res.hessian.n_cols == hess_dim);
+
+        expect_true
+          (std::abs(res.likelihood - likelihood_truth) <
+            eps * 10 * likelihood_truth);
+
+        for(size_t i = 0; i < hess_dim; ++i)
+          expect_true
+          (std::abs(res.gradient[i] - gr_truth[i])
+             < std::abs(gr_truth[i]) * 1e-3);
+
+        for(size_t i = 0; i < hess_dim * hess_dim; ++i)
+          expect_true
+          (std::abs(res.hessian.begin()[i] - hess_truth[i])
+             < std::abs(hess_truth[i]) * 1e-3);
+      }
+    }
+    {
+      constexpr double likelihood_truth{0.537507162242763};
+      arma::vec const gr_truth{0.556591004679402, 0.278295502349235, -0.019737269693756, -0.0148029522422098},
+                    hess_truth{-0.349268085817092, -0.174634042912492, -0.14551276426383, -0.109134573187886, -0.174634042912492, -0.0873170214682717, -0.0727563821223562, -0.0545672865770353, -0.14551276426383, -0.0727563821223562, 0.0163584780014546, 0.0122688584866644, -0.109134573187886, -0.0545672865770353, 0.0122688584866644, 0.00920164385139158};
+
+      arma::vec const lb{0}, ub{Inf};
+
+      pedmod::pedigree_l_factor_Hessian l_factor{scale_mats, 1L, X.t(), 8};
+      pedmod::cdf<pedmod::pedigree_l_factor_Hessian>::alloc_mem(n_mem, 1);
+
+      arma::mat vcov_mat;
+      l_factor.setup(vcov_mat, sigs.begin(), 100);
+
+      {
+        auto const res = pedmod::cdf<pedmod::pedigree_l_factor_Hessian>(
+          l_factor, lb, ub, mu, vcov_mat, true, false, true).approximate(
+              1000000L, -1, eps, pedmod::cdf_methods::Korobov, 0, 8);
+
+        expect_true(res.gradient.size() == hess_dim);
+        expect_true(res.hessian.n_rows == hess_dim);
+        expect_true(res.hessian.n_cols == hess_dim);
+
+        expect_true
+          (std::abs(res.likelihood - likelihood_truth) <
+            eps * 10 * likelihood_truth);
+
+        for(size_t i = 0; i < hess_dim; ++i)
+          expect_true
+          (std::abs(res.gradient[i] - gr_truth[i])
+             < std::abs(gr_truth[i]) * 1e-3);
+
+        for(size_t i = 0; i < hess_dim * hess_dim; ++i)
+          expect_true
+          (std::abs(res.hessian.begin()[i] - hess_truth[i])
+             < std::abs(hess_truth[i]) * 1e-3);
+      }
+      {
+        auto const res = pedmod::cdf<pedmod::pedigree_l_factor_Hessian>(
+          l_factor, lb, ub, mu, vcov_mat, true, false, false).approximate(
+              1000000L, -1, eps, pedmod::cdf_methods::Korobov, 0, 8);
+
+        expect_true(res.gradient.size() == hess_dim);
+        expect_true(res.hessian.n_rows == hess_dim);
+        expect_true(res.hessian.n_cols == hess_dim);
+
+        expect_true
+          (std::abs(res.likelihood - likelihood_truth) <
+            eps * 10 * likelihood_truth);
+
+        for(size_t i = 0; i < hess_dim; ++i)
+          expect_true
+          (std::abs(res.gradient[i] - gr_truth[i])
+             < std::abs(gr_truth[i]) * 1e-3);
+
+        for(size_t i = 0; i < hess_dim * hess_dim; ++i)
+          expect_true
+          (std::abs(res.hessian.begin()[i] - hess_truth[i])
+             < std::abs(hess_truth[i]) * 1e-3);
+      }
+    }
+  }
+
   test_that("cdf<likelihood> gives similar output to R") {
     /*
      set.seed(1)
@@ -232,18 +517,18 @@ context("restrictcdf unit tests") {
 /*
  sigs <- list(matrix(.5, 1, 1), matrix(1.5, 1, 1))
 
- lws <- c(-Inf, 1  , 1)
- ubs <- c(   2, Inf, 2)
+ lws <- c(-Inf, 1  )
+ ubs <- c(   2, Inf)
  mu <- .5
  xs <- c(.33, .5)
 
  f <- function(x, lw, ub, use_log){
  va <- sigs[[1]] * x[2] + sigs[[2]] * x[3] + 1
  vub <- if(is.finite(ub))
- pnorm(ub, x[1], sqrt(va), log.p = use_log) else 1
+ pnorm(ub, x[1], sqrt(va)) else 1
  vlb <- if(is.finite(lw))
- pnorm(lw, x[1], sqrt(va), log.p = use_log) else 0
- vub - vlb
+ pnorm(lw, x[1], sqrt(va)) else 0
+ if(use_log) log(vub - vlb) else vub - vlb
  }
 
  library(numDeriv)
@@ -256,12 +541,11 @@ context("restrictcdf unit tests") {
  */
     arma::vec lbs, ubs;
     constexpr double const Inf = std::numeric_limits<double>::infinity();
-    lbs << -Inf << 1   << 1;
-    ubs << 2    << Inf << 2;
-    arma::mat expect;
-
-    expect << 0.860805198822333 << -0.186117393338058 << -0.0364459647521367 << -0.109337894247473 << 0.358932107909215 << 0.421282527277076 << 0.0274988594855953 << 0.0824965784320902 << 0.219737306731548 << 0.235165133942785 << -0.00894710527045604 << -0.0268413158128328;
-    expect.reshape(4, 3);
+    lbs << -Inf << 1  ;
+    ubs << 2    << Inf;
+    arma::mat expect
+      {0.860805198822333, -0.186117393334307, -0.0364459647473255, -0.109337894242028, 0.358932107909215, 0.752428372350956, 0.0491141235094509, 0.14734237051237};
+    expect.reshape(4, 2);
 
     std::vector<arma::mat> scales;
     arma::mat s1(1, 1), s2(1, 1);
@@ -272,13 +556,12 @@ context("restrictcdf unit tests") {
     arma::mat X(1, 1, arma::fill::ones);
 
     pedmod::pedigree_l_factor func(scales, 1L, X, 8);
-    arma::vec par;
-    par << .5 << .33 << .5;
+    arma::vec const par{.5, .33, .5};
 
     arma::mat sig(1, 1);
     double const eps = std::pow(std::numeric_limits<double>::epsilon(), .5);
     pedmod::cdf<pedmod::pedigree_l_factor>::alloc_mem(1, 1);
-    for(int i = 0; i < 3; ++i){
+    for(int i = 0; i < 2; ++i){
       func.setup(sig, par.begin() + 1, 1.);
       arma::vec lower(1), upper(1), mu(1);
       lower[0] = lbs[i];
@@ -653,14 +936,15 @@ context("restrictcdf unit tests") {
      f <- \(x) pnorm(0, x[1], sqrt(x[2]), log = TRUE)
      dput(f(c(mu, Sig)) |> exp())
      dput(numDeriv::grad(f, c(mu, Sig)))
+
+     f <- \(x) pnorm(0, x[1], sqrt(x[2]), log = TRUE, lower.tail = FALSE)
+     dput(f(c(mu, Sig)) |> exp())
+     dput(numDeriv::grad(f, c(mu, Sig)))
      */
     constexpr unsigned dim{4}, n_sequences{1};
     constexpr double mu{1.5},
-                     Sig{.67},
-                     true_likelihood{0.0334353800612323},
-                     true_gr[]{-2.71919649074598, 3.04387666878185};
-    constexpr double const Inf = std::numeric_limits<double>::infinity();
-    arma::vec const lb{-Inf}, ub{0};
+                     Sig{.67};
+    constexpr double Inf = std::numeric_limits<double>::infinity();
 
     std::vector<unsigned> seeds{ 1L };
     parallelrng::set_rng_seeds(seeds);
@@ -670,18 +954,45 @@ context("restrictcdf unit tests") {
 
     arma::vec mu_vec{mu};
     arma::mat Sig_mat{Sig};
-    pedmod::generic_l_factor l_factor(mu_vec, Sig_mat, 1);
-    auto const res = pedmod::cdf<pedmod::generic_l_factor>(
-      l_factor, lb, ub, mu_vec, Sig_mat, true, true, false).approximate(
-          1000000L, -1, -1, pedmod::cdf_methods::Korobov, 0, n_sequences);
 
-    expect_true(
-      std::abs(true_likelihood - res.likelihood) <
-        std::abs(true_likelihood) * 1e-8);
+    {
+      constexpr double true_likelihood{0.0334353800612323},
+                             true_gr[]{-2.71919649074598, 3.04387666878185};
 
-    expect_true(res.derivs.size() == 2);
-    for(unsigned i = 0; i < 2; ++i)
+      arma::vec const lb{-Inf}, ub{0};
+      pedmod::generic_l_factor l_factor(mu_vec, Sig_mat, 1);
+      auto const res = pedmod::cdf<pedmod::generic_l_factor>(
+        l_factor, lb, ub, mu_vec, Sig_mat, true, true, false).approximate(
+            1000000L, -1, -1, pedmod::cdf_methods::Korobov, 0, n_sequences);
+
       expect_true(
-        std::abs(res.derivs[i] - true_gr[i]) < std::abs(true_gr[i]) * 1e-5);
+        std::abs(true_likelihood - res.likelihood) <
+          true_likelihood * 1e-8);
+
+      expect_true(res.derivs.size() == 2);
+      for(unsigned i = 0; i < 2; ++i)
+        expect_true(
+          std::abs(res.derivs[i] - true_gr[i]) < std::abs(true_gr[i]) * 1e-5);
+    }
+    {
+      constexpr double true_likelihood{0.966564619938768},
+                       true_gr[]{0.0940623795382624, -0.105293708440383};
+
+      arma::vec const lb{0}, ub{Inf};
+
+      pedmod::generic_l_factor l_factor(mu_vec, Sig_mat, 1);
+      auto const res = pedmod::cdf<pedmod::generic_l_factor>(
+        l_factor, lb, ub, mu_vec, Sig_mat, true, true, false).approximate(
+            1000000L, -1, -1, pedmod::cdf_methods::Korobov, 0, n_sequences);
+
+      expect_true(
+        std::abs(true_likelihood - res.likelihood) <
+          true_likelihood * 1e-8);
+
+      expect_true(res.derivs.size() == 2);
+      for(unsigned i = 0; i < 2; ++i)
+        expect_true(
+          std::abs(res.derivs[i] - true_gr[i]) < std::abs(true_gr[i]) * 1e-5);
+    }
   }
 }

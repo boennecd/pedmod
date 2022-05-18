@@ -30,7 +30,7 @@ static inline double pnorm_std(double const x, int lower, int is_log) {
       if(lower)
         return x > 0 ? 0 : -INFINITY;
       else
-        return x < 0 ? 0 :  INFINITY;
+        return x < 0 ? 0 : -INFINITY;
     } else {
       if(lower)
         return x > 0 ? 1 : 0;

@@ -452,13 +452,16 @@ Rcpp::NumericVector eval_pedigree_ll
   openmp_exception_ptr exception_handler;
   pedmod::cdf_methods const meth = pedmod::get_cdf_methods(method);
 
+  for(unsigned thread = 0; thread < n_threads; ++thread){
+    double * wmem = r_mem.get_mem(thread);
+    std::fill(wmem, wmem + 2, 0);
+  }
+
 #ifdef _OPENMP
 #pragma omp parallel num_threads(n_threads)
 {
 #endif
   double *wmem = r_mem.get_mem();
-  wmem[0] = 0;
-  wmem[1] = 0;
 
 #ifdef _OPENMP
 #pragma omp for schedule(static) reduction(+:n_fails)
@@ -555,14 +558,17 @@ Rcpp::NumericVector eval_pedigree_grad
   openmp_exception_ptr exception_handler;
   pedmod::cdf_methods const meth = pedmod::get_cdf_methods(method);
 
+  for(unsigned thread = 0; thread < n_threads; ++thread){
+    double * wmem = r_mem.get_mem(thread);
+    std::fill(wmem, wmem + 2 * (1 + par.size()), 0);
+  }
+
 #ifdef _OPENMP
 #pragma omp parallel num_threads(n_threads)
 {
 #endif
   double * wmem    = r_mem.get_mem(),
          * var_est = wmem + 1 + par.size();
-  std::fill(wmem   , wmem    + 1 + par.size(), 0.);
-  std::fill(var_est, var_est + 1 + par.size(), 0.);
 
 #ifdef _OPENMP
 #pragma omp for schedule(static) reduction(+:n_fails)
@@ -625,6 +631,129 @@ Rcpp::NumericVector eval_pedigree_grad
   return grad;
 }
 
+// [[Rcpp::export("eval_pedigree_hess_cpp")]]
+Rcpp::NumericMatrix eval_pedigree_hess
+  (SEXP ptr, arma::vec par, int const maxvls,
+   double const abs_eps, double const rel_eps,
+   Rcpp::Nullable<Rcpp::IntegerVector> indices = R_NilValue,
+   int const minvls = -1, bool const do_reorder = true,
+   bool const use_aprx = false, unsigned n_threads = 1L,
+   Rcpp::Nullable<Rcpp::NumericVector> cluster_weights = R_NilValue,
+   int const method = 0, bool const use_tilting = false,
+   Rcpp::Nullable<Rcpp::NumericVector> vls_scales = R_NilValue){
+  Rcpp::XPtr<pedigree_terms> terms_ptr(ptr);
+  std::vector<pedmod::pedigree_ll_term > &terms = terms_ptr->terms;
+  n_threads = eval_get_n_threads(n_threads, *terms_ptr);
+
+  parallelrng::set_rng_seeds(n_threads);
+
+  // checks
+  auto const n_par = terms[0].n_par();
+  if(static_cast<size_t>(par.size()) != n_par)
+    throw std::invalid_argument(
+        "eval_pedigree_hess: invalid par argument. Had " +
+          std::to_string(par.size()) + " elements but should have " +
+          std::to_string(n_par) + ".");
+
+  arma::vec const c_weights
+    {check_n_get_cluster_weights(cluster_weights, terms.size())};
+  bool const has_weights = c_weights.size() > 0;
+
+  arma::vec const vls_scales_use
+    {check_n_get_vls_scales(vls_scales, terms.size(), maxvls)};
+  bool const has_vls_scales{vls_scales_use.size() > 0};
+
+  // transform scale parameters
+  auto const n_fix = terms[0].n_fix_effect();
+  for(unsigned i = n_fix; i < n_par; ++i)
+    par[i] = std::exp(par[i]);
+
+  pedmod::cache_mem<double> r_mem;
+  auto const dim_out = 1 + n_par * (1 + n_par);
+  r_mem.set_n_mem(2 * dim_out, n_threads);
+
+  // compute
+  auto all_idx = get_indices(indices, *terms_ptr);
+  int const * idx = &all_idx[0];
+  int n_fails(0);
+
+  openmp_exception_ptr exception_handler;
+  pedmod::cdf_methods const meth = pedmod::get_cdf_methods(method);
+
+  for(unsigned thread = 0; thread < n_threads; ++thread){
+    double * wmem = r_mem.get_mem(thread);
+    std::fill(wmem, wmem + 2 * dim_out, 0);
+  }
+
+#ifdef _OPENMP
+#pragma omp parallel num_threads(n_threads)
+{
+#endif
+  double * wmem    = r_mem.get_mem(),
+         * var_est = wmem + dim_out;
+
+#ifdef _OPENMP
+#pragma omp for schedule(static) reduction(+:n_fails)
+#endif
+  for(int i = 0; i < all_idx.size(); ++i)
+    exception_handler.run([&]() -> void {
+      if(idx[i] >= static_cast<int>(terms.size()))
+        return;
+      bool did_fail(false);
+      double const w_i = has_weights ? c_weights[idx[i]] : 1;
+      if(std::abs(w_i) < std::numeric_limits<double>::epsilon())
+        return;
+
+      int minvls_use{minvls};
+      int maxvls_use{maxvls};
+      if(has_vls_scales){
+        if(minvls > 0)
+          minvls_use = std::max<int>(1, std::lround(minvls * vls_scales_use[i]));
+        maxvls_use = std::lround(maxvls * vls_scales_use[i]);
+      }
+
+      *wmem += terms.at(idx[i]).hessian(
+        &par[0], wmem + 1,  wmem + 1 + n_par, var_est, maxvls_use, abs_eps,
+        rel_eps, minvls_use, do_reorder, use_aprx, did_fail, w_i, meth,
+        use_tilting);
+      n_fails += did_fail;
+    });
+#ifdef _OPENMP
+}
+#endif
+
+  exception_handler.rethrow_if_error();
+
+  // aggregate the result
+  Rcpp::NumericVector grad(n_par),
+                   std_est(dim_out);
+  Rcpp::NumericMatrix hess(n_par, n_par);
+
+  double ll(0.);
+  for(unsigned i = 0; i < n_threads; ++i){
+    double *wmem = r_mem.get_mem(i);
+    ll += *wmem;
+    for(unsigned j = 0; j < n_par; ++j)
+      grad[j] += wmem[j + 1];
+    for(unsigned j = 0; j < n_par; ++j)
+      for(unsigned k = 0; k < n_par; ++k)
+        hess(k, j) += wmem[1 + n_par + k + j * n_par];
+
+    for(unsigned j = 0; j < dim_out; ++j)
+      std_est[j] += wmem[j + dim_out];
+  }
+
+  for(unsigned j = 0; j < dim_out; ++j)
+    std_est[j] = std::sqrt(std_est[j]);
+
+  hess.attr("logLik")  = Rcpp::NumericVector::create(ll);
+  hess.attr("grad") = grad;
+  hess.attr("n_fails") = Rcpp::IntegerVector::create(n_fails);
+  hess.attr("std")     = std_est;
+
+  return hess;
+}
+
 //' @rdname pedigree_ll_terms
 //'
 //' @export
@@ -684,13 +813,16 @@ Rcpp::NumericVector eval_pedigree_ll_loadings
   openmp_exception_ptr exception_handler;
   pedmod::cdf_methods const meth = pedmod::get_cdf_methods(method);
 
+  for(unsigned thread = 0; thread < n_threads; ++thread){
+    double * wmem = r_mem.get_mem(thread);
+    std::fill(wmem, wmem + 2, 0);
+  }
+
 #ifdef _OPENMP
 #pragma omp parallel num_threads(n_threads)
 {
 #endif
   double *wmem = r_mem.get_mem();
-  wmem[0] = 0;
-  wmem[1] = 0;
 
 #ifdef _OPENMP
 #pragma omp for schedule(static) reduction(+:n_fails)
@@ -784,14 +916,17 @@ Rcpp::NumericVector eval_pedigree_grad_loadings
   openmp_exception_ptr exception_handler;
   pedmod::cdf_methods const meth = pedmod::get_cdf_methods(method);
 
+  for(unsigned thread = 0; thread < n_threads; ++thread){
+    double * wmem = r_mem.get_mem(thread);
+    std::fill(wmem, wmem + 2 * (1 + par.size()), 0);
+  }
+
 #ifdef _OPENMP
 #pragma omp parallel num_threads(n_threads)
 {
 #endif
   double * wmem    = r_mem.get_mem(),
          * var_est = wmem + 1 + par.size();
-  std::fill(wmem   , wmem    + 1 + par.size(), 0.);
-  std::fill(var_est, var_est + 1 + par.size(), 0.);
 
 #ifdef _OPENMP
 #pragma omp for schedule(static) reduction(+:n_fails)

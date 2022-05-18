@@ -202,6 +202,30 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// eval_pedigree_hess
+Rcpp::NumericMatrix eval_pedigree_hess(SEXP ptr, arma::vec par, int const maxvls, double const abs_eps, double const rel_eps, Rcpp::Nullable<Rcpp::IntegerVector> indices, int const minvls, bool const do_reorder, bool const use_aprx, unsigned n_threads, Rcpp::Nullable<Rcpp::NumericVector> cluster_weights, int const method, bool const use_tilting, Rcpp::Nullable<Rcpp::NumericVector> vls_scales);
+RcppExport SEXP _pedmod_eval_pedigree_hess(SEXP ptrSEXP, SEXP parSEXP, SEXP maxvlsSEXP, SEXP abs_epsSEXP, SEXP rel_epsSEXP, SEXP indicesSEXP, SEXP minvlsSEXP, SEXP do_reorderSEXP, SEXP use_aprxSEXP, SEXP n_threadsSEXP, SEXP cluster_weightsSEXP, SEXP methodSEXP, SEXP use_tiltingSEXP, SEXP vls_scalesSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type ptr(ptrSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type par(parSEXP);
+    Rcpp::traits::input_parameter< int const >::type maxvls(maxvlsSEXP);
+    Rcpp::traits::input_parameter< double const >::type abs_eps(abs_epsSEXP);
+    Rcpp::traits::input_parameter< double const >::type rel_eps(rel_epsSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::IntegerVector> >::type indices(indicesSEXP);
+    Rcpp::traits::input_parameter< int const >::type minvls(minvlsSEXP);
+    Rcpp::traits::input_parameter< bool const >::type do_reorder(do_reorderSEXP);
+    Rcpp::traits::input_parameter< bool const >::type use_aprx(use_aprxSEXP);
+    Rcpp::traits::input_parameter< unsigned >::type n_threads(n_threadsSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::NumericVector> >::type cluster_weights(cluster_weightsSEXP);
+    Rcpp::traits::input_parameter< int const >::type method(methodSEXP);
+    Rcpp::traits::input_parameter< bool const >::type use_tilting(use_tiltingSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::NumericVector> >::type vls_scales(vls_scalesSEXP);
+    rcpp_result_gen = Rcpp::wrap(eval_pedigree_hess(ptr, par, maxvls, abs_eps, rel_eps, indices, minvls, do_reorder, use_aprx, n_threads, cluster_weights, method, use_tilting, vls_scales));
+    return rcpp_result_gen;
+END_RCPP
+}
 // pedigree_ll_terms_loadings
 SEXP pedigree_ll_terms_loadings(Rcpp::List data, unsigned const max_threads, unsigned const n_sequences);
 RcppExport SEXP _pedmod_pedigree_ll_terms_loadings(SEXP dataSEXP, SEXP max_threadsSEXP, SEXP n_sequencesSEXP) {
@@ -279,6 +303,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_pedmod_get_n_terms_loadings", (DL_FUNC) &_pedmod_get_n_terms_loadings, 1},
     {"_pedmod_eval_pedigree_ll", (DL_FUNC) &_pedmod_eval_pedigree_ll, 14},
     {"_pedmod_eval_pedigree_grad", (DL_FUNC) &_pedmod_eval_pedigree_grad, 14},
+    {"_pedmod_eval_pedigree_hess", (DL_FUNC) &_pedmod_eval_pedigree_hess, 14},
     {"_pedmod_pedigree_ll_terms_loadings", (DL_FUNC) &_pedmod_pedigree_ll_terms_loadings, 3},
     {"_pedmod_eval_pedigree_ll_loadings", (DL_FUNC) &_pedmod_eval_pedigree_ll_loadings, 14},
     {"_pedmod_eval_pedigree_grad_loadings", (DL_FUNC) &_pedmod_eval_pedigree_grad_loadings, 14},

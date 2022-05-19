@@ -307,13 +307,11 @@ system.time(hess <- eval_pedigree_hess(
 # the gradient is quite small
 sqrt(sum(attr(hess, "grad")^2))
 
-# compute the covariance matrix and show parameter estimates along with standard 
-# errors
-vcov_est <- solve(-hess)
-vcov_est
-
+# show parameter estimates along with standard errors
+rbind(Estimates = opt_out$par, 
+      SE = sqrt(diag(attr(hess, "vcov"))))
 rbind(Estimates = c(head(opt_out$par, -1), exp(tail(opt_out$par, 1))), 
-      SE = sqrt(diag(vcov_est)))
+      SE = sqrt(diag(attr(hess, "vcov_org"))))
 ```
 
 ### Minimax Tilting
@@ -656,29 +654,27 @@ prof_res <- pedmod_profile(
 # the confidence interval for the scale parameter
 exp(prof_res$confs)
 
-# Not too good agreement with the Wald type confidence interval on the square 
-# root scale
-scale_est <- exp(tail(opt_out$par, 1))
-Wald_conf <- sqrt(scale_est) + c(-1, 1) * qnorm(.975) *
-  sqrt(tail(diag(vcov_est), 1)) / (2 * sqrt(scale_est))
-rbind(Wald = Wald_conf, `Profile likelihood` = exp(prof_res$confs / 2))
+# compare with Wald based confidence intervals on the log scale
+Wald_conf <- tail(opt_out$par, 1) + c(-1, 1) * qnorm(.975) *
+  sqrt(tail(diag(attr(hess, "vcov")), 1))
+rbind(Wald = Wald_conf, `Profile likelihood` = prof_res$confs)
 
 # plot the estimated profile likelihood curve and check that everything looks 
 # fine
 sigs <- exp(prof_res$xs / 2)
 pls <- prof_res$p_log_Lik
 par(mar = c(5, 5, 1, 1))
-plot(sigs, pls, bty = "l",
-     pch = 16, xlab = expression(sigma), ylab = "Profile likelihood")
+plot(log(sigs), pls, bty = "l",
+     pch = 16, xlab = expression(log(sigma)), ylab = "Profile likelihood")
 grid()
-smooth_est <- smooth.spline(sigs, pls)
-lines(predict(smooth_est, seq(min(sigs), max(sigs), length.out = 100)))
+smooth_est <- smooth.spline(log(sigs), pls)
+lines(predict(smooth_est, log(seq(min(sigs), max(sigs), length.out = 100))))
 abline(v = exp(tail(opt_out$par, 1) / 2), lty = 2) # the estimate
 abline(v = sqrt(attr(dat, "sig_sq")), lty = 3) # the true value
 abline(h = max(pls) - qchisq(.95, 1) / 2, lty = 3) # mark the critical value
 
-abline(v = Wald_conf, lty = 4) # Wald
-abline(v = exp(prof_res$confs / 2), lty = 3) # Profile likelihood
+abline(v = Wald_conf / 2, lty = 4) # Wald
+abline(v = prof_res$confs / 2, lty = 3) # Profile likelihood
 
 # we can do the same for the slope of the binary covariates
 prof_res <- pedmod_profile(
@@ -688,6 +684,11 @@ prof_res <- pedmod_profile(
 
 # the confidence interval for the slope of the binary covariate
 prof_res$confs
+
+# compare w/ Wald
+Wald_conf <- opt_out$par[3] + c(-1, 1) * qnorm(.975) *
+  sqrt(diag(attr(hess, "vcov"))[3])
+rbind(Wald = Wald_conf, `Profile likelihood` = prof_res$confs)
 ```
 
 ```{r binary_simple_pedmod_profile, cache = 1, message = TRUE, fig.keep="last"}
@@ -999,8 +1000,7 @@ sim_study <- lapply(seeds, function(s){
   message(paste0(capture.output(out$fit_std   $opt_out$par), collapse = "\n"))
   
   par <- out$fit_direct$opt_out$par
-  par[4] <- exp(par[4])
-  SEs <- sqrt(diag(solve(-out$fit_direct$hess)))
+  SEs <- sqrt(diag(attr(out$fit_direct$hess, "vcov")))
   
   message(paste0(capture.output(rbind(
     Estimate = par, SE = SEs)), collapse = "\n"))
@@ -1067,12 +1067,8 @@ apply(time_vals, 1:2, quantile)
 # get the standardized errors
 ers_sds <- sapply(sim_study, function(x){
   par <- x$fit_direct$opt_out$par
-  par[4] <- exp(par[4])
-  err <- par - c(attr(tmp, "beta"), attr(tmp, "sig_sq"))
-  
-  hess <- x$fit_direct$hess
-  SEs <- sqrt(diag(solve(-hess)))
-  
+  err <- par - c(attr(tmp, "beta"), log(attr(tmp, "sig_sq")))
+  SEs <- sqrt(diag(attr(x$fit_direct$hess, "vcov")))
   err / SEs
 })
 
@@ -1304,13 +1300,11 @@ system.time(hess <- eval_pedigree_hess(
 # the gradient is quite small
 sqrt(sum(attr(hess, "grad")^2))
 
-# compute the covariance matrix and show parameter estimates along with standard 
-# errors
-vcov_est <- solve(-hess)
-vcov_est
-
+# show parameter estimates along with standard errors
+rbind(Estimates = opt_out$par, 
+      SE = sqrt(diag(attr(hess, "vcov"))))
 rbind(Estimates = c(head(opt_out$par, -2), exp(tail(opt_out$par, 2))), 
-      SE = sqrt(diag(vcov_est)))
+      SE = sqrt(diag(attr(hess, "vcov_org"))))
 ```
 
 ### Motivation of Different Number of Samples
@@ -1555,7 +1549,9 @@ pl_genetic <- pedmod_profile(
 exp(pl_genetic$confs) # the confidence interval
 
 # compare with the Wald type
-exp(opt_out$par[3]) + c(-1, 1) * qnorm(.975) * sqrt(diag(vcov_est)[3])
+Wald <- 
+  opt_out$par[3] + c(-1, 1) * qnorm(.975) * sqrt(diag(attr(hess, "vcov"))[3])
+rbind(Wald = Wald, `Profile likelihood` = pl_genetic$confs)
 
 # then we compute the curve for the environment effect
 pl_env <- pedmod_profile(
@@ -1566,7 +1562,9 @@ pl_env <- pedmod_profile(
 exp(pl_env$confs) # the confidence interval
 
 # compare with the Wald type
-exp(opt_out$par[4]) + c(-1, 1) * qnorm(.975) * sqrt(diag(vcov_est)[4])
+Wald <- 
+  opt_out$par[4] + c(-1, 1) * qnorm(.975) * sqrt(diag(attr(hess, "vcov"))[4])
+rbind(Wald = Wald, `Profile likelihood` = pl_env$confs)
 ```
 
 We plot the two profile likelihood curves below:
@@ -1796,8 +1794,7 @@ sim_study <- lapply(seeds, function(s){
   message(paste0(capture.output(out$fit_std   $opt_out$par), collapse = "\n"))
   
   par <- out$fit_direct$opt_out$par
-  par[3:4] <- exp(par[3:4])
-  SEs <- sqrt(diag(solve(-out$fit_direct$hess)))
+  SEs <- sqrt(diag(attr(out$fit_direct$hess, "vcov")))
   
   message(paste0(capture.output(rbind(
     Estimate = par, SE = SEs)), collapse = "\n"))
@@ -1866,8 +1863,7 @@ apply(time_vals, 1:2, quantile)
 # get the standardized errors
 ers_sds <- sapply(sim_study, function(x){
   par <- x$fit_direct$opt_out$par
-  par[3:4] <- exp(par[3:4])
-  err <- par - c(attr(tmp, "beta"), attr(tmp, "sig_sq"))
+  err <- par - c(attr(tmp, "beta"), log(attr(tmp, "sig_sq")))
   SEs <- sqrt(diag(solve(-x$fit_direct$hess)))
   
   err / SEs

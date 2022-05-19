@@ -12,3 +12,4 @@
 ^sandbox/*
 ^cran-comments\.md
 ^CRAN-RELEASE$
+^create-vignette\.Rout

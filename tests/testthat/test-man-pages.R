@@ -121,6 +121,16 @@ test_that("examples in manual pages gives the correct answer for eval_pedigree_[
 
   # the hessian
   # fn <- function(par){
+  #   set.seed(1)
+  #   eval_pedigree_ll(
+  #     ptr = ptr, par = par, abs_eps = -1, maxvls = 1e6,
+  #     rel_eps = 1e-12, minvls = 1e6, use_aprx = FALSE,
+  #     cluster_weights = c(1, 3, 0))
+  # }
+  # hess_true <- numDeriv::hessian(
+  #   fn, c(beta, log(scs)), method.args = list(eps = 1e-3, r = 2))
+  # dput(hess_true)
+  # fn_org <- function(par){
   #   par[4:5] <- log(par[4:5])
   #   set.seed(1)
   #   eval_pedigree_ll(
@@ -128,10 +138,14 @@ test_that("examples in manual pages gives the correct answer for eval_pedigree_[
   #       rel_eps = 1e-12, minvls = 1e6, use_aprx = FALSE,
   #       cluster_weights = c(1, 3, 0))
   # }
-  # hess_true <- numDeriv::hessian(fn, c(beta, scs),
-  #                                method.args = list(eps = 1e-3, r = 2))
-  # dput(hess_true)
+  # hess_true_org <- numDeriv::hessian(
+  #   fn_org, c(beta, scs), method.args = list(eps = 1e-3, r = 2))
+  # dput(hess_true_org)
+
   hess_true <- structure(c(
+    -2.88891553189542, -0.372877416220607, -0.276971459436541, 0.0281657330877043, 0.0343517626691977, -0.372877416220607, -1.04898316015941, 0.41871400203138, -0.0128126086495478, -0.0190693013188479, -0.276971459436541, 0.41871400203138, -2.39137670342856, 0.124092440925949, 0.0660723990531604, 0.0281657330877043, -0.0128126086495478, 0.124092440925949, -0.21514573450055, 0.0842551312188162, 0.0343517626691977, -0.0190693013188479, 0.0660723990531604, 0.0842551312188162, -0.215708721111546),
+    .Dim = c(5L, 5L))
+  hess_true_org <- structure(c(
     -2.88891553189542, -0.372877416220607, -0.276971459436541, 0.0563308676050589, 0.104095006476072, -0.372877416220607, -1.04898316015941, 0.41871400203138, -0.0256252124640631, -0.057785767571208, -0.276971459436541, 0.41871400203138, -2.39137670342856, 0.248184857359668, 0.200219327614127, 0.0563308676050589, -0.0256252124640631, 0.248184857359668, 0.399117752341619, 0.51063693960504, 0.104095006476072, -0.057785767571208, 0.200219327614127, 0.51063693960504, 0.579967091261364),
     .Dim = c(5L, 5L))
 
@@ -142,11 +156,11 @@ test_that("examples in manual pages gives the correct answer for eval_pedigree_[
 
   expect_equal(
     hess_w_weight, hess_true, check.attributes = FALSE, tolerance = 1e-3)
-  hess_grad <- attr(hess_w_weight, "grad")
-  hess_grad[4:5] <- hess_grad[4:5] * scs
-
   expect_equal(
-    hess_grad, deriv_w_weight, check.attributes = FALSE, tolerance = 1e-3)
+    attr(hess_w_weight, "hess_org"), hess_true_org, tolerance = 1e-3)
+
+  hess_grad <- attr(hess_w_weight, "grad")
+  expect_equal(hess_grad, c(deriv_w_weight), tolerance = 1e-3)
   expect_equal(
     attr(hess_w_weight, "logLik"), c(ll_w_weight), tolerance = 1e-4)
 

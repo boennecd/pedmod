@@ -365,7 +365,7 @@ library(pedmod)
 ll_terms <- pedigree_ll_terms(dat, max_threads = 4L)
 system.time(start <- pedmod_start(ptr = ll_terms, data = dat, n_threads = 4L))
 #>    user  system elapsed 
-#>  14.374   0.000   3.603
+#>  14.692   0.000   3.683
 
 # log likelihood without the random effects and at the starting values
 start$logLik_no_rng
@@ -380,7 +380,7 @@ system.time(
     n_threads = 4L, 
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 #>    user  system elapsed 
-#>  45.571   0.008  11.446
+#>   45.87    0.00   11.49
 ```
 
 The results of the estimation are shown below:
@@ -438,27 +438,23 @@ system.time(hess <- eval_pedigree_hess(
   ptr = ll_terms, par = opt_out$par, maxvls = 25000L, minvls = 5000L, abs_eps = 0, 
   rel_eps = 1e-4, do_reorder = TRUE, use_aprx = FALSE, n_threads = 4L))
 #>    user  system elapsed 
-#>   8.188   0.000   2.075
+#>   8.202   0.000   2.066
 
 # the gradient is quite small
 sqrt(sum(attr(hess, "grad")^2))
-#> [1] 0.015
+#> [1] 0.02917
 
-# compute the covariance matrix and show parameter estimates along with standard 
-# errors
-vcov_est <- solve(-hess)
-vcov_est
-#>          [,1]     [,2]     [,3]    [,4]
-#> [1,]  0.11713 -0.03718 -0.07714 -0.3070
-#> [2,] -0.03718  0.01444  0.02418  0.1013
-#> [3,] -0.07714  0.02418  0.05559  0.1994
-#> [4,] -0.30703  0.10135  0.19943  0.8692
-
-rbind(Estimates = c(head(opt_out$par, -1), exp(tail(opt_out$par, 1))), 
-      SE = sqrt(diag(vcov_est)))
+# show parameter estimates along with standard errors
+rbind(Estimates = opt_out$par, 
+      SE = sqrt(diag(attr(hess, "vcov"))))
 #>           (Intercept) Continuous Binary       
-#> Estimates     -2.8718     0.9689 1.8783 2.9075
-#> SE             0.3422     0.1202 0.2358 0.9323
+#> Estimates     -2.8718     0.9689  1.878 1.0673
+#> SE             0.3427     0.1203  0.236 0.3211
+rbind(Estimates = c(head(opt_out$par, -1), exp(tail(opt_out$par, 1))), 
+      SE = sqrt(diag(attr(hess, "vcov_org"))))
+#>           (Intercept) Continuous Binary       
+#> Estimates     -2.8718     0.9689  1.878 2.9075
+#> SE             0.3427     0.1203  0.236 0.9336
 ```
 
 ### Minimax Tilting
@@ -930,32 +926,30 @@ exp(prof_res$confs)
 #>  2.50 pct. 97.50 pct. 
 #>      1.613      6.390
 
-# Not too good agreement with the Wald type confidence interval on the square 
-# root scale
-scale_est <- exp(tail(opt_out$par, 1))
-Wald_conf <- sqrt(scale_est) + c(-1, 1) * qnorm(.975) *
-  sqrt(tail(diag(vcov_est), 1)) / (2 * sqrt(scale_est))
-rbind(Wald = Wald_conf, `Profile likelihood` = exp(prof_res$confs / 2))
+# compare with Wald based confidence intervals on the log scale
+Wald_conf <- tail(opt_out$par, 1) + c(-1, 1) * qnorm(.975) *
+  sqrt(tail(diag(attr(hess, "vcov")), 1))
+rbind(Wald = Wald_conf, `Profile likelihood` = prof_res$confs)
 #>                    2.50 pct. 97.50 pct.
-#> Wald                   1.169      2.241
-#> Profile likelihood     1.270      2.528
+#> Wald                  0.4380      1.697
+#> Profile likelihood    0.4779      1.855
 
 # plot the estimated profile likelihood curve and check that everything looks 
 # fine
 sigs <- exp(prof_res$xs / 2)
 pls <- prof_res$p_log_Lik
 par(mar = c(5, 5, 1, 1))
-plot(sigs, pls, bty = "l",
-     pch = 16, xlab = expression(sigma), ylab = "Profile likelihood")
+plot(log(sigs), pls, bty = "l",
+     pch = 16, xlab = expression(log(sigma)), ylab = "Profile likelihood")
 grid()
-smooth_est <- smooth.spline(sigs, pls)
-lines(predict(smooth_est, seq(min(sigs), max(sigs), length.out = 100)))
+smooth_est <- smooth.spline(log(sigs), pls)
+lines(predict(smooth_est, log(seq(min(sigs), max(sigs), length.out = 100))))
 abline(v = exp(tail(opt_out$par, 1) / 2), lty = 2) # the estimate
 abline(v = sqrt(attr(dat, "sig_sq")), lty = 3) # the true value
 abline(h = max(pls) - qchisq(.95, 1) / 2, lty = 3) # mark the critical value
 
-abline(v = Wald_conf, lty = 4) # Wald
-abline(v = exp(prof_res$confs / 2), lty = 3) # Profile likelihood
+abline(v = Wald_conf / 2, lty = 4) # Wald
+abline(v = prof_res$confs / 2, lty = 3) # Profile likelihood
 ```
 
 <img src="man/figures/README-simple_pedmod_profile-1.png" width="100%" />
@@ -995,6 +989,14 @@ prof_res <- pedmod_profile(
 prof_res$confs
 #>  2.50 pct. 97.50 pct. 
 #>      1.502      2.582
+
+# compare w/ Wald
+Wald_conf <- opt_out$par[3] + c(-1, 1) * qnorm(.975) *
+  sqrt(diag(attr(hess, "vcov"))[3])
+rbind(Wald = Wald_conf, `Profile likelihood` = prof_res$confs)
+#>                    2.50 pct. 97.50 pct.
+#> Wald                   1.416      2.341
+#> Profile likelihood     1.502      2.582
 ```
 
 ``` r
@@ -1421,8 +1423,7 @@ sim_study <- lapply(seeds, function(s){
   message(paste0(capture.output(out$fit_std   $opt_out$par), collapse = "\n"))
   
   par <- out$fit_direct$opt_out$par
-  par[4] <- exp(par[4])
-  SEs <- sqrt(diag(solve(-out$fit_direct$hess)))
+  SEs <- sqrt(diag(attr(out$fit_direct$hess, "vcov")))
   
   message(paste0(capture.output(rbind(
     Estimate = par, SE = SEs)), collapse = "\n"))
@@ -1498,50 +1499,46 @@ time_vals <- sapply(sim_study, function(x) {
         Standardized = .(x$fit_std))
 }, simplify = "array")
 apply(time_vals, 1:2, mean)
-#>              opt_out start  total
-#> Direct         6.621 2.104  8.725
-#> Standardized   8.537 2.062 10.599
+#>              opt_out start total
+#> Direct          5.98 1.869 7.849
+#> Standardized    7.87 1.856 9.726
 apply(time_vals, 1:2, sd)
 #>              opt_out start total
-#> Direct         3.812 1.249 4.239
-#> Standardized   2.508 1.354 2.740
+#> Direct         3.361 1.055 3.634
+#> Standardized   2.389 1.221 2.617
 apply(time_vals, 1:2, quantile)
 #> , , opt_out
 #> 
 #>      Direct Standardized
-#> 0%    2.662        4.095
-#> 25%   4.124        6.485
-#> 50%   4.982        9.035
-#> 75%   8.733       10.112
-#> 100% 23.246       14.349
+#> 0%    2.529        3.970
+#> 25%   3.846        6.063
+#> 50%   4.383        8.159
+#> 75%   7.880        9.595
+#> 100% 20.556       12.935
 #> 
 #> , , start
 #> 
 #>      Direct Standardized
-#> 0%    0.849        0.751
-#> 25%   1.375        1.283
-#> 50%   1.650        1.551
-#> 75%   2.381        2.306
-#> 100%  7.193        7.537
+#> 0%    0.693        0.728
+#> 25%   1.201        1.111
+#> 50%   1.414        1.355
+#> 75%   2.112        2.051
+#> 100%  5.959        6.434
 #> 
 #> , , total
 #> 
 #>      Direct Standardized
-#> 0%    3.972        5.570
-#> 25%   5.964        8.432
-#> 50%   7.253       10.745
-#> 75%  11.382       11.972
-#> 100% 28.545       16.437
+#> 0%    3.722        5.000
+#> 25%   5.283        7.855
+#> 50%   6.835        9.726
+#> 75%   9.613       11.624
+#> 100% 24.276       15.367
 
 # get the standardized errors
 ers_sds <- sapply(sim_study, function(x){
   par <- x$fit_direct$opt_out$par
-  par[4] <- exp(par[4])
-  err <- par - c(attr(tmp, "beta"), attr(tmp, "sig_sq"))
-  
-  hess <- x$fit_direct$hess
-  SEs <- sqrt(diag(solve(-hess)))
-  
+  err <- par - c(attr(tmp, "beta"), log(attr(tmp, "sig_sq")))
+  SEs <- sqrt(diag(attr(x$fit_direct$hess, "vcov")))
   err / SEs
 })
 
@@ -1550,16 +1547,16 @@ rowMeans(abs(ers_sds) < qnorm(.975)) # 95% coverage
 #>        0.98        0.98        0.98        0.96
 rowMeans(abs(ers_sds) < qnorm(.995)) # 99% coverage
 #> (Intercept)  Continuous      Binary             
-#>        1.00        0.98        0.98        0.98
+#>        1.00        0.98        0.98        1.00
 
 # stats for the computation time of the Hessian
 hess_time <- sapply(
   sim_study, function(x) attr(x$fit_direct$hess, "time")["elapsed"])
 mean(hess_time)
-#> [1] 1.298
+#> [1] 1.168
 quantile(hess_time, probs = seq(0, 1, .1))
 #>    0%   10%   20%   30%   40%   50%   60%   70%   80%   90%  100% 
-#> 1.051 1.130 1.175 1.185 1.216 1.290 1.382 1.413 1.430 1.450 1.598
+#> 1.045 1.124 1.134 1.138 1.142 1.154 1.178 1.189 1.208 1.226 1.324
 ```
 
 ## Example: Adding Child Environment Effects
@@ -1677,12 +1674,12 @@ system.time(ll_res <- eval_pedigree_ll(
   ll_terms_wo_weights, c(beta_true, log(sig_sq_true)), maxvls = 100000L, 
   abs_eps = 0, rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4))
 #>    user  system elapsed 
-#>   0.562   0.000   0.142
+#>   0.585   0.000   0.148
 system.time(grad_res <- eval_pedigree_grad(
   ll_terms_wo_weights, c(beta_true, log(sig_sq_true)), maxvls = 100000L, 
   abs_eps = 0, rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4))
 #>    user  system elapsed 
-#>  13.309   0.000   3.393
+#>  15.573   0.000   3.943
 
 # find the duplicated combinations of pedigrees, covariates, and outcomes. One 
 # likely needs to change this code if the pedigrees are not identical but are 
@@ -1705,13 +1702,13 @@ system.time(ll_res_fast <- eval_pedigree_ll(
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4, 
   cluster_weights = c_weights))
 #>    user  system elapsed 
-#>   0.246   0.000   0.063
+#>   0.256   0.000   0.066
 system.time(grad_res_fast <- eval_pedigree_grad(
   ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4, 
   cluster_weights = c_weights))
 #>    user  system elapsed 
-#>   5.768   0.000   1.521
+#>   6.408   0.000   1.673
 
 # show that we get the same (up to a Monte Carlo error)
 print(c(redundant = ll_res, fast = ll_res_fast), digits = 6)
@@ -1780,20 +1777,20 @@ system.time(ll_res_fast <- eval_pedigree_ll(
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4, 
   cluster_weights = c_weights, vls_scales = sqrt(c_weights)))
 #>    user  system elapsed 
-#>   0.369   0.000   0.126
+#>   0.428   0.000   0.150
 system.time(grad_res_fast <- eval_pedigree_grad(
   ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4, 
   cluster_weights = c_weights, vls_scales = sqrt(c_weights)))
 #>    user  system elapsed 
-#>   6.335   0.000   1.670
+#>   6.921   0.000   1.888
 
 # find the starting values
 system.time(start <- pedmod_start(
   ptr = ll_terms, data = dat_unqiue, cluster_weights = c_weights, 
   vls_scales = sqrt(c_weights)))
 #>    user  system elapsed 
-#>   7.700   0.000   7.701
+#>   7.565   0.000   7.565
 
 # optimize
 system.time(
@@ -1803,7 +1800,7 @@ system.time(
     maxvls = 5000L, rel_eps = 1e-2, minvls = 500L, 
     vls_scales = sqrt(c_weights)))
 #>    user  system elapsed 
-#>   6.231   0.000   1.644
+#>   6.524   0.000   1.709
 system.time(
   opt_out <- pedmod_opt(
     ptr = ll_terms, par = opt_out_quick$par, abs_eps = 0, use_aprx = TRUE, 
@@ -1811,7 +1808,7 @@ system.time(
     # we changed these parameters
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 #>    user  system elapsed 
-#>   32.02    0.00   10.13
+#>  33.713   0.004  10.500
 ```
 
 The results are shown below:
@@ -1849,27 +1846,23 @@ system.time(hess <- eval_pedigree_hess(
   rel_eps = 1e-4, do_reorder = TRUE, use_aprx = FALSE, n_threads = 4L,
   cluster_weights = c_weights, vls_scales = sqrt(c_weights)))
 #>    user  system elapsed 
-#>  12.026   0.000   4.396
+#>  12.668   0.000   4.628
 
 # the gradient is quite small
 sqrt(sum(attr(hess, "grad")^2))
-#> [1] 0.08536
+#> [1] 0.1233
 
-# compute the covariance matrix and show parameter estimates along with standard 
-# errors
-vcov_est <- solve(-hess)
-vcov_est
-#>          [,1]    [,2]    [,3]     [,4]
-#> [1,]  0.09402 -0.1248 -0.1569 -0.07960
-#> [2,] -0.12482  0.1728  0.2100  0.10685
-#> [3,] -0.15694  0.2100  0.2983  0.10625
-#> [4,] -0.07960  0.1069  0.1062  0.09781
-
+# show parameter estimates along with standard errors
+rbind(Estimates = opt_out$par, 
+      SE = sqrt(diag(attr(hess, "vcov"))))
+#>           (Intercept) Binary               
+#> Estimates      -2.919 3.9073 0.6166 -0.1745
+#> SE              0.305 0.4136 0.2932  0.3710
 rbind(Estimates = c(head(opt_out$par, -2), exp(tail(opt_out$par, 2))), 
-      SE = sqrt(diag(vcov_est)))
+      SE = sqrt(diag(attr(hess, "vcov_org"))))
 #>           (Intercept) Binary              
-#> Estimates     -2.9187 3.9073 1.8526 0.8399
-#> SE             0.3066 0.4158 0.5462 0.3127
+#> Estimates      -2.919 3.9073 1.8526 0.8399
+#> SE              0.305 0.4136 0.5432 0.3116
 ```
 
 ### Motivation of Different Number of Samples
@@ -2226,8 +2219,12 @@ exp(pl_genetic$confs) # the confidence interval
 #>      1.046      3.713
 
 # compare with the Wald type
-exp(opt_out$par[3]) + c(-1, 1) * qnorm(.975) * sqrt(diag(vcov_est)[3])
-#> [1] 0.7822 2.9230
+Wald <- 
+  opt_out$par[3] + c(-1, 1) * qnorm(.975) * sqrt(diag(attr(hess, "vcov"))[3])
+rbind(Wald = Wald, `Profile likelihood` = pl_genetic$confs)
+#>                    2.50 pct. 97.50 pct.
+#> Wald                 0.04186      1.191
+#> Profile likelihood   0.04545      1.312
 
 # then we compute the curve for the environment effect
 pl_env <- pedmod_profile(
@@ -2262,8 +2259,12 @@ exp(pl_env$confs) # the confidence interval
 #>     0.3471     1.8223
 
 # compare with the Wald type
-exp(opt_out$par[4]) + c(-1, 1) * qnorm(.975) * sqrt(diag(vcov_est)[4])
-#> [1] 0.2269 1.4528
+Wald <- 
+  opt_out$par[4] + c(-1, 1) * qnorm(.975) * sqrt(diag(attr(hess, "vcov"))[4])
+rbind(Wald = Wald, `Profile likelihood` = pl_env$confs)
+#>                    2.50 pct. 97.50 pct.
+#> Wald                 -0.9017     0.5527
+#> Profile likelihood   -1.0581     0.6001
 ```
 
 We plot the two profile likelihood curves below:
@@ -2609,8 +2610,7 @@ sim_study <- lapply(seeds, function(s){
   message(paste0(capture.output(out$fit_std   $opt_out$par), collapse = "\n"))
   
   par <- out$fit_direct$opt_out$par
-  par[3:4] <- exp(par[3:4])
-  SEs <- sqrt(diag(solve(-out$fit_direct$hess)))
+  SEs <- sqrt(diag(attr(out$fit_direct$hess, "vcov")))
   
   message(paste0(capture.output(rbind(
     Estimate = par, SE = SEs)), collapse = "\n"))
@@ -2689,45 +2689,44 @@ time_vals <- sapply(sim_study, function(x) {
 }, simplify = "array")
 apply(time_vals, 1:2, mean)
 #>              opt_out start total
-#> Direct          13.1 4.068 17.17
-#> Standardized    10.8 4.125 14.92
+#> Direct        11.329 3.433 14.76
+#> Standardized   9.356 3.454 12.81
 apply(time_vals, 1:2, sd)
 #>              opt_out start total
-#> Direct         7.643 2.514 7.973
-#> Standardized   6.545 2.049 7.036
+#> Direct         6.423 2.048 6.634
+#> Standardized   5.558 1.657 5.863
 apply(time_vals, 1:2, quantile)
 #> , , opt_out
 #> 
 #>      Direct Standardized
-#> 0%    1.270        1.297
-#> 25%   6.666        3.005
-#> 50%  13.789       13.052
-#> 75%  18.053       15.838
-#> 100% 31.866       20.013
+#> 0%    1.348        1.320
+#> 25%   6.071        2.754
+#> 50%  11.952       11.003
+#> 75%  16.335       13.472
+#> 100% 26.685       18.306
 #> 
 #> , , start
 #> 
 #>      Direct Standardized
-#> 0%    1.627        1.862
-#> 25%   2.699        2.812
-#> 50%   3.094        3.522
-#> 75%   4.845        4.648
-#> 100% 16.322       13.203
+#> 0%    1.495        1.499
+#> 25%   2.300        2.392
+#> 50%   2.695        2.947
+#> 75%   4.088        3.930
+#> 100% 13.544       11.408
 #> 
 #> , , total
 #> 
 #>      Direct Standardized
-#> 0%    3.937        4.033
-#> 25%  10.705        9.006
-#> 50%  18.240       16.374
-#> 75%  22.408       21.110
-#> 100% 39.019       26.340
+#> 0%    3.633        3.635
+#> 25%   9.392        7.837
+#> 50%  15.512       14.571
+#> 75%  19.831       17.195
+#> 100% 32.720       22.291
 
 # get the standardized errors
 ers_sds <- sapply(sim_study, function(x){
   par <- x$fit_direct$opt_out$par
-  par[3:4] <- exp(par[3:4])
-  err <- par - c(attr(tmp, "beta"), attr(tmp, "sig_sq"))
+  err <- par - c(attr(tmp, "beta"), log(attr(tmp, "sig_sq")))
   SEs <- sqrt(diag(solve(-x$fit_direct$hess)))
   
   err / SEs
@@ -2735,19 +2734,19 @@ ers_sds <- sapply(sim_study, function(x){
 
 rowMeans(abs(ers_sds) < qnorm(.975)) # 95% coverage
 #> (Intercept)      Binary                         
-#>        0.94        0.90        0.90        0.98
+#>        0.94        0.90        0.92        0.96
 rowMeans(abs(ers_sds) < qnorm(.995)) # 99% coverage
 #> (Intercept)      Binary                         
-#>        1.00        1.00        0.96        1.00
+#>        1.00        1.00        1.00        0.98
 
 # stats for the computation time of the Hessian
 hess_time <- sapply(
   sim_study, function(x) attr(x$fit_direct$hess, "time")["elapsed"])
 mean(hess_time)
-#> [1] 2.753
+#> [1] 2.432
 quantile(hess_time, probs = seq(0, 1, .1))
 #>    0%   10%   20%   30%   40%   50%   60%   70%   80%   90%  100% 
-#> 2.328 2.523 2.628 2.680 2.705 2.746 2.797 2.842 2.913 3.015 3.105
+#> 2.118 2.286 2.341 2.394 2.411 2.430 2.457 2.497 2.516 2.562 2.673
 ```
 
 ## Individual Specific Loadings

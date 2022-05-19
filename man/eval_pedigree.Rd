@@ -131,12 +131,14 @@ standard error estimates of the gradient. The latter ignores the Monte Carlo
 error from the likelihood approximation.
 
 \code{eval_pedigree_hess}: a matrix with the hessian with
-respect to \code{par}. Note that unlike the other functions, the hessian
-is computed on the scale parameter scale rather than on the log of the
-scale parameters but the log of the scale parameters should be passed.
+respect to \code{par}.
 An attribute called \code{"logLik"} contains the
 log marginal likelihood approximation and an attribute called \code{"grad"}
-contains the gradient· Again, this is on the scale parameter scale.
+contains the gradient·
+The attribute \code{"hess_org"} contains the Hessian with the scale
+parameter on the identity scale rather than the log scale.
+\code{"vcov"} and \code{"vcov_org"} are
+the covariance matrices from the hessian and \code{"hess_org"}.
 }
 \description{
 Approximate the log marginal likelihood and the derivatives with

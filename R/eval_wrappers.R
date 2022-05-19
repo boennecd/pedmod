@@ -295,12 +295,14 @@ eval_pedigree_grad <- function(
 #' @rdname eval_pedigree
 #'
 #' @return \code{eval_pedigree_hess}: a matrix with the hessian with
-#' respect to \code{par}. Note that unlike the other functions, the hessian
-#' is computed on the scale parameter scale rather than on the log of the
-#' scale parameters but the log of the scale parameters should be passed.
+#' respect to \code{par}.
 #' An attribute called \code{"logLik"} contains the
 #' log marginal likelihood approximation and an attribute called \code{"grad"}
-#' contains the gradient· Again, the latter is on the scale parameter scale.
+#' contains the gradient·
+#' The attribute \code{"hess_org"} contains the Hessian with the scale
+#' parameter on the identity scale rather than the log scale.
+#' \code{"vcov"} and \code{"vcov_org"} are
+#' the covariance matrices from the hessian and \code{"hess_org"}.
 #'
 #' @export
 eval_pedigree_hess <- function(
@@ -310,10 +312,46 @@ eval_pedigree_hess <- function(
   stopifnot(inherits(ptr, "pedigree_ll_terms_ptr"))
   .warn_on_standardized(standardized)
 
-  eval_pedigree_hess_cpp(
+  hess_org <- eval_pedigree_hess_cpp(
     ptr = ptr, par = par, maxvls = maxvls, abs_eps = abs_eps,
     rel_eps = rel_eps, indices = indices, minvls = minvls,
     do_reorder = do_reorder, use_aprx = use_aprx, n_threads = n_threads,
     cluster_weights = cluster_weights, method = method,
     use_tilting = use_tilting, vls_scales = vls_scales)
+
+  # compute the Hessian on the log scale of the scale parameters
+  gr <- attr(hess_org, "grad")
+
+  n_scales <- .get_n_scales(ptr)
+  n_par <- length(par)
+  jac <- rep(1, n_par)
+  idx_scale <- seq_len(n_scales) + n_par - n_scales
+  scales <- exp(tail(par, n_scales))
+  jac[idx_scale] <- scales
+  jac <- diag(jac)
+
+  # TODO: this can be done way smarter
+  hess_inner <- matrix(0, n_par * n_par, n_par)
+  for(i in seq_along(idx_scale)){
+    idx <- idx_scale[i]
+    hess_inner[(idx - 1L) * n_par + idx, idx] <- scales[i]
+  }
+
+  hess <- jac %*% hess_org %*% jac + (t(gr) %x% diag(n_par)) %*% hess_inner
+
+  attributes(hess) <- attributes(hess_org)
+  attributes(hess_org) <- NULL
+  dim(hess_org) <- dim(hess)
+  attr(hess, "hess_org") <- hess_org
+
+  vcov <- try(solve(-hess))
+  if(!inherits(vcov, "try-error"))
+    vcov_org <- jac %*% vcov %*% jac
+  else
+    vcov_org <- vcov
+  attr(hess, "vcov") <- vcov
+  attr(hess, "vcov_org") <- vcov_org
+  attr(hess, "grad") <- drop(jac %*% gr)
+
+  hess
 }

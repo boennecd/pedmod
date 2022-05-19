@@ -152,7 +152,6 @@
 #'           tolerance = 1e-5)
 #'
 #' hess_grad <- attr(hess_dum, "grad")
-#' hess_grad[4:5] <- hess_grad[4:5] * scs
 #' all.equal(hess_grad, deriv_dum, check.attributes = FALSE,
 #'           tolerance = 1e-3)
 #'

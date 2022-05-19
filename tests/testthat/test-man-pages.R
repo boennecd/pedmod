@@ -171,7 +171,7 @@ test_that("examples in manual pages gives the correct answer for eval_pedigree_[
     rel_eps = 1e-3, minvls = 2000, use_aprx = TRUE)
   attr(hess_w_weight, "n_fails") <- attr(hess_dum, "n_fails") <- NULL
   attr(hess_w_weight, "std") <- attr(hess_dum, "std") <- NULL
-  expect_equal(hess_dum, hess_w_weight, tolerance = 1e-3)
+  expect_equal(hess_dum, hess_w_weight, tolerance = 1e-2)
 
   # with loadings
   dat_arg_loadings <- lapply(fam_dat, function(x){

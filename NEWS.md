@@ -3,7 +3,7 @@
   the `eval_pedigree_hess` function.
 * `pedmod_profile` works with object from `pedigree_ll_terms_loadings`.
 * `pedmod_profile_nleq` has been added to construct profile likelihood based 
-  confidence intervals for general non-linear transformation of the model 
+  confidence intervals for general non-linear transformations of the model 
   parameters.
 * An undefined undefined behavior bug has been fixed in the C++ code which 
   possibly effects cases where `use_aprx = TRUE` but only in very extreme 

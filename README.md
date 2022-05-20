@@ -2492,6 +2492,7 @@ curves are the invalid/attempted profile likelihood curves.
 # using the right approach 
 estimate <- exp(tail(opt_out$par, 2))
 estimate <- estimate / (1 + sum(estimate))
+par(mar = c(5, 5, 1, 1))
 do_plot(pl_genetic_prop, expression(h[G]), estimate[1], identity)
 
 # create curve using the wrong approach

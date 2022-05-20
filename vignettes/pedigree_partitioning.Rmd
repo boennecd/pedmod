@@ -9,7 +9,7 @@ knitr::opts_chunk$set(
   comment = "#>",
   fig.path = "figures/partitioning-",
   cache.path = "cache/partitioning-",
-  out.width = "100%", fig.width = 7, fig.height = 4,
+  out.width = "100%", fig.width = 7, fig.height = 4, dpi = 50,
   message = FALSE, warning = FALSE, error = FALSE)
 options(digits = 4)
 ```

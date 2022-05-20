@@ -1055,8 +1055,6 @@ public:
 
   /**
    * runs the approximate maximally balanced connected partition algorithm.
-   * See
-   *    https://cstheory.stackexchange.com/q/48864/62145
    */
   mbcp_result get(double const slack, unsigned const max_kl_it_inner,
                   unsigned const max_kl_it){

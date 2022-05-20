@@ -463,13 +463,13 @@ show_split(sim_dat, max_part)
 ```
 
 Our implementation of the method by @Chlebíková96 is outlined at
-[cstheory.stackexchange.com/q/48864/62145](https://cstheory.stackexchange.com/q/48864/62145). 
+[Implementation Details](#implementation-details). 
 Currently, we re-compute the cut vertices (articulation points) at every 
 iteration but it may be possible to update these which presumably will be faster
 and reduce the overall computation time. We do find a perfectly balanced 
 partition 
 above where each set is of size 25. However, we cut `r NROW(removed_edges)` edges
-to this. Thus, we implemented a greedy method to reduce the number of cut edges
+to do this. Thus, we implemented a greedy method to reduce the number of cut edges
 while maintaining a roughly balanced connected partition which we outline next.
 
 Given an approximately balanced connected partition $(V_1, V_2)$ and vertex 
@@ -700,5 +700,41 @@ NROW(max_part$removed_edges) # number of removed edges
 The method completely failed this time except when we started from the 
 balanced connected partition.
 
+### Implementation Details
+
+The algorithm by @Chlebíková96 is given below. 
+Given a block (2-connected graph) $G=(V,E)$ and a vertex weight function $w$:
+
+ 0. Order $V$ in such a way that $w(v_1) \geq w(v_2) \geq w(v_3) \geq \dots$.  
+    Initialize $V_1 = \{v_1\}$ and $V_2 = V\setminus V_1$.
+ 1. If $w(V_1) \geq w(V)/2$ then go to 3. else go to 2.
+ 2. Let 
+  $$V_0 = \left\{u \in V_2 \mid \left(V_1 \cup \{u\}, V_2 \setminus \{u\}\right) \text{ is a connected partition of }G\right\}.$$
+    Choose $u = \text{arg min}_{v\in V_0} w(v)$.  
+    If $w(u) < w(V) - 2w(V_1)$ then set 
+    $V_1 := V_1 \cup \{u\}$ and $V_2 := V_2 \setminus \{u\}$ and go to 1. else go to 3.
+ 3. Return $(V_1, V_2)$.
+
+The $V_1 \cup \{u\}$ condition in step 2. is easy to deal with as one can keep track of vertices that have neighbors in the other set.
+We cannot remove $u\in V_2$ in 2. if $u$ is an articulation point (cut vertex) 
+of $V_2$ as then $V_2$ is no longer connected. Therefore, an implementation 
+may look as follows:
+
+ 0. Find $v_1 = \text{arg max}_{u \in V} w(u)$.  
+    Initialize $V_1 = \{v_1\}$ and $V_2 = V\setminus V_1$.  
+    Create the sets
+      $$\begin{align*}
+         I &= \left\{u \in V_2 \mid u \text{ has an edge to any vertex } v \in V_1\right\} \\
+         A &= \left\{u \in V_2 \mid u \text{ is an articulation point of }V_2\right\}.
+      \end{align*}$$
+ 1. If $w(V_1) \geq w(V)/2$ then go to 4. else go to 2.
+ 2. Let $V_0 = I \setminus A$.
+    Choose $u = \text{arg min}_{v\in V_0} w(v)$.  
+    If $w(u) < w(V) - 2w(V_1)$ then go to 3. else go to 4.
+ 3. Set $V_1 := V_1 \cup \{u\}$ and $V_2 := V_2 \setminus \{u\}$.  
+    Update $I$ and $A$ and go to 1.
+ 4. Return $(V_1, V_2)$.
+ 
+We can find the articulation points in $\mathcal O(\lvert V_2\rvert)$ using the method suggested by @Hopcroft73 and we do not need to do anything for every vertex $u\in I$. Perhaps we can update $A$ quicker then this though.
 
 ## References

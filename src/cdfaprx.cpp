@@ -305,7 +305,7 @@ void pedigree_l_factor::univariate
     return -x * x / 2. - log_sqrt_2_pi_inv;
   };
 
-  // TODO: the code does not seem correct if one of the limits are not Inf
+  // TODO: the code does not seem correct if both the limits are finite
   bool const f_ub = std::isinf(ub),
              f_lb = std::isinf(lw);
 
@@ -509,12 +509,14 @@ void pedigree_l_factor_Hessian::operator()
       outer_vec[fix] = std::inner_product
         (X_permu + fix * n_mem, X_permu + (fix + 1) * n_mem, draw_scaled, 0.);
 
+    // TODO: exploit the symmetry and only store the triangular part
     for(size_t scale = 0; scale < n_scales; ++scale)
       outer_vec[scale + n_fix] = std::inner_product
         (outer_res, outer_res + n_mem * n_mem, scale_mats_permu[scale], 0.);
 
     size_t const vec_outer_res_dim{n_fix + n_scales};
     double * const vec_outer_res{res_i + shift_vec_outer_res};
+    // TODO: exploit the symmetry and only store the triangular part
     for(size_t param1 = 0; param1 < vec_outer_res_dim; ++param1)
       for(size_t param2 = 0; param2 < vec_outer_res_dim; ++param2)
         vec_outer_res[param2 + param1 * vec_outer_res_dim] =
@@ -529,7 +531,7 @@ void pedigree_l_factor_Hessian::univariate
     return -x * x / 2. - log_sqrt_2_pi_inv;
   };
 
-  // TODO: the code does not seem correct if one of the limits are not Inf
+  // TODO: the code does not seem correct if both the limits are finite
   bool const f_ub = std::isinf(ub),
              f_lb = std::isinf(lw);
 

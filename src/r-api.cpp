@@ -719,30 +719,44 @@ Rcpp::NumericMatrix eval_pedigree_hess
   exception_handler.rethrow_if_error();
 
   // aggregate the result
+  // Rcpp::NumericVector grad
+  //     (r_mem.get_mem(0) + 1, r_mem.get_mem(0) + 1 + n_par);
+  // Rcpp::NumericVector std_est
+  //     (r_mem.get_mem(0) + dim_out, r_mem.get_mem(0) + 2 * dim_out);
   Rcpp::NumericVector grad(n_par),
                    std_est(dim_out);
   Rcpp::NumericMatrix hess(n_par, n_par);
+  // std::copy(r_mem.get_mem(0) + 1 + n_par,
+  //           r_mem.get_mem(0) + 1 + n_par * (1 + n_par),
+  //           hess.begin());
 
-  double ll(0.);
+  // double ll{*r_mem.get_mem(0)};
+  double ll{};
   for(unsigned thread = 0; thread < n_threads; ++thread){
     double *wmem = r_mem.get_mem(thread);
     ll += *wmem;
     for(unsigned j = 0; j < n_par; ++j)
-      grad[j] += wmem[j + 1];
+      grad(j) += wmem[j + 1];
     for(unsigned j = 0; j < n_par; ++j)
       for(unsigned k = 0; k < n_par; ++k)
         hess(k, j) += wmem[1 + n_par + k + j * n_par];
 
     for(unsigned j = 0; j < dim_out; ++j)
-      std_est[j] += wmem[j + dim_out];
+      std_est(j) += wmem[j + dim_out];
   }
 
   for(unsigned j = 0; j < dim_out; ++j)
-    std_est[j] = std::sqrt(std_est[j]);
+    std_est(j) = std::sqrt(std_est[j]);
 
   hess.attr("logLik")  = Rcpp::NumericVector::create(ll);
   hess.attr("grad") = grad;
-  hess.attr("todo_delete_raw") = arma::vec(r_mem.get_mem(0), dim_out);
+
+  arma::vec todo_delete_raw(dim_out * n_threads);
+  for(unsigned thread = 0; thread < n_threads; ++thread)
+    std::copy(r_mem.get_mem(thread), r_mem.get_mem(thread) + dim_out,
+              todo_delete_raw.begin() + dim_out * thread);
+  hess.attr("todo_delete_raw") = Rcpp::NumericVector(
+    todo_delete_raw.begin(), todo_delete_raw.end());
   hess.attr("n_fails") = Rcpp::IntegerVector::create(n_fails);
   hess.attr("std") = std_est;
 

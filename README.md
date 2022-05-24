@@ -365,7 +365,7 @@ library(pedmod)
 ll_terms <- pedigree_ll_terms(dat, max_threads = 4L)
 system.time(start <- pedmod_start(ptr = ll_terms, data = dat, n_threads = 4L))
 #>    user  system elapsed 
-#>  14.692   0.000   3.683
+#>  15.863   0.004   3.983
 
 # log likelihood without the random effects and at the starting values
 start$logLik_no_rng
@@ -380,7 +380,7 @@ system.time(
     n_threads = 4L, 
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 #>    user  system elapsed 
-#>   45.87    0.00   11.49
+#>   45.77    0.00   11.45
 ```
 
 The results of the estimation are shown below:
@@ -438,7 +438,7 @@ system.time(hess <- eval_pedigree_hess(
   ptr = ll_terms, par = opt_out$par, maxvls = 25000L, minvls = 5000L, abs_eps = 0, 
   rel_eps = 1e-4, do_reorder = TRUE, use_aprx = FALSE, n_threads = 4L))
 #>    user  system elapsed 
-#>   8.202   0.000   2.066
+#>   8.522   0.000   2.145
 
 # the gradient is quite small
 sqrt(sum(attr(hess, "grad")^2))
@@ -453,8 +453,8 @@ rbind(Estimates = opt_out$par,
 rbind(Estimates = c(head(opt_out$par, -1), exp(tail(opt_out$par, 1))), 
       SE = sqrt(diag(attr(hess, "vcov_org"))))
 #>           (Intercept) Continuous Binary       
-#> Estimates     -2.8718     0.9689  1.878 2.9075
-#> SE             0.3427     0.1203  0.236 0.9336
+#> Estimates     -2.8718     0.9689 1.8783 2.9075
+#> SE             0.3422     0.1202 0.2358 0.9323
 ```
 
 ### Minimax Tilting
@@ -1674,12 +1674,12 @@ system.time(ll_res <- eval_pedigree_ll(
   ll_terms_wo_weights, c(beta_true, log(sig_sq_true)), maxvls = 100000L, 
   abs_eps = 0, rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4))
 #>    user  system elapsed 
-#>   0.585   0.000   0.148
+#>   0.573   0.000   0.146
 system.time(grad_res <- eval_pedigree_grad(
   ll_terms_wo_weights, c(beta_true, log(sig_sq_true)), maxvls = 100000L, 
   abs_eps = 0, rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4))
 #>    user  system elapsed 
-#>  15.573   0.000   3.943
+#>  15.363   0.000   3.945
 
 # find the duplicated combinations of pedigrees, covariates, and outcomes. One 
 # likely needs to change this code if the pedigrees are not identical but are 
@@ -1702,13 +1702,13 @@ system.time(ll_res_fast <- eval_pedigree_ll(
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4, 
   cluster_weights = c_weights))
 #>    user  system elapsed 
-#>   0.256   0.000   0.066
+#>   0.239   0.000   0.063
 system.time(grad_res_fast <- eval_pedigree_grad(
   ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4, 
   cluster_weights = c_weights))
 #>    user  system elapsed 
-#>   6.408   0.000   1.673
+#>   6.441   0.000   1.719
 
 # show that we get the same (up to a Monte Carlo error)
 print(c(redundant = ll_res, fast = ll_res_fast), digits = 6)
@@ -1777,20 +1777,20 @@ system.time(ll_res_fast <- eval_pedigree_ll(
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4, 
   cluster_weights = c_weights, vls_scales = sqrt(c_weights)))
 #>    user  system elapsed 
-#>   0.428   0.000   0.150
+#>   0.365   0.000   0.124
 system.time(grad_res_fast <- eval_pedigree_grad(
   ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4, 
   cluster_weights = c_weights, vls_scales = sqrt(c_weights)))
 #>    user  system elapsed 
-#>   6.921   0.000   1.888
+#>   6.321   0.000   1.681
 
 # find the starting values
 system.time(start <- pedmod_start(
   ptr = ll_terms, data = dat_unqiue, cluster_weights = c_weights, 
   vls_scales = sqrt(c_weights)))
 #>    user  system elapsed 
-#>   7.565   0.000   7.565
+#>   7.802   0.000   7.802
 
 # optimize
 system.time(
@@ -1800,7 +1800,7 @@ system.time(
     maxvls = 5000L, rel_eps = 1e-2, minvls = 500L, 
     vls_scales = sqrt(c_weights)))
 #>    user  system elapsed 
-#>   6.524   0.000   1.709
+#>   6.302   0.000   1.668
 system.time(
   opt_out <- pedmod_opt(
     ptr = ll_terms, par = opt_out_quick$par, abs_eps = 0, use_aprx = TRUE, 
@@ -1808,7 +1808,7 @@ system.time(
     # we changed these parameters
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 #>    user  system elapsed 
-#>  33.713   0.004  10.500
+#>  33.922   0.009  10.703
 ```
 
 The results are shown below:
@@ -1846,7 +1846,7 @@ system.time(hess <- eval_pedigree_hess(
   rel_eps = 1e-4, do_reorder = TRUE, use_aprx = FALSE, n_threads = 4L,
   cluster_weights = c_weights, vls_scales = sqrt(c_weights)))
 #>    user  system elapsed 
-#>  12.668   0.000   4.628
+#>  12.505   0.000   4.535
 
 # the gradient is quite small
 sqrt(sum(attr(hess, "grad")^2))
@@ -1861,8 +1861,8 @@ rbind(Estimates = opt_out$par,
 rbind(Estimates = c(head(opt_out$par, -2), exp(tail(opt_out$par, 2))), 
       SE = sqrt(diag(attr(hess, "vcov_org"))))
 #>           (Intercept) Binary              
-#> Estimates      -2.919 3.9073 1.8526 0.8399
-#> SE              0.305 0.4136 0.5432 0.3116
+#> Estimates     -2.9187 3.9073 1.8526 0.8399
+#> SE             0.3066 0.4158 0.5462 0.3127
 ```
 
 ### Motivation of Different Number of Samples

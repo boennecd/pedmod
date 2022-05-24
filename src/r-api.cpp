@@ -459,8 +459,8 @@ Rcpp::NumericVector eval_pedigree_ll
 
 #ifdef _OPENMP
 #pragma omp parallel num_threads(n_threads)
-{
 #endif
+  {
   double *wmem = r_mem.get_mem();
 
 #ifdef _OPENMP
@@ -491,9 +491,7 @@ Rcpp::NumericVector eval_pedigree_ll
       wmem[1] += w_i * w_i * res.estimator_var;
       n_fails += did_fail;
     });
-#ifdef _OPENMP
-}
-#endif
+  }
 
   exception_handler.rethrow_if_error();
 
@@ -565,8 +563,8 @@ Rcpp::NumericVector eval_pedigree_grad
 
 #ifdef _OPENMP
 #pragma omp parallel num_threads(n_threads)
-{
 #endif
+  {
   double * wmem    = r_mem.get_mem(),
          * var_est = wmem + 1 + par.size();
 
@@ -595,9 +593,7 @@ Rcpp::NumericVector eval_pedigree_grad
         do_reorder, use_aprx, did_fail, w_i, meth, use_tilting);
       n_fails += did_fail;
     });
-#ifdef _OPENMP
-}
-#endif
+  }
 
   exception_handler.rethrow_if_error();
 
@@ -687,8 +683,8 @@ Rcpp::NumericMatrix eval_pedigree_hess
 
 #ifdef _OPENMP
 #pragma omp parallel num_threads(n_threads)
-{
 #endif
+  {
   double * wmem    = r_mem.get_mem(),
          * var_est = wmem + dim_out;
 
@@ -713,14 +709,12 @@ Rcpp::NumericMatrix eval_pedigree_hess
       }
 
       *wmem += terms.at(idx[i]).hessian(
-        &par[0], wmem + 1,  wmem + 1 + n_par, var_est, maxvls_use, abs_eps,
+        &par[0], wmem + 1, wmem + 1 + n_par, var_est, maxvls_use, abs_eps,
         rel_eps, minvls_use, do_reorder, use_aprx, did_fail, w_i, meth,
         use_tilting);
       n_fails += did_fail;
     });
-#ifdef _OPENMP
-}
-#endif
+  }
 
   exception_handler.rethrow_if_error();
 
@@ -730,8 +724,8 @@ Rcpp::NumericMatrix eval_pedigree_hess
   Rcpp::NumericMatrix hess(n_par, n_par);
 
   double ll(0.);
-  for(unsigned i = 0; i < n_threads; ++i){
-    double *wmem = r_mem.get_mem(i);
+  for(unsigned thread = 0; thread < n_threads; ++thread){
+    double *wmem = r_mem.get_mem(thread);
     ll += *wmem;
     for(unsigned j = 0; j < n_par; ++j)
       grad[j] += wmem[j + 1];
@@ -748,8 +742,9 @@ Rcpp::NumericMatrix eval_pedigree_hess
 
   hess.attr("logLik")  = Rcpp::NumericVector::create(ll);
   hess.attr("grad") = grad;
+  hess.attr("todo_delete_raw") = arma::vec(r_mem.get_mem(0), dim_out);
   hess.attr("n_fails") = Rcpp::IntegerVector::create(n_fails);
-  hess.attr("std")     = std_est;
+  hess.attr("std") = std_est;
 
   return hess;
 }
@@ -820,8 +815,8 @@ Rcpp::NumericVector eval_pedigree_ll_loadings
 
 #ifdef _OPENMP
 #pragma omp parallel num_threads(n_threads)
-{
 #endif
+  {
   double *wmem = r_mem.get_mem();
 
 #ifdef _OPENMP
@@ -852,9 +847,7 @@ Rcpp::NumericVector eval_pedigree_ll_loadings
       wmem[1] += w_i * w_i * res.estimator_var;
       n_fails += did_fail;
     });
-#ifdef _OPENMP
-}
-#endif
+  }
 
   exception_handler.rethrow_if_error();
 
@@ -923,8 +916,8 @@ Rcpp::NumericVector eval_pedigree_grad_loadings
 
 #ifdef _OPENMP
 #pragma omp parallel num_threads(n_threads)
-{
 #endif
+  {
   double * wmem    = r_mem.get_mem(),
          * var_est = wmem + 1 + par.size();
 
@@ -953,9 +946,7 @@ Rcpp::NumericVector eval_pedigree_grad_loadings
         do_reorder, use_aprx, did_fail, w_i, meth, use_tilting);
       n_fails += did_fail;
     });
-#ifdef _OPENMP
-}
-#endif
+  }
 
   exception_handler.rethrow_if_error();
 

@@ -320,6 +320,7 @@ eval_pedigree_hess <- function(
 
   # compute the Hessian on the log scale of the scale parameters
   gr <- attr(hess_org, "grad")
+  todo_delete_raw <- attr(hess_org, "todo_delete_raw")
 
   n_scales <- .get_n_scales(ptr)
   n_par <- length(par)
@@ -342,6 +343,9 @@ eval_pedigree_hess <- function(
   attributes(hess_org) <- NULL
   dim(hess_org) <- dim(hess)
   attr(hess, "hess_org") <- hess_org
+  attr(hess, "todo_delete_jac") <- jac
+  attr(hess, "todo_delete_gr_raw") <- gr
+  attr(hess, "todo_delete_raw") <- todo_delete_raw
 
   vcov <- try(solve(-hess))
   if(!inherits(vcov, "try-error"))

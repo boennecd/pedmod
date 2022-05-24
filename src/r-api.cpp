@@ -729,22 +729,22 @@ Rcpp::NumericMatrix eval_pedigree_hess
                    std_est(dim_out);
   Rcpp::NumericMatrix hess(n_par, n_par);
 
-  double ll(0.);
+  double ll{};
   for(unsigned i = 0; i < n_threads; ++i){
     double *wmem = r_mem.get_mem(i);
     ll += *wmem;
     for(unsigned j = 0; j < n_par; ++j)
-      grad[j] += wmem[j + 1];
+      grad(j) += wmem[j + 1];
     for(unsigned j = 0; j < n_par; ++j)
       for(unsigned k = 0; k < n_par; ++k)
         hess(k, j) += wmem[1 + n_par + k + j * n_par];
 
     for(unsigned j = 0; j < dim_out; ++j)
-      std_est[j] += wmem[j + dim_out];
+      std_est(j) += wmem[j + dim_out];
   }
 
   for(unsigned j = 0; j < dim_out; ++j)
-    std_est[j] = std::sqrt(std_est[j]);
+    std_est(j) = std::sqrt(std_est[j]);
 
   hess.attr("logLik")  = Rcpp::NumericVector::create(ll);
   hess.attr("grad") = grad;

@@ -343,13 +343,11 @@ eval_pedigree_hess <- function(
   dim(hess_org) <- dim(hess)
   attr(hess, "hess_org") <- hess_org
 
-  vcov <- try(solve(-hess))
-  if(!inherits(vcov, "try-error"))
-    vcov_org <- jac %*% vcov %*% jac
-  else
-    vcov_org <- vcov
-  attr(hess, "vcov") <- vcov
-  attr(hess, "vcov_org") <- vcov_org
+  try_solve <- function(x)
+    try(solve(-x))
+
+  attr(hess, "vcov") <- try_solve(hess)
+  attr(hess, "vcov_org") <- try_solve(hess_org)
   attr(hess, "grad") <- drop(jac %*% gr)
 
   hess

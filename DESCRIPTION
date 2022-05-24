@@ -1,7 +1,7 @@
 Package: pedmod
 Type: Package
 Title: Pedigree Models
-Version: 0.2.1
+Version: 0.2.2
 Authors@R: c(
   person("Benjamin", "Christoffersen", 
          email = "boennecd@gmail.com", 

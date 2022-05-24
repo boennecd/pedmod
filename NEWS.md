@@ -1,3 +1,7 @@
+# pedmod 0.2.2
+* a minor bug fix on Mac when using Apple LLVM version 10.0.0 with R version
+  4.2.0 and x86_64.
+
 # pedmod 0.2.1
 * A hessian approximation of objects from `pedigree_ll_terms` is added in 
   the `eval_pedigree_hess` function.

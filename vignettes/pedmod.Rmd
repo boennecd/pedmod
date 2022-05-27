@@ -315,6 +315,61 @@ rbind(Estimates = c(head(opt_out$par, -1), exp(tail(opt_out$par, 1))),
       SE = sqrt(diag(attr(hess, "vcov_org"))))
 ```
 
+We may want to report estimates with the proportion of variances and 
+the standardized fixed effects coefficients which we show later. This can be 
+done by applying the delta method. An example is given below.
+
+```{r std_props_ex}
+# computes the standardized coefficients and proportion of variances. The 
+# covariance matrix is computed using the delta method.
+# 
+# Args:
+#   par: the parameter estimates. 
+#   n_scales: the number of scale parameters.
+#   hess: the output from eval_pedigree_hess
+std_prop_estimates <- function(par, n_scales, hess = NULL){
+  # transform the parameter estimates
+  n_par <- length(par)
+  n_fixef <- n_par - n_scales
+  idx_scale <- seq_len(n_scales) + n_fixef
+  par[idx_scale] <- exp(par[idx_scale])
+  total_var <- 1 + sum(par[idx_scale])
+  
+  denom <- sqrt(total_var)
+  d_denom <- -1/(2 * denom * total_var)
+  par_out <- c(par[-idx_scale] / denom, par[idx_scale] / total_var)
+  
+  if(!is.null(hess)){
+    # compute the Jacobian from par to par_out
+    jac <- matrix(0, n_par, n_par)
+    n_fixed <- n_par - n_scales 
+    for(i in seq_len(n_fixed)){
+      jac[i, i] <- 1 / denom
+      jac[i, idx_scale] <- par[i] * d_denom
+    }
+    
+    for(i in seq_len(n_scales)){
+      jac[idx_scale[i], idx_scale   ] <- -par[idx_scale[i]] / total_var^2
+      jac[idx_scale[i], idx_scale[i]] <- 
+        jac[idx_scale[i], idx_scale[i]] + 1 / total_var
+    }
+    
+    # compute the Hessian using the delta method
+    vcov_var <- tcrossprod(jac %*% attr(hess, "vcov_org"), jac)
+  } else 
+    vcov_var <- NULL
+  
+  list(par = par_out, vcov_var = vcov_var)
+}
+
+# show the transformed estimates along with standard errors
+std_prop <- std_prop_estimates(opt_out$par, n_scales = 1L, hess = hess)
+rbind(
+  Truth = std_prop_estimates(
+    c(attr(dat, "beta"), log(attr(dat, "sig_sq"))), 1)$par,
+  Estimates = std_prop$par, SE = sqrt(diag(std_prop$vcov_var)))
+```
+
 ### Minimax Tilting
 
 The minimax tilting method suggested by @Botev17 is also implemented. The 
@@ -936,7 +991,7 @@ We make a small simulation study below where we are interested in the estimation
 time, bias and coverage of Wald type confidence intervals.
 
 ```{r clean_pre_sim_study_simple, echo = FALSE}
-rm(list = setdiff(ls(), c("sim_dat", "ped", "fam")))
+rm(list = setdiff(ls(), c("sim_dat", "ped", "fam", "std_prop_estimates")))
 ```
 
 ```{r sim_study_simple}
@@ -1073,6 +1128,7 @@ ers_sds <- sapply(sim_study, function(x){
   err / SEs
 })
 
+rowMeans(abs(ers_sds) < qnorm(.95)) # 90% coverage
 rowMeans(abs(ers_sds) < qnorm(.975)) # 95% coverage
 rowMeans(abs(ers_sds) < qnorm(.995)) # 99% coverage
 
@@ -1081,12 +1137,25 @@ hess_time <- sapply(
   sim_study, function(x) attr(x$fit_direct$hess, "time")["elapsed"])
 mean(hess_time)
 quantile(hess_time, probs = seq(0, 1, .1))
+
+# compute the coverage on the standardized scale with the proportion of 
+# variances
+ers_sds <- sapply(sim_study, function(x){
+  par_n_vcov <- std_prop_estimates(
+    x$fit_direct$opt_out$par, 1L, x$fit_direct$hess)
+  truth <- std_prop_estimates(c(attr(tmp, "beta"), log(attr(tmp, "sig_sq"))), 1)
+  (par_n_vcov$par - truth$par) / sqrt(diag(par_n_vcov$vcov_var))
+})
+
+rowMeans(abs(ers_sds) < qnorm(.95)) # 90% coverage
+rowMeans(abs(ers_sds) < qnorm(.975)) # 95% coverage
+rowMeans(abs(ers_sds) < qnorm(.995)) # 99% coverage
 ```
 
 ## Example: Adding Child Environment Effects 
 
 ```{r clean_pre_simple_w_ev, echo = FALSE}
-rm(list = setdiff(ls(), c("ped", "fam")))
+rm(list = setdiff(ls(), c("ped", "fam", "std_prop_estimates")))
 ```
 
 As an extension, we can add a child environment effect. The new scale matrix, 
@@ -1306,6 +1375,18 @@ rbind(Estimates = opt_out$par,
       SE = sqrt(diag(attr(hess, "vcov"))))
 rbind(Estimates = c(head(opt_out$par, -2), exp(tail(opt_out$par, 2))), 
       SE = sqrt(diag(attr(hess, "vcov_org"))))
+```
+
+Again, we can look at the estimates with the standardized fixed effects 
+coefficients and the proportion of variances.
+
+```{r env_std_coef_n_prop_var}
+# show the transformed estimates along with standard errors
+std_prop <- std_prop_estimates(opt_out$par, n_scales = 2L, hess = hess)
+rbind(
+  Truth = std_prop_estimates(
+    c(attr(dat_unqiue, "beta"), log(attr(dat_unqiue, "sig_sq"))), 2)$par,
+  Estimates = std_prop$par, SE = sqrt(diag(std_prop$vcov_var)))
 ```
 
 ### Motivation of Different Number of Samples
@@ -1709,7 +1790,7 @@ We make a small simulation study below where we are interested in the estimation
 time, bias and coverage of Wald type confidence intervals.
 
 ```{r clean_pre_sim_simple_w_ev, echo = FALSE}
-rm(list = setdiff(ls(), c("sim_dat", "ped", "fam", "C_env")))
+rm(list = setdiff(ls(), c("sim_dat", "ped", "fam", "C_env", "std_prop_estimates")))
 ```
 
 ```{r sim_study_simple_w}
@@ -1871,6 +1952,7 @@ ers_sds <- sapply(sim_study, function(x){
   err / SEs
 })
 
+rowMeans(abs(ers_sds) < qnorm(.95)) # 90% coverage
 rowMeans(abs(ers_sds) < qnorm(.975)) # 95% coverage
 rowMeans(abs(ers_sds) < qnorm(.995)) # 99% coverage
 
@@ -1879,6 +1961,19 @@ hess_time <- sapply(
   sim_study, function(x) attr(x$fit_direct$hess, "time")["elapsed"])
 mean(hess_time)
 quantile(hess_time, probs = seq(0, 1, .1))
+
+# compute the coverage on the standardized scale with the proportion of 
+# variances
+ers_sds <- sapply(sim_study, function(x){
+  par_n_vcov <- std_prop_estimates(
+    x$fit_direct$opt_out$par, 2L, x$fit_direct$hess)
+  truth <- std_prop_estimates(c(attr(tmp, "beta"), log(attr(tmp, "sig_sq"))), 2)
+  (par_n_vcov$par - truth$par) / sqrt(diag(par_n_vcov$vcov_var))
+})
+
+rowMeans(abs(ers_sds) < qnorm(.95)) # 90% coverage
+rowMeans(abs(ers_sds) < qnorm(.975)) # 95% coverage
+rowMeans(abs(ers_sds) < qnorm(.995)) # 99% coverage
 ```
 
 ## Individual Specific Loadings

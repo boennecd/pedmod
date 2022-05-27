@@ -457,6 +457,65 @@ rbind(Estimates = c(head(opt_out$par, -1), exp(tail(opt_out$par, 1))),
 #> SE             0.3422     0.1202 0.2358 0.9323
 ```
 
+We may want to report estimates with the proportion of variances and the
+standardized fixed effects coefficients which we show later. This can be
+done by applying the delta method. An example is given below.
+
+``` r
+# computes the standardized coefficients and proportion of variances. The 
+# covariance matrix is computed using the delta method.
+# 
+# Args:
+#   par: the parameter estimates. 
+#   n_scales: the number of scale parameters.
+#   hess: the output from eval_pedigree_hess
+std_prop_estimates <- function(par, n_scales, hess = NULL){
+  # transform the parameter estimates
+  n_par <- length(par)
+  n_fixef <- n_par - n_scales
+  idx_scale <- seq_len(n_scales) + n_fixef
+  par[idx_scale] <- exp(par[idx_scale])
+  total_var <- 1 + sum(par[idx_scale])
+  
+  denom <- sqrt(total_var)
+  d_denom <- -1/(2 * denom * total_var)
+  par_out <- c(par[-idx_scale] / denom, par[idx_scale] / total_var)
+  
+  if(!is.null(hess)){
+    # compute the Jacobian from par to par_out
+    jac <- matrix(0, n_par, n_par)
+    n_fixed <- n_par - n_scales 
+    for(i in seq_len(n_fixed)){
+      jac[i, i] <- 1 / denom
+      jac[i, idx_scale] <- par[i] * d_denom
+    }
+    
+    for(i in seq_len(n_scales)){
+      jac[idx_scale[i], idx_scale   ] <- -par[idx_scale[i]] / total_var^2
+      jac[idx_scale[i], idx_scale[i]] <- 
+        jac[idx_scale[i], idx_scale[i]] + 1 / total_var
+    }
+    
+    # compute the Hessian using the delta method
+    vcov_var <- tcrossprod(jac %*% attr(hess, "vcov_org"), jac)
+  } else 
+    vcov_var <- NULL
+  
+  list(par = par_out, vcov_var = vcov_var)
+}
+
+# show the transformed estimates along with standard errors
+std_prop <- std_prop_estimates(opt_out$par, n_scales = 1L, hess = hess)
+rbind(
+  Truth = std_prop_estimates(
+    c(attr(dat, "beta"), log(attr(dat, "sig_sq"))), 1)$par,
+  Estimates = std_prop$par, SE = sqrt(diag(std_prop$vcov_var)))
+#>           (Intercept) Continuous  Binary        
+#> Truth         -1.5000    0.50000 1.00000 0.75000
+#> Estimates     -1.4528    0.49014 0.95018 0.74408
+#> SE             0.0476    0.02613 0.05042 0.06106
+```
+
 ### Minimax Tilting
 
 The minimax tilting method suggested by Botev (2017) is also
@@ -1542,6 +1601,9 @@ ers_sds <- sapply(sim_study, function(x){
   err / SEs
 })
 
+rowMeans(abs(ers_sds) < qnorm(.95)) # 90% coverage
+#> (Intercept)  Continuous      Binary             
+#>        0.96        0.98        0.96        0.94
 rowMeans(abs(ers_sds) < qnorm(.975)) # 95% coverage
 #> (Intercept)  Continuous      Binary             
 #>        0.98        0.98        0.98        0.96
@@ -1557,6 +1619,25 @@ mean(hess_time)
 quantile(hess_time, probs = seq(0, 1, .1))
 #>    0%   10%   20%   30%   40%   50%   60%   70%   80%   90%  100% 
 #> 1.045 1.124 1.134 1.138 1.142 1.154 1.178 1.189 1.208 1.226 1.324
+
+# compute the coverage on the standardized scale with the proportion of 
+# variances
+ers_sds <- sapply(sim_study, function(x){
+  par_n_vcov <- std_prop_estimates(
+    x$fit_direct$opt_out$par, 1L, x$fit_direct$hess)
+  truth <- std_prop_estimates(c(attr(tmp, "beta"), log(attr(tmp, "sig_sq"))), 1)
+  (par_n_vcov$par - truth$par) / sqrt(diag(par_n_vcov$vcov_var))
+})
+
+rowMeans(abs(ers_sds) < qnorm(.95)) # 90% coverage
+#> (Intercept)  Continuous      Binary             
+#>        0.92        0.88        0.92        0.94
+rowMeans(abs(ers_sds) < qnorm(.975)) # 95% coverage
+#> (Intercept)  Continuous      Binary             
+#>        0.96        0.94        0.92        0.96
+rowMeans(abs(ers_sds) < qnorm(.995)) # 99% coverage
+#> (Intercept)  Continuous      Binary             
+#>        1.00        1.00        0.98        0.98
 ```
 
 ## Example: Adding Child Environment Effects
@@ -1863,6 +1944,22 @@ rbind(Estimates = c(head(opt_out$par, -2), exp(tail(opt_out$par, 2))),
 #>           (Intercept) Binary              
 #> Estimates     -2.9187 3.9073 1.8526 0.8399
 #> SE             0.3066 0.4158 0.5462 0.3127
+```
+
+Again, we can look at the estimates with the standardized fixed effects
+coefficients and the proportion of variances.
+
+``` r
+# show the transformed estimates along with standard errors
+std_prop <- std_prop_estimates(opt_out$par, n_scales = 2L, hess = hess)
+rbind(
+  Truth = std_prop_estimates(
+    c(attr(dat_unqiue, "beta"), log(attr(dat_unqiue, "sig_sq"))), 2)$par,
+  Estimates = std_prop$par, SE = sqrt(diag(std_prop$vcov_var)))
+#>           (Intercept)  Binary               
+#> Truth        -1.50000 2.00000 0.5000 0.25000
+#> Estimates    -1.51892 2.03338 0.5017 0.22745
+#> SE            0.02393 0.04633 0.0578 0.05172
 ```
 
 ### Motivation of Different Number of Samples
@@ -2733,6 +2830,9 @@ ers_sds <- sapply(sim_study, function(x){
   err / SEs
 })
 
+rowMeans(abs(ers_sds) < qnorm(.95)) # 90% coverage
+#> (Intercept)      Binary                         
+#>        0.86        0.88        0.90        0.94
 rowMeans(abs(ers_sds) < qnorm(.975)) # 95% coverage
 #> (Intercept)      Binary                         
 #>        0.94        0.90        0.92        0.96
@@ -2748,6 +2848,25 @@ mean(hess_time)
 quantile(hess_time, probs = seq(0, 1, .1))
 #>    0%   10%   20%   30%   40%   50%   60%   70%   80%   90%  100% 
 #> 2.118 2.286 2.341 2.394 2.411 2.430 2.457 2.497 2.516 2.562 2.673
+
+# compute the coverage on the standardized scale with the proportion of 
+# variances
+ers_sds <- sapply(sim_study, function(x){
+  par_n_vcov <- std_prop_estimates(
+    x$fit_direct$opt_out$par, 2L, x$fit_direct$hess)
+  truth <- std_prop_estimates(c(attr(tmp, "beta"), log(attr(tmp, "sig_sq"))), 2)
+  (par_n_vcov$par - truth$par) / sqrt(diag(par_n_vcov$vcov_var))
+})
+
+rowMeans(abs(ers_sds) < qnorm(.95)) # 90% coverage
+#> (Intercept)      Binary                         
+#>        0.96        0.94        0.88        0.92
+rowMeans(abs(ers_sds) < qnorm(.975)) # 95% coverage
+#> (Intercept)      Binary                         
+#>        1.00        0.98        0.96        0.98
+rowMeans(abs(ers_sds) < qnorm(.995)) # 99% coverage
+#> (Intercept)      Binary                         
+#>        1.00        0.98        1.00        1.00
 ```
 
 ## Individual Specific Loadings

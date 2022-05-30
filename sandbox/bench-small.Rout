@@ -1,6 +1,6 @@
 
-R version 4.1.1 (2021-08-10) -- "Kick Things"
-Copyright (C) 2021 The R Foundation for Statistical Computing
+R version 4.1.3 (2022-03-10) -- "One Push-Up"
+Copyright (C) 2022 The R Foundation for Statistical Computing
 Platform: x86_64-pc-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -20,34 +20,45 @@ Type 'q()' to quit R.
 > library(microbenchmark)
 > dat <- readRDS("dat-small.RDS")
 > par <- c(attr(dat, "beta"), log(attr(dat, "sig_sq")))
->
+> 
 > library(pedmod)
 > ll_terms <- pedigree_ll_terms(dat, max_threads = 4L)
->
-> do_eval <- function(n_threads, is_grad, use_aprx){
-+   f <- if(is_grad) eval_pedigree_grad else eval_pedigree_ll
+> 
+> do_eval <- function(n_threads, what, use_aprx){
++   f <- switch(what,
++               likelihood = eval_pedigree_ll,
++               gradient = eval_pedigree_grad,
++               hess = eval_pedigree_hess,
++               stop())
++ 
 +   f(ptr = ll_terms, par = par, maxvls = 2500, minvls = 2500,
 +     abs_eps = 0, rel_eps = 0, use_aprx = use_aprx, n_threads = n_threads)
 + }
->
+> 
 > set.seed(1)
 > bench <- microbenchmark(
-+   `fn 1` = do_eval(1, FALSE, TRUE),
-+   `fn 2` = do_eval(2, FALSE, TRUE),
-+   `fn 4` = do_eval(4, FALSE, TRUE),
-+   `gr 1` = do_eval(1, TRUE , TRUE),
-+   `gr 2` = do_eval(2, TRUE , TRUE),
-+   `gr 4` = do_eval(4, TRUE , TRUE),
++   `fn 1` = do_eval(1, "likelihood", TRUE),
++   `fn 2` = do_eval(2, "likelihood", TRUE),
++   `fn 4` = do_eval(4, "likelihood", TRUE),
++   `gr 1` = do_eval(1, "gradient", TRUE),
++   `gr 2` = do_eval(2, "gradient", TRUE),
++   `gr 4` = do_eval(4, "gradient", TRUE),
++   `hess 1` = do_eval(1, "hess", TRUE),
++   `hess 2` = do_eval(2, "hess", TRUE),
++   `hess 4` = do_eval(4, "hess", TRUE),
 +   times = 10)
 > summary(bench)[, c("expr", "lq", "median", "uq")]
-  expr        lq    median        uq
-1 fn 1  53.99451  54.07348  54.15654
-2 fn 2  27.16808  27.39842  27.63001
-3 fn 4  14.00711  14.02069  14.13366
-4 gr 1 127.72104 127.84392 129.08521
-5 gr 2  64.00504  64.96218  66.17573
-6 gr 4  33.00839  33.08670  33.15084
->
+    expr        lq    median        uq
+1   fn 1  53.79673  54.10959  55.03041
+2   fn 2  27.17547  27.43220  27.89525
+3   fn 4  13.94678  14.11997  15.94981
+4   gr 1 129.43139 129.98285 131.05312
+5   gr 2  65.19476  65.72970  66.98681
+6   gr 4  33.59764  33.71786  34.98278
+7 hess 1 236.27080 237.16675 239.13179
+8 hess 2 119.21974 120.64948 121.55521
+9 hess 4  61.36270  61.62128  61.91427
+> 
 > proc.time()
-   user  system elapsed
-  6.090   0.029   3.458
+   user  system elapsed 
+ 13.691   0.020   7.720 

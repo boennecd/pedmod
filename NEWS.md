@@ -1,3 +1,6 @@
+# pedmod 0.2.3
+* the `eval_pedigree_hess` function is faster.
+
 # pedmod 0.2.2
 * a minor bug fix on Mac when using Apple LLVM version 10.0.0 with R version
   4.2.0 and x86_64.

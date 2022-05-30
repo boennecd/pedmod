@@ -499,28 +499,38 @@ void pedigree_l_factor_Hessian::operator()
 
     double * const outer_res{res_i + shift_outer_res};
     for(unsigned id1 = 0; id1 < n_mem; ++id1)
-      for(unsigned id2 = 0; id2 < n_mem; ++id2)
-        outer_res[id2 + id1 * n_mem] =
-          (draw_scaled[id1] * draw_scaled[id2]
-             - vcov_inv[id2 + id1 * n_mem]) / 2;
+      for(unsigned id2 = 0; id2 <= id1; ++id2){
+        double const value
+          {(draw_scaled[id1] * draw_scaled[id2]
+              - vcov_inv[id2 + id1 * n_mem]) / 2};
+        outer_res[id2 + id1 * n_mem] = value;
+        outer_res[id1 + id2 * n_mem] = value;
+      }
 
     /// compute the required outer product for the hessian
     for(unsigned fix = 0; fix < n_fix; ++fix)
       outer_vec[fix] = std::inner_product
         (X_permu + fix * n_mem, X_permu + (fix + 1) * n_mem, draw_scaled, 0.);
 
-    // TODO: exploit the symmetry and only store the triangular part
-    for(size_t scale = 0; scale < n_scales; ++scale)
-      outer_vec[scale + n_fix] = std::inner_product
-        (outer_res, outer_res + n_mem * n_mem, scale_mats_permu[scale], 0.);
+    for(size_t scale = 0; scale < n_scales; ++scale){
+      outer_vec[scale + n_fix] = 0;
+      double const *scale_mat{scale_mats_permu[scale]};
+      for(unsigned id1 = 0; id1 < n_mem; ++id1){
+        for(unsigned id2 = 0; id2 < id1; ++id2)
+          outer_vec[scale + n_fix] +=
+            2 * outer_res[id2 + id1 * n_mem] * scale_mat[id2 + id1 * n_mem];
+        outer_vec[scale + n_fix] +=
+          outer_res[id1 + id1 * n_mem] * scale_mat[id1 + id1 * n_mem];
+      }
+    }
 
     size_t const vec_outer_res_dim{n_fix + n_scales};
     double * const vec_outer_res{res_i + shift_vec_outer_res};
-    // TODO: exploit the symmetry and only store the triangular part
     for(size_t param1 = 0; param1 < vec_outer_res_dim; ++param1)
-      for(size_t param2 = 0; param2 < vec_outer_res_dim; ++param2)
+      for(size_t param2 = 0; param2 <= param1; ++param2){
         vec_outer_res[param2 + param1 * vec_outer_res_dim] =
           outer_vec[param1] * outer_vec[param2];
+      }
   }
 }
 
@@ -557,7 +567,6 @@ void pedigree_l_factor_Hessian::univariate
   arma::uword const hess_dim{n_fix + n_scales};
   double * const hess_begin{out + 1 + hess_dim};
   std::fill(hess_begin, hess_begin + hess_dim * hess_dim, 0);
-
 
   auto add_to_hess = [&](double const limit, double const ratio,
                          bool const is_upper){
@@ -620,6 +629,13 @@ pedigree_l_factor_Hessian::out_type pedigree_l_factor_Hessian::get_output
     size_t const shift_scaled_res{1},
                  shift_outer_res{shift_scaled_res + n_mem},
                  shift_vec_outer_res{shift_outer_res + n_mem * n_mem};
+
+    {
+      // fill in the lower triangle
+      arma::mat vec_outer_res
+                   (res + shift_vec_outer_res, hess_dim, hess_dim, false);
+      vec_outer_res = arma::symmatu(vec_outer_res);
+    }
 
     out.sd_errs[0] = sdest[0] * norm_const;
     std::fill

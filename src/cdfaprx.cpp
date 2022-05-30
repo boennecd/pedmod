@@ -459,6 +459,8 @@ void pedigree_l_factor_Hessian::prep_permutated
           scale_mats[scale](indices[id2], indices[id1]);
 }
 
+// TODO: this function can be made faster by only working with the upper
+//       triangles of the symmetric matrices
 void pedigree_l_factor_Hessian::operator()
   (double const * PEDMOD_RESTRICT draw, double * PEDMOD_RESTRICT out,
    int const *, bool const, unsigned const n_draws) {
@@ -499,13 +501,10 @@ void pedigree_l_factor_Hessian::operator()
 
     double * const outer_res{res_i + shift_outer_res};
     for(unsigned id1 = 0; id1 < n_mem; ++id1)
-      for(unsigned id2 = 0; id2 <= id1; ++id2){
-        double const value
-          {(draw_scaled[id1] * draw_scaled[id2]
-              - vcov_inv[id2 + id1 * n_mem]) / 2};
-        outer_res[id2 + id1 * n_mem] = value;
-        outer_res[id1 + id2 * n_mem] = value;
-      }
+      for(unsigned id2 = 0; id2 <= id1; ++id2)
+        outer_res[id2 + id1 * n_mem] =
+          (draw_scaled[id1] * draw_scaled[id2]
+             - vcov_inv[id2 + id1 * n_mem]) / 2;
 
     /// compute the required outer product for the hessian
     for(unsigned fix = 0; fix < n_fix; ++fix)
@@ -632,6 +631,10 @@ pedigree_l_factor_Hessian::out_type pedigree_l_factor_Hessian::get_output
 
     {
       // fill in the lower triangle
+      arma::mat outer_res
+                   (res + shift_outer_res, n_mem, n_mem, false);
+      outer_res = arma::symmatu(outer_res);
+
       arma::mat vec_outer_res
                    (res + shift_vec_outer_res, hess_dim, hess_dim, false);
       vec_outer_res = arma::symmatu(vec_outer_res);

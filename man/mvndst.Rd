@@ -54,7 +54,7 @@ approximation. Eight is used in the original Fortran code. If one is
 used then the error will be set to zero because it cannot be estimated.}
 
 \item{use_tilting}{\code{TRUE} if the minimax tilting method suggested
-by Botev (2017). See \doi{10.1111/rssb.12162}.}
+by Botev (2017) should be used. See \doi{10.1111/rssb.12162}.}
 }
 \value{
 An approximation of the CDF. The \code{"n_it"} attribute shows the number of

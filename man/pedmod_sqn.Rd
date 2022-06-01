@@ -113,7 +113,7 @@ that the likelihood did increase. If not, the iterations are reset and the
 step-size is halved.}
 
 \item{use_tilting}{\code{TRUE} if the minimax tilting method suggested
-by Botev (2017). See \doi{10.1111/rssb.12162}.}
+by Botev (2017) should be used. See \doi{10.1111/rssb.12162}.}
 
 \item{vls_scales}{can be a numeric vector with a positive scalar for each
 cluster. Then \code{vls_scales[i] * minvls} and

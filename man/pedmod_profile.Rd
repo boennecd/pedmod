@@ -98,7 +98,7 @@ parameterization. See \code{\link{standardized_to_direct}} and the vignette
 at \code{vignette("pedmod", package = "pedmod")}.}
 
 \item{use_tilting}{\code{TRUE} if the minimax tilting method suggested
-by Botev (2017). See \doi{10.1111/rssb.12162}.}
+by Botev (2017) should be used. See \doi{10.1111/rssb.12162}.}
 
 \item{vls_scales}{can be a numeric vector with a positive scalar for each
 cluster. Then \code{vls_scales[i] * minvls} and

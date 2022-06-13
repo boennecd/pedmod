@@ -178,7 +178,7 @@ label: unconnected_largest_ex
 
 output file: pedigree_partitioning.knit.md
 
-/usr/bin/pandoc +RTS -K512m -RTS pedigree_partitioning.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output pedigree_partitioning.html --lua-filter /home/boennecd/R/x86_64-pc-linux-gnu-library/4.2/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /home/boennecd/R/x86_64-pc-linux-gnu-library/4.2/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --standalone --section-divs --template /home/boennecd/R/x86_64-pc-linux-gnu-library/4.2/rmarkdown/rmd/h/default.html --no-highlight --variable highlightjs=1 --variable theme=bootstrap --mathjax --variable 'mathjax-url=https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --include-in-header /tmp/RtmpTqIxYL/rmarkdown-str11b475b0b52e8.html --filter /usr/bin/pandoc-citeproc 
+/usr/bin/pandoc +RTS -K512m -RTS pedigree_partitioning.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output pedigree_partitioning.html --lua-filter /home/boennecd/R/x86_64-pc-linux-gnu-library/4.2/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /home/boennecd/R/x86_64-pc-linux-gnu-library/4.2/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --standalone --section-divs --template /home/boennecd/R/x86_64-pc-linux-gnu-library/4.2/rmarkdown/rmd/h/default.html --no-highlight --variable highlightjs=1 --variable theme=bootstrap --mathjax --variable 'mathjax-url=https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --include-in-header /tmp/RtmpZoelJu/rmarkdown-str137367cb41488.html --filter /usr/bin/pandoc-citeproc 
 
 Output created: pedigree_partitioning.html
 
@@ -311,6 +311,50 @@ label: simple_ex_profile_likelihood (with options)
 List of 1
  $ cache: num 1
 
+
+Log likelihood -1630.49043 (-1630.48117). Estimated parameters:
+(Intercept)  Continuous      Binary       Scale 
+    -1.9356      0.6602      1.2670      0.8526 
+
+Log likelihood -1622.23810 (-1622.20363). Estimated parameters:
+(Intercept)  Continuous      Binary       Scale 
+    -2.2219      0.7544      1.4547      1.1368 
+
+Log likelihood -1619.10043 (-1619.04310). Estimated parameters:
+(Intercept)  Continuous      Binary       Scale 
+    -2.5369      0.8583      1.6604      1.4210 
+
+Log likelihood -1618.40438 (-1618.34841). Estimated parameters:
+(Intercept)  Continuous      Binary       Scale 
+    -2.8713      0.9689      1.8775      1.7051 
+
+Log likelihood -1618.40438 (-1618.34841). Estimated parameters:
+(Intercept)  Continuous      Binary       Scale 
+    -2.8713      0.9689      1.8775      1.7051 
+
+Log likelihood -1618.77303 (-1618.71124). Estimated parameters:
+(Intercept)  Continuous      Binary       Scale 
+     -3.221       1.084       2.105       1.989 
+
+Log likelihood -1619.55154 (-1619.46541). Estimated parameters:
+(Intercept)  Continuous      Binary       Scale 
+     -3.580       1.203       2.337       2.274 
+
+Log likelihood -1620.41553 (-1620.31638). Estimated parameters:
+(Intercept)  Continuous      Binary       Scale 
+     -3.947       1.324       2.575       2.558 
+
+Log likelihood -1621.26305 (-1621.16882). Estimated parameters:
+(Intercept)  Continuous      Binary       Scale 
+     -4.319       1.448       2.816       2.842 
+
+Log likelihood -1622.03205 (-1621.92743). Estimated parameters:
+(Intercept)  Continuous      Binary       Scale 
+     -4.696       1.573       3.060       3.126 
+
+Log likelihood -1622.71601 (-1622.61343). Estimated parameters:
+(Intercept)  Continuous      Binary       Scale 
+     -5.077       1.699       3.307       3.410 
   |                                                                              |................                                                      |  23%
   ordinary text without R code
 
@@ -427,7 +471,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -3.2259     1.0385 2.1585 1.2426
 SE            0.4296     0.1429 0.2982 0.3444
-Time          8.1,          9.3. Max ll:   -1574.0667,   -1574.0658
+Time          8.0,          9.3. Max ll:   -1574.0667,   -1574.0658
 
 (Intercept)  Continuous      Binary             
      -3.291       1.107       2.137       1.305 
@@ -439,7 +483,7 @@ Residual
          (Intercept) Continuous Binary      
 Estimate     -3.2908     1.1074 2.1374 1.305
 SE            0.4409     0.1518 0.2977 0.340
-Time         10.1,         13.6. Max ll:   -1569.6613,   -1569.6609
+Time         10.3,         14.1. Max ll:   -1569.6613,   -1569.6609
 
 (Intercept)  Continuous      Binary             
     -2.8068      0.9498      1.9047      1.0250 
@@ -451,7 +495,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.8068     0.9498 1.9047 1.0250
 SE            0.3244     0.1176 0.2338 0.3118
-Time         10.9,         11.4. Max ll:   -1618.0764,   -1618.0755
+Time         11.3,         11.9. Max ll:   -1618.0764,   -1618.0755
 
 (Intercept)  Continuous      Binary             
     -2.7593      0.9823      1.8346      0.9390 
@@ -463,7 +507,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate      -2.759     0.9823  1.835 0.9390
 SE             0.288     0.1102  0.203 0.2901
-Time          4.1,         10.1. Max ll:   -1616.7848,   -1616.7831
+Time          4.3,          9.9. Max ll:   -1616.7848,   -1616.7831
 
 (Intercept)  Continuous      Binary             
      -3.137       1.134       2.059       1.165 
@@ -475,7 +519,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -3.1367     1.1344 2.0591 1.1649
 SE            0.3833     0.1431 0.2628 0.3221
-Time          4.9,          9.1. Max ll:   -1583.7124,   -1583.7126
+Time          5.4,          9.1. Max ll:   -1583.7124,   -1583.7126
 
 (Intercept)  Continuous      Binary             
      -3.298       1.041       2.182       1.360 
@@ -487,7 +531,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -3.2985     1.0406 2.1824 1.3598
 SE            0.4346     0.1434 0.3007 0.3324
-Time         15.5,         11.3. Max ll:   -1615.3256,   -1615.3264
+Time         15.6,         11.7. Max ll:   -1615.3256,   -1615.3264
 
 (Intercept)  Continuous      Binary             
     -2.5149      0.7904      1.5945      0.4589 
@@ -499,7 +543,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.5149    0.79038  1.595 0.4589
 SE            0.2109    0.07513  0.149 0.2676
-Time          8.2,         12.4. Max ll:   -1566.8999,   -1566.8999
+Time          8.4,         12.4. Max ll:   -1566.8999,   -1566.8999
 
 (Intercept)  Continuous      Binary             
      -3.323       1.096       2.071       1.469 
@@ -511,7 +555,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -3.3225      1.096 2.0710 1.4689
 SE            0.4919      0.170 0.3172 0.3659
-Time          6.7,         10.7. Max ll:   -1590.2368,   -1590.2370
+Time          6.8,         10.4. Max ll:   -1590.2368,   -1590.2370
 
 (Intercept)  Continuous      Binary             
      -3.735       1.259       2.476       1.649 
@@ -523,7 +567,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -3.7348      1.259 2.4757 1.6491
 SE            0.6233      0.217 0.4247 0.3991
-Time          7.0,         14.6. Max ll:   -1583.5849,   -1583.5846
+Time          7.0,         15.2. Max ll:   -1583.5849,   -1583.5846
 
 (Intercept)  Continuous      Binary             
     -2.8240      1.0329      1.8463      0.9501 
@@ -535,7 +579,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.8240     1.0329 1.8463 0.9501
 SE            0.3005     0.1162 0.2079 0.2941
-Time          6.5,         11.6. Max ll:   -1573.0912,   -1573.0908
+Time          6.4,         11.2. Max ll:   -1573.0912,   -1573.0908
 
 (Intercept)  Continuous      Binary             
      -3.464       1.114       2.301       1.391 
@@ -547,7 +591,7 @@ Residual
          (Intercept) Continuous Binary      
 Estimate     -3.4640     1.1145 2.3015 1.391
 SE            0.4575     0.1541 0.3126 0.331
-Time          5.4,         10.6. Max ll:   -1549.6445,   -1549.6443
+Time          5.3,         10.4. Max ll:   -1549.6445,   -1549.6443
 
 (Intercept)  Continuous      Binary             
      -3.275       1.095       2.262       1.258 
@@ -559,7 +603,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -3.2749     1.0953 2.2617 1.2582
 SE            0.4301     0.1498 0.3094 0.3394
-Time          6.4,          6.4. Max ll:   -1580.3836,   -1580.3836
+Time          6.3,          6.7. Max ll:   -1580.3836,   -1580.3836
 
 (Intercept)  Continuous      Binary             
     -2.7584      0.9734      1.8345      0.8728 
@@ -571,7 +615,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.7584     0.9734 1.8345 0.8728
 SE            0.2911     0.1097 0.2066 0.2984
-Time          5.1,          9.2. Max ll:   -1598.1032,   -1598.1023
+Time          5.2,          9.2. Max ll:   -1598.1032,   -1598.1023
 
 (Intercept)  Continuous      Binary             
      -3.019       1.002       2.126       1.173 
@@ -583,7 +627,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -3.0191     1.0020 2.1265 1.1728
 SE            0.3602     0.1263 0.2644 0.3102
-Time          6.1,          7.8. Max ll:   -1647.5906,   -1647.5893
+Time          6.0,          7.7. Max ll:   -1647.5906,   -1647.5893
 
 (Intercept)  Continuous      Binary             
      -3.716       1.274       2.407       1.578 
@@ -595,7 +639,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -3.7161     1.2741 2.4066 1.5781
 SE            0.5708     0.2002 0.3796 0.3728
-Time          3.8,         11.5. Max ll:   -1526.4827,   -1526.4814
+Time          4.0,         13.8. Max ll:   -1526.4827,   -1526.4814
 
 (Intercept)  Continuous      Binary             
      -2.934       1.055       1.911       1.126 
@@ -607,7 +651,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.9341     1.0546 1.9110 1.1258
 SE            0.3361     0.1269 0.2319 0.3028
-Time         14.2,         10.2. Max ll:   -1613.5392,   -1613.5391
+Time         16.7,         11.1. Max ll:   -1613.5392,   -1613.5391
 
 (Intercept)  Continuous      Binary             
     -2.8035      0.9292      1.9385      1.0237 
@@ -619,7 +663,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.8035     0.9292 1.9385 1.0237
 SE            0.3003     0.1066 0.2215 0.2858
-Time          8.3,          5.3. Max ll:   -1653.6128,   -1653.6129
+Time          8.5,          5.4. Max ll:   -1653.6128,   -1653.6129
 
 (Intercept)  Continuous      Binary             
     -2.8805      0.9265      1.8133      1.1205 
@@ -631,7 +675,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate      -2.880     0.9265 1.8133 1.1205
 SE             0.352     0.1197 0.2384 0.3268
-Time          9.1,         11.1. Max ll:   -1625.5476,   -1625.5452
+Time          9.6,         12.4. Max ll:   -1625.5476,   -1625.5452
 
 (Intercept)  Continuous      Binary             
      -2.858       1.001       1.852       1.009 
@@ -643,7 +687,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.8579      1.001 1.8518 1.0088
 SE            0.3158      0.116 0.2177 0.2982
-Time          7.3,          5.4. Max ll:   -1608.3817,   -1608.3804
+Time          8.4,          6.0. Max ll:   -1608.3817,   -1608.3804
 
 (Intercept)  Continuous      Binary             
     -2.9567      0.9662      2.0162      1.0261 
@@ -655,7 +699,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.9567     0.9662 2.0162 1.0261
 SE            0.3309     0.1150 0.2371 0.3053
-Time          6.7,         11.0. Max ll:   -1589.7108,   -1589.7108
+Time          7.0,         11.0. Max ll:   -1589.7108,   -1589.7108
 
 (Intercept)  Continuous      Binary             
      -3.383       1.144       2.231       1.388 
@@ -667,7 +711,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -3.3835     1.1440 2.2313 1.3884
 SE            0.4847     0.1705 0.3289 0.3585
-Time          5.0,          6.9. Max ll:   -1580.1220,   -1580.1218
+Time          5.4,          7.3. Max ll:   -1580.1220,   -1580.1218
 
 (Intercept)  Continuous      Binary             
     -2.7232      0.9308      1.7717      0.8454 
@@ -679,7 +723,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.7232     0.9308  1.772 0.8454
 SE            0.2686     0.0975  0.190 0.2750
-Time          8.7,          8.5. Max ll:   -1595.5390,   -1595.5364
+Time          9.6,          8.7. Max ll:   -1595.5390,   -1595.5364
 
 (Intercept)  Continuous      Binary             
      -3.530       1.139       2.372       1.439 
@@ -691,7 +735,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -3.5301     1.1390 2.3724 1.4392
 SE            0.4895     0.1651 0.3382 0.3464
-Time          5.7,          7.0. Max ll:   -1574.6020,   -1574.6036
+Time          6.0,          7.8. Max ll:   -1574.6020,   -1574.6036
 
 (Intercept)  Continuous      Binary             
     -2.6764      0.9196      1.7183      0.7708 
@@ -703,7 +747,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.6764    0.91956 1.7183 0.7708
 SE            0.2625    0.09736 0.1824 0.2834
-Time          4.0,          9.7. Max ll:   -1581.5043,   -1581.5037
+Time          4.3,         10.0. Max ll:   -1581.5043,   -1581.5037
 
 (Intercept)  Continuous      Binary             
      -3.308       1.004       2.247       1.353 
@@ -715,7 +759,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -3.3084     1.0040 2.2472 1.3531
 SE            0.4484     0.1427 0.3136 0.3416
-Time          5.3,         10.8. Max ll:   -1591.3680,   -1591.3679
+Time          5.6,         10.9. Max ll:   -1591.3680,   -1591.3679
 
 (Intercept)  Continuous      Binary             
      -3.984       1.288       2.559       1.984 
@@ -727,7 +771,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -3.9838     1.2875 2.5588 1.9836
 SE            0.7132     0.2381 0.4676 0.4102
-Time         23.7,          8.1. Max ll:   -1641.9077,   -1641.9075
+Time         24.6,          8.9. Max ll:   -1641.9077,   -1641.9075
 
 (Intercept)  Continuous      Binary             
     -2.8043      0.9353      1.8464      0.9950 
@@ -739,7 +783,7 @@ Residual
          (Intercept) Continuous Binary      
 Estimate     -2.8043     0.9353 1.8464 0.995
 SE            0.2997     0.1059 0.2109 0.291
-Time          5.1,         12.3. Max ll:   -1610.3250,   -1610.3232
+Time          5.7,         12.7. Max ll:   -1610.3250,   -1610.3232
 
 (Intercept)  Continuous      Binary             
     -2.7686      0.9774      1.9829      1.0085 
@@ -751,7 +795,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.7686     0.9774 1.9829 1.0085
 SE            0.2968     0.1115 0.2207 0.2887
-Time          4.7,          7.1. Max ll:   -1699.3578,   -1699.3561
+Time          5.1,          7.1. Max ll:   -1699.3578,   -1699.3561
 
 (Intercept)  Continuous      Binary             
     -2.7637      0.9000      1.9396      0.8837 
@@ -763,7 +807,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.7637    0.90003 1.9396 0.8837
 SE            0.2733    0.09482 0.2019 0.2762
-Time          5.0,         10.4. Max ll:   -1615.5320,   -1615.5305
+Time          5.2,         10.9. Max ll:   -1615.5320,   -1615.5305
 
 (Intercept)  Continuous      Binary             
      -3.190       1.169       2.173       1.370 
@@ -775,7 +819,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -3.1904     1.1688 2.1725 1.3699
 SE            0.4163     0.1571 0.2963 0.3273
-Time          6.3,         14.3. Max ll:   -1608.8413,   -1608.8405
+Time          6.1,         14.1. Max ll:   -1608.8413,   -1608.8405
 
 (Intercept)  Continuous      Binary             
     -2.6756      0.8857      1.8309      0.6906 
@@ -787,7 +831,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.6756    0.88574 1.8309 0.6906
 SE            0.2425    0.08814 0.1804 0.2639
-Time          5.0,          5.3. Max ll:   -1577.1618,   -1577.1616
+Time          5.1,          5.1. Max ll:   -1577.1618,   -1577.1616
 
 (Intercept)  Continuous      Binary             
     -2.9307      0.9919      1.9318      1.1919 
@@ -799,7 +843,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.9307     0.9919 1.9318 1.1919
 SE            0.3668     0.1307 0.2538 0.3237
-Time          4.9,          5.6. Max ll:   -1650.7065,   -1650.7056
+Time          4.9,          6.3. Max ll:   -1650.7065,   -1650.7056
 
 (Intercept)  Continuous      Binary             
     -2.5901      0.8567      1.6904      0.7512 
@@ -811,7 +855,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.5901    0.85672 1.6904 0.7512
 SE            0.2463    0.08775 0.1763 0.2724
-Time          9.6,          5.6. Max ll:   -1611.1538,   -1611.1544
+Time         10.3,          5.5. Max ll:   -1611.1538,   -1611.1544
 
 (Intercept)  Continuous      Binary             
      -3.882       1.309       2.673       1.666 
@@ -823,7 +867,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -3.8815     1.3092 2.6728 1.6661
 SE            0.6723     0.2339 0.4699 0.4158
-Time          9.9,          6.9. Max ll:   -1543.1585,   -1543.1577
+Time         10.1,          7.0. Max ll:   -1543.1585,   -1543.1577
 
 (Intercept)  Continuous      Binary             
      -3.302       1.002       2.224       1.390 
@@ -835,7 +879,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -3.3023     1.0024 2.2238 1.3899
 SE            0.4569     0.1448 0.3169 0.3455
-Time         10.5,         11.7. Max ll:   -1643.4977,   -1643.4958
+Time         10.2,         10.5. Max ll:   -1643.4977,   -1643.4958
 
 (Intercept)  Continuous      Binary             
     -2.8096      0.8574      1.9157      0.7994 
@@ -847,7 +891,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.8096    0.85744 1.9157 0.7994
 SE            0.2738    0.09143 0.1983 0.2800
-Time         10.5,          9.2. Max ll:   -1574.7349,   -1574.7348
+Time         10.8,          9.5. Max ll:   -1574.7349,   -1574.7348
 
 (Intercept)  Continuous      Binary             
     -2.6379      0.8634      1.7388      0.6046 
@@ -859,7 +903,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.6379    0.86345  1.739 0.6046
 SE            0.2305    0.08599  0.166 0.2627
-Time         11.6,         10.5. Max ll:   -1544.2522,   -1544.2522
+Time         13.0,         11.6. Max ll:   -1544.2522,   -1544.2522
 
 (Intercept)  Continuous      Binary             
      -3.732       1.313       2.482       1.562 
@@ -871,7 +915,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -3.7322      1.313 2.4816 1.5617
 SE            0.5843      0.213 0.3997 0.3793
-Time          6.2,          6.7. Max ll:   -1517.1693,   -1517.1690
+Time          7.1,          7.2. Max ll:   -1517.1693,   -1517.1690
 
 (Intercept)  Continuous      Binary             
     -2.7332      0.9528      1.8472      0.8795 
@@ -883,7 +927,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.7332     0.9528 1.8472 0.8795
 SE            0.2773     0.1032 0.2035 0.2821
-Time          5.0,          9.0. Max ll:   -1606.8309,   -1606.8306
+Time          5.3,          9.9. Max ll:   -1606.8309,   -1606.8306
 
 (Intercept)  Continuous      Binary             
      -3.119       1.042       2.045       1.021 
@@ -895,7 +939,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -3.1189     1.0420 2.0451 1.0212
 SE            0.3535     0.1238 0.2443 0.3049
-Time          4.7,          8.9. Max ll:   -1530.2611,   -1530.2607
+Time          5.5,          9.5. Max ll:   -1530.2611,   -1530.2607
 
 (Intercept)  Continuous      Binary             
     -2.7945      0.9446      1.8856      1.0420 
@@ -907,7 +951,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.7945     0.9446 1.8856 1.0420
 SE            0.2984     0.1072 0.2135 0.2896
-Time          9.3,          8.6. Max ll:   -1643.2979,   -1643.2979
+Time          9.7,         10.2. Max ll:   -1643.2979,   -1643.2979
 
 (Intercept)  Continuous      Binary             
      -3.086       1.082       2.090       1.240 
@@ -919,7 +963,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -3.0857     1.0817 2.0899 1.2398
 SE            0.3668     0.1354 0.2614 0.3034
-Time          4.8,         10.7. Max ll:   -1637.9652,   -1637.9651
+Time          5.5,         11.1. Max ll:   -1637.9652,   -1637.9651
 
 (Intercept)  Continuous      Binary             
      -2.962       1.050       1.794       1.221 
@@ -931,7 +975,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.9625     1.0502 1.7941 1.2209
 SE            0.3816     0.1411 0.2455 0.3303
-Time          8.9,         11.3. Max ll:   -1626.8064,   -1626.8063
+Time          9.7,         12.5. Max ll:   -1626.8064,   -1626.8063
 
 (Intercept)  Continuous      Binary             
      -2.932       1.007       2.074       1.009 
@@ -943,7 +987,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.9317      1.007 2.0743 1.0091
 SE            0.3139      0.114 0.2335 0.2877
-Time          9.4,         11.6. Max ll:   -1624.0941,   -1624.0939
+Time         10.5,         11.7. Max ll:   -1624.0941,   -1624.0939
 
 (Intercept)  Continuous      Binary             
     -2.8140      0.9323      1.9071      0.7796 
@@ -955,7 +999,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.8140     0.9323 1.9071 0.7796
 SE            0.2664     0.0942 0.1916 0.2692
-Time          5.8,          5.7. Max ll:   -1582.0835,   -1582.0837
+Time          5.9,          6.5. Max ll:   -1582.0835,   -1582.0837
 
 (Intercept)  Continuous      Binary             
      -3.614       1.133       2.193       1.512 
@@ -967,7 +1011,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -3.6136     1.1326 2.1933 1.5117
 SE            0.5484     0.1766 0.3428 0.3712
-Time          6.2,          6.7. Max ll:   -1512.1259,   -1512.1256
+Time          6.8,          7.0. Max ll:   -1512.1259,   -1512.1256
 
 (Intercept)  Continuous      Binary             
     -2.8741      0.9475      1.9688      0.9152 
@@ -979,7 +1023,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.8741     0.9475 1.9688 0.9152
 SE            0.2992     0.1050 0.2144 0.2901
-Time          9.3,          8.3. Max ll:   -1577.6617,   -1577.6617
+Time          9.9,          8.8. Max ll:   -1577.6617,   -1577.6617
 
 (Intercept)  Continuous      Binary             
      -2.899       1.033       1.859       1.081 
@@ -991,7 +1035,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.8988     1.0330 1.8589 1.0806
 SE            0.3314     0.1237 0.2272 0.3046
-Time          6.2,          7.3. Max ll:   -1630.5539,   -1630.5533
+Time          7.0,          8.4. Max ll:   -1630.5539,   -1630.5533
 
 (Intercept)  Continuous      Binary             
      -3.205       1.057       2.110       1.293 
@@ -1003,7 +1047,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -3.2047     1.0571 2.1097 1.2932
 SE            0.4204     0.1437 0.2902 0.3346
-Time          4.9,          7.5. Max ll:   -1585.6072,   -1585.6071
+Time          5.9,          8.3. Max ll:   -1585.6072,   -1585.6071
 
 (Intercept)  Continuous      Binary             
     -2.9610      0.9663      2.0263      1.1579 
@@ -1015,7 +1059,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.9610     0.9663 2.0263 1.1579
 SE            0.3519     0.1206 0.2523 0.3122
-Time          9.5,          8.8. Max ll:   -1643.4114,   -1643.4113
+Time         10.3,          9.3. Max ll:   -1643.4114,   -1643.4113
 
   |                                                                              |.............................                                         |  42%
   ordinary text without R code
@@ -1085,6 +1129,156 @@ label: simple_w_ev_ex_profile_likelihood (with options)
 List of 1
  $ cache: num 1
 
+
+Log likelihood -2697.26863 (-2697.25320). Estimated parameters:
+non-fixed.(Intercept)      non-fixed.Binary                fixed1 
+              -2.5187                3.3712                0.1789 
+               fixed2 
+              -0.6150 
+
+Log likelihood -2696.66185 (-2696.64545). Estimated parameters:
+non-fixed.(Intercept)      non-fixed.Binary                fixed1 
+               -2.675                 3.581                 0.442 
+               fixed2 
+               -0.615 
+
+Log likelihood -2697.20639 (-2697.19256). Estimated parameters:
+non-fixed.(Intercept)      non-fixed.Binary                fixed1 
+              -2.8410                3.8016                0.6745 
+               fixed2 
+              -0.6150 
+
+Log likelihood -2698.55537 (-2698.53554). Estimated parameters:
+non-fixed.(Intercept)      non-fixed.Binary                fixed1 
+              -3.0145                4.0323                0.8828 
+               fixed2 
+              -0.6150 
+
+Log likelihood -2700.43072 (-2700.41095). Estimated parameters:
+non-fixed.(Intercept)      non-fixed.Binary                fixed1 
+               -3.194                 4.272                 1.071 
+               fixed2 
+               -0.615 
+
+Log likelihood -2697.29907 (-2697.28408). Estimated parameters:
+non-fixed.(Intercept)      non-fixed.Binary                fixed1 
+              -2.5920                3.4705                0.1789 
+               fixed2 
+              -0.3518 
+
+Log likelihood -2696.27290 (-2696.25913). Estimated parameters:
+non-fixed.(Intercept)      non-fixed.Binary                fixed1 
+              -2.7449                3.6742                0.4420 
+               fixed2 
+              -0.3518 
+
+Log likelihood -2696.39903 (-2696.38006). Estimated parameters:
+non-fixed.(Intercept)      non-fixed.Binary                fixed1 
+              -2.9071                3.8908                0.6745 
+               fixed2 
+              -0.3518 
+
+Log likelihood -2697.36573 (-2697.34827). Estimated parameters:
+non-fixed.(Intercept)      non-fixed.Binary                fixed1 
+              -3.0770                4.1171                0.8828 
+               fixed2 
+              -0.3518 
+
+Log likelihood -2698.91786 (-2698.89513). Estimated parameters:
+non-fixed.(Intercept)      non-fixed.Binary                fixed1 
+              -3.2536                4.3523                1.0714 
+               fixed2 
+              -0.3518 
+
+Log likelihood -2697.98626 (-2697.97113). Estimated parameters:
+non-fixed.(Intercept)      non-fixed.Binary                fixed1 
+              -2.6722                3.5788                0.1789 
+               fixed2 
+              -0.1193 
+
+Log likelihood -2696.48890 (-2696.47121). Estimated parameters:
+non-fixed.(Intercept)      non-fixed.Binary                fixed1 
+              -2.8212                3.7777                0.4420 
+               fixed2 
+              -0.1193 
+
+Log likelihood -2696.13456 (-2696.11662). Estimated parameters:
+non-fixed.(Intercept)      non-fixed.Binary                fixed1 
+              -2.9795                3.9888                0.6745 
+               fixed2 
+              -0.1193 
+
+Log likelihood -2696.65715 (-2696.63967). Estimated parameters:
+non-fixed.(Intercept)      non-fixed.Binary                fixed1 
+              -3.1460                4.2107                0.8828 
+               fixed2 
+              -0.1193 
+
+Log likelihood -2697.82011 (-2697.80274). Estimated parameters:
+non-fixed.(Intercept)      non-fixed.Binary                fixed1 
+              -3.3193                4.4414                1.0714 
+               fixed2 
+              -0.1193 
+
+Log likelihood -2699.31734 (-2699.30690). Estimated parameters:
+non-fixed.(Intercept)      non-fixed.Binary                fixed1 
+             -2.75842               3.69529               0.17887 
+               fixed2 
+              0.08899 
+
+Log likelihood -2697.31712 (-2697.29451). Estimated parameters:
+non-fixed.(Intercept)      non-fixed.Binary                fixed1 
+             -2.90314               3.88810               0.44202 
+               fixed2 
+              0.08899 
+
+Log likelihood -2696.44122 (-2696.41527). Estimated parameters:
+non-fixed.(Intercept)      non-fixed.Binary                fixed1 
+             -3.05791               4.09496               0.67454 
+               fixed2 
+              0.08899 
+
+Log likelihood -2696.47213 (-2696.44993). Estimated parameters:
+non-fixed.(Intercept)      non-fixed.Binary                fixed1 
+             -3.22066               4.31157               0.88282 
+               fixed2 
+              0.08899 
+
+Log likelihood -2697.18936 (-2697.17058). Estimated parameters:
+non-fixed.(Intercept)      non-fixed.Binary                fixed1 
+             -3.39053               4.53838               1.07144 
+               fixed2 
+              0.08899 
+
+Log likelihood -2701.24846 (-2701.23860). Estimated parameters:
+non-fixed.(Intercept)      non-fixed.Binary                fixed1 
+              -2.8498                3.8187                0.1789 
+               fixed2 
+               0.2776 
+
+Log likelihood -2698.73352 (-2698.71818). Estimated parameters:
+non-fixed.(Intercept)      non-fixed.Binary                fixed1 
+              -2.9910                4.0067                0.4420 
+               fixed2 
+               0.2776 
+
+Log likelihood -2697.31403 (-2697.29099). Estimated parameters:
+non-fixed.(Intercept)      non-fixed.Binary                fixed1 
+              -3.1417                4.2081                0.6745 
+               fixed2 
+               0.2776 
+
+Log likelihood -2696.81476 (-2696.78749). Estimated parameters:
+non-fixed.(Intercept)      non-fixed.Binary                fixed1 
+              -3.3009                4.4203                0.8828 
+               fixed2 
+               0.2776 
+
+Log likelihood -2697.05276 (-2697.03021). Estimated parameters:
+non-fixed.(Intercept)      non-fixed.Binary                fixed1 
+              -3.4672                4.6418                1.0714 
+               fixed2 
+               0.2776 
   |                                                                              |......................................                                |  54%
   ordinary text without R code
 
@@ -1157,7 +1351,7 @@ Residual
          (Intercept) Binary               
 Estimate     -2.6481 3.6234 0.4520 -0.3163
 SE            0.2373 0.3287 0.2636  0.3402
-Time         11.5,         11.0. Max ll:   -2873.6880,   -2873.6880
+Time         12.6,         12.5. Max ll:   -2873.6880,   -2873.6880
 
 (Intercept)      Binary                         
   -3.157781    4.405151    0.947818   -0.008592 
@@ -1169,7 +1363,7 @@ Residual
          (Intercept) Binary                 
 Estimate      -3.158 4.4052 0.9478 -0.008592
 SE             0.374 0.5282 0.3056  0.383326
-Time          8.8,          5.2. Max ll:   -2779.6472,   -2779.6490
+Time         10.1,          5.6. Max ll:   -2779.6472,   -2779.6490
 
 (Intercept)      Binary                         
     -2.8414      3.7621      0.2716      0.2028 
@@ -1181,7 +1375,7 @@ Residual
          (Intercept) Binary              
 Estimate     -2.8414 3.7621 0.2716 0.2028
 SE            0.2705 0.3621 0.3149 0.2793
-Time         10.2,         10.5. Max ll:   -2711.1825,   -2711.1823
+Time         11.3,         11.2. Max ll:   -2711.1825,   -2711.1823
 
 (Intercept)      Binary                         
     -2.6060      3.5515      0.2742     -0.2248 
@@ -1193,7 +1387,7 @@ Residual
          (Intercept) Binary               
 Estimate     -2.6060 3.5515 0.2742 -0.2248
 SE            0.2173 0.3002 0.2659  0.3035
-Time          8.8,         16.3. Max ll:   -2808.3757,   -2808.3754
+Time          9.9,         16.5. Max ll:   -2808.3757,   -2808.3754
 
 (Intercept)      Binary                         
    -2.88444     4.02697     0.63506    -0.01787 
@@ -1205,7 +1399,7 @@ Residual
          (Intercept) Binary                
 Estimate     -2.8844 4.0270 0.6351 -0.01787
 SE            0.2954 0.4169 0.2873  0.33201
-Time         21.1,         20.5. Max ll:   -2806.5809,   -2806.5807
+Time         22.0,         21.0. Max ll:   -2806.5809,   -2806.5807
 
 (Intercept)      Binary                         
     -3.4243      4.5947      1.0178      0.3087 
@@ -1217,7 +1411,7 @@ Residual
          (Intercept) Binary              
 Estimate     -3.4243 4.5947 1.0178 0.3087
 SE            0.4333 0.5856 0.3239 0.3606
-Time          6.9,          7.0. Max ll:   -2709.5472,   -2709.5473
+Time          6.8,          6.9. Max ll:   -2709.5472,   -2709.5473
 
 (Intercept)      Binary                         
    -2.92890     3.87255     0.63523     0.05416 
@@ -1229,7 +1423,7 @@ Residual
          (Intercept) Binary               
 Estimate     -2.9289 3.8725 0.6352 0.05416
 SE            0.3004 0.4035 0.2926 0.32011
-Time         26.9,         22.2. Max ll:   -2823.8290,   -2823.8293
+Time         28.8,         22.3. Max ll:   -2823.8290,   -2823.8293
 
 (Intercept)      Binary                         
     -2.5750      3.3585      0.2541     -0.4181 
@@ -1241,7 +1435,7 @@ Residual
          (Intercept) Binary               
 Estimate     -2.5750  3.359 0.2541 -0.4181
 SE            0.2284  0.304 0.2815  0.3570
-Time          7.1,         21.9. Max ll:   -2753.4426,   -2753.4433
+Time          7.4,         22.4. Max ll:   -2753.4426,   -2753.4433
 
 (Intercept)      Binary                         
     -2.5207      3.4087      0.2612     -0.5451 
@@ -1253,7 +1447,7 @@ Residual
          (Intercept) Binary               
 Estimate     -2.5207 3.4087 0.2612 -0.5451
 SE            0.1989 0.2725 0.2522  0.3442
-Time         15.3,          5.3. Max ll:   -2800.0163,   -2800.0188
+Time         15.4,          5.2. Max ll:   -2800.0163,   -2800.0188
 
 (Intercept)      Binary                         
    -2.76572     3.66404     0.25859    -0.08975 
@@ -1265,7 +1459,7 @@ Residual
          (Intercept) Binary                
 Estimate     -2.7657 3.6640 0.2586 -0.08975
 SE            0.2474 0.3326 0.2921  0.30655
-Time         18.4,         18.1. Max ll:   -2641.9372,   -2641.9372
+Time         19.0,         18.2. Max ll:   -2641.9372,   -2641.9372
 
 (Intercept)      Binary                         
     -3.0253      4.1490      0.5587      0.3516 
@@ -1277,7 +1471,7 @@ Residual
          (Intercept) Binary              
 Estimate     -3.0253 4.1490 0.5587 0.3516
 SE            0.3187 0.4416 0.3128 0.2896
-Time         13.0,          7.5. Max ll:   -2767.1642,   -2767.1643
+Time         13.6,          8.0. Max ll:   -2767.1642,   -2767.1643
 
 (Intercept)      Binary                         
    -2.72371     3.51815     0.24602    -0.08211 
@@ -1289,7 +1483,7 @@ Residual
          (Intercept) Binary                
 Estimate     -2.7237 3.5181 0.2460 -0.08211
 SE            0.2506 0.3282 0.3004  0.30630
-Time         15.0,         12.7. Max ll:   -2719.1933,   -2719.1929
+Time         15.3,         12.9. Max ll:   -2719.1933,   -2719.1929
 
 (Intercept)      Binary                         
    -2.98203     3.88358     0.65442    -0.01735 
@@ -1301,7 +1495,7 @@ Residual
          (Intercept) Binary                
 Estimate     -2.9820 3.8836 0.6544 -0.01735
 SE            0.3249 0.4289 0.3028  0.35886
-Time         17.3,         19.1. Max ll:   -2716.4607,   -2716.4600
+Time         18.7,         20.5. Max ll:   -2716.4607,   -2716.4600
 
 (Intercept)      Binary                         
     -2.7699      3.8082      0.6410     -0.3775 
@@ -1313,7 +1507,7 @@ Residual
          (Intercept) Binary               
 Estimate     -2.7699 3.8082 0.6410 -0.3775
 SE            0.2573 0.3571 0.2573  0.3727
-Time         26.0,         21.1. Max ll:   -2842.7168,   -2842.7169
+Time         27.4,         22.4. Max ll:   -2842.7168,   -2842.7169
 
 (Intercept)      Binary                         
     -2.6527      3.5657      0.2886     -0.2409 
@@ -1325,7 +1519,7 @@ Residual
          (Intercept) Binary               
 Estimate     -2.6527 3.5657 0.2886 -0.2409
 SE            0.2326 0.3179 0.2824  0.3152
-Time         18.2,         16.6. Max ll:   -2737.0265,   -2737.0259
+Time         19.9,         17.1. Max ll:   -2737.0265,   -2737.0259
 
 (Intercept)      Binary                         
     -2.9122      3.8533      0.6993     -0.1953 
@@ -1337,7 +1531,7 @@ Residual
          (Intercept) Binary               
 Estimate      -2.912 3.8533 0.6993 -0.1953
 SE             0.292 0.3909 0.2772  0.3571
-Time         19.8,         19.7. Max ll:   -2789.6682,   -2789.6678
+Time         20.6,         20.9. Max ll:   -2789.6682,   -2789.6678
 
 (Intercept)      Binary                         
     -2.4991      3.3502      0.1687     -0.4777 
@@ -1349,7 +1543,7 @@ Residual
          (Intercept) Binary               
 Estimate     -2.4991  3.350 0.1687 -0.4777
 SE            0.1976  0.271 0.2610  0.3292
-Time         17.8,         13.9. Max ll:   -2803.0914,   -2803.0911
+Time         18.2,         15.1. Max ll:   -2803.0914,   -2803.0911
 
 (Intercept)      Binary                         
    -3.16173     4.24362     0.88453     0.02605 
@@ -1361,7 +1555,7 @@ Residual
          (Intercept) Binary               
 Estimate     -3.1617 4.2436 0.8845 0.02605
 SE            0.3873 0.5239 0.3177 0.39778
-Time         21.4,         15.3. Max ll:   -2709.9614,   -2709.9611
+Time         23.1,         16.8. Max ll:   -2709.9614,   -2709.9611
 
 (Intercept)      Binary                         
      -3.625       4.897       1.278       0.269 
@@ -1373,7 +1567,7 @@ Residual
          (Intercept) Binary              
 Estimate     -3.6252 4.8970 1.2777 0.2690
 SE            0.5914 0.8001 0.3941 0.4623
-Time         10.5,          6.8. Max ll:   -2731.5355,   -2731.5334
+Time         11.8,          7.3. Max ll:   -2731.5355,   -2731.5334
 
 (Intercept)      Binary                         
     -3.2488      4.3347      0.9023      0.1602 
@@ -1385,7 +1579,7 @@ Residual
          (Intercept) Binary              
 Estimate     -3.2488 4.3347 0.9023 0.1602
 SE            0.3619 0.4871 0.2922 0.3419
-Time         19.2,         17.1. Max ll:   -2719.6435,   -2719.6428
+Time         20.5,         17.8. Max ll:   -2719.6435,   -2719.6428
 
 (Intercept)      Binary                         
     -4.4644      6.1794      1.7044      0.9144 
@@ -1397,7 +1591,7 @@ Residual
          (Intercept) Binary              
 Estimate     -4.4644  6.179 1.7044 0.9144
 SE            0.7713  1.073 0.3928 0.4307
-Time         13.5,         15.1. Max ll:   -2702.0254,   -2702.0269
+Time         14.3,         16.8. Max ll:   -2702.0254,   -2702.0269
 
 (Intercept)      Binary                         
     -2.8263      3.6975      0.3116      0.1569 
@@ -1409,7 +1603,7 @@ Residual
          (Intercept) Binary              
 Estimate     -2.8263 3.6975 0.3116 0.1569
 SE            0.2705 0.3581 0.3099 0.2873
-Time         23.5,         10.2. Max ll:   -2743.2777,   -2743.2771
+Time         25.8,         10.9. Max ll:   -2743.2777,   -2743.2771
 
 (Intercept)      Binary                         
     -3.0707      4.0870      0.9175     -0.1502 
@@ -1421,7 +1615,7 @@ Residual
          (Intercept) Binary               
 Estimate     -3.0707 4.0870 0.9175 -0.1502
 SE            0.3765 0.5045 0.3152  0.4166
-Time         16.5,         23.0. Max ll:   -2832.3663,   -2832.3646
+Time         18.2,         25.0. Max ll:   -2832.3663,   -2832.3646
 
 (Intercept)      Binary                         
     -3.1727      4.1588      0.6502      0.3095 
@@ -1433,7 +1627,7 @@ Residual
          (Intercept) Binary              
 Estimate     -3.1727  4.159 0.6502 0.3095
 SE            0.3616  0.477 0.3218 0.3243
-Time          5.4,          6.5. Max ll:   -2655.4698,   -2655.4703
+Time          5.4,          6.8. Max ll:   -2655.4698,   -2655.4703
 
 (Intercept)      Binary                         
     -3.5266      4.7762      1.0314      0.5086 
@@ -1445,7 +1639,7 @@ Residual
          (Intercept) Binary              
 Estimate     -3.5266 4.7762 1.0314 0.5086
 SE            0.4884 0.6666 0.3525 0.3706
-Time         14.3,         16.3. Max ll:   -2710.7652,   -2710.7651
+Time         15.8,         17.7. Max ll:   -2710.7652,   -2710.7651
 
 (Intercept)      Binary                         
     -2.5484      3.4448      0.1328     -0.2769 
@@ -1457,7 +1651,7 @@ Residual
          (Intercept) Binary               
 Estimate     -2.5484  3.445 0.1328 -0.2769
 SE            0.2035  0.280 0.2696  0.3055
-Time         13.7,         10.0. Max ll:   -2782.1826,   -2782.1829
+Time         14.5,         10.4. Max ll:   -2782.1826,   -2782.1829
 
 (Intercept)      Binary                         
     -2.6879      3.5793      0.4797     -0.3159 
@@ -1469,7 +1663,7 @@ Residual
          (Intercept) Binary               
 Estimate     -2.6879 3.5793 0.4797 -0.3159
 SE            0.2409 0.3252 0.2664  0.3408
-Time         34.9,          6.2. Max ll:   -2857.1726,   -2857.1719
+Time         37.2,          6.6. Max ll:   -2857.1726,   -2857.1719
 
 (Intercept)      Binary                         
     -3.5197      4.5932      1.0615      0.5975 
@@ -1481,7 +1675,7 @@ Residual
          (Intercept) Binary              
 Estimate     -3.5197 4.5932 1.0615 0.5975
 SE            0.4972 0.6534 0.3616 0.3570
-Time         24.2,         21.1. Max ll:   -2849.6794,   -2849.6787
+Time         26.2,         22.7. Max ll:   -2849.6794,   -2849.6787
 
 (Intercept)      Binary                         
    -2.99804     3.99226     0.76219     0.01046 
@@ -1493,7 +1687,7 @@ Residual
          (Intercept) Binary               
 Estimate     -2.9980 3.9923 0.7622 0.01046
 SE            0.3101 0.4181 0.2843 0.33903
-Time          5.5,          5.9. Max ll:   -2821.0137,   -2821.0146
+Time          5.7,          6.3. Max ll:   -2821.0137,   -2821.0146
 
 (Intercept)      Binary                         
     -2.9105      3.7849      0.7159     -0.5208 
@@ -1505,7 +1699,7 @@ Residual
          (Intercept) Binary               
 Estimate     -2.9105 3.7849 0.7159 -0.5208
 SE            0.3016 0.3961 0.2810  0.4445
-Time         21.4,         21.8. Max ll:   -2654.8796,   -2654.8795
+Time         23.5,         23.5. Max ll:   -2654.8796,   -2654.8795
 
 (Intercept)      Binary                         
    -3.14467     4.17722     0.89514     0.09991 
@@ -1517,7 +1711,7 @@ Residual
          (Intercept) Binary               
 Estimate     -3.1447 4.1772 0.8951 0.09991
 SE            0.3697 0.4967 0.3087 0.36337
-Time          9.0,         12.9. Max ll:   -2801.1212,   -2801.1213
+Time          9.6,         13.8. Max ll:   -2801.1212,   -2801.1213
 
 (Intercept)      Binary                         
     -3.4530      4.6777      1.0444      0.3239 
@@ -1529,7 +1723,7 @@ Residual
          (Intercept) Binary              
 Estimate     -3.4530 4.6777 1.0444 0.3239
 SE            0.4704 0.6434 0.3501 0.3736
-Time         36.0,         16.1. Max ll:   -2697.2461,   -2697.2459
+Time         38.8,         17.2. Max ll:   -2697.2461,   -2697.2459
 
 (Intercept)      Binary                         
     -3.5680      4.4687      1.1718      0.3754 
@@ -1541,7 +1735,7 @@ Residual
          (Intercept) Binary              
 Estimate     -3.5680 4.4687 1.1718 0.3754
 SE            0.5209 0.6555 0.3604 0.4087
-Time          9.2,          7.5. Max ll:   -2762.9871,   -2762.9884
+Time          9.9,          8.3. Max ll:   -2762.9871,   -2762.9884
 
 (Intercept)      Binary                         
     -3.0594      3.9578      0.8123     -0.3610 
@@ -1553,7 +1747,7 @@ Residual
          (Intercept) Binary               
 Estimate     -3.0594 3.9578 0.8123 -0.3610
 SE            0.3263 0.4254 0.2867  0.4105
-Time         20.6,         24.9. Max ll:   -2623.0103,   -2623.0092
+Time         22.1,         26.4. Max ll:   -2623.0103,   -2623.0092
 
 (Intercept)      Binary                         
    -2.92019     3.99500     0.60893    -0.08805 
@@ -1565,7 +1759,7 @@ Residual
          (Intercept) Binary                
 Estimate     -2.9202 3.9950 0.6089 -0.08805
 SE            0.2884 0.3967 0.2828  0.33062
-Time         12.5,         12.6. Max ll:   -2741.6145,   -2741.6146
+Time         13.3,         14.0. Max ll:   -2741.6145,   -2741.6146
 
 (Intercept)      Binary                         
     -3.0191      4.1467      0.6068      0.2539 
@@ -1577,7 +1771,7 @@ Residual
          (Intercept) Binary              
 Estimate     -3.0191 4.1467 0.6068 0.2539
 SE            0.3405 0.4703 0.3296 0.3177
-Time         18.4,         10.8. Max ll:   -2754.9105,   -2754.9104
+Time         19.7,         11.6. Max ll:   -2754.9105,   -2754.9104
 
 (Intercept)      Binary                         
     -3.1113      3.9482      0.8101     -0.1061 
@@ -1589,7 +1783,7 @@ Residual
          (Intercept) Binary               
 Estimate     -3.1113 3.9482 0.8101 -0.1061
 SE            0.3392 0.4349 0.2878  0.3809
-Time         10.1,         15.7. Max ll:   -2686.3897,   -2686.3850
+Time         11.6,         16.9. Max ll:   -2686.3897,   -2686.3850
 
 (Intercept)      Binary                         
     -2.8393      3.7168      0.5725     -0.1982 
@@ -1601,7 +1795,7 @@ Residual
          (Intercept) Binary               
 Estimate     -2.8393 3.7168 0.5725 -0.1982
 SE            0.2769 0.3665 0.2774  0.3508
-Time         23.0,         21.0. Max ll:   -2757.3076,   -2757.3083
+Time         24.1,         21.4. Max ll:   -2757.3076,   -2757.3083
 
 (Intercept)      Binary                         
    -3.10187     4.13678     0.78083     0.02054 
@@ -1613,7 +1807,7 @@ Residual
          (Intercept) Binary               
 Estimate     -3.1019 4.1368 0.7808 0.02054
 SE            0.3515 0.4708 0.3023 0.36275
-Time         18.9,         17.2. Max ll:   -2712.5176,   -2712.5161
+Time         20.0,         17.8. Max ll:   -2712.5176,   -2712.5161
 
 (Intercept)      Binary                         
     -3.7821      5.1336      1.3021      0.4485 
@@ -1625,7 +1819,7 @@ Residual
          (Intercept) Binary              
 Estimate     -3.7821 5.1336 1.3021 0.4485
 SE            0.6317 0.8624 0.4021 0.4564
-Time         23.9,         18.8. Max ll:   -2650.1462,   -2650.1477
+Time         25.1,         19.6. Max ll:   -2650.1462,   -2650.1477
 
 (Intercept)      Binary                         
    -3.19204     4.29838     0.94724     0.05537 
@@ -1637,7 +1831,7 @@ Residual
          (Intercept) Binary               
 Estimate     -3.1920 4.2984 0.9472 0.05537
 SE            0.4098 0.5552 0.3306 0.40000
-Time         25.2,          7.7. Max ll:   -2768.4679,   -2768.4698
+Time         25.9,          8.1. Max ll:   -2768.4679,   -2768.4698
 
 (Intercept)      Binary                         
    -3.00350     4.01653     0.65044     0.05291 
@@ -1649,7 +1843,7 @@ Residual
          (Intercept) Binary               
 Estimate      -3.004  4.017 0.6504 0.05291
 SE             0.331  0.448 0.3142 0.33943
-Time         18.3,         10.4. Max ll:   -2703.6492,   -2703.6541
+Time         18.8,         11.0. Max ll:   -2703.6492,   -2703.6541
 
 (Intercept)      Binary                         
      -4.965       6.621       1.813       1.373 
@@ -1661,7 +1855,7 @@ Residual
          (Intercept) Binary              
 Estimate      -4.965  6.621 1.8126 1.3731
 SE             1.110  1.485 0.5114 0.4926
-Time         11.0,          6.8. Max ll:   -2704.0546,   -2704.0532
+Time         11.9,          7.0. Max ll:   -2704.0546,   -2704.0532
 
 (Intercept)      Binary                         
     -3.0587      4.0983      0.5858      0.2205 
@@ -1673,7 +1867,7 @@ Residual
          (Intercept) Binary              
 Estimate     -3.0587 4.0983 0.5858 0.2205
 SE            0.3246 0.4398 0.3075 0.3139
-Time         25.7,         21.8. Max ll:   -2681.1876,   -2681.1873
+Time         27.7,         22.7. Max ll:   -2681.1876,   -2681.1873
 
 (Intercept)      Binary                         
    -2.99664     3.90846     0.60526     0.08917 
@@ -1685,7 +1879,7 @@ Residual
          (Intercept) Binary               
 Estimate      -2.997 3.9085 0.6053 0.08917
 SE             0.325 0.4298 0.3139 0.33125
-Time         18.1,         14.9. Max ll:   -2697.4757,   -2697.4757
+Time         19.4,         15.3. Max ll:   -2697.4757,   -2697.4757
 
 (Intercept)      Binary                         
    -2.90238     4.00198     0.62882    -0.01734 
@@ -1697,7 +1891,7 @@ Residual
          (Intercept) Binary                
 Estimate     -2.9024 4.0020 0.6288 -0.01734
 SE            0.2912 0.4056 0.2874  0.32088
-Time         11.1,         16.3. Max ll:   -2788.8708,   -2788.8692
+Time         11.7,         17.7. Max ll:   -2788.8708,   -2788.8692
 
 (Intercept)      Binary                         
     -2.7045      3.6774      0.2285     -0.1323 
@@ -1709,7 +1903,7 @@ Residual
          (Intercept) Binary               
 Estimate     -2.7045 3.6774 0.2285 -0.1323
 SE            0.2377 0.3276 0.2918  0.3041
-Time         22.3,         18.5. Max ll:   -2663.0191,   -2663.0192
+Time         24.0,         19.6. Max ll:   -2663.0191,   -2663.0192
 
 (Intercept)      Binary                         
     -2.8175      3.6386      0.5459     -0.4015 
@@ -1721,7 +1915,7 @@ Residual
          (Intercept) Binary               
 Estimate      -2.817 3.6386 0.5459 -0.4015
 SE             0.268 0.3509 0.2717  0.3838
-Time         20.4,         21.1. Max ll:   -2683.9449,   -2683.9442
+Time         21.0,         22.4. Max ll:   -2683.9449,   -2683.9442
 
 (Intercept)      Binary                         
     -2.7614      3.6960      0.4532     -0.2251 
@@ -1733,7 +1927,7 @@ Residual
          (Intercept) Binary               
 Estimate     -2.7614 3.6960 0.4532 -0.2251
 SE            0.2583 0.3502 0.2828  0.3323
-Time         24.6,         18.5. Max ll:   -2745.8375,   -2745.8383
+Time         25.5,         19.2. Max ll:   -2745.8375,   -2745.8383
 
 (Intercept)      Binary                         
     -3.1535      4.2105      0.7249      0.2730 
@@ -1745,7 +1939,7 @@ Residual
          (Intercept) Binary              
 Estimate     -3.1535  4.210 0.7249 0.2730
 SE            0.3599  0.484 0.3144 0.3315
-Time         26.0,         18.3. Max ll:   -2711.1002,   -2711.0966
+Time         27.7,         18.9. Max ll:   -2711.1002,   -2711.0966
 
   |                                                                              |..............................................                        |  65%
   ordinary text without R code
@@ -2205,7 +2399,7 @@ List of 1
 
 output file: pedmod.knit.md
 
-/usr/bin/pandoc +RTS -K512m -RTS pedmod.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output pedmod.html --lua-filter /home/boennecd/R/x86_64-pc-linux-gnu-library/4.2/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /home/boennecd/R/x86_64-pc-linux-gnu-library/4.2/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --standalone --section-divs --template /home/boennecd/R/x86_64-pc-linux-gnu-library/4.2/rmarkdown/rmd/h/default.html --no-highlight --variable highlightjs=1 --variable theme=bootstrap --mathjax --variable 'mathjax-url=https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --include-in-header /tmp/RtmpTqIxYL/rmarkdown-str11b4746e10bae.html --filter /usr/bin/pandoc-citeproc 
+/usr/bin/pandoc +RTS -K512m -RTS pedmod.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output pedmod.html --lua-filter /home/boennecd/R/x86_64-pc-linux-gnu-library/4.2/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /home/boennecd/R/x86_64-pc-linux-gnu-library/4.2/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --standalone --section-divs --template /home/boennecd/R/x86_64-pc-linux-gnu-library/4.2/rmarkdown/rmd/h/default.html --no-highlight --variable highlightjs=1 --variable theme=bootstrap --mathjax --variable 'mathjax-url=https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --include-in-header /tmp/RtmpZoelJu/rmarkdown-str13736313a6d43.html --filter /usr/bin/pandoc-citeproc 
 [WARNING] This document format requires a nonempty <title> element.
   Please specify either 'title' or 'pagetitle' in the metadata,
   e.g. by using --metadata pagetitle="..." on the command line.
@@ -2458,7 +2652,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -3.2259     1.0385 2.1585 1.2426
 SE            0.4296     0.1429 0.2982 0.3444
-Time          8.1,          9.3. Max ll:   -1574.0667,   -1574.0658
+Time          8.0,          9.3. Max ll:   -1574.0667,   -1574.0658
 
 (Intercept)  Continuous      Binary             
      -3.291       1.107       2.137       1.305 
@@ -2470,7 +2664,7 @@ Residual
          (Intercept) Continuous Binary      
 Estimate     -3.2908     1.1074 2.1374 1.305
 SE            0.4409     0.1518 0.2977 0.340
-Time         10.1,         13.6. Max ll:   -1569.6613,   -1569.6609
+Time         10.3,         14.1. Max ll:   -1569.6613,   -1569.6609
 
 (Intercept)  Continuous      Binary             
     -2.8068      0.9498      1.9047      1.0250 
@@ -2482,7 +2676,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.8068     0.9498 1.9047 1.0250
 SE            0.3244     0.1176 0.2338 0.3118
-Time         10.9,         11.4. Max ll:   -1618.0764,   -1618.0755
+Time         11.3,         11.9. Max ll:   -1618.0764,   -1618.0755
 
 (Intercept)  Continuous      Binary             
     -2.7593      0.9823      1.8346      0.9390 
@@ -2494,7 +2688,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate      -2.759     0.9823  1.835 0.9390
 SE             0.288     0.1102  0.203 0.2901
-Time          4.1,         10.1. Max ll:   -1616.7848,   -1616.7831
+Time          4.3,          9.9. Max ll:   -1616.7848,   -1616.7831
 
 (Intercept)  Continuous      Binary             
      -3.137       1.134       2.059       1.165 
@@ -2506,7 +2700,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -3.1367     1.1344 2.0591 1.1649
 SE            0.3833     0.1431 0.2628 0.3221
-Time          4.9,          9.1. Max ll:   -1583.7124,   -1583.7126
+Time          5.4,          9.1. Max ll:   -1583.7124,   -1583.7126
 
 (Intercept)  Continuous      Binary             
      -3.298       1.041       2.182       1.360 
@@ -2518,7 +2712,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -3.2985     1.0406 2.1824 1.3598
 SE            0.4346     0.1434 0.3007 0.3324
-Time         15.5,         11.3. Max ll:   -1615.3256,   -1615.3264
+Time         15.6,         11.7. Max ll:   -1615.3256,   -1615.3264
 
 (Intercept)  Continuous      Binary             
     -2.5149      0.7904      1.5945      0.4589 
@@ -2530,7 +2724,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.5149    0.79038  1.595 0.4589
 SE            0.2109    0.07513  0.149 0.2676
-Time          8.2,         12.4. Max ll:   -1566.8999,   -1566.8999
+Time          8.4,         12.4. Max ll:   -1566.8999,   -1566.8999
 
 (Intercept)  Continuous      Binary             
      -3.323       1.096       2.071       1.469 
@@ -2542,7 +2736,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -3.3225      1.096 2.0710 1.4689
 SE            0.4919      0.170 0.3172 0.3659
-Time          6.7,         10.7. Max ll:   -1590.2368,   -1590.2370
+Time          6.8,         10.4. Max ll:   -1590.2368,   -1590.2370
 
 (Intercept)  Continuous      Binary             
      -3.735       1.259       2.476       1.649 
@@ -2554,7 +2748,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -3.7348      1.259 2.4757 1.6491
 SE            0.6233      0.217 0.4247 0.3991
-Time          7.0,         14.6. Max ll:   -1583.5849,   -1583.5846
+Time          7.0,         15.2. Max ll:   -1583.5849,   -1583.5846
 
 (Intercept)  Continuous      Binary             
     -2.8240      1.0329      1.8463      0.9501 
@@ -2566,7 +2760,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.8240     1.0329 1.8463 0.9501
 SE            0.3005     0.1162 0.2079 0.2941
-Time          6.5,         11.6. Max ll:   -1573.0912,   -1573.0908
+Time          6.4,         11.2. Max ll:   -1573.0912,   -1573.0908
 
 (Intercept)  Continuous      Binary             
      -3.464       1.114       2.301       1.391 
@@ -2578,7 +2772,7 @@ Residual
          (Intercept) Continuous Binary      
 Estimate     -3.4640     1.1145 2.3015 1.391
 SE            0.4575     0.1541 0.3126 0.331
-Time          5.4,         10.6. Max ll:   -1549.6445,   -1549.6443
+Time          5.3,         10.4. Max ll:   -1549.6445,   -1549.6443
 
 (Intercept)  Continuous      Binary             
      -3.275       1.095       2.262       1.258 
@@ -2590,7 +2784,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -3.2749     1.0953 2.2617 1.2582
 SE            0.4301     0.1498 0.3094 0.3394
-Time          6.4,          6.4. Max ll:   -1580.3836,   -1580.3836
+Time          6.3,          6.7. Max ll:   -1580.3836,   -1580.3836
 
 (Intercept)  Continuous      Binary             
     -2.7584      0.9734      1.8345      0.8728 
@@ -2602,7 +2796,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.7584     0.9734 1.8345 0.8728
 SE            0.2911     0.1097 0.2066 0.2984
-Time          5.1,          9.2. Max ll:   -1598.1032,   -1598.1023
+Time          5.2,          9.2. Max ll:   -1598.1032,   -1598.1023
 
 (Intercept)  Continuous      Binary             
      -3.019       1.002       2.126       1.173 
@@ -2614,7 +2808,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -3.0191     1.0020 2.1265 1.1728
 SE            0.3602     0.1263 0.2644 0.3102
-Time          6.1,          7.8. Max ll:   -1647.5906,   -1647.5893
+Time          6.0,          7.7. Max ll:   -1647.5906,   -1647.5893
 
 (Intercept)  Continuous      Binary             
      -3.716       1.274       2.407       1.578 
@@ -2626,7 +2820,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -3.7161     1.2741 2.4066 1.5781
 SE            0.5708     0.2002 0.3796 0.3728
-Time          3.8,         11.5. Max ll:   -1526.4827,   -1526.4814
+Time          4.0,         13.8. Max ll:   -1526.4827,   -1526.4814
 
 (Intercept)  Continuous      Binary             
      -2.934       1.055       1.911       1.126 
@@ -2638,7 +2832,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.9341     1.0546 1.9110 1.1258
 SE            0.3361     0.1269 0.2319 0.3028
-Time         14.2,         10.2. Max ll:   -1613.5392,   -1613.5391
+Time         16.7,         11.1. Max ll:   -1613.5392,   -1613.5391
 
 (Intercept)  Continuous      Binary             
     -2.8035      0.9292      1.9385      1.0237 
@@ -2650,7 +2844,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.8035     0.9292 1.9385 1.0237
 SE            0.3003     0.1066 0.2215 0.2858
-Time          8.3,          5.3. Max ll:   -1653.6128,   -1653.6129
+Time          8.5,          5.4. Max ll:   -1653.6128,   -1653.6129
 
 (Intercept)  Continuous      Binary             
     -2.8805      0.9265      1.8133      1.1205 
@@ -2662,7 +2856,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate      -2.880     0.9265 1.8133 1.1205
 SE             0.352     0.1197 0.2384 0.3268
-Time          9.1,         11.1. Max ll:   -1625.5476,   -1625.5452
+Time          9.6,         12.4. Max ll:   -1625.5476,   -1625.5452
 
 (Intercept)  Continuous      Binary             
      -2.858       1.001       1.852       1.009 
@@ -2674,7 +2868,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.8579      1.001 1.8518 1.0088
 SE            0.3158      0.116 0.2177 0.2982
-Time          7.3,          5.4. Max ll:   -1608.3817,   -1608.3804
+Time          8.4,          6.0. Max ll:   -1608.3817,   -1608.3804
 
 (Intercept)  Continuous      Binary             
     -2.9567      0.9662      2.0162      1.0261 
@@ -2686,7 +2880,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.9567     0.9662 2.0162 1.0261
 SE            0.3309     0.1150 0.2371 0.3053
-Time          6.7,         11.0. Max ll:   -1589.7108,   -1589.7108
+Time          7.0,         11.0. Max ll:   -1589.7108,   -1589.7108
 
 (Intercept)  Continuous      Binary             
      -3.383       1.144       2.231       1.388 
@@ -2698,7 +2892,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -3.3835     1.1440 2.2313 1.3884
 SE            0.4847     0.1705 0.3289 0.3585
-Time          5.0,          6.9. Max ll:   -1580.1220,   -1580.1218
+Time          5.4,          7.3. Max ll:   -1580.1220,   -1580.1218
 
 (Intercept)  Continuous      Binary             
     -2.7232      0.9308      1.7717      0.8454 
@@ -2710,7 +2904,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.7232     0.9308  1.772 0.8454
 SE            0.2686     0.0975  0.190 0.2750
-Time          8.7,          8.5. Max ll:   -1595.5390,   -1595.5364
+Time          9.6,          8.7. Max ll:   -1595.5390,   -1595.5364
 
 (Intercept)  Continuous      Binary             
      -3.530       1.139       2.372       1.439 
@@ -2722,7 +2916,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -3.5301     1.1390 2.3724 1.4392
 SE            0.4895     0.1651 0.3382 0.3464
-Time          5.7,          7.0. Max ll:   -1574.6020,   -1574.6036
+Time          6.0,          7.8. Max ll:   -1574.6020,   -1574.6036
 
 (Intercept)  Continuous      Binary             
     -2.6764      0.9196      1.7183      0.7708 
@@ -2734,7 +2928,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.6764    0.91956 1.7183 0.7708
 SE            0.2625    0.09736 0.1824 0.2834
-Time          4.0,          9.7. Max ll:   -1581.5043,   -1581.5037
+Time          4.3,         10.0. Max ll:   -1581.5043,   -1581.5037
 
 (Intercept)  Continuous      Binary             
      -3.308       1.004       2.247       1.353 
@@ -2746,7 +2940,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -3.3084     1.0040 2.2472 1.3531
 SE            0.4484     0.1427 0.3136 0.3416
-Time          5.3,         10.8. Max ll:   -1591.3680,   -1591.3679
+Time          5.6,         10.9. Max ll:   -1591.3680,   -1591.3679
 
 (Intercept)  Continuous      Binary             
      -3.984       1.288       2.559       1.984 
@@ -2758,7 +2952,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -3.9838     1.2875 2.5588 1.9836
 SE            0.7132     0.2381 0.4676 0.4102
-Time         23.7,          8.1. Max ll:   -1641.9077,   -1641.9075
+Time         24.6,          8.9. Max ll:   -1641.9077,   -1641.9075
 
 (Intercept)  Continuous      Binary             
     -2.8043      0.9353      1.8464      0.9950 
@@ -2770,7 +2964,7 @@ Residual
          (Intercept) Continuous Binary      
 Estimate     -2.8043     0.9353 1.8464 0.995
 SE            0.2997     0.1059 0.2109 0.291
-Time          5.1,         12.3. Max ll:   -1610.3250,   -1610.3232
+Time          5.7,         12.7. Max ll:   -1610.3250,   -1610.3232
 
 (Intercept)  Continuous      Binary             
     -2.7686      0.9774      1.9829      1.0085 
@@ -2782,7 +2976,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.7686     0.9774 1.9829 1.0085
 SE            0.2968     0.1115 0.2207 0.2887
-Time          4.7,          7.1. Max ll:   -1699.3578,   -1699.3561
+Time          5.1,          7.1. Max ll:   -1699.3578,   -1699.3561
 
 (Intercept)  Continuous      Binary             
     -2.7637      0.9000      1.9396      0.8837 
@@ -2794,7 +2988,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.7637    0.90003 1.9396 0.8837
 SE            0.2733    0.09482 0.2019 0.2762
-Time          5.0,         10.4. Max ll:   -1615.5320,   -1615.5305
+Time          5.2,         10.9. Max ll:   -1615.5320,   -1615.5305
 
 (Intercept)  Continuous      Binary             
      -3.190       1.169       2.173       1.370 
@@ -2806,7 +3000,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -3.1904     1.1688 2.1725 1.3699
 SE            0.4163     0.1571 0.2963 0.3273
-Time          6.3,         14.3. Max ll:   -1608.8413,   -1608.8405
+Time          6.1,         14.1. Max ll:   -1608.8413,   -1608.8405
 
 (Intercept)  Continuous      Binary             
     -2.6756      0.8857      1.8309      0.6906 
@@ -2818,7 +3012,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.6756    0.88574 1.8309 0.6906
 SE            0.2425    0.08814 0.1804 0.2639
-Time          5.0,          5.3. Max ll:   -1577.1618,   -1577.1616
+Time          5.1,          5.1. Max ll:   -1577.1618,   -1577.1616
 
 (Intercept)  Continuous      Binary             
     -2.9307      0.9919      1.9318      1.1919 
@@ -2830,7 +3024,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.9307     0.9919 1.9318 1.1919
 SE            0.3668     0.1307 0.2538 0.3237
-Time          4.9,          5.6. Max ll:   -1650.7065,   -1650.7056
+Time          4.9,          6.3. Max ll:   -1650.7065,   -1650.7056
 
 (Intercept)  Continuous      Binary             
     -2.5901      0.8567      1.6904      0.7512 
@@ -2842,7 +3036,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.5901    0.85672 1.6904 0.7512
 SE            0.2463    0.08775 0.1763 0.2724
-Time          9.6,          5.6. Max ll:   -1611.1538,   -1611.1544
+Time         10.3,          5.5. Max ll:   -1611.1538,   -1611.1544
 
 (Intercept)  Continuous      Binary             
      -3.882       1.309       2.673       1.666 
@@ -2854,7 +3048,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -3.8815     1.3092 2.6728 1.6661
 SE            0.6723     0.2339 0.4699 0.4158
-Time          9.9,          6.9. Max ll:   -1543.1585,   -1543.1577
+Time         10.1,          7.0. Max ll:   -1543.1585,   -1543.1577
 
 (Intercept)  Continuous      Binary             
      -3.302       1.002       2.224       1.390 
@@ -2866,7 +3060,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -3.3023     1.0024 2.2238 1.3899
 SE            0.4569     0.1448 0.3169 0.3455
-Time         10.5,         11.7. Max ll:   -1643.4977,   -1643.4958
+Time         10.2,         10.5. Max ll:   -1643.4977,   -1643.4958
 
 (Intercept)  Continuous      Binary             
     -2.8096      0.8574      1.9157      0.7994 
@@ -2878,7 +3072,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.8096    0.85744 1.9157 0.7994
 SE            0.2738    0.09143 0.1983 0.2800
-Time         10.5,          9.2. Max ll:   -1574.7349,   -1574.7348
+Time         10.8,          9.5. Max ll:   -1574.7349,   -1574.7348
 
 (Intercept)  Continuous      Binary             
     -2.6379      0.8634      1.7388      0.6046 
@@ -2890,7 +3084,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.6379    0.86345  1.739 0.6046
 SE            0.2305    0.08599  0.166 0.2627
-Time         11.6,         10.5. Max ll:   -1544.2522,   -1544.2522
+Time         13.0,         11.6. Max ll:   -1544.2522,   -1544.2522
 
 (Intercept)  Continuous      Binary             
      -3.732       1.313       2.482       1.562 
@@ -2902,7 +3096,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -3.7322      1.313 2.4816 1.5617
 SE            0.5843      0.213 0.3997 0.3793
-Time          6.2,          6.7. Max ll:   -1517.1693,   -1517.1690
+Time          7.1,          7.2. Max ll:   -1517.1693,   -1517.1690
 
 (Intercept)  Continuous      Binary             
     -2.7332      0.9528      1.8472      0.8795 
@@ -2914,7 +3108,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.7332     0.9528 1.8472 0.8795
 SE            0.2773     0.1032 0.2035 0.2821
-Time          5.0,          9.0. Max ll:   -1606.8309,   -1606.8306
+Time          5.3,          9.9. Max ll:   -1606.8309,   -1606.8306
 
 (Intercept)  Continuous      Binary             
      -3.119       1.042       2.045       1.021 
@@ -2926,7 +3120,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -3.1189     1.0420 2.0451 1.0212
 SE            0.3535     0.1238 0.2443 0.3049
-Time          4.7,          8.9. Max ll:   -1530.2611,   -1530.2607
+Time          5.5,          9.5. Max ll:   -1530.2611,   -1530.2607
 
 (Intercept)  Continuous      Binary             
     -2.7945      0.9446      1.8856      1.0420 
@@ -2938,7 +3132,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.7945     0.9446 1.8856 1.0420
 SE            0.2984     0.1072 0.2135 0.2896
-Time          9.3,          8.6. Max ll:   -1643.2979,   -1643.2979
+Time          9.7,         10.2. Max ll:   -1643.2979,   -1643.2979
 
 (Intercept)  Continuous      Binary             
      -3.086       1.082       2.090       1.240 
@@ -2950,7 +3144,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -3.0857     1.0817 2.0899 1.2398
 SE            0.3668     0.1354 0.2614 0.3034
-Time          4.8,         10.7. Max ll:   -1637.9652,   -1637.9651
+Time          5.5,         11.1. Max ll:   -1637.9652,   -1637.9651
 
 (Intercept)  Continuous      Binary             
      -2.962       1.050       1.794       1.221 
@@ -2962,7 +3156,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.9625     1.0502 1.7941 1.2209
 SE            0.3816     0.1411 0.2455 0.3303
-Time          8.9,         11.3. Max ll:   -1626.8064,   -1626.8063
+Time          9.7,         12.5. Max ll:   -1626.8064,   -1626.8063
 
 (Intercept)  Continuous      Binary             
      -2.932       1.007       2.074       1.009 
@@ -2974,7 +3168,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.9317      1.007 2.0743 1.0091
 SE            0.3139      0.114 0.2335 0.2877
-Time          9.4,         11.6. Max ll:   -1624.0941,   -1624.0939
+Time         10.5,         11.7. Max ll:   -1624.0941,   -1624.0939
 
 (Intercept)  Continuous      Binary             
     -2.8140      0.9323      1.9071      0.7796 
@@ -2986,7 +3180,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.8140     0.9323 1.9071 0.7796
 SE            0.2664     0.0942 0.1916 0.2692
-Time          5.8,          5.7. Max ll:   -1582.0835,   -1582.0837
+Time          5.9,          6.5. Max ll:   -1582.0835,   -1582.0837
 
 (Intercept)  Continuous      Binary             
      -3.614       1.133       2.193       1.512 
@@ -2998,7 +3192,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -3.6136     1.1326 2.1933 1.5117
 SE            0.5484     0.1766 0.3428 0.3712
-Time          6.2,          6.7. Max ll:   -1512.1259,   -1512.1256
+Time          6.8,          7.0. Max ll:   -1512.1259,   -1512.1256
 
 (Intercept)  Continuous      Binary             
     -2.8741      0.9475      1.9688      0.9152 
@@ -3010,7 +3204,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.8741     0.9475 1.9688 0.9152
 SE            0.2992     0.1050 0.2144 0.2901
-Time          9.3,          8.3. Max ll:   -1577.6617,   -1577.6617
+Time          9.9,          8.8. Max ll:   -1577.6617,   -1577.6617
 
 (Intercept)  Continuous      Binary             
      -2.899       1.033       1.859       1.081 
@@ -3022,7 +3216,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.8988     1.0330 1.8589 1.0806
 SE            0.3314     0.1237 0.2272 0.3046
-Time          6.2,          7.3. Max ll:   -1630.5539,   -1630.5533
+Time          7.0,          8.4. Max ll:   -1630.5539,   -1630.5533
 
 (Intercept)  Continuous      Binary             
      -3.205       1.057       2.110       1.293 
@@ -3034,7 +3228,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -3.2047     1.0571 2.1097 1.2932
 SE            0.4204     0.1437 0.2902 0.3346
-Time          4.9,          7.5. Max ll:   -1585.6072,   -1585.6071
+Time          5.9,          8.3. Max ll:   -1585.6072,   -1585.6071
 
 (Intercept)  Continuous      Binary             
     -2.9610      0.9663      2.0263      1.1579 
@@ -3046,7 +3240,7 @@ Residual
          (Intercept) Continuous Binary       
 Estimate     -2.9610     0.9663 2.0263 1.1579
 SE            0.3519     0.1206 0.2523 0.3122
-Time          9.5,          8.8. Max ll:   -1643.4114,   -1643.4113
+Time         10.3,          9.3. Max ll:   -1643.4114,   -1643.4113
 
   |                                                                              |.............................                                         |  42%
   ordinary text without R code
@@ -3188,7 +3382,7 @@ Residual
          (Intercept) Binary               
 Estimate     -2.6481 3.6234 0.4520 -0.3163
 SE            0.2373 0.3287 0.2636  0.3402
-Time         11.5,         11.0. Max ll:   -2873.6880,   -2873.6880
+Time         12.6,         12.5. Max ll:   -2873.6880,   -2873.6880
 
 (Intercept)      Binary                         
   -3.157781    4.405151    0.947818   -0.008592 
@@ -3200,7 +3394,7 @@ Residual
          (Intercept) Binary                 
 Estimate      -3.158 4.4052 0.9478 -0.008592
 SE             0.374 0.5282 0.3056  0.383326
-Time          8.8,          5.2. Max ll:   -2779.6472,   -2779.6490
+Time         10.1,          5.6. Max ll:   -2779.6472,   -2779.6490
 
 (Intercept)      Binary                         
     -2.8414      3.7621      0.2716      0.2028 
@@ -3212,7 +3406,7 @@ Residual
          (Intercept) Binary              
 Estimate     -2.8414 3.7621 0.2716 0.2028
 SE            0.2705 0.3621 0.3149 0.2793
-Time         10.2,         10.5. Max ll:   -2711.1825,   -2711.1823
+Time         11.3,         11.2. Max ll:   -2711.1825,   -2711.1823
 
 (Intercept)      Binary                         
     -2.6060      3.5515      0.2742     -0.2248 
@@ -3224,7 +3418,7 @@ Residual
          (Intercept) Binary               
 Estimate     -2.6060 3.5515 0.2742 -0.2248
 SE            0.2173 0.3002 0.2659  0.3035
-Time          8.8,         16.3. Max ll:   -2808.3757,   -2808.3754
+Time          9.9,         16.5. Max ll:   -2808.3757,   -2808.3754
 
 (Intercept)      Binary                         
    -2.88444     4.02697     0.63506    -0.01787 
@@ -3236,7 +3430,7 @@ Residual
          (Intercept) Binary                
 Estimate     -2.8844 4.0270 0.6351 -0.01787
 SE            0.2954 0.4169 0.2873  0.33201
-Time         21.1,         20.5. Max ll:   -2806.5809,   -2806.5807
+Time         22.0,         21.0. Max ll:   -2806.5809,   -2806.5807
 
 (Intercept)      Binary                         
     -3.4243      4.5947      1.0178      0.3087 
@@ -3248,7 +3442,7 @@ Residual
          (Intercept) Binary              
 Estimate     -3.4243 4.5947 1.0178 0.3087
 SE            0.4333 0.5856 0.3239 0.3606
-Time          6.9,          7.0. Max ll:   -2709.5472,   -2709.5473
+Time          6.8,          6.9. Max ll:   -2709.5472,   -2709.5473
 
 (Intercept)      Binary                         
    -2.92890     3.87255     0.63523     0.05416 
@@ -3260,7 +3454,7 @@ Residual
          (Intercept) Binary               
 Estimate     -2.9289 3.8725 0.6352 0.05416
 SE            0.3004 0.4035 0.2926 0.32011
-Time         26.9,         22.2. Max ll:   -2823.8290,   -2823.8293
+Time         28.8,         22.3. Max ll:   -2823.8290,   -2823.8293
 
 (Intercept)      Binary                         
     -2.5750      3.3585      0.2541     -0.4181 
@@ -3272,7 +3466,7 @@ Residual
          (Intercept) Binary               
 Estimate     -2.5750  3.359 0.2541 -0.4181
 SE            0.2284  0.304 0.2815  0.3570
-Time          7.1,         21.9. Max ll:   -2753.4426,   -2753.4433
+Time          7.4,         22.4. Max ll:   -2753.4426,   -2753.4433
 
 (Intercept)      Binary                         
     -2.5207      3.4087      0.2612     -0.5451 
@@ -3284,7 +3478,7 @@ Residual
          (Intercept) Binary               
 Estimate     -2.5207 3.4087 0.2612 -0.5451
 SE            0.1989 0.2725 0.2522  0.3442
-Time         15.3,          5.3. Max ll:   -2800.0163,   -2800.0188
+Time         15.4,          5.2. Max ll:   -2800.0163,   -2800.0188
 
 (Intercept)      Binary                         
    -2.76572     3.66404     0.25859    -0.08975 
@@ -3296,7 +3490,7 @@ Residual
          (Intercept) Binary                
 Estimate     -2.7657 3.6640 0.2586 -0.08975
 SE            0.2474 0.3326 0.2921  0.30655
-Time         18.4,         18.1. Max ll:   -2641.9372,   -2641.9372
+Time         19.0,         18.2. Max ll:   -2641.9372,   -2641.9372
 
 (Intercept)      Binary                         
     -3.0253      4.1490      0.5587      0.3516 
@@ -3308,7 +3502,7 @@ Residual
          (Intercept) Binary              
 Estimate     -3.0253 4.1490 0.5587 0.3516
 SE            0.3187 0.4416 0.3128 0.2896
-Time         13.0,          7.5. Max ll:   -2767.1642,   -2767.1643
+Time         13.6,          8.0. Max ll:   -2767.1642,   -2767.1643
 
 (Intercept)      Binary                         
    -2.72371     3.51815     0.24602    -0.08211 
@@ -3320,7 +3514,7 @@ Residual
          (Intercept) Binary                
 Estimate     -2.7237 3.5181 0.2460 -0.08211
 SE            0.2506 0.3282 0.3004  0.30630
-Time         15.0,         12.7. Max ll:   -2719.1933,   -2719.1929
+Time         15.3,         12.9. Max ll:   -2719.1933,   -2719.1929
 
 (Intercept)      Binary                         
    -2.98203     3.88358     0.65442    -0.01735 
@@ -3332,7 +3526,7 @@ Residual
          (Intercept) Binary                
 Estimate     -2.9820 3.8836 0.6544 -0.01735
 SE            0.3249 0.4289 0.3028  0.35886
-Time         17.3,         19.1. Max ll:   -2716.4607,   -2716.4600
+Time         18.7,         20.5. Max ll:   -2716.4607,   -2716.4600
 
 (Intercept)      Binary                         
     -2.7699      3.8082      0.6410     -0.3775 
@@ -3344,7 +3538,7 @@ Residual
          (Intercept) Binary               
 Estimate     -2.7699 3.8082 0.6410 -0.3775
 SE            0.2573 0.3571 0.2573  0.3727
-Time         26.0,         21.1. Max ll:   -2842.7168,   -2842.7169
+Time         27.4,         22.4. Max ll:   -2842.7168,   -2842.7169
 
 (Intercept)      Binary                         
     -2.6527      3.5657      0.2886     -0.2409 
@@ -3356,7 +3550,7 @@ Residual
          (Intercept) Binary               
 Estimate     -2.6527 3.5657 0.2886 -0.2409
 SE            0.2326 0.3179 0.2824  0.3152
-Time         18.2,         16.6. Max ll:   -2737.0265,   -2737.0259
+Time         19.9,         17.1. Max ll:   -2737.0265,   -2737.0259
 
 (Intercept)      Binary                         
     -2.9122      3.8533      0.6993     -0.1953 
@@ -3368,7 +3562,7 @@ Residual
          (Intercept) Binary               
 Estimate      -2.912 3.8533 0.6993 -0.1953
 SE             0.292 0.3909 0.2772  0.3571
-Time         19.8,         19.7. Max ll:   -2789.6682,   -2789.6678
+Time         20.6,         20.9. Max ll:   -2789.6682,   -2789.6678
 
 (Intercept)      Binary                         
     -2.4991      3.3502      0.1687     -0.4777 
@@ -3380,7 +3574,7 @@ Residual
          (Intercept) Binary               
 Estimate     -2.4991  3.350 0.1687 -0.4777
 SE            0.1976  0.271 0.2610  0.3292
-Time         17.8,         13.9. Max ll:   -2803.0914,   -2803.0911
+Time         18.2,         15.1. Max ll:   -2803.0914,   -2803.0911
 
 (Intercept)      Binary                         
    -3.16173     4.24362     0.88453     0.02605 
@@ -3392,7 +3586,7 @@ Residual
          (Intercept) Binary               
 Estimate     -3.1617 4.2436 0.8845 0.02605
 SE            0.3873 0.5239 0.3177 0.39778
-Time         21.4,         15.3. Max ll:   -2709.9614,   -2709.9611
+Time         23.1,         16.8. Max ll:   -2709.9614,   -2709.9611
 
 (Intercept)      Binary                         
      -3.625       4.897       1.278       0.269 
@@ -3404,7 +3598,7 @@ Residual
          (Intercept) Binary              
 Estimate     -3.6252 4.8970 1.2777 0.2690
 SE            0.5914 0.8001 0.3941 0.4623
-Time         10.5,          6.8. Max ll:   -2731.5355,   -2731.5334
+Time         11.8,          7.3. Max ll:   -2731.5355,   -2731.5334
 
 (Intercept)      Binary                         
     -3.2488      4.3347      0.9023      0.1602 
@@ -3416,7 +3610,7 @@ Residual
          (Intercept) Binary              
 Estimate     -3.2488 4.3347 0.9023 0.1602
 SE            0.3619 0.4871 0.2922 0.3419
-Time         19.2,         17.1. Max ll:   -2719.6435,   -2719.6428
+Time         20.5,         17.8. Max ll:   -2719.6435,   -2719.6428
 
 (Intercept)      Binary                         
     -4.4644      6.1794      1.7044      0.9144 
@@ -3428,7 +3622,7 @@ Residual
          (Intercept) Binary              
 Estimate     -4.4644  6.179 1.7044 0.9144
 SE            0.7713  1.073 0.3928 0.4307
-Time         13.5,         15.1. Max ll:   -2702.0254,   -2702.0269
+Time         14.3,         16.8. Max ll:   -2702.0254,   -2702.0269
 
 (Intercept)      Binary                         
     -2.8263      3.6975      0.3116      0.1569 
@@ -3440,7 +3634,7 @@ Residual
          (Intercept) Binary              
 Estimate     -2.8263 3.6975 0.3116 0.1569
 SE            0.2705 0.3581 0.3099 0.2873
-Time         23.5,         10.2. Max ll:   -2743.2777,   -2743.2771
+Time         25.8,         10.9. Max ll:   -2743.2777,   -2743.2771
 
 (Intercept)      Binary                         
     -3.0707      4.0870      0.9175     -0.1502 
@@ -3452,7 +3646,7 @@ Residual
          (Intercept) Binary               
 Estimate     -3.0707 4.0870 0.9175 -0.1502
 SE            0.3765 0.5045 0.3152  0.4166
-Time         16.5,         23.0. Max ll:   -2832.3663,   -2832.3646
+Time         18.2,         25.0. Max ll:   -2832.3663,   -2832.3646
 
 (Intercept)      Binary                         
     -3.1727      4.1588      0.6502      0.3095 
@@ -3464,7 +3658,7 @@ Residual
          (Intercept) Binary              
 Estimate     -3.1727  4.159 0.6502 0.3095
 SE            0.3616  0.477 0.3218 0.3243
-Time          5.4,          6.5. Max ll:   -2655.4698,   -2655.4703
+Time          5.4,          6.8. Max ll:   -2655.4698,   -2655.4703
 
 (Intercept)      Binary                         
     -3.5266      4.7762      1.0314      0.5086 
@@ -3476,7 +3670,7 @@ Residual
          (Intercept) Binary              
 Estimate     -3.5266 4.7762 1.0314 0.5086
 SE            0.4884 0.6666 0.3525 0.3706
-Time         14.3,         16.3. Max ll:   -2710.7652,   -2710.7651
+Time         15.8,         17.7. Max ll:   -2710.7652,   -2710.7651
 
 (Intercept)      Binary                         
     -2.5484      3.4448      0.1328     -0.2769 
@@ -3488,7 +3682,7 @@ Residual
          (Intercept) Binary               
 Estimate     -2.5484  3.445 0.1328 -0.2769
 SE            0.2035  0.280 0.2696  0.3055
-Time         13.7,         10.0. Max ll:   -2782.1826,   -2782.1829
+Time         14.5,         10.4. Max ll:   -2782.1826,   -2782.1829
 
 (Intercept)      Binary                         
     -2.6879      3.5793      0.4797     -0.3159 
@@ -3500,7 +3694,7 @@ Residual
          (Intercept) Binary               
 Estimate     -2.6879 3.5793 0.4797 -0.3159
 SE            0.2409 0.3252 0.2664  0.3408
-Time         34.9,          6.2. Max ll:   -2857.1726,   -2857.1719
+Time         37.2,          6.6. Max ll:   -2857.1726,   -2857.1719
 
 (Intercept)      Binary                         
     -3.5197      4.5932      1.0615      0.5975 
@@ -3512,7 +3706,7 @@ Residual
          (Intercept) Binary              
 Estimate     -3.5197 4.5932 1.0615 0.5975
 SE            0.4972 0.6534 0.3616 0.3570
-Time         24.2,         21.1. Max ll:   -2849.6794,   -2849.6787
+Time         26.2,         22.7. Max ll:   -2849.6794,   -2849.6787
 
 (Intercept)      Binary                         
    -2.99804     3.99226     0.76219     0.01046 
@@ -3524,7 +3718,7 @@ Residual
          (Intercept) Binary               
 Estimate     -2.9980 3.9923 0.7622 0.01046
 SE            0.3101 0.4181 0.2843 0.33903
-Time          5.5,          5.9. Max ll:   -2821.0137,   -2821.0146
+Time          5.7,          6.3. Max ll:   -2821.0137,   -2821.0146
 
 (Intercept)      Binary                         
     -2.9105      3.7849      0.7159     -0.5208 
@@ -3536,7 +3730,7 @@ Residual
          (Intercept) Binary               
 Estimate     -2.9105 3.7849 0.7159 -0.5208
 SE            0.3016 0.3961 0.2810  0.4445
-Time         21.4,         21.8. Max ll:   -2654.8796,   -2654.8795
+Time         23.5,         23.5. Max ll:   -2654.8796,   -2654.8795
 
 (Intercept)      Binary                         
    -3.14467     4.17722     0.89514     0.09991 
@@ -3548,7 +3742,7 @@ Residual
          (Intercept) Binary               
 Estimate     -3.1447 4.1772 0.8951 0.09991
 SE            0.3697 0.4967 0.3087 0.36337
-Time          9.0,         12.9. Max ll:   -2801.1212,   -2801.1213
+Time          9.6,         13.8. Max ll:   -2801.1212,   -2801.1213
 
 (Intercept)      Binary                         
     -3.4530      4.6777      1.0444      0.3239 
@@ -3560,7 +3754,7 @@ Residual
          (Intercept) Binary              
 Estimate     -3.4530 4.6777 1.0444 0.3239
 SE            0.4704 0.6434 0.3501 0.3736
-Time         36.0,         16.1. Max ll:   -2697.2461,   -2697.2459
+Time         38.8,         17.2. Max ll:   -2697.2461,   -2697.2459
 
 (Intercept)      Binary                         
     -3.5680      4.4687      1.1718      0.3754 
@@ -3572,7 +3766,7 @@ Residual
          (Intercept) Binary              
 Estimate     -3.5680 4.4687 1.1718 0.3754
 SE            0.5209 0.6555 0.3604 0.4087
-Time          9.2,          7.5. Max ll:   -2762.9871,   -2762.9884
+Time          9.9,          8.3. Max ll:   -2762.9871,   -2762.9884
 
 (Intercept)      Binary                         
     -3.0594      3.9578      0.8123     -0.3610 
@@ -3584,7 +3778,7 @@ Residual
          (Intercept) Binary               
 Estimate     -3.0594 3.9578 0.8123 -0.3610
 SE            0.3263 0.4254 0.2867  0.4105
-Time         20.6,         24.9. Max ll:   -2623.0103,   -2623.0092
+Time         22.1,         26.4. Max ll:   -2623.0103,   -2623.0092
 
 (Intercept)      Binary                         
    -2.92019     3.99500     0.60893    -0.08805 
@@ -3596,7 +3790,7 @@ Residual
          (Intercept) Binary                
 Estimate     -2.9202 3.9950 0.6089 -0.08805
 SE            0.2884 0.3967 0.2828  0.33062
-Time         12.5,         12.6. Max ll:   -2741.6145,   -2741.6146
+Time         13.3,         14.0. Max ll:   -2741.6145,   -2741.6146
 
 (Intercept)      Binary                         
     -3.0191      4.1467      0.6068      0.2539 
@@ -3608,7 +3802,7 @@ Residual
          (Intercept) Binary              
 Estimate     -3.0191 4.1467 0.6068 0.2539
 SE            0.3405 0.4703 0.3296 0.3177
-Time         18.4,         10.8. Max ll:   -2754.9105,   -2754.9104
+Time         19.7,         11.6. Max ll:   -2754.9105,   -2754.9104
 
 (Intercept)      Binary                         
     -3.1113      3.9482      0.8101     -0.1061 
@@ -3620,7 +3814,7 @@ Residual
          (Intercept) Binary               
 Estimate     -3.1113 3.9482 0.8101 -0.1061
 SE            0.3392 0.4349 0.2878  0.3809
-Time         10.1,         15.7. Max ll:   -2686.3897,   -2686.3850
+Time         11.6,         16.9. Max ll:   -2686.3897,   -2686.3850
 
 (Intercept)      Binary                         
     -2.8393      3.7168      0.5725     -0.1982 
@@ -3632,7 +3826,7 @@ Residual
          (Intercept) Binary               
 Estimate     -2.8393 3.7168 0.5725 -0.1982
 SE            0.2769 0.3665 0.2774  0.3508
-Time         23.0,         21.0. Max ll:   -2757.3076,   -2757.3083
+Time         24.1,         21.4. Max ll:   -2757.3076,   -2757.3083
 
 (Intercept)      Binary                         
    -3.10187     4.13678     0.78083     0.02054 
@@ -3644,7 +3838,7 @@ Residual
          (Intercept) Binary               
 Estimate     -3.1019 4.1368 0.7808 0.02054
 SE            0.3515 0.4708 0.3023 0.36275
-Time         18.9,         17.2. Max ll:   -2712.5176,   -2712.5161
+Time         20.0,         17.8. Max ll:   -2712.5176,   -2712.5161
 
 (Intercept)      Binary                         
     -3.7821      5.1336      1.3021      0.4485 
@@ -3656,7 +3850,7 @@ Residual
          (Intercept) Binary              
 Estimate     -3.7821 5.1336 1.3021 0.4485
 SE            0.6317 0.8624 0.4021 0.4564
-Time         23.9,         18.8. Max ll:   -2650.1462,   -2650.1477
+Time         25.1,         19.6. Max ll:   -2650.1462,   -2650.1477
 
 (Intercept)      Binary                         
    -3.19204     4.29838     0.94724     0.05537 
@@ -3668,7 +3862,7 @@ Residual
          (Intercept) Binary               
 Estimate     -3.1920 4.2984 0.9472 0.05537
 SE            0.4098 0.5552 0.3306 0.40000
-Time         25.2,          7.7. Max ll:   -2768.4679,   -2768.4698
+Time         25.9,          8.1. Max ll:   -2768.4679,   -2768.4698
 
 (Intercept)      Binary                         
    -3.00350     4.01653     0.65044     0.05291 
@@ -3680,7 +3874,7 @@ Residual
          (Intercept) Binary               
 Estimate      -3.004  4.017 0.6504 0.05291
 SE             0.331  0.448 0.3142 0.33943
-Time         18.3,         10.4. Max ll:   -2703.6492,   -2703.6541
+Time         18.8,         11.0. Max ll:   -2703.6492,   -2703.6541
 
 (Intercept)      Binary                         
      -4.965       6.621       1.813       1.373 
@@ -3692,7 +3886,7 @@ Residual
          (Intercept) Binary              
 Estimate      -4.965  6.621 1.8126 1.3731
 SE             1.110  1.485 0.5114 0.4926
-Time         11.0,          6.8. Max ll:   -2704.0546,   -2704.0532
+Time         11.9,          7.0. Max ll:   -2704.0546,   -2704.0532
 
 (Intercept)      Binary                         
     -3.0587      4.0983      0.5858      0.2205 
@@ -3704,7 +3898,7 @@ Residual
          (Intercept) Binary              
 Estimate     -3.0587 4.0983 0.5858 0.2205
 SE            0.3246 0.4398 0.3075 0.3139
-Time         25.7,         21.8. Max ll:   -2681.1876,   -2681.1873
+Time         27.7,         22.7. Max ll:   -2681.1876,   -2681.1873
 
 (Intercept)      Binary                         
    -2.99664     3.90846     0.60526     0.08917 
@@ -3716,7 +3910,7 @@ Residual
          (Intercept) Binary               
 Estimate      -2.997 3.9085 0.6053 0.08917
 SE             0.325 0.4298 0.3139 0.33125
-Time         18.1,         14.9. Max ll:   -2697.4757,   -2697.4757
+Time         19.4,         15.3. Max ll:   -2697.4757,   -2697.4757
 
 (Intercept)      Binary                         
    -2.90238     4.00198     0.62882    -0.01734 
@@ -3728,7 +3922,7 @@ Residual
          (Intercept) Binary                
 Estimate     -2.9024 4.0020 0.6288 -0.01734
 SE            0.2912 0.4056 0.2874  0.32088
-Time         11.1,         16.3. Max ll:   -2788.8708,   -2788.8692
+Time         11.7,         17.7. Max ll:   -2788.8708,   -2788.8692
 
 (Intercept)      Binary                         
     -2.7045      3.6774      0.2285     -0.1323 
@@ -3740,7 +3934,7 @@ Residual
          (Intercept) Binary               
 Estimate     -2.7045 3.6774 0.2285 -0.1323
 SE            0.2377 0.3276 0.2918  0.3041
-Time         22.3,         18.5. Max ll:   -2663.0191,   -2663.0192
+Time         24.0,         19.6. Max ll:   -2663.0191,   -2663.0192
 
 (Intercept)      Binary                         
     -2.8175      3.6386      0.5459     -0.4015 
@@ -3752,7 +3946,7 @@ Residual
          (Intercept) Binary               
 Estimate      -2.817 3.6386 0.5459 -0.4015
 SE             0.268 0.3509 0.2717  0.3838
-Time         20.4,         21.1. Max ll:   -2683.9449,   -2683.9442
+Time         21.0,         22.4. Max ll:   -2683.9449,   -2683.9442
 
 (Intercept)      Binary                         
     -2.7614      3.6960      0.4532     -0.2251 
@@ -3764,7 +3958,7 @@ Residual
          (Intercept) Binary               
 Estimate     -2.7614 3.6960 0.4532 -0.2251
 SE            0.2583 0.3502 0.2828  0.3323
-Time         24.6,         18.5. Max ll:   -2745.8375,   -2745.8383
+Time         25.5,         19.2. Max ll:   -2745.8375,   -2745.8383
 
 (Intercept)      Binary                         
     -3.1535      4.2105      0.7249      0.2730 
@@ -3776,7 +3970,7 @@ Residual
          (Intercept) Binary              
 Estimate     -3.1535  4.210 0.7249 0.2730
 SE            0.3599  0.484 0.3144 0.3315
-Time         26.0,         18.3. Max ll:   -2711.1002,   -2711.0966
+Time         27.7,         18.9. Max ll:   -2711.1002,   -2711.0966
 
   |                                                                              |..............................................                        |  65%
   ordinary text without R code
@@ -4244,5 +4438,5 @@ Preview created: README.html
 Output created: README.md
 > 
 > proc.time()
-    user   system  elapsed 
-9772.508    1.825 3196.481 
+     user    system   elapsed 
+30493.431     3.337  8819.502 

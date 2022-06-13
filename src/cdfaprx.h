@@ -412,8 +412,13 @@ class cdf {
         w[k] = 0;
 
       w[k] /= functor.get_norm_constant();
-      for(unsigned i = 0; i < n_integrands; ++i, ++o)
-        *o *= w[k];
+      if(w[k] == 0){
+        std::fill(o, o + n_integrands, 0);
+        o += n_integrands;
+
+      } else
+        for(unsigned i = 0; i < n_integrands; ++i, ++o)
+          *o *= w[k];
     }
   }
 

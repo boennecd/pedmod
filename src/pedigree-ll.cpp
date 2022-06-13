@@ -29,7 +29,7 @@ void pedigree_ll_term::setup
             -std::numeric_limits<double>::infinity());
   upper.zeros();
 
-  arma::vec beta(const_cast<double *>(par), n_fix_effect(), false);
+  arma::vec beta(const_cast<double *>(par), n_fix_effect(), false, true);
   for(unsigned i = 0; i < n_members(); ++i)
     mu[i] = arma::dot(beta, X.row(i));
 
@@ -266,10 +266,10 @@ pedigree_ll_term_loading::fn_res pedigree_ll_term_loading::fn
     (lower.begin(), lower.end(), -std::numeric_limits<double>::infinity());
   upper.zeros();
 
-  arma::vec beta(const_cast<double *>(par), n_fix_effect(), false);
+  arma::vec beta(const_cast<double *>(par), n_fix_effect(), false, true);
   arma::vec const mu = X * beta;
 
-  arma::mat thetas(beta.end(), n_scale_coefs(), n_scales(), false);
+  arma::mat thetas(beta.end(), n_scale_coefs(), n_scales(), false, true);
   arma::mat scale_params = Z * thetas;
   scale_params.for_each([](double &x) { x = std::exp(x); });
 
@@ -315,7 +315,7 @@ double pedigree_ll_term_loading::gr
     (lower.begin(), lower.end(), -std::numeric_limits<double>::infinity());
   upper.zeros();
 
-  arma::vec beta(const_cast<double *>(par), n_fix_effect(), false);
+  arma::vec beta(const_cast<double *>(par), n_fix_effect(), false, true);
   arma::vec const mu = X * beta;
 
   arma::mat thetas
@@ -356,11 +356,11 @@ double pedigree_ll_term_loading::gr
 
   // compute the derivatives
   res.derivs *= weight;
-  arma::vec d_mu(res.derivs.begin(), n_members(), false);
-  arma::mat d_Sig(d_mu.end(), n_members(), n_members(), false);
+  arma::vec d_mu(res.derivs.begin(), n_members(), false, true);
+  arma::mat d_Sig(d_mu.end(), n_members(), n_members(), false, true);
 
-  arma::vec d_fixef(d_par, n_fix_effect(), false);
-  arma::mat d_thetas(d_fixef.end(), n_scale_coefs(), n_scales(), false);
+  arma::vec d_fixef(d_par, n_fix_effect(), false, true);
+  arma::mat d_thetas(d_fixef.end(), n_scale_coefs(), n_scales(), false, true);
 
   d_fixef += X.t() * d_mu;
 

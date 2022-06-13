@@ -551,7 +551,7 @@ public:
           infin[i] = infi[i];
         }
 
-        arma::mat sigma_permu(get_dmem(ndim * ndim), ndim, ndim, false);
+        arma::mat sigma_permu(get_dmem(ndim * ndim), ndim, ndim, false, true);
         for(arma::uword j = 0; j < ndim; ++j)
           for(arma::uword i = 0; i < ndim; ++i)
             sigma_permu.at(i, j) = sigma_in.at(indices[i], indices[j]);
@@ -568,7 +568,7 @@ public:
         }
 
     } else if(!do_reorder and ndim > 1L) {
-      arma::mat tmp(get_dmem(ndim * ndim), ndim, ndim, false);
+      arma::mat tmp(get_dmem(ndim * ndim), ndim, ndim, false, true);
       tmp = sigma_in;
       for(arma::uword i = 0; i < ndim; ++i)
         for(arma::uword j = 0; j < ndim; ++j)

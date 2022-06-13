@@ -42,7 +42,10 @@ double qtnorm(double const x, double lower, double upper){
   double z{std::sqrt(lower - 2 * log(1 + x * expm1((lower - upper) / 2)))},
        err{std::numeric_limits<double>::infinity()};
 
-  while(err > 1e-10){
+  constexpr unsigned max_step{100};
+  unsigned step{};
+
+  while(err > 1e-10 && step++ < max_step){
     double const step
       {-qfunc(z)
         + (1 - x) * std::exp((z *  z - lower) / 2) * q_lower

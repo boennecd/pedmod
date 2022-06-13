@@ -95,7 +95,7 @@ pedigree_l_factor::pedigree_l_factor
   imem.set_n_mem(n_scales, max_threads);
 
   // check that the scale matrices are positive semi definite
-  arma::vec vdum(dmem.get_mem(), n_mem, false);
+  arma::vec vdum(dmem.get_mem(), n_mem, false, true);
   for(arma::mat const &m : scale_mats){
     if(!arma::eig_sym(vdum, m))
       throw std::runtime_error("Eigen decomposition failed in pedigree_l_factor constructor");
@@ -131,7 +131,7 @@ void pedigree_l_factor::setup
   cdf_mem = next_mem;
   next_mem += 2 * get_n_integrands();
 
-  arma::mat t1(next_mem, n_mem, n_mem, false);
+  arma::mat t1(next_mem, n_mem, n_mem, false, true);
   if(!arma::inv_sympd(t1, sig))
     throw std::runtime_error("pedigree_ll_factor::setup: inv_sympd failed");
 
@@ -148,11 +148,11 @@ void pedigree_l_factor::prep_permutated
   double * next_mem = cdf_mem + 2 * get_n_integrands();
   interal_mem = next_mem + n_fix * n_mem + n_mem * n_mem * n_scales;
 
-  arma::vec dum_vec(interal_mem  , n_mem, false);
-  arma::mat t1(dum_vec.end(), n_mem, n_mem, false),
-            t2(t1.end()     , n_mem, n_mem, false),
-            t3(t2.end()     , n_mem, n_mem, false),
-       X_permu(t3.end()     , n_mem, n_fix, false);
+  arma::vec dum_vec(interal_mem  , n_mem, false, true);
+  arma::mat t1(dum_vec.end(), n_mem, n_mem, false, true),
+            t2(t1.end()     , n_mem, n_mem, false, true),
+            t3(t2.end()     , n_mem, n_mem, false, true),
+       X_permu(t3.end()     , n_mem, n_fix, false, true);
   if(!arma::chol(t1, sig, "lower"))
     throw std::runtime_error("pedigree_ll_factor::setup: chol failed");
 
@@ -162,7 +162,7 @@ void pedigree_l_factor::prep_permutated
       X_permu(i, j) = X(indices[i], j);
 
   d_fix_mat = next_mem;
-  arma::mat d_fix_obj(d_fix_mat, n_mem, n_fix, false);
+  arma::mat d_fix_obj(d_fix_mat, n_mem, n_fix, false, true);
   next_mem += n_mem * n_fix;
   arma::solve(d_fix_obj, arma::trimatl(t1), X_permu);
 
@@ -607,7 +607,7 @@ void pedigree_l_factor_Hessian::univariate
   if(!f_lb)
     add_to_hess(lw, d_lb, false);
 
-   arma::mat hess(hess_begin, hess_dim, hess_dim, false);
+   arma::mat hess(hess_begin, hess_dim, hess_dim, false, true);
    hess = arma::symmatu(hess);
 }
 
@@ -662,8 +662,8 @@ pedigree_l_factor_Hessian::out_type pedigree_l_factor_Hessian::get_output
          scale_mats_permu[scale], 0.);
 
     // compute the Hessian
-    arma::mat X_permu_mat(X_permu, n_mem, n_fix, false),
-             vcov_inv_mat(vcov_inv, n_mem, n_mem, false); // TODO: solve instead
+    arma::mat X_permu_mat(X_permu, n_mem, n_fix, false, true),
+             vcov_inv_mat(vcov_inv, n_mem, n_mem, false, true); // TODO: solve instead
 
     hess.resize(hess_dim, hess_dim);
     std::copy
@@ -679,13 +679,13 @@ pedigree_l_factor_Hessian::out_type pedigree_l_factor_Hessian::get_output
       (X_permu_mat.t() * vcov_inv_mat * X_permu_mat) / rel_likelihood;
 
     {
-      arma::vec cross_vec(res + shift_scaled_res, n_mem, false);
+      arma::vec cross_vec(res + shift_scaled_res, n_mem, false, true);
       for(size_t scale = 0; scale < n_scales; ++scale)
         hess.submat(0, n_fix + scale, n_fix - 1, n_fix + scale) -=
           X_permu_mat.t() * vcov_inv_mat * scale_mats_arma[scale] * cross_vec;
     }
     {
-      arma::mat outer_vec(res + shift_outer_res, n_mem, n_mem, false);
+      arma::mat outer_vec(res + shift_outer_res, n_mem, n_mem, false, true);
       arma::mat prod1;
 
       for(size_t scale1 = 0; scale1 < n_scales; ++scale1){
@@ -825,7 +825,7 @@ generic_l_factor::out_type generic_l_factor::get_output
 
     out.derivs.resize(n_vars * (n_vars + 1));
 
-    arma::vec d_mean(out.derivs.begin(), n_vars, false);
+    arma::vec d_mean(out.derivs.begin(), n_vars, false, true);
 
     {
       double const * const d_mean_permu{res + 1};
@@ -833,7 +833,7 @@ generic_l_factor::out_type generic_l_factor::get_output
         d_mean[indices[v]] = d_mean_permu[v];
     }
 
-    arma::mat d_Sig(d_mean.end(), n_vars, n_vars, false);
+    arma::mat d_Sig(d_mean.end(), n_vars, n_vars, false, true);
 
     std::unique_ptr<double[]> Sig_permu_inv
       (new double[(n_vars * (n_vars + 1)) / 2]);

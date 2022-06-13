@@ -1,5 +1,9 @@
 # pedmod 0.2.3
-* the `eval_pedigree_hess` function is faster.
+* `eval_pedigree_hess` is faster.
+* fixed a bug from release 0.2.0 which in en extreme settings could cause the 
+  C++ code to run forever.
+* deal with a breaking change in RcppArmadillo which __could possibly__
+  cause issues in this package. See https://stackoverflow.com/a/72533955/5861244
 
 # pedmod 0.2.2
 * a minor bug fix on Mac when using Apple LLVM version 10.0.0 with R version

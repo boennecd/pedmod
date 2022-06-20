@@ -2621,6 +2621,52 @@ do_plot(dum_pl, expression(h[E]), estimate[2], identity, col = "gray40",
 
 <img src="man/figures/README-plot_prop_var_conf-2.png" width="100%" />
 
+It is also possible to pass starting bounds to `pedmod_profile_prop` as
+shown below.
+
+``` r
+# confidence interval for the proportion of variance for the genetic effect
+pl_genetic_prop_bounds <- pedmod_profile_prop(
+  ptr = ll_terms, par = opt_out$par, maxvls = 20000L, 
+  minvls = 1000L, alpha = .05, abs_eps = 0, rel_eps = 1e-4, which_prof = 1L,
+  use_aprx = TRUE, n_threads = 4L, verbose = TRUE, cluster_weights = c_weights, 
+  vls_scales = sqrt(c_weights), bound = c(.3, .65))
+#> The estimate of the standard error of the log likelihood is 0.00485355. Preferably this should be below 0.001
+#> 
+#> Finding the upper limit of the profile likelihood curve
+#> LogLike: -2699.4910 at         0.650000
+#> LogLike: -2699.5002 at         0.650000
+#> LogLike: -2696.1152 at         0.503198
+#> LogLike: -2696.9779 at         0.577242. Lb, target, ub: -2699.5002, -2698.0360, -2696.9779
+#> LogLike: -2696.9763 at         0.577242. Lb, target, ub: -2699.5002, -2698.0360, -2696.9763
+#> LogLike: -2698.0296 at         0.613455. Lb, target, ub: -2699.5002, -2698.0360, -2698.0296
+#> LogLike: -2698.0244 at         0.613455. Lb, target, ub: -2699.5002, -2698.0360, -2698.0244
+#> LogLike: -2698.1872 at         0.617816. Lb, target, ub: -2698.1872, -2698.0360, -2698.0244
+#> LogLike: -2698.1831 at         0.617816. Lb, target, ub: -2698.1831, -2698.0360, -2698.0244
+#> 
+#> Finding the lower limit of the profile likelihood curve
+#> LogLike: -2701.8072 at         0.300000
+#> LogLike: -2701.8211 at         0.300000
+#> LogLike: -2696.1152 at         0.503198
+#> LogLike: -2697.0364 at         0.419820. Lb, target, ub: -2701.8211, -2698.0360, -2697.0364
+#> LogLike: -2697.0466 at         0.419820. Lb, target, ub: -2701.8211, -2698.0360, -2697.0466
+#> LogLike: -2698.6668 at         0.366663. Lb, target, ub: -2698.6668, -2698.0360, -2697.0466
+#> LogLike: -2698.6685 at         0.366663. Lb, target, ub: -2698.6685, -2698.0360, -2697.0466
+#> LogLike: -2697.9751 at         0.385995. Lb, target, ub: -2698.6685, -2698.0360, -2697.9751
+#> LogLike: -2697.9907 at         0.385995. Lb, target, ub: -2698.6685, -2698.0360, -2697.9907
+#> LogLike: -2698.0933 at         0.382563. Lb, target, ub: -2698.0933, -2698.0360, -2697.9907
+#> LogLike: -2698.1021 at         0.382563. Lb, target, ub: -2698.1021, -2698.0360, -2697.9907
+#> LogLike: -2696.1152 at         0.503198
+
+# compare the result
+pl_genetic_prop_bounds$confs
+#>  2.50 pct. 97.50 pct. 
+#>     0.3846     0.6138
+pl_genetic_prop$confs
+#>  2.50 pct. 97.50 pct. 
+#>     0.3846     0.6138
+```
+
 ### Simulation Study
 
 We make a small simulation study below where we are interested in the

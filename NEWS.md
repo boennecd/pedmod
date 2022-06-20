@@ -4,6 +4,10 @@
   C++ code to run forever.
 * deal with a breaking change in RcppArmadillo which __could possibly__
   cause issues in this package. See https://stackoverflow.com/a/72533955/5861244
+* better starting values are used by `pedmod_profile_prop`. It is also possible 
+  to pass bound on the confidence interval using the `bound` argument.
+* `mvndst_grad` is added which computes the gradient with respect to the mean 
+  and covariance matrix.
 
 # pedmod 0.2.2
 * a minor bug fix on Mac when using Apple LLVM version 10.0.0 with R version

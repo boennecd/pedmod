@@ -74,10 +74,7 @@ some guess.}
 likelihood terms to include. Use \code{NULL} if all indices should be
 used.}
 
-\item{maxvls_start}{number of samples to use when finding the
-initial values for the optimization.}
-
-\item{minvls_start}{number of samples to use when finding the
+\item{maxvls_start, minvls_start}{number of samples to use when finding the
 initial values for the optimization.}
 
 \item{do_reorder}{\code{TRUE} if a heuristic variable reordering should

@@ -1141,6 +1141,9 @@ comp_confs <- function(xs, z_vals, alpha){
 #' @param opt_func function to perform minimization with arguments like
 #' \code{\link{optim}}. BFGS is used with \code{\link{optim}} if this argument
 #' is \code{NULL}.
+#' @param bound boundaries for the limits of the proportion. Has to be in
+#' between \eqn{(0,1)}. This is useful particularly if the optimization fails to
+#' work on the default values.
 #' @param ... arguments passed to \code{opt_func}.
 #'
 #' @details
@@ -1254,7 +1257,8 @@ pedmod_profile_prop <- function(
   minvls_start = if(minvls < 0) minvls else minvls / 5,
   do_reorder = TRUE, use_aprx = FALSE, n_threads = 1L, cluster_weights = NULL,
   method = 0L, seed = 1L, verbose = FALSE, max_step = 15L,
-  opt_func = NULL, use_tilting = FALSE, vls_scales = NULL, ...){
+  opt_func = NULL, use_tilting = FALSE, vls_scales = NULL,
+  bound = c(.01, .99), ...){
   # checks
   standardized <- FALSE
   n_scales <- get_n_scales(ptr)
@@ -1265,7 +1269,9 @@ pedmod_profile_prop <- function(
     length(which_prof) == 1L, is.integer(which_prof),
     which_prof %in% 1:n_scales,
     is.numeric(alpha), length(alpha) == 1, is.finite(alpha),
-    alpha > 0, alpha < 1)
+    alpha > 0, alpha < 1,
+    all(is.finite(bound)), diff(bound) > 0, 0 < bound[1],
+    bound[2] < 1)
   if(n_scales < 2)
     stop("pedmod_profile when there is just one scale parameter")
   if(!inherits(ptr, "pedigree_ll_terms_ptr"))
@@ -1334,6 +1340,12 @@ pedmod_profile_prop <- function(
   do_fit <- function(x, dir, lb = NULL, ub = NULL){
     # get the starting value
     par <- par[-is_scales[which_prof]]
+
+    # re-scale the starting values
+    new_total_var <- (function(new_par){
+      sum(exp(new_par[is_scales])) + 1
+    })(get_par(par, x))
+    par[is_beta] <- par[is_beta] * sqrt(new_total_var / total_var)
 
     # handle defaults
     if(is.null(opt_func)){
@@ -1421,7 +1433,7 @@ pedmod_profile_prop <- function(
     # check if the limit is ok
     step <- step + 1L
     if(dir < 0){
-      lb <- .01
+      lb <- bound[1]
       if(prop_var_max < lb){
         out[[step]] <- do_fit(prop_var_max / 2, dir = dir)
         return(out[sapply(out, length) > 0])
@@ -1432,7 +1444,7 @@ pedmod_profile_prop <- function(
         return(out[sapply(out, length) > 0])
 
     } else {
-      ub <- .99
+      ub <- bound[2]
       if(prop_var_max > ub){
         out[[step]] <- do_fit(1 - (1 - prop_var_max) / 2, dir = dir)
         return(out[sapply(out, length) > 0])

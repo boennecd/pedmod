@@ -101,6 +101,29 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// mvndst_grad
+Rcpp::List mvndst_grad(arma::vec const& lower, arma::vec const& upper, arma::vec const& mu, arma::mat const& sigma, unsigned const maxvls, double const abs_eps, double const rel_eps, int minvls, bool const do_reorder, bool const use_aprx, int const method, unsigned const n_sequences, bool const use_tilting);
+RcppExport SEXP _pedmod_mvndst_grad(SEXP lowerSEXP, SEXP upperSEXP, SEXP muSEXP, SEXP sigmaSEXP, SEXP maxvlsSEXP, SEXP abs_epsSEXP, SEXP rel_epsSEXP, SEXP minvlsSEXP, SEXP do_reorderSEXP, SEXP use_aprxSEXP, SEXP methodSEXP, SEXP n_sequencesSEXP, SEXP use_tiltingSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec const& >::type lower(lowerSEXP);
+    Rcpp::traits::input_parameter< arma::vec const& >::type upper(upperSEXP);
+    Rcpp::traits::input_parameter< arma::vec const& >::type mu(muSEXP);
+    Rcpp::traits::input_parameter< arma::mat const& >::type sigma(sigmaSEXP);
+    Rcpp::traits::input_parameter< unsigned const >::type maxvls(maxvlsSEXP);
+    Rcpp::traits::input_parameter< double const >::type abs_eps(abs_epsSEXP);
+    Rcpp::traits::input_parameter< double const >::type rel_eps(rel_epsSEXP);
+    Rcpp::traits::input_parameter< int >::type minvls(minvlsSEXP);
+    Rcpp::traits::input_parameter< bool const >::type do_reorder(do_reorderSEXP);
+    Rcpp::traits::input_parameter< bool const >::type use_aprx(use_aprxSEXP);
+    Rcpp::traits::input_parameter< int const >::type method(methodSEXP);
+    Rcpp::traits::input_parameter< unsigned const >::type n_sequences(n_sequencesSEXP);
+    Rcpp::traits::input_parameter< bool const >::type use_tilting(use_tiltingSEXP);
+    rcpp_result_gen = Rcpp::wrap(mvndst_grad(lower, upper, mu, sigma, maxvls, abs_eps, rel_eps, minvls, do_reorder, use_aprx, method, n_sequences, use_tilting));
+    return rcpp_result_gen;
+END_RCPP
+}
 // pedigree_ll_terms
 SEXP pedigree_ll_terms(Rcpp::List data, unsigned const max_threads, unsigned const n_sequences);
 RcppExport SEXP _pedmod_pedigree_ll_terms(SEXP dataSEXP, SEXP max_threadsSEXP, SEXP n_sequencesSEXP) {
@@ -296,6 +319,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_pedmod_get_max_balanced_partition", (DL_FUNC) &_pedmod_get_max_balanced_partition, 11},
     {"_pedmod_unconnected_partition_rcpp", (DL_FUNC) &_pedmod_unconnected_partition_rcpp, 10},
     {"_pedmod_mvndst", (DL_FUNC) &_pedmod_mvndst, 13},
+    {"_pedmod_mvndst_grad", (DL_FUNC) &_pedmod_mvndst_grad, 13},
     {"_pedmod_pedigree_ll_terms", (DL_FUNC) &_pedmod_pedigree_ll_terms, 3},
     {"_pedmod_get_n_scales", (DL_FUNC) &_pedmod_get_n_scales, 1},
     {"_pedmod_get_n_scales_loadings", (DL_FUNC) &_pedmod_get_n_scales_loadings, 1},

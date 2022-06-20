@@ -1,11 +1,13 @@
 #include "pedigree-ll.h"
 #include "ped-mem.h"
 #include "openmp-exception_ptr.h"
+#include <algorithm>
 
-//' Multivariate Normal Distribution CDF
+//' Multivariate Normal Distribution CDF and Its Derivative
 //' @description
 //' Provides an approximation of the multivariate normal distribution CDF
-//' over a hyperrectangle.
+//' over a hyperrectangle and the derivative with respect to the mean vector
+//' and the covariance matrix.
 //'
 //' @param lower numeric vector with lower bounds.
 //' @param upper numeric vector with upper bounds.
@@ -31,6 +33,7 @@
 //' by Botev (2017) should be used. See \doi{10.1111/rssb.12162}.
 //'
 //' @return
+//' \code{mvndst:}
 //' An approximation of the CDF. The \code{"n_it"} attribute shows the number of
 //' integrand evaluations, the \code{"inform"} attribute is zero if the
 //' requested precision is achieved, and the \code{"abserr"} attribute
@@ -79,6 +82,42 @@
 //'     print(TruncatedNormal_time)
 //' }
 //'
+//' # check the gradient
+//' system.time(pedmod_res <- mvndst_grad(
+//'   lower = rep(-Inf, n), upper = u, sigma = S, mu = numeric(n),
+//'   maxvls = 1e5, minvls = 1e5, abs_eps = 0, rel_eps = 1e-4, use_aprx = TRUE))
+//' pedmod_res
+//'
+//' \donttest{# compare with numerical differentiation. Should give the same up to Monte
+//' # Carlo and finite difference error
+//' if(require(numDeriv)){
+//'   num_res <- grad(
+//'     function(par){
+//'       set.seed(1)
+//'       mu <- head(par, n)
+//'       S[upper.tri(S, TRUE)] <- tail(par, -n)
+//'       S[lower.tri(S)] <- t(S)[lower.tri(S)]
+//'       mvndst(
+//'         lower = rep(-Inf, n), upper = u, sigma = S, mu = mu,
+//'         maxvls = 1e4, minvls = 1e4, abs_eps = 0, rel_eps = 1e-4,
+//'         use_aprx = TRUE)
+//'     }, c(numeric(n), S[upper.tri(S, TRUE)]),
+//'     method.args = list(d = .01, r = 2))
+//'
+//'   d_mu <- head(num_res, n)
+//'   d_sigma <- matrix(0, n, n)
+//'   d_sigma[upper.tri(d_sigma, TRUE)] <- tail(num_res, -n)
+//'   d_sigma[upper.tri(d_sigma)] <- d_sigma[upper.tri(d_sigma)] / 2
+//'   d_sigma[lower.tri(d_sigma)] <- t(d_sigma)[lower.tri(d_sigma)]
+//'
+//'   cat("numerical derivatives\n")
+//'   print(rbind(numDeriv = d_mu,
+//'               pedmod = pedmod_res$d_mu))
+//'   print(d_sigma)
+//'   cat("\nd_sigma from pedmod\n")
+//'   print(pedmod_res$d_sigma) # for comparison
+//' }}
+//'
 //' @export
 // [[Rcpp::export]]
 Rcpp::NumericVector mvndst
@@ -120,6 +159,78 @@ Rcpp::NumericVector mvndst
   res.attr("n_it")   = Rcpp::IntegerVector::create(out.minvls);
   res.attr("inform") = Rcpp::IntegerVector::create(out.inform);
   res.attr("abserr") = Rcpp::NumericVector::create(out.abserr);
+  return res;
+}
+
+//' @rdname mvndst
+//' @return
+//' \code{mvndst_grad:}
+//' A list with
+//' \itemize{
+//'   \item \code{likelihood}: the likelihood approximation.
+//'   \item \code{d_mu}: the derivative with respect to the the mean vector.
+//'   \item \code{d_sigma}: the derivative with respect to the covariance matrix
+//'   ignoring the symmetry (i.e. working the \eqn{n^2} parameters with
+//'   \eqn{n} being the dimension rather than the \eqn{n(n + 1) / 2}
+//'   free parameters).
+//' }
+//'
+//' @export
+// [[Rcpp::export]]
+Rcpp::List mvndst_grad
+  (arma::vec const &lower, arma::vec const &upper, arma::vec const &mu,
+   arma::mat const &sigma, unsigned const maxvls = 25000,
+   double const abs_eps = .001, double const rel_eps = 0,
+   int minvls = -1, bool const do_reorder = true,
+   bool const use_aprx = false, int const method = 0,
+   unsigned const n_sequences = 8, bool const use_tilting = false){
+  arma::uword const n = lower.n_elem;
+  if(upper.n_elem != n)
+    throw std::invalid_argument("mvndst: invalid upper");
+  if(mu.n_elem != n)
+    throw std::invalid_argument("mvndst: invalid mu");
+  if(sigma.n_cols != n or sigma.n_rows != n)
+    throw std::invalid_argument("mvndst: invalid sigma");
+  if(!std::isfinite(abs_eps) or !std::isfinite(rel_eps))
+    throw std::invalid_argument("mvndst: invalid abs_eps or rel_eps");
+
+  if(minvls < 0)
+    minvls = pedmod::default_minvls(lower.n_elem);
+
+  if(maxvls < static_cast<unsigned>(minvls) or maxvls < 1)
+    throw std::invalid_argument("mvndst: invalid maxvls");
+
+  pedmod::generic_l_factor func(mu, sigma, 1);
+  parallelrng::set_rng_seeds(1);
+
+  pedmod::cdf<pedmod::generic_l_factor>::alloc_mem(lower.n_elem, 1);
+  pedmod::generic_l_factor::alloc_mem(lower.n_elem, 1, n_sequences);
+  auto const out = pedmod::cdf<pedmod::generic_l_factor>(
+    func, lower, upper, mu, sigma, do_reorder, use_aprx,
+    use_tilting).approximate(
+        maxvls, abs_eps, rel_eps, pedmod::get_cdf_methods(method), minvls,
+        n_sequences);
+
+  Rcpp::NumericVector d_mu(n);
+  Rcpp::NumericMatrix d_sig(n, n);
+  std::copy(out.derivs.begin(), out.derivs.begin() + n, d_mu.begin());
+  std::copy(out.derivs.begin() + n, out.derivs.end(), d_sig.begin());
+
+  {
+    auto scale_entries = [&](double &x){ x *= out.likelihood; };
+    std::for_each(d_mu.begin(), d_mu.end(), scale_entries);
+    std::for_each(d_sig.begin(), d_sig.end(), scale_entries);
+  }
+
+  Rcpp::List res = Rcpp::List::create(
+    Rcpp::Named("likelihood") = out.likelihood,
+    Rcpp::Named("d_mu") = std::move(d_mu),
+    Rcpp::Named("d_sigma") = std::move(d_sig));
+
+  res.attr("n_it")   = Rcpp::IntegerVector::create(out.minvls);
+  res.attr("inform") = Rcpp::IntegerVector::create(out.inform);
+  res.attr("abserr") = Rcpp::NumericVector::create(out.abserr);
+
   return res;
 }
 

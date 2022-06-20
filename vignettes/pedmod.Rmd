@@ -1784,6 +1784,22 @@ do_plot(dum_pl, expression(h[E]), estimate[2], identity, col = "gray40",
         add = TRUE)
 ```
 
+It is also possible to pass starting bounds to `pedmod_profile_prop` as shown 
+below.
+
+```{r boud_prop_var_conf, cache = 1, message=TRUE}
+# confidence interval for the proportion of variance for the genetic effect
+pl_genetic_prop_bounds <- pedmod_profile_prop(
+  ptr = ll_terms, par = opt_out$par, maxvls = 20000L, 
+  minvls = 1000L, alpha = .05, abs_eps = 0, rel_eps = 1e-4, which_prof = 1L,
+  use_aprx = TRUE, n_threads = 4L, verbose = TRUE, cluster_weights = c_weights, 
+  vls_scales = sqrt(c_weights), bound = c(.3, .65))
+
+# compare the result
+pl_genetic_prop_bounds$confs
+pl_genetic_prop$confs
+```
+
 ### Simulation Study
 
 We make a small simulation study below where we are interested in the estimation 

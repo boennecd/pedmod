@@ -17,10 +17,11 @@
     .Call(`_pedmod_unconnected_partition_rcpp`, from, to, weights_ids, weights, edge_weights, slack, max_kl_it_inner, max_kl_it, trace, init)
 }
 
-#' Multivariate Normal Distribution CDF
+#' Multivariate Normal Distribution CDF and Its Derivative
 #' @description
 #' Provides an approximation of the multivariate normal distribution CDF
-#' over a hyperrectangle.
+#' over a hyperrectangle and the derivative with respect to the mean vector
+#' and the covariance matrix.
 #'
 #' @param lower numeric vector with lower bounds.
 #' @param upper numeric vector with upper bounds.
@@ -46,6 +47,7 @@
 #' by Botev (2017) should be used. See \doi{10.1111/rssb.12162}.
 #'
 #' @return
+#' \code{mvndst:}
 #' An approximation of the CDF. The \code{"n_it"} attribute shows the number of
 #' integrand evaluations, the \code{"inform"} attribute is zero if the
 #' requested precision is achieved, and the \code{"abserr"} attribute
@@ -94,9 +96,63 @@
 #'     print(TruncatedNormal_time)
 #' }
 #'
+#' # check the gradient
+#' system.time(pedmod_res <- mvndst_grad(
+#'   lower = rep(-Inf, n), upper = u, sigma = S, mu = numeric(n),
+#'   maxvls = 1e5, minvls = 1e5, abs_eps = 0, rel_eps = 1e-4, use_aprx = TRUE))
+#' pedmod_res
+#'
+#' \donttest{# compare with numerical differentiation. Should give the same up to Monte
+#' # Carlo and finite difference error
+#' if(require(numDeriv)){
+#'   num_res <- grad(
+#'     function(par){
+#'       set.seed(1)
+#'       mu <- head(par, n)
+#'       S[upper.tri(S, TRUE)] <- tail(par, -n)
+#'       S[lower.tri(S)] <- t(S)[lower.tri(S)]
+#'       mvndst(
+#'         lower = rep(-Inf, n), upper = u, sigma = S, mu = mu,
+#'         maxvls = 1e4, minvls = 1e4, abs_eps = 0, rel_eps = 1e-4,
+#'         use_aprx = TRUE)
+#'     }, c(numeric(n), S[upper.tri(S, TRUE)]),
+#'     method.args = list(d = .01, r = 2))
+#'
+#'   d_mu <- head(num_res, n)
+#'   d_sigma <- matrix(0, n, n)
+#'   d_sigma[upper.tri(d_sigma, TRUE)] <- tail(num_res, -n)
+#'   d_sigma[upper.tri(d_sigma)] <- d_sigma[upper.tri(d_sigma)] / 2
+#'   d_sigma[lower.tri(d_sigma)] <- t(d_sigma)[lower.tri(d_sigma)]
+#'
+#'   cat("numerical derivatives\n")
+#'   print(rbind(numDeriv = d_mu,
+#'               pedmod = pedmod_res$d_mu))
+#'   print(d_sigma)
+#'   cat("\nd_sigma from pedmod\n")
+#'   print(pedmod_res$d_sigma) # for comparison
+#' }}
+#'
 #' @export
 mvndst <- function(lower, upper, mu, sigma, maxvls = 25000L, abs_eps = .001, rel_eps = 0L, minvls = -1L, do_reorder = TRUE, use_aprx = FALSE, method = 0L, n_sequences = 8L, use_tilting = FALSE) {
     .Call(`_pedmod_mvndst`, lower, upper, mu, sigma, maxvls, abs_eps, rel_eps, minvls, do_reorder, use_aprx, method, n_sequences, use_tilting)
+}
+
+#' @rdname mvndst
+#' @return
+#' \code{mvndst_grad:}
+#' A list with
+#' \itemize{
+#'   \item \code{likelihood}: the likelihood approximation.
+#'   \item \code{d_mu}: the derivative with respect to the the mean vector.
+#'   \item \code{d_sigma}: the derivative with respect to the covariance matrix
+#'   ignoring the symmetry (i.e. working the \eqn{n^2} parameters with
+#'   \eqn{n} being the dimension rather than the \eqn{n(n + 1) / 2}
+#'   free parameters).
+#' }
+#'
+#' @export
+mvndst_grad <- function(lower, upper, mu, sigma, maxvls = 25000L, abs_eps = .001, rel_eps = 0L, minvls = -1L, do_reorder = TRUE, use_aprx = FALSE, method = 0L, n_sequences = 8L, use_tilting = FALSE) {
+    .Call(`_pedmod_mvndst_grad`, lower, upper, mu, sigma, maxvls, abs_eps, rel_eps, minvls, do_reorder, use_aprx, method, n_sequences, use_tilting)
 }
 
 #' Get a C++ Object for Log Marginal Likelihood Approximations

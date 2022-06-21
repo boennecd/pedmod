@@ -5,7 +5,7 @@
 * deal with a breaking change in RcppArmadillo which __could possibly__
   cause issues in this package. See https://stackoverflow.com/a/72533955/5861244
 * better starting values are used by `pedmod_profile_prop`. It is also possible 
-  to pass bound on the confidence interval using the `bound` argument.
+  to pass a bound on the confidence interval using the `bound` argument.
 * `mvndst_grad` is added which computes the gradient with respect to the mean 
   and covariance matrix.
 

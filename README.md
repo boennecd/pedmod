@@ -365,7 +365,7 @@ library(pedmod)
 ll_terms <- pedigree_ll_terms(dat, max_threads = 4L)
 system.time(start <- pedmod_start(ptr = ll_terms, data = dat, n_threads = 4L))
 #>    user  system elapsed 
-#>  15.898   0.012   3.998
+#>  14.813   0.003   3.723
 
 # log likelihood without the random effects and at the starting values
 start$logLik_no_rng
@@ -380,7 +380,7 @@ system.time(
     n_threads = 4L, 
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 #>    user  system elapsed 
-#>  41.182   0.004  10.318
+#>   42.16    0.00   10.57
 ```
 
 The results of the estimation are shown below:
@@ -438,7 +438,7 @@ system.time(hess <- eval_pedigree_hess(
   ptr = ll_terms, par = opt_out$par, maxvls = 25000L, minvls = 5000L, abs_eps = 0, 
   rel_eps = 1e-4, do_reorder = TRUE, use_aprx = FALSE, n_threads = 4L))
 #>    user  system elapsed 
-#>   7.358   0.000   1.856
+#>   7.799   0.000   1.980
 
 # the gradient is quite small
 sqrt(sum(attr(hess, "grad")^2))
@@ -536,7 +536,7 @@ system.time(
     ptr = ll_terms, data = dat, n_threads = 4L, use_tilting = TRUE, 
     use_aprx = FALSE))
 #>    user  system elapsed 
-#>  20.191   0.000   5.056
+#>  21.943   0.000   5.503
 
 # estimate the model
 system.time(
@@ -545,7 +545,7 @@ system.time(
     n_threads = 4L, use_tilting = TRUE,
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 #>    user  system elapsed 
-#> 165.897   0.008  41.618
+#> 163.367   0.233  41.043
 ```
 
 The results of the estimation are shown below:
@@ -602,7 +602,7 @@ system.time(
     n_threads = 4L, use_tilting = TRUE,
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L, opt_func = nlminb_wrapper))
 #>    user  system elapsed 
-#> 618.841   0.016 155.567
+#>  579.41    0.02  145.41
 ```
 
 The results of the estimation are shown below:
@@ -708,7 +708,7 @@ The model can also be estimated with the standardized parameterization:
 system.time(start_std <- pedmod_start(
   ptr = ll_terms, data = dat, n_threads = 4L, standardized = TRUE))
 #>    user  system elapsed 
-#>   5.643   0.000   1.417
+#>   6.249   0.000   1.570
 
 # the starting values are close
 standardized_to_direct(start_std$par, n_scales = 1L)
@@ -736,7 +736,7 @@ system.time(
     n_threads = 4L, standardized = TRUE,
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 #>    user  system elapsed 
-#>  32.092   0.000   8.027
+#>  31.347   0.000   7.845
 
 # we get the same
 standardized_to_direct(opt_out_std$par, n_scales = 1L)
@@ -778,7 +778,7 @@ system.time(
     minvls = 1000L, n_it = 400L, n_grad_steps = 10L, n_grad = 100L, 
     n_hess = 400L))
 #>    user  system elapsed 
-#> 331.006   0.004  82.821
+#> 339.779   0.004  84.991
 
 # show the log marginal likelihood
 ll_wrapper <- function(x)
@@ -829,7 +829,7 @@ system.time(
     # but use fewer samples in each iteration
     n_grad = 20L, n_hess = 100L))
 #>    user  system elapsed 
-#>   324.7     0.0    81.2
+#> 334.146   0.008  83.575
 
 # compute the marginal log likelihood and compare the parameter estimates
 print(ll_wrapper(sqn_out_few$par), digits = 8)
@@ -1391,7 +1391,7 @@ system.time(
     n_threads = 4L, 
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L, method = 1L))
 #>    user  system elapsed 
-#>   49.81    0.00   12.54
+#>   47.35    0.00   11.88
 
 # compare the result. We start with the log likelihood
 print(-opt_out_sobol$value, digits = 8)
@@ -1559,39 +1559,39 @@ time_vals <- sapply(sim_study, function(x) {
 }, simplify = "array")
 apply(time_vals, 1:2, mean)
 #>              opt_out start total
-#> Direct         6.086 1.946 8.033
-#> Standardized   7.873 1.795 9.669
+#> Direct         5.990 1.750  7.74
+#> Standardized   7.644 1.706  9.35
 apply(time_vals, 1:2, sd)
 #>              opt_out  start total
-#> Direct         3.411 1.1706 3.699
-#> Standardized   2.517 0.9084 2.456
+#> Direct         3.448 1.0666  3.65
+#> Standardized   2.415 0.8325  2.33
 apply(time_vals, 1:2, quantile)
 #> , , opt_out
 #> 
 #>      Direct Standardized
-#> 0%    2.649        3.997
-#> 25%   3.958        5.308
-#> 50%   4.431        8.402
-#> 75%   8.221        9.800
-#> 100% 21.043       12.812
+#> 0%    2.660        4.013
+#> 25%   3.862        5.177
+#> 50%   4.179        7.904
+#> 75%   8.012        9.456
+#> 100% 21.358       12.279
 #> 
 #> , , start
 #> 
 #>      Direct Standardized
-#> 0%    0.847        0.716
-#> 25%   1.276        1.276
-#> 50%   1.496        1.470
-#> 75%   2.229        2.133
-#> 100%  6.803        6.314
+#> 0%    0.696        0.695
+#> 25%   1.156        1.248
+#> 50%   1.319        1.388
+#> 75%   2.064        1.957
+#> 100%  5.862        5.882
 #> 
 #> , , total
 #> 
 #>      Direct Standardized
-#> 0%    4.050        5.108
-#> 25%   5.462        7.727
-#> 50%   6.907        9.724
-#> 75%   9.872       11.192
-#> 100% 24.634       15.169
+#> 0%    3.861        5.389
+#> 25%   5.219        7.394
+#> 50%   6.547        9.439
+#> 75%   9.388       11.072
+#> 100% 24.547       14.219
 
 # get the standardized errors
 ers_sds <- sapply(sim_study, function(x){
@@ -1615,10 +1615,10 @@ rowMeans(abs(ers_sds) < qnorm(.995)) # 99% coverage
 hess_time <- sapply(
   sim_study, function(x) attr(x$fit_direct$hess, "time")["elapsed"])
 mean(hess_time)
-#> [1] 1.073
+#> [1] 1.03
 quantile(hess_time, probs = seq(0, 1, .1))
-#>    0%   10%   20%   30%   40%   50%   60%   70%   80%   90%  100% 
-#> 0.994 1.002 1.018 1.031 1.043 1.056 1.067 1.087 1.098 1.168 1.404
+#>     0%    10%    20%    30%    40%    50%    60%    70%    80%    90%   100% 
+#> 0.9810 0.9938 1.0062 1.0250 1.0306 1.0320 1.0364 1.0400 1.0422 1.0471 1.1410
 
 # compute the coverage on the standardized scale with the proportion of 
 # variances
@@ -1755,12 +1755,12 @@ system.time(ll_res <- eval_pedigree_ll(
   ll_terms_wo_weights, c(beta_true, log(sig_sq_true)), maxvls = 100000L, 
   abs_eps = 0, rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4))
 #>    user  system elapsed 
-#>   0.705   0.000   0.183
+#>   0.598   0.000   0.151
 system.time(grad_res <- eval_pedigree_grad(
   ll_terms_wo_weights, c(beta_true, log(sig_sq_true)), maxvls = 100000L, 
   abs_eps = 0, rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4))
 #>    user  system elapsed 
-#>  15.313   0.000   3.888
+#>  15.038   0.000   3.818
 
 # find the duplicated combinations of pedigrees, covariates, and outcomes. One 
 # likely needs to change this code if the pedigrees are not identical but are 
@@ -1783,13 +1783,13 @@ system.time(ll_res_fast <- eval_pedigree_ll(
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4, 
   cluster_weights = c_weights))
 #>    user  system elapsed 
-#>   0.257   0.000   0.066
+#>   0.251   0.000   0.064
 system.time(grad_res_fast <- eval_pedigree_grad(
   ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4, 
   cluster_weights = c_weights))
 #>    user  system elapsed 
-#>   6.546   0.000   1.714
+#>   6.337   0.000   1.657
 
 # show that we get the same (up to a Monte Carlo error)
 print(c(redundant = ll_res, fast = ll_res_fast), digits = 6)
@@ -1858,20 +1858,20 @@ system.time(ll_res_fast <- eval_pedigree_ll(
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4, 
   cluster_weights = c_weights, vls_scales = sqrt(c_weights)))
 #>    user  system elapsed 
-#>   0.378   0.000   0.127
+#>   0.384   0.000   0.130
 system.time(grad_res_fast <- eval_pedigree_grad(
   ll_terms, c(beta_true, log(sig_sq_true)), maxvls = 100000L, abs_eps = 0, 
   rel_eps = 1e-3, minvls = 2500L, use_aprx = TRUE, n_threads = 4, 
   cluster_weights = c_weights, vls_scales = sqrt(c_weights)))
 #>    user  system elapsed 
-#>   6.352   0.000   1.678
+#>   7.095   0.000   1.863
 
 # find the starting values
 system.time(start <- pedmod_start(
   ptr = ll_terms, data = dat_unqiue, cluster_weights = c_weights, 
   vls_scales = sqrt(c_weights)))
 #>    user  system elapsed 
-#>   12.17    0.00   12.17
+#>   11.95    0.00   11.95
 
 # optimize
 system.time(
@@ -1881,7 +1881,7 @@ system.time(
     maxvls = 5000L, rel_eps = 1e-2, minvls = 500L, 
     vls_scales = sqrt(c_weights)))
 #>    user  system elapsed 
-#>   5.704   0.000   1.518
+#>   6.642   0.000   1.778
 system.time(
   opt_out <- pedmod_opt(
     ptr = ll_terms, par = opt_out_quick$par, abs_eps = 0, use_aprx = TRUE, 
@@ -1889,7 +1889,7 @@ system.time(
     # we changed these parameters
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 #>    user  system elapsed 
-#>  24.071   0.000   7.478
+#>  22.948   0.000   7.186
 ```
 
 The results are shown below:
@@ -1927,7 +1927,7 @@ system.time(hess <- eval_pedigree_hess(
   rel_eps = 1e-4, do_reorder = TRUE, use_aprx = FALSE, n_threads = 4L,
   cluster_weights = c_weights, vls_scales = sqrt(c_weights)))
 #>    user  system elapsed 
-#>  12.999   0.000   4.561
+#>  10.958   0.003   4.007
 
 # the gradient is quite small
 sqrt(sum(attr(hess, "grad")^2))
@@ -2123,7 +2123,7 @@ system.time(start_std <- pedmod_start(
   ptr = ll_terms, data = dat_unqiue, cluster_weights = c_weights, 
   vls_scales = sqrt(c_weights), standardized = TRUE))
 #>    user  system elapsed 
-#>   12.02    0.00   12.02
+#>   11.85    0.00   11.85
 
 # are the starting values similar?
 standardized_to_direct(start_std$par, n_scales = 2L)
@@ -2152,7 +2152,7 @@ system.time(
     maxvls = 5000L, rel_eps = 1e-2, minvls = 500L, 
     vls_scales = sqrt(c_weights)))
 #>    user  system elapsed 
-#>   8.027   0.000   2.122
+#>   7.847   0.000   2.089
 system.time(
   opt_out_std <- pedmod_opt(
     ptr = ll_terms, par = opt_out_quick_std$par, abs_eps = 0, use_aprx = TRUE, 
@@ -2161,7 +2161,7 @@ system.time(
     # we changed these parameters
     maxvls = 25000L, rel_eps = 1e-3, minvls = 5000L))
 #>    user  system elapsed 
-#>   5.604   0.000   1.757
+#>   5.544   0.000   1.766
 
 # we get the same
 standardized_to_direct(opt_out_std$par, n_scales = 2L)
@@ -2464,30 +2464,30 @@ pl_genetic_prop <- pedmod_profile_prop(
 #> The estimate of the standard error of the log likelihood is 0.00485355. Preferably this should be below 0.001
 #> 
 #> Finding the upper limit of the profile likelihood curve
-#> LogLike: -2746.5861 at         0.990000
-#> LogLike: -2746.6350 at         0.990000
+#> LogLike: -2746.1578 at         0.990000
+#> LogLike: -2746.2084 at         0.990000
 #> LogLike: -2696.1152 at         0.503198
-#> LogLike: -2696.9041 at         0.573739. Lb, target, ub: -2746.6350, -2698.0360, -2696.9041
-#> LogLike: -2696.8976 at         0.573739. Lb, target, ub: -2746.6350, -2698.0360, -2696.8976
-#> LogLike: -2699.1978 at         0.643548. Lb, target, ub: -2699.1978, -2698.0360, -2696.8976
-#> LogLike: -2699.2076 at         0.643548. Lb, target, ub: -2699.2076, -2698.0360, -2696.8976
-#> LogLike: -2698.1091 at         0.614990. Lb, target, ub: -2698.1091, -2698.0360, -2696.8976
-#> LogLike: -2698.0773 at         0.614990. Lb, target, ub: -2698.0773, -2698.0360, -2696.8976
-#> LogLike: -2697.9109 at         0.609332. Lb, target, ub: -2698.0773, -2698.0360, -2697.9109
-#> LogLike: -2697.8819 at         0.609332. Lb, target, ub: -2698.0773, -2698.0360, -2697.8819
+#> LogLike: -2696.9007 at         0.573879. Lb, target, ub: -2746.2084, -2698.0360, -2696.9007
+#> LogLike: -2696.9005 at         0.573879. Lb, target, ub: -2746.2084, -2698.0360, -2696.9005
+#> LogLike: -2699.2078 at         0.643801. Lb, target, ub: -2699.2078, -2698.0360, -2696.9005
+#> LogLike: -2699.2179 at         0.643801. Lb, target, ub: -2699.2179, -2698.0360, -2696.9005
+#> LogLike: -2698.0856 at         0.615037. Lb, target, ub: -2698.0856, -2698.0360, -2696.9005
+#> LogLike: -2698.0797 at         0.615037. Lb, target, ub: -2698.0797, -2698.0360, -2696.9005
+#> LogLike: -2697.8859 at         0.609329. Lb, target, ub: -2698.0797, -2698.0360, -2697.8859
+#> LogLike: -2697.8830 at         0.609329. Lb, target, ub: -2698.0797, -2698.0360, -2697.8830
 #> 
 #> Finding the lower limit of the profile likelihood curve
-#> LogLike: -2730.9048 at         0.010000
+#> LogLike: -2730.9045 at         0.010000
 #> LogLike: -2730.9120 at         0.010000
 #> LogLike: -2696.1152 at         0.503198
-#> LogLike: -2696.9383 at         0.424199. Lb, target, ub: -2730.9120, -2698.0360, -2696.9383
-#> LogLike: -2696.9457 at         0.424199. Lb, target, ub: -2730.9120, -2698.0360, -2696.9457
-#> LogLike: -2699.5268 at         0.345739. Lb, target, ub: -2699.5268, -2698.0360, -2696.9457
-#> LogLike: -2699.5243 at         0.345739. Lb, target, ub: -2699.5243, -2698.0360, -2696.9457
-#> LogLike: -2698.1160 at         0.381938. Lb, target, ub: -2698.1160, -2698.0360, -2696.9457
-#> LogLike: -2698.1241 at         0.381938. Lb, target, ub: -2698.1241, -2698.0360, -2696.9457
-#> LogLike: -2697.8806 at         0.388938. Lb, target, ub: -2698.1241, -2698.0360, -2697.8806
-#> LogLike: -2697.8963 at         0.388938. Lb, target, ub: -2698.1241, -2698.0360, -2697.8963
+#> LogLike: -2696.9370 at         0.424199. Lb, target, ub: -2730.9120, -2698.0360, -2696.9370
+#> LogLike: -2696.9449 at         0.424199. Lb, target, ub: -2730.9120, -2698.0360, -2696.9449
+#> LogLike: -2699.5217 at         0.345715. Lb, target, ub: -2699.5217, -2698.0360, -2696.9449
+#> LogLike: -2699.5253 at         0.345715. Lb, target, ub: -2699.5253, -2698.0360, -2696.9449
+#> LogLike: -2698.1268 at         0.381905. Lb, target, ub: -2698.1268, -2698.0360, -2696.9449
+#> LogLike: -2698.1258 at         0.381905. Lb, target, ub: -2698.1258, -2698.0360, -2696.9449
+#> LogLike: -2697.8799 at         0.388948. Lb, target, ub: -2698.1258, -2698.0360, -2697.8799
+#> LogLike: -2697.8953 at         0.388948. Lb, target, ub: -2698.1258, -2698.0360, -2697.8953
 #> LogLike: -2696.1152 at         0.503198
 pl_genetic_prop$confs # the confidence interval
 #>  2.50 pct. 97.50 pct. 
@@ -2503,30 +2503,30 @@ pl_env_prop <- pedmod_profile_prop(
 #> The estimate of the standard error of the log likelihood is 0.00485355. Preferably this should be below 0.001
 #> 
 #> Finding the upper limit of the profile likelihood curve
-#> LogLike: -3045.1114 at         0.990000
-#> LogLike: -3045.0709 at         0.990000
+#> LogLike: -3063.0661 at         0.990000
+#> LogLike: -3045.1027 at         0.990000
 #> LogLike: -2696.1152 at         0.227501
-#> LogLike: -2697.5489 at         0.315954. Lb, target, ub: -3045.0709, -2698.0360, -2697.5489
-#> LogLike: -2697.5663 at         0.315954. Lb, target, ub: -3045.0709, -2698.0360, -2697.5663
-#> LogLike: -2701.2382 at         0.393140. Lb, target, ub: -2701.2382, -2698.0360, -2697.5663
-#> LogLike: -2701.2480 at         0.393140. Lb, target, ub: -2701.2480, -2698.0360, -2697.5663
-#> LogLike: -2698.4566 at         0.340320. Lb, target, ub: -2698.4566, -2698.0360, -2697.5663
-#> LogLike: -2698.4732 at         0.340320. Lb, target, ub: -2698.4732, -2698.0360, -2697.5663
-#> LogLike: -2698.0102 at         0.329229. Lb, target, ub: -2698.4732, -2698.0360, -2698.0102
-#> LogLike: -2698.0256 at         0.329229. Lb, target, ub: -2698.4732, -2698.0360, -2698.0256
+#> LogLike: -2697.5521 at         0.315953. Lb, target, ub: -3045.1027, -2698.0360, -2697.5521
+#> LogLike: -2697.5598 at         0.315953. Lb, target, ub: -3045.1027, -2698.0360, -2697.5598
+#> LogLike: -2701.2481 at         0.393171. Lb, target, ub: -2701.2481, -2698.0360, -2697.5598
+#> LogLike: -2701.2467 at         0.393171. Lb, target, ub: -2701.2467, -2698.0360, -2697.5598
+#> LogLike: -2698.4675 at         0.340565. Lb, target, ub: -2698.4675, -2698.0360, -2697.5598
+#> LogLike: -2698.4842 at         0.340565. Lb, target, ub: -2698.4842, -2698.0360, -2697.5598
+#> LogLike: -2698.0145 at         0.329342. Lb, target, ub: -2698.4842, -2698.0360, -2698.0145
+#> LogLike: -2698.0311 at         0.329342. Lb, target, ub: -2698.4842, -2698.0360, -2698.0311
 #> 
 #> Finding the lower limit of the profile likelihood curve
-#> LogLike: -2704.2334 at         0.010000
-#> LogLike: -2704.2424 at         0.010000
+#> LogLike: -2704.2329 at         0.010000
+#> LogLike: -2704.2423 at         0.010000
 #> LogLike: -2696.1152 at         0.227501
-#> LogLike: -2696.9418 at         0.157643. Lb, target, ub: -2704.2424, -2698.0360, -2696.9418
-#> LogLike: -2696.9549 at         0.157643. Lb, target, ub: -2704.2424, -2698.0360, -2696.9549
-#> LogLike: -2698.9054 at         0.099971. Lb, target, ub: -2698.9054, -2698.0360, -2696.9549
-#> LogLike: -2698.9197 at         0.099971. Lb, target, ub: -2698.9197, -2698.0360, -2696.9549
-#> LogLike: -2697.9965 at         0.122739. Lb, target, ub: -2698.9197, -2698.0360, -2697.9965
-#> LogLike: -2698.0107 at         0.122739. Lb, target, ub: -2698.9197, -2698.0360, -2698.0107
-#> LogLike: -2698.1149 at         0.119563. Lb, target, ub: -2698.1149, -2698.0360, -2698.0107
-#> LogLike: -2698.1279 at         0.119563. Lb, target, ub: -2698.1279, -2698.0360, -2698.0107
+#> LogLike: -2696.9430 at         0.157642. Lb, target, ub: -2704.2423, -2698.0360, -2696.9430
+#> LogLike: -2696.9591 at         0.157642. Lb, target, ub: -2704.2423, -2698.0360, -2696.9591
+#> LogLike: -2698.8929 at         0.100249. Lb, target, ub: -2698.8929, -2698.0360, -2696.9591
+#> LogLike: -2698.9071 at         0.100249. Lb, target, ub: -2698.9071, -2698.0360, -2696.9591
+#> LogLike: -2697.9997 at         0.122869. Lb, target, ub: -2698.9071, -2698.0360, -2697.9997
+#> LogLike: -2698.0064 at         0.122869. Lb, target, ub: -2698.9071, -2698.0360, -2698.0064
+#> LogLike: -2698.1153 at         0.119594. Lb, target, ub: -2698.1153, -2698.0360, -2698.0064
+#> LogLike: -2698.1260 at         0.119594. Lb, target, ub: -2698.1260, -2698.0360, -2698.0064
 #> LogLike: -2696.1152 at         0.227501
 pl_env_prop$confs # the confidence interval
 #>  2.50 pct. 97.50 pct. 
@@ -3248,7 +3248,7 @@ c(`Without weights` = sd(ll_ests), `With weights` = sd(ll_ests_fast),
 system.time(start <- pedmod_start_loadings(
   ll_terms, data = dat_unqiue, cluster_weights = c_weights))
 #>    user  system elapsed 
-#>   0.010   0.000   0.009
+#>    0.01    0.00    0.01
 
 # find the maximum likelihood estimator
 system.time(
@@ -3257,7 +3257,7 @@ system.time(
     abs_eps = 0, rel_eps = 1e-3, n_threads = 4L, use_aprx = TRUE, 
     cluster_weights = c_weights, vls_scales = sqrt(c_weights)))
 #>    user  system elapsed 
-#> 436.749   0.032 132.632
+#>   437.1     0.0   133.5
 ```
 
 We compare the maximum likelihood estimator with the true values below.
@@ -3375,7 +3375,7 @@ system.time(
 #> LogLike: -4372.5552 at         1.268475. Lb, target, ub: -4373.1099, -4372.6022, -4372.5552
 #> LogLike: -4370.6815 at         1.094952
 #>     user   system  elapsed 
-#> 1704.071    0.036  427.046
+#> 1729.173    0.072  433.445
 ```
 
 The confidence interval is shown below along with a plot of the profile
@@ -3467,7 +3467,7 @@ system.time(
 #> LogLike: -4372.6959 at         0.321147. Lb, target, ub: -4372.6959, -4372.6068, -4372.4467
 #> LogLike: -4370.6861 at         0.410651
 #>     user   system  elapsed 
-#> 4428.643    0.276 1199.074
+#> 4491.874    0.272 1227.960
 ```
 
 The confidence interval is shown below along with a plot of the profile
@@ -3805,7 +3805,7 @@ gr <- function(par, seed = 1L, rel_eps = 1e-2, use_aprx = TRUE,
 # check output at the starting values
 system.time(ll <- -fn(c(beta, sc)))
 #>    user  system elapsed 
-#>   4.283   0.000   1.088
+#>   4.186   0.000   1.060
 ll # the log likelihood at the starting values
 #> [1] -26042
 #> attr(,"n_fails")
@@ -3814,7 +3814,7 @@ ll # the log likelihood at the starting values
 #> [1] 0.05963
 system.time(gr_val <- gr(c(beta, sc)))
 #>    user  system elapsed 
-#>  39.662   0.004   9.982
+#>   43.22    0.00   10.90
 gr_val # the gradient at the starting values
 #> [1] 1894.83 -549.43 -235.73   47.21  -47.84
 #> attr(,"value")
@@ -3855,7 +3855,7 @@ rbind(numDeriv = numDeriv::grad(fn, c(beta, sc), indices = 0:10),
 # optimize the log likelihood approximation
 system.time(opt <- optim(c(beta, sc), fn, gr, method = "BFGS"))
 #>     user   system  elapsed 
-#> 1538.183    0.176  391.143
+#> 1602.379    0.016  407.611
 ```
 
 The output from the optimization is shown below:
@@ -3898,12 +3898,12 @@ microbenchmark(
   times = 1)
 #> Unit: seconds
 #>            expr    min     lq   mean median     uq    max neval
-#>   fn (1 thread)  3.529  3.529  3.529  3.529  3.529  3.529     1
-#>  fn (2 threads)  1.939  1.939  1.939  1.939  1.939  1.939     1
-#>  fn (4 threads)  1.179  1.179  1.179  1.179  1.179  1.179     1
-#>   gr (1 thread) 33.861 33.861 33.861 33.861 33.861 33.861     1
-#>  gr (2 threads) 17.814 17.814 17.814 17.814 17.814 17.814     1
-#>  gr (4 threads)  9.277  9.277  9.277  9.277  9.277  9.277     1
+#>   fn (1 thread)  3.881  3.881  3.881  3.881  3.881  3.881     1
+#>  fn (2 threads)  1.970  1.970  1.970  1.970  1.970  1.970     1
+#>  fn (4 threads)  1.140  1.140  1.140  1.140  1.140  1.140     1
+#>   gr (1 thread) 36.177 36.177 36.177 36.177 36.177 36.177     1
+#>  gr (2 threads) 19.129 19.129 19.129 19.129 19.129 19.129     1
+#>  gr (4 threads)  9.435  9.435  9.435  9.435  9.435  9.435     1
 ```
 
 ### Using ADAM
@@ -4005,7 +4005,7 @@ system.time(
                    verbose = FALSE, maxvls = maxpts_use, 
                    minvls = minvls))
 #>     user   system  elapsed 
-#> 1493.797    0.228  378.901
+#> 1570.129    0.084  398.476
 ```
 
 The result is shown below.
@@ -4172,13 +4172,13 @@ The new implementation is faster when the approximation is used:
 ``` r
 rowMeans(sim_res[, "time", ])
 #>                 mvtnorm         TruncatedNormal        no aprx; Korobov 
-#>                0.018165                0.055039                0.013233 
+#>                0.018016                0.054301                0.012852 
 #>          no aprx; Sobol        w/ aprx; Korobov          w/ aprx; Sobol 
-#>                0.015641                0.004780                0.006274 
+#>                0.015486                0.004854                0.006240 
 #> no aprx; Korobov (tilt)   no aprx; Sobol (tilt) w/ aprx; Korobov (tilt) 
-#>                0.013279                0.012098                0.009976 
+#>                0.012644                0.011646                0.009643 
 #>   w/ aprx; Sobol (tilt) 
-#>                0.008956
+#>                0.008862
 par(mar = c(9, 4, 1, 1), bty = "l")
 boxplot(t(sim_res[, "time", ]), log = "y", las = 2)
 grid()
@@ -4328,28 +4328,28 @@ A similar plot for the average estimation time is shown below.
 sim_res[, "time", ]
 #>                          Dimension
 #> Method                            3        5       10       15       20
-#>   mvtnorm                 0.0024362 0.005440 0.018485 0.043281 0.057015
-#>   TruncatedNormal         0.0183156 0.026164 0.044996 0.068920 0.091227
-#>   no aprx; Korobov        0.0034981 0.006263 0.012996 0.021489 0.027314
-#>   no aprx; Sobol          0.0027378 0.004814 0.009628 0.015528 0.019704
-#>   w/ aprx; Korobov        0.0008863 0.001609 0.003436 0.005983 0.007891
-#>   w/ aprx; Sobol          0.0009385 0.001551 0.003082 0.004878 0.006638
-#>   no aprx; Korobov (tilt) 0.0065741 0.011810 0.022876 0.037241 0.047184
-#>   no aprx; Sobol (tilt)   0.0048393 0.009001 0.016683 0.025486 0.033817
-#>   w/ aprx; Korobov (tilt) 0.0055458 0.010251 0.019205 0.034412 0.018217
-#>   w/ aprx; Sobol (tilt)   0.0041505 0.007602 0.013988 0.024672 0.013902
+#>   mvtnorm                 0.0024594 0.005693 0.018783 0.043671 0.058178
+#>   TruncatedNormal         0.0189829 0.026533 0.047174 0.070437 0.092527
+#>   no aprx; Korobov        0.0036634 0.006398 0.013653 0.021524 0.028756
+#>   no aprx; Sobol          0.0028079 0.004870 0.009911 0.015499 0.021142
+#>   w/ aprx; Korobov        0.0009455 0.001706 0.003707 0.005911 0.008496
+#>   w/ aprx; Sobol          0.0009710 0.001544 0.003210 0.005003 0.007176
+#>   no aprx; Korobov (tilt) 0.0067950 0.011466 0.023547 0.036336 0.048791
+#>   no aprx; Sobol (tilt)   0.0051081 0.008716 0.016716 0.025904 0.035360
+#>   w/ aprx; Korobov (tilt) 0.0058555 0.009854 0.019565 0.034711 0.018599
+#>   w/ aprx; Sobol (tilt)   0.0042097 0.007238 0.014215 0.025702 0.014323
 #>                          Dimension
 #> Method                          25
-#>   mvtnorm                 0.069657
-#>   TruncatedNormal         0.111872
-#>   no aprx; Korobov        0.033103
-#>   no aprx; Sobol          0.024200
-#>   w/ aprx; Korobov        0.010127
-#>   w/ aprx; Sobol          0.008499
-#>   no aprx; Korobov (tilt) 0.059539
-#>   no aprx; Sobol (tilt)   0.043731
-#>   w/ aprx; Korobov (tilt) 0.023226
-#>   w/ aprx; Sobol (tilt)   0.017776
+#>   mvtnorm                 0.070511
+#>   TruncatedNormal         0.114410
+#>   no aprx; Korobov        0.035051
+#>   no aprx; Sobol          0.026401
+#>   w/ aprx; Korobov        0.010705
+#>   w/ aprx; Sobol          0.009492
+#>   no aprx; Korobov (tilt) 0.061957
+#>   no aprx; Sobol (tilt)   0.044211
+#>   w/ aprx; Korobov (tilt) 0.023848
+#>   w/ aprx; Sobol (tilt)   0.018139
 
 # plot the computation time
 par(mar = c(5, 5, 1, 1), cex = .8)

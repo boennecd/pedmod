@@ -937,6 +937,8 @@ void pedigree_l_factor_Hessian::operator()
     }
 
     double * const outer_res{res_i + shift_outer_res};
+    // TODO: get rid of this if we start working only the triangular part
+    std::fill(outer_res, outer_res + n_mem * n_mem, 0);
     for(unsigned id1 = 0; id1 < n_mem; ++id1)
       for(unsigned id2 = 0; id2 <= id1; ++id2)
         outer_res[id2 + id1 * n_mem] =
@@ -962,6 +964,11 @@ void pedigree_l_factor_Hessian::operator()
 
     size_t const vec_outer_res_dim{n_fix + n_scales};
     double * const vec_outer_res{res_i + shift_vec_outer_res};
+    // TODO: get rid of this if we start working only the triangular part
+    std::fill
+      (vec_outer_res,
+       vec_outer_res + vec_outer_res_dim * vec_outer_res_dim, 0);
+
     for(size_t param1 = 0; param1 < vec_outer_res_dim; ++param1)
       for(size_t param2 = 0; param2 <= param1; ++param2){
         vec_outer_res[param2 + param1 * vec_outer_res_dim] =

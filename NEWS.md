@@ -1,7 +1,7 @@
 # pedmod 0.2.3
 * `eval_pedigree_hess` is faster.
-* fixed a bug from release 0.2.0 which in en extreme settings could cause the 
-  C++ code to run forever.
+* fixed a bug from release 0.2.0 which in extreme settings could cause the C++ 
+  code to run forever.
 * deal with a breaking change in RcppArmadillo which __could possibly__
   cause issues in this package. See https://stackoverflow.com/a/72533955/5861244
 * better starting values are used by `pedmod_profile_prop`. It is also possible 

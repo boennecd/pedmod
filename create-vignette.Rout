@@ -178,7 +178,7 @@ label: unconnected_largest_ex
 
 output file: pedigree_partitioning.knit.md
 
-/usr/bin/pandoc +RTS -K512m -RTS pedigree_partitioning.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output pedigree_partitioning.html --lua-filter /home/boennecd/R/x86_64-pc-linux-gnu-library/4.2/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /home/boennecd/R/x86_64-pc-linux-gnu-library/4.2/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --standalone --section-divs --template /home/boennecd/R/x86_64-pc-linux-gnu-library/4.2/rmarkdown/rmd/h/default.html --no-highlight --variable highlightjs=1 --variable theme=bootstrap --mathjax --variable 'mathjax-url=https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --include-in-header /tmp/RtmpFOOHE8/rmarkdown-str9ca14afc9f5b.html --filter /usr/bin/pandoc-citeproc 
+/usr/bin/pandoc +RTS -K512m -RTS pedigree_partitioning.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output pedigree_partitioning.html --lua-filter /home/boennecd/R/x86_64-pc-linux-gnu-library/4.2/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /home/boennecd/R/x86_64-pc-linux-gnu-library/4.2/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --standalone --section-divs --template /home/boennecd/R/x86_64-pc-linux-gnu-library/4.2/rmarkdown/rmd/h/default.html --no-highlight --variable highlightjs=1 --variable theme=bootstrap --mathjax --variable 'mathjax-url=https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --include-in-header /tmp/RtmpYJh340/rmarkdown-str36b3408112d9.html --filter /usr/bin/pandoc-citeproc 
 
 Output created: pedigree_partitioning.html
 
@@ -311,50 +311,6 @@ label: simple_ex_profile_likelihood (with options)
 List of 1
  $ cache: num 1
 
-
-Log likelihood -1630.49043 (-1630.48117). Estimated parameters:
-(Intercept)  Continuous      Binary       Scale 
-    -1.9356      0.6602      1.2670      0.8526 
-
-Log likelihood -1622.23810 (-1622.20363). Estimated parameters:
-(Intercept)  Continuous      Binary       Scale 
-    -2.2219      0.7544      1.4547      1.1368 
-
-Log likelihood -1619.10043 (-1619.04310). Estimated parameters:
-(Intercept)  Continuous      Binary       Scale 
-    -2.5369      0.8583      1.6604      1.4210 
-
-Log likelihood -1618.40438 (-1618.34841). Estimated parameters:
-(Intercept)  Continuous      Binary       Scale 
-    -2.8713      0.9689      1.8775      1.7051 
-
-Log likelihood -1618.40438 (-1618.34841). Estimated parameters:
-(Intercept)  Continuous      Binary       Scale 
-    -2.8713      0.9689      1.8775      1.7051 
-
-Log likelihood -1618.77303 (-1618.71124). Estimated parameters:
-(Intercept)  Continuous      Binary       Scale 
-     -3.221       1.084       2.105       1.989 
-
-Log likelihood -1619.55154 (-1619.46541). Estimated parameters:
-(Intercept)  Continuous      Binary       Scale 
-     -3.580       1.203       2.337       2.274 
-
-Log likelihood -1620.41553 (-1620.31638). Estimated parameters:
-(Intercept)  Continuous      Binary       Scale 
-     -3.947       1.324       2.575       2.558 
-
-Log likelihood -1621.26305 (-1621.16882). Estimated parameters:
-(Intercept)  Continuous      Binary       Scale 
-     -4.319       1.448       2.816       2.842 
-
-Log likelihood -1622.03205 (-1621.92743). Estimated parameters:
-(Intercept)  Continuous      Binary       Scale 
-     -4.696       1.573       3.060       3.126 
-
-Log likelihood -1622.71601 (-1622.61343). Estimated parameters:
-(Intercept)  Continuous      Binary       Scale 
-     -5.077       1.699       3.307       3.410 
   |                                                                              |................                                                      |  23%
   ordinary text without R code
 
@@ -1129,156 +1085,6 @@ label: simple_w_ev_ex_profile_likelihood (with options)
 List of 1
  $ cache: num 1
 
-
-Log likelihood -2697.26863 (-2697.25320). Estimated parameters:
-non-fixed.(Intercept)      non-fixed.Binary                fixed1 
-              -2.5187                3.3712                0.1789 
-               fixed2 
-              -0.6150 
-
-Log likelihood -2696.66185 (-2696.64545). Estimated parameters:
-non-fixed.(Intercept)      non-fixed.Binary                fixed1 
-               -2.675                 3.581                 0.442 
-               fixed2 
-               -0.615 
-
-Log likelihood -2697.20639 (-2697.19256). Estimated parameters:
-non-fixed.(Intercept)      non-fixed.Binary                fixed1 
-              -2.8410                3.8016                0.6745 
-               fixed2 
-              -0.6150 
-
-Log likelihood -2698.55537 (-2698.53554). Estimated parameters:
-non-fixed.(Intercept)      non-fixed.Binary                fixed1 
-              -3.0145                4.0323                0.8828 
-               fixed2 
-              -0.6150 
-
-Log likelihood -2700.43072 (-2700.41095). Estimated parameters:
-non-fixed.(Intercept)      non-fixed.Binary                fixed1 
-               -3.194                 4.272                 1.071 
-               fixed2 
-               -0.615 
-
-Log likelihood -2697.29907 (-2697.28408). Estimated parameters:
-non-fixed.(Intercept)      non-fixed.Binary                fixed1 
-              -2.5920                3.4705                0.1789 
-               fixed2 
-              -0.3518 
-
-Log likelihood -2696.27290 (-2696.25913). Estimated parameters:
-non-fixed.(Intercept)      non-fixed.Binary                fixed1 
-              -2.7449                3.6742                0.4420 
-               fixed2 
-              -0.3518 
-
-Log likelihood -2696.39903 (-2696.38006). Estimated parameters:
-non-fixed.(Intercept)      non-fixed.Binary                fixed1 
-              -2.9071                3.8908                0.6745 
-               fixed2 
-              -0.3518 
-
-Log likelihood -2697.36573 (-2697.34827). Estimated parameters:
-non-fixed.(Intercept)      non-fixed.Binary                fixed1 
-              -3.0770                4.1171                0.8828 
-               fixed2 
-              -0.3518 
-
-Log likelihood -2698.91786 (-2698.89513). Estimated parameters:
-non-fixed.(Intercept)      non-fixed.Binary                fixed1 
-              -3.2536                4.3523                1.0714 
-               fixed2 
-              -0.3518 
-
-Log likelihood -2697.98626 (-2697.97113). Estimated parameters:
-non-fixed.(Intercept)      non-fixed.Binary                fixed1 
-              -2.6722                3.5788                0.1789 
-               fixed2 
-              -0.1193 
-
-Log likelihood -2696.48890 (-2696.47121). Estimated parameters:
-non-fixed.(Intercept)      non-fixed.Binary                fixed1 
-              -2.8212                3.7777                0.4420 
-               fixed2 
-              -0.1193 
-
-Log likelihood -2696.13456 (-2696.11662). Estimated parameters:
-non-fixed.(Intercept)      non-fixed.Binary                fixed1 
-              -2.9795                3.9888                0.6745 
-               fixed2 
-              -0.1193 
-
-Log likelihood -2696.65715 (-2696.63967). Estimated parameters:
-non-fixed.(Intercept)      non-fixed.Binary                fixed1 
-              -3.1460                4.2107                0.8828 
-               fixed2 
-              -0.1193 
-
-Log likelihood -2697.82011 (-2697.80274). Estimated parameters:
-non-fixed.(Intercept)      non-fixed.Binary                fixed1 
-              -3.3193                4.4414                1.0714 
-               fixed2 
-              -0.1193 
-
-Log likelihood -2699.31734 (-2699.30690). Estimated parameters:
-non-fixed.(Intercept)      non-fixed.Binary                fixed1 
-             -2.75842               3.69529               0.17887 
-               fixed2 
-              0.08899 
-
-Log likelihood -2697.31712 (-2697.29451). Estimated parameters:
-non-fixed.(Intercept)      non-fixed.Binary                fixed1 
-             -2.90314               3.88810               0.44202 
-               fixed2 
-              0.08899 
-
-Log likelihood -2696.44122 (-2696.41527). Estimated parameters:
-non-fixed.(Intercept)      non-fixed.Binary                fixed1 
-             -3.05791               4.09496               0.67454 
-               fixed2 
-              0.08899 
-
-Log likelihood -2696.47213 (-2696.44993). Estimated parameters:
-non-fixed.(Intercept)      non-fixed.Binary                fixed1 
-             -3.22066               4.31157               0.88282 
-               fixed2 
-              0.08899 
-
-Log likelihood -2697.18936 (-2697.17058). Estimated parameters:
-non-fixed.(Intercept)      non-fixed.Binary                fixed1 
-             -3.39053               4.53838               1.07144 
-               fixed2 
-              0.08899 
-
-Log likelihood -2701.24846 (-2701.23860). Estimated parameters:
-non-fixed.(Intercept)      non-fixed.Binary                fixed1 
-              -2.8498                3.8187                0.1789 
-               fixed2 
-               0.2776 
-
-Log likelihood -2698.73352 (-2698.71818). Estimated parameters:
-non-fixed.(Intercept)      non-fixed.Binary                fixed1 
-              -2.9910                4.0067                0.4420 
-               fixed2 
-               0.2776 
-
-Log likelihood -2697.31403 (-2697.29099). Estimated parameters:
-non-fixed.(Intercept)      non-fixed.Binary                fixed1 
-              -3.1417                4.2081                0.6745 
-               fixed2 
-               0.2776 
-
-Log likelihood -2696.81476 (-2696.78749). Estimated parameters:
-non-fixed.(Intercept)      non-fixed.Binary                fixed1 
-              -3.3009                4.4203                0.8828 
-               fixed2 
-               0.2776 
-
-Log likelihood -2697.05276 (-2697.03021). Estimated parameters:
-non-fixed.(Intercept)      non-fixed.Binary                fixed1 
-              -3.4672                4.6418                1.0714 
-               fixed2 
-               0.2776 
 
   ordinary text without R code
 
@@ -2408,7 +2214,7 @@ List of 1
 
 output file: pedmod.knit.md
 
-/usr/bin/pandoc +RTS -K512m -RTS pedmod.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output pedmod.html --lua-filter /home/boennecd/R/x86_64-pc-linux-gnu-library/4.2/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /home/boennecd/R/x86_64-pc-linux-gnu-library/4.2/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --standalone --section-divs --template /home/boennecd/R/x86_64-pc-linux-gnu-library/4.2/rmarkdown/rmd/h/default.html --no-highlight --variable highlightjs=1 --variable theme=bootstrap --mathjax --variable 'mathjax-url=https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --include-in-header /tmp/RtmpFOOHE8/rmarkdown-str9ca13bc46b64.html --filter /usr/bin/pandoc-citeproc 
+/usr/bin/pandoc +RTS -K512m -RTS pedmod.knit.md --to html4 --from markdown+autolink_bare_uris+tex_math_single_backslash --output pedmod.html --lua-filter /home/boennecd/R/x86_64-pc-linux-gnu-library/4.2/rmarkdown/rmarkdown/lua/pagebreak.lua --lua-filter /home/boennecd/R/x86_64-pc-linux-gnu-library/4.2/rmarkdown/rmarkdown/lua/latex-div.lua --self-contained --variable bs3=TRUE --standalone --section-divs --template /home/boennecd/R/x86_64-pc-linux-gnu-library/4.2/rmarkdown/rmd/h/default.html --no-highlight --variable highlightjs=1 --variable theme=bootstrap --mathjax --variable 'mathjax-url=https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML' --include-in-header /tmp/RtmpYJh340/rmarkdown-str36b36816c16e.html --filter /usr/bin/pandoc-citeproc 
 [WARNING] This document format requires a nonempty <title> element.
   Please specify either 'title' or 'pagetitle' in the metadata,
   e.g. by using --metadata pagetitle="..." on the command line.
@@ -4456,5 +4262,5 @@ Preview created: README.html
 Output created: README.md
 > 
 > proc.time()
-     user    system   elapsed 
-25092.830     2.926  7213.301 
+   user  system elapsed 
+162.974   1.328 249.253 

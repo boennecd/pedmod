@@ -14,3 +14,4 @@
 ^CRAN-RELEASE$
 ^create-vignette\.Rout
 ^man/figures/README-
+^CRAN-SUBMISSION$

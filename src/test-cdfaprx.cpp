@@ -313,16 +313,10 @@ context("cdfaprx unit tests") {
     parallelrng::set_rng_seeds(seeds);
     constexpr double const Inf = std::numeric_limits<double>::infinity();
 
-    arma::vec lower, upper, mean;
-    arma::mat sigma;
-
-    lower << -Inf   << -1   << 1      << -Inf;
-    upper << 1      << Inf  << 3      << 2;
-    mean  << -0.626 << 0.18 << -0.836 << 1.595;
-
-    sigma << 8.287 << -0.848 << -0.879 << -1.788 << -0.848 << 3.581
-          << 2.916 << -3.957 << -0.879 << 2.916 << 7.361 << -0.648
-          << -1.788 << -3.957 << -0.648 << 11.735;
+    arma::vec lower{-Inf, -1, 1, -Inf},
+              upper{1, Inf, 3, 2},
+              mean{-0.626, 0.18, -0.836, 1.595};
+    arma::mat sigma{{8.287, -0.848, -0.879, -1.788, -0.848, 3.581, 2.916, -3.957, -0.879, 2.916, 7.361, -0.648, -1.788, -3.957, -0.648, 11.735}};
     sigma.reshape(4L, 4L);
 
     double constexpr E_prop(0.0693596863013216);
@@ -466,11 +460,10 @@ context("cdfaprx unit tests") {
  f(mu, va)
  }, l = lbs, u = ubs))
  */
-    arma::vec lbs, ubs, expect;
     constexpr double const Inf = std::numeric_limits<double>::infinity();
-    lbs << -1  << -Inf << -.5;
-    ubs << Inf << 1    << 2;
-    expect << 0.953233743655453 << 0.711924938984711 << 0.821457505013967;
+    arma::vec lbs{-1, -Inf, -.5},
+              ubs{Inf, 1, 2},
+           expect{0.953233743655453, 0.711924938984711, 0.821457505013967};
     double const mu(.5);
     double const va(.8);
 
@@ -539,10 +532,9 @@ context("cdfaprx unit tests") {
  c(o, do)
  }, lw = lws, ub = ubs))
  */
-    arma::vec lbs, ubs;
     constexpr double const Inf = std::numeric_limits<double>::infinity();
-    lbs << -Inf << 1  ;
-    ubs << 2    << Inf;
+    arma::vec lbs{-Inf, 1},
+              ubs{2, Inf};
     arma::mat expect
       {0.860805198822333, -0.186117393334307, -0.0364459647473255, -0.109337894242028, 0.358932107909215, 0.752428372350956, 0.0491141235094509, 0.14734237051237};
     expect.reshape(4, 2);
@@ -609,15 +601,13 @@ context("cdfaprx unit tests") {
     std::vector<unsigned> seeds = { 1L };
     parallelrng::set_rng_seeds(seeds);
 
-    arma::vec lbs, ubs, expect, mu;
     constexpr double const Inf = std::numeric_limits<double>::infinity();
-    lbs << -Inf << -1  << -1.5;
-    ubs << 2    << Inf << 1;
-    expect << 0.438847591008297 << -0.0800167903883939 << 0.166356462364297 << -0.0550185761207399 << -0.186593525090286;
-    mu << .5 << -.25 << 0;
+    arma::vec lbs{-Inf, -1, -1.5},
+              ubs{2, Inf, 1},
+           expect{0.438847591008297, -0.0800167903883939, 0.166356462364297, -0.0550185761207399, -0.186593525090286},
+               mu{.5, -.25, 0};
 
-    arma::mat s1;
-    s1 << 1 << .25 << 0 << .25 << 1 << .1 << 0 << .1 << 1;
+    arma::mat s1{1, .25, 0, .25, 1, .1, 0, .1, 1};
     s1.reshape(3, 3);
     std::vector<arma::mat> scales;
     scales.emplace_back(s1);
@@ -740,16 +730,14 @@ context("cdfaprx unit tests") {
     std::vector<unsigned> seeds = { 1L };
     parallelrng::set_rng_seeds(seeds);
 
-    arma::vec lbs, ubs, expect, mu;
     constexpr double const Inf = std::numeric_limits<double>::infinity();
-    lbs << -Inf << -1  << -1.5;
-    ubs << 2    << Inf << 1;
-    expect << 0.355656058666919 << -0.065516198469146 << 0.123908592190096 << -0.0184193612120618 << -0.116799569758003 << -0.0926881442370132;
-    mu << .5 << -.25 << 0;
+    arma::vec lbs{-Inf, -1, -1.5},
+              ubs{2, Inf, 1},
+           expect{0.355656058666919, -0.065516198469146, 0.123908592190096, -0.0184193612120618, -0.116799569758003, -0.0926881442370132},
+               mu{.5, -.25, 0};
 
-    arma::mat s1, s2;
-    s1 << 1 << .25 << 0 << .25 << 1 << .1 << 0 << .1 << 1;
-    s2 << 1 << 0 << 1 << 0 << 1 << 0 << 1 << 0 << 1;
+    arma::mat s1{{1, .25, 0, .25, 1, .1, 0, .1, 1}},
+              s2{{1, 0, 1, 0, 1, 0, 1, 0, 1}};
     s1.reshape(3, 3);
     s2.reshape(3, 3);
     std::vector<arma::mat> scales;

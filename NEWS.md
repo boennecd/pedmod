@@ -1,3 +1,6 @@
+# pedmod 0.2.4
+* deal with a deprecated `<<` operator for `arma` objects in version 11.2.3.
+
 # pedmod 0.2.3
 * `eval_pedigree_hess` is faster.
 * fixed a bug from release 0.2.0 which in extreme settings could cause the C++ 

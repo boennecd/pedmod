@@ -2303,6 +2303,7 @@ heq(opt_res$par)
 system.time(
   pl_curve_nleq <- pedmod_profile_nleq(
     ll_terms, par = opt_res$par, maxvls = 5000L, minvls = 1000L, 
+    minvls_start = 500L, maxvls_start = 500L,
     abs_eps = 0, rel_eps = 1e-3, n_threads = 4L, use_aprx = TRUE, 
     cluster_weights = c_weights, vls_scales = sqrt(c_weights), 
     delta = .2, verbose = TRUE, heq = heq, heq_bounds = c(-1, 1)))

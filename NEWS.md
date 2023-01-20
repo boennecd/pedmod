@@ -1,3 +1,9 @@
+# pedmod 0.2.5
+* `pedmod_profile_nleq()` passes on the augmented penalty parameter for the 
+  quadratic term and the Lagrangian parameter to `auglag()` if `maxvls_start` 
+  and `minvls_start` is passed.
+* A citation is added.
+
 # pedmod 0.2.4
 * deal with a deprecated `<<` operator for `arma` objects in version 11.2.3.
 

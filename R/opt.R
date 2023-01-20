@@ -1729,9 +1729,15 @@ pedmod_profile_nleq <- function(
       out
     }
 
-    opt_func <- function(par, minvls, maxvls){
+    opt_func <- function(par, minvls, maxvls, sig0 = NULL, lam0 = NULL){
       heq_pass_inner <- function(par, ...)
         heq_pass(par) - x
+
+      if(!is.null(sig0) && is.null(control.outer$sig0))
+        control.outer$sig0 <- sig0 * max(abs(heq_pass_inner(par)))
+      if(!is.null(lam0) && is.null(control.outer$lam0))
+        control.outer$lam0 <- lam0
+
       auglag(
         par = par, fn = fn, gr = gr, heq = heq_pass_inner,
         control.outer = control.outer, minvls = minvls, maxvls = maxvls,
@@ -1741,13 +1747,19 @@ pedmod_profile_nleq <- function(
     if(maxvls > maxvls_start){
       opt_quick <- opt_func(par, minvls = minvls_start, maxvls = maxvls_start)
 
+      sig0 <- opt_quick$sigma
+      lam0 <- opt_quick$lambda
       par <- opt_quick$par
       opt_quick <- wrap_optim(x, opt_quick, dir, lb = lb, ub = ub)
 
-    } else
+    } else {
       opt_quick <- NULL
+      sig0 <- NULL
+      lam0 <- NULL
+    }
 
-    opt_out <- opt_func(par, minvls = minvls, maxvls = maxvls)
+    opt_out <- opt_func(
+      par, minvls = minvls, maxvls = maxvls, sig0 = sig0, lam0 = lam0)
 
     structure(wrap_optim(x, opt_out, dir, lb = lb, ub = ub),
               opt_quick = opt_quick)

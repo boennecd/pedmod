@@ -1,0 +1,22 @@
+bibentry(bibtype = "Article",
+  title        = "Quasi-Monte Carlo Methods for Binary Event Models with Complex Family Data",
+  author       = c(person(given = "Benjamin",
+                          family = "Christoffersen",
+                          email = "benjamin.christoffersen@ki.se"),
+                   person(given = "Behrang",
+                          family = "Mahjani"),
+                   person(given = "Mark",
+                          family = "Clements"), 
+                   person(given = "Hedvig",
+                          family = "Kjellström"), 
+                   person(given = "Keith",
+                          family = "Humphreys")
+                  ),
+  journal      = "Journal of Computational and Graphical Statistics",
+  year         = "2023",
+  volume       = "0",
+  number       = "0",
+  pages        = "1--9",
+  doi          = "10.1080/10618600.2022.2151454",
+  header       = "To cite pedmod in publications use:"
+)

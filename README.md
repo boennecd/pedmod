@@ -3443,32 +3443,32 @@ system.time(
 #> 
 #> Finding the upper limit of the profile likelihood curve
 #> LogLike: -4385.8000 at         0.610651
-#> LogLike: -4385.7980 at         0.610651
+#> LogLike: -4385.8021 at         0.610651
 #> LogLike: -4370.6861 at         0.410651
-#> LogLike: -4371.3425 at         0.455469. Lb, target, ub: -4385.7980, -4372.6068, -4371.3425
-#> LogLike: -4371.3155 at         0.455469. Lb, target, ub: -4385.7980, -4372.6068, -4371.3155
-#> LogLike: -4374.2595 at         0.513409. Lb, target, ub: -4374.2595, -4372.6068, -4371.3155
-#> LogLike: -4374.2570 at         0.513409. Lb, target, ub: -4374.2570, -4372.6068, -4371.3155
-#> LogLike: -4372.7179 at         0.488943. Lb, target, ub: -4372.7179, -4372.6068, -4371.3155
-#> LogLike: -4372.6892 at         0.488943. Lb, target, ub: -4372.6892, -4372.6068, -4371.3155
-#> LogLike: -4372.4552 at         0.483824. Lb, target, ub: -4372.6892, -4372.6068, -4372.4552
-#> LogLike: -4372.4248 at         0.483824. Lb, target, ub: -4372.6892, -4372.6068, -4372.4248
+#> LogLike: -4371.3423 at         0.455463. Lb, target, ub: -4385.8021, -4372.6068, -4371.3423
+#> LogLike: -4371.3155 at         0.455463. Lb, target, ub: -4385.8021, -4372.6068, -4371.3155
+#> LogLike: -4374.2589 at         0.513399. Lb, target, ub: -4374.2589, -4372.6068, -4371.3155
+#> LogLike: -4374.2560 at         0.513399. Lb, target, ub: -4374.2560, -4372.6068, -4371.3155
+#> LogLike: -4372.7176 at         0.488937. Lb, target, ub: -4372.7176, -4372.6068, -4371.3155
+#> LogLike: -4372.6888 at         0.488937. Lb, target, ub: -4372.6888, -4372.6068, -4371.3155
+#> LogLike: -4372.4552 at         0.483824. Lb, target, ub: -4372.6888, -4372.6068, -4372.4552
+#> LogLike: -4372.4248 at         0.483824. Lb, target, ub: -4372.6888, -4372.6068, -4372.4248
 #> 
 #> Finding the lower limit of the profile likelihood curve
 #> LogLike: -4379.4649 at         0.210651
-#> LogLike: -4379.4472 at         0.210651
+#> LogLike: -4379.4469 at         0.210651
 #> LogLike: -4370.6861 at         0.410651
-#> LogLike: -4371.6443 at         0.349454. Lb, target, ub: -4379.4472, -4372.6068, -4371.6443
-#> LogLike: -4371.6296 at         0.349454. Lb, target, ub: -4379.4472, -4372.6068, -4371.6296
-#> LogLike: -4373.5250 at         0.303116. Lb, target, ub: -4373.5250, -4372.6068, -4371.6296
-#> LogLike: -4373.5107 at         0.303116. Lb, target, ub: -4373.5107, -4372.6068, -4371.6296
-#> LogLike: -4372.6098 at         0.323047. Lb, target, ub: -4372.6098, -4372.6068, -4371.6296
-#> LogLike: -4372.5819 at         0.323047. Lb, target, ub: -4373.5107, -4372.6068, -4372.5819
-#> LogLike: -4372.7368 at         0.320291. Lb, target, ub: -4372.7368, -4372.6068, -4372.5819
-#> LogLike: -4372.7061 at         0.320291. Lb, target, ub: -4372.7061, -4372.6068, -4372.5819
+#> LogLike: -4371.6444 at         0.349452. Lb, target, ub: -4379.4469, -4372.6068, -4371.6444
+#> LogLike: -4371.6290 at         0.349452. Lb, target, ub: -4379.4469, -4372.6068, -4371.6290
+#> LogLike: -4373.5286 at         0.303085. Lb, target, ub: -4373.5286, -4372.6068, -4371.6290
+#> LogLike: -4373.5118 at         0.303085. Lb, target, ub: -4373.5118, -4372.6068, -4371.6290
+#> LogLike: -4372.6199 at         0.323028. Lb, target, ub: -4372.6199, -4372.6068, -4371.6290
+#> LogLike: -4372.5890 at         0.323028. Lb, target, ub: -4373.5118, -4372.6068, -4372.5890
+#> LogLike: -4372.7209 at         0.320426. Lb, target, ub: -4372.7209, -4372.6068, -4372.5890
+#> LogLike: -4372.6897 at         0.320426. Lb, target, ub: -4372.6897, -4372.6068, -4372.5890
 #> LogLike: -4370.6861 at         0.410651
 #>     user   system  elapsed 
-#> 3471.136    0.124  905.688
+#> 2675.382    0.069  698.971
 ```
 
 The confidence interval is shown below along with a plot of the profile
@@ -3477,7 +3477,7 @@ likelihood curve.
 ``` r
 pl_curve_nleq$confs # the confidence interval
 #>  2.50 pct. 97.50 pct. 
-#>     0.3225     0.4874
+#>     0.3226     0.4874
 
 # plot the profile likelihood curve
 local({

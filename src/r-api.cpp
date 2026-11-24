@@ -432,33 +432,33 @@ unsigned eval_get_n_threads
 //' fam_dat <- list(
 //'   list(
 //'     y = c(FALSE, TRUE, FALSE, FALSE),
-//'     X = structure(c(
+//'     X = structure(.Data = c(
 //'       1, 1, 1, 1, 1.2922654151273, 0.358134905909256, -0.734963997107464,
 //'       0.855235473516044, -1.16189500386223, -0.387298334620742,
 //'       0.387298334620742, 1.16189500386223),
-//'       .Dim = 4:3, .Dimnames = list( NULL, c("(Intercept)", "X1", ""))),
-//'     rel_mat = structure(c(
+//'       dim = 4:3, dimnames = list( NULL, c("(Intercept)", "X1", ""))),
+//'     rel_mat = structure(.Data = c(
 //'       1, 0.5, 0.5, 0.125, 0.5, 1, 0.5, 0.125, 0.5, 0.5,
-//'       1, 0.125, 0.125, 0.125, 0.125, 1), .Dim = c(4L, 4L)),
-//'     met_mat = structure(c(1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 1),
-//'                         .Dim = c(4L, 4L))),
+//'       1, 0.125, 0.125, 0.125, 0.125, 1), dim = c(4L, 4L)),
+//'     met_mat = structure(.Data = c(1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 1),
+//'                         dim = c(4L, 4L))),
 //'   list(
 //'     y = c(FALSE, FALSE, FALSE),
-//'     X = structure(c(
+//'     X = structure(.Data = c(
 //'       1, 1, 1, -0.0388728997202442, -0.0913782435233639,
-//'       -0.0801619722392612, -1, 0, 1), .Dim = c(3L, 3L)),
-//'     rel_mat = structure(c(
-//'       1, 0.5, 0.125, 0.5, 1, 0.125, 0.125, 0.125, 1), .Dim = c(3L, 3L)),
-//'     met_mat = structure(c(
-//'       1, 1, 0, 1, 1, 0, 0, 0, 1), .Dim = c(3L, 3L))),
+//'       -0.0801619722392612, -1, 0, 1), dim = c(3L, 3L)),
+//'     rel_mat = structure(.Data = c(
+//'       1, 0.5, 0.125, 0.5, 1, 0.125, 0.125, 0.125, 1), dim = c(3L, 3L)),
+//'     met_mat = structure(.Data = c(
+//'       1, 1, 0, 1, 1, 0, 0, 0, 1), dim = c(3L, 3L))),
 //'   list(
 //'     y = c(TRUE, FALSE),
-//'     X = structure(c(
+//'     X = structure(.Data = c(
 //'       1, 1, 0.305275750370738, -1.49482995913648,  -0.707106781186547,
 //'       0.707106781186547),
-//'       .Dim = 2:3, .Dimnames = list( NULL, c("(Intercept)", "X1", ""))),
-//'     rel_mat = structure(c(1, 0.5,  0.5, 1), .Dim = c(2L, 2L)),
-//'     met_mat = structure(c(1, 1, 1, 1), .Dim = c(2L,  2L))))
+//'       dim = 2:3, dimnames = list( NULL, c("(Intercept)", "X1", ""))),
+//'     rel_mat = structure(.Data = c(1, 0.5,  0.5, 1), dim = c(2L, 2L)),
+//'     met_mat = structure(.Data = c(1, 1, 1, 1), dim = c(2L,  2L))))
 //'
 //' # get the data into the format needed for the package
 //' dat_arg <- lapply(fam_dat, function(x){

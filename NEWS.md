@@ -1,4 +1,6 @@
 # pedmod 0.2.5
+* Graph functions now handle unit vertex weights without accessing empty vectors.
+* Fixed Hessian calculations with current RcppArmadillo versions.
 * `pedmod_profile_nleq()` passes on the augmented penalty parameter for the 
   quadratic term and the Lagrangian parameter to `auglag()` if `maxvls_start` 
   and `minvls_start` is passed.

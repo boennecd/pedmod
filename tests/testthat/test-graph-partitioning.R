@@ -197,3 +197,9 @@ test_that("the partitioning functions for graphs give the same", {
                                                   weight = 100)))
   expect_equal(partition, partition_reordered)
 })
+
+test_that(desc = "a graph without edges gives an error", code = {
+  expect_error(
+    object = biconnected_components(from = integer(), to = integer()),
+    regexp = "at least one edge")
+})

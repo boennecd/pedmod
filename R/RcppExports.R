@@ -161,14 +161,14 @@ mvndst_grad <- function(lower, upper, mu, sigma, maxvls = 25000L, abs_eps = .001
 #' Constructs an object needed for \code{\link{eval_pedigree_ll}} and
 #' \code{\link{eval_pedigree_grad}}.
 #'
-#' @param data \code{\link{list}} where each element is a list for a cluster
-#' with an:
-#' \itemize{
-#'   \item{\code{"X"}}{ element with the design matrix for the fixed effect,}
-#'   \item{\code{"Z"}}{ element with the design matrix for the loadings of the effects (only needed for \code{pedigree_ll_terms_loadings}),}
-#'   \item{\code{"y"}}{ element with the zero-one outcomes, and}
-#'   \item{\code{"scale_mats"}}{ element with a list where each element is a
-#' scale/correlation matrix for a particular type of effect.}
+#' @param data A list with one entry per cluster. Each entry has these elements:
+#' \describe{
+#'   \item{\code{X}}{Design matrix for the fixed effects.}
+#'   \item{\code{Z}}{Design matrix for the effect loadings. Only
+#'   \code{pedigree_ll_terms_loadings} requires this matrix.}
+#'   \item{\code{y}}{Vector of binary outcomes.}
+#'   \item{\code{scale_mats}}{List of scale or correlation matrices, one per
+#'   effect type.}
 #' }
 #' @param max_threads maximum number of threads to use.
 #' @param n_sequences number of randomized quasi-Monte Carlo sequences to use.

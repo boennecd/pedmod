@@ -16,21 +16,21 @@ options(digits = 4)
 
 # pedmod: Pedigree Models
 
-[![R-CMD-check](https://github.com/boennecd/pedmod/workflows/R-CMD-check/badge.svg)](https://github.com/boennecd/pedmod/actions)
-[![](https://www.r-pkg.org/badges/version/pedmod)](https://CRAN.R-project.org/package=pedmod)
-[![CRAN RStudio mirror downloads](http://cranlogs.r-pkg.org/badges/pedmod)](https://CRAN.R-project.org/package=pedmod)
+[![R-CMD-check](https://github.com/boennecd/pedmod/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/boennecd/pedmod/actions/workflows/R-CMD-check.yaml)
+[![CRAN version](https://www.r-pkg.org/badges/version/pedmod)](https://CRAN.R-project.org/package=pedmod)
+[![CRAN downloads](https://cranlogs.r-pkg.org/badges/last-month/pedmod)](https://cranlogs.r-pkg.org/)
 
-The pedmod package provides functions to estimate models for pedigree data. 
-Particularly, the package provides functions to estimate mixed models of 
-the form:
+Use pedmod to fit mixed probit models to binary outcomes in pedigree data. The model for individual $j$ in family $i$ is
 
-$$\begin{align*}
-Y_{ij} \mid \epsilon_{ij} = e 
+$$
+\begin{aligned}
+Y_{ij} \mid \epsilon_{ij} = e
   &\sim \text{Bin}(\Phi(\vec\beta^\top\vec x_{ij} + e), 1) \\
 \vec\epsilon_i = (\epsilon_{i1}, \dots, \epsilon_{in_i})^\top &\sim
   N^{(n_i)}\left(\vec 0, \sum_{l = 1}^K\sigma_l^2 C_{il}
   \right)
-\end{align*}$$
+\end{aligned}
+$$
 
 where $Y_{ij}$ is the binary outcome of interest for individual $j$ in 
 family/cluster $i$, $\vec x_{ij}$ is the individual's known covariates, 
@@ -38,12 +38,15 @@ $\Phi$ is the standard normal distribution's CDF, and
 $\text{Bin}$ implies a binomial distribution such if 
 $z\sim \text{Bin}(p, n)$ then the density of $z$ is:
 
-$$f(z) = \begin{pmatrix} n \\ z \end{pmatrix}p^z(1 - p)^{n-z}$$
+$$
+f(z) = \begin{pmatrix} n \\ z \end{pmatrix}p^z(1 - p)^{n-z}
+$$
 
 A different and equivalent way of writing the model is as:
 
-$$\begin{align*}
-Y_{ij} \mid \epsilon_{ij} = e 
+$$
+\begin{aligned}
+Y_{ij} \mid \epsilon_{ij} = e
   &= \begin{cases}
     1 & \vec\beta^\top\vec x_{ij} + e > 0 \\
     0 & \text{otherwise}
@@ -51,14 +54,15 @@ Y_{ij} \mid \epsilon_{ij} = e
 \vec\epsilon_i = (\epsilon_{i1}, \dots, \epsilon_{in_i})^\top &\sim
   N^{(n_i)}\left(\vec 0, I_{n_i} + \sum_{l = 1}^K\sigma_l^2 C_{il}
   \right)
-\end{align*}$$
+\end{aligned}
+$$
 
 where $I_{n_i}$ is the $n_i$ dimensional identity matrix which comes from the 
 unshared/individual specific random effect. This effect is always included. 
 The models are commonly known as liability threshold models or mixed probit 
 models.
 
-The $C_{il}$s are known scale/correlation matrices where each of the $l$'th 
+The matrices $C_{il}$ are known scale or correlation matrices where each of the $l$'th
 types correspond to a type of effect. An arbitrary number of such matrices can 
 be passed to include e.g. a genetic effect, a maternal effect, a paternal, an 
 effect of a shared adult environment etc. Usually, these matrices are 
@@ -67,30 +71,36 @@ that all the matrices are correlation matrices. A
 typical example is that $C_{il}$ is two times the kinship matrix in which 
 case we call:
 
-$$\frac{\sigma_l^2}{1 + \sum_{k = 1}^K\sigma_k^2}$$
+$$
+\frac{\sigma_l^2}{1 + \sum_{k = 1}^K\sigma_k^2}
+$$
 
 the heritability. That is, the proportion of the variance attributable to the 
 the $l$'th effect which in this case is the direct genetic effect. 
-The scale parameters, the $\sigma_k^2$s, may be the 
+The scale parameters, the variances $\sigma_k^2$, may be the
 primary interest in an analysis. The scale in the model cannot be identified. 
 That is, an equivalent model is:
 
-$$\begin{align*}
-Y_{ij} \mid \epsilon_{ij} = e 
+$$
+\begin{aligned}
+Y_{ij} \mid \epsilon_{ij} = e
   &= \begin{cases}
     1 & \sqrt\phi\vec\beta^\top\vec x_{ij} + e > 0 \\
     0 & \text{otherwise}
     \end{cases} \\
 \vec\epsilon_i = (\epsilon_{i1}, \dots, \epsilon_{in_i})^\top &\sim
-  N^{(n_i)}\left(\vec 0, 
+  N^{(n_i)}\left(\vec 0,
   \phi\left(I_{n_i} + \sum_{l = 1}^K\sigma_l^2 C_{il}\right)
   \right)
-\end{align*}$$
+\end{aligned}
+$$
 
 for any $\phi > 0$. A common option other than $\phi = 1$ is to set 
-$\phi = (1 + \sum_{l = 1}^K \sigma_l^2)^{-1}$. This has the effect that  
+$\phi = (1 + \sum_{l = 1}^K \sigma_l^2)^{-1}$. This has the effect that
 
-$$\frac{\sigma_l^2}{1 + \sum_{k = 1}^K\sigma_k^2} = \phi\sigma_l^2$$
+$$
+\frac{\sigma_l^2}{1 + \sum_{k = 1}^K\sigma_k^2} = \phi\sigma_l^2
+$$
 
 is the proportion of variance attributable to the $l$'th effect (assuming all 
 $C_{il}$ matrices are correlation matrices). Moreover, $\phi$ is the proportion 
@@ -114,9 +124,11 @@ and we use $\theta_l = \log\sigma_l^2$. For the
 standardized parameterization
 where $\phi = (1 + \sum_{l = 1}^K \sigma_l^2)^{-1}$, we work with
 $\phi = (1 + \sum_{l = 1}^K \sigma_l^2)^{-1}$,
-$\vec\gamma = \sqrt\phi\vec\beta$, and 
+$\vec\gamma = \sqrt\phi\vec\beta$, and
 
-$$\phi\sigma_l^2 = \frac{\exp(\psi_l)}{1 +\sum_{l = 1}^k\exp(\psi_l)}\Leftrightarrow\sigma_l^2 = \exp(\psi_l).$$
+$$
+\phi\sigma_l^2 = \frac{\exp(\psi_l)}{1 +\sum_{l = 1}^k\exp(\psi_l)}\Leftrightarrow\sigma_l^2 = \exp(\psi_l).
+$$
 
 This package provides randomized quasi-Monte Carlo methods to approximate 
 the log marginal likelihood for these types of 
@@ -157,20 +169,13 @@ Since the implementation is easy to extend, possible extensions are:
     imputation in the mdgc package.
     
 ## Installation
-The package can be installed from GitHub by calling:
+Install the development version from GitHub.
 
 ```{r how_to_install, eval = FALSE}
-remotes::install_github("boennecd/pedmod", build_vignettes = TRUE)
+remotes::install_github(repo = "boennecd/pedmod", build_vignettes = TRUE)
 ```
 
-The package can also be installed from CRAN by calling:
-
-```{r cran_how_to_install, eval = FALSE}
-install.packages("pedmod")
-```
-
-The code benefits from being build with automatic vectorization so having e.g. 
-`-O3` in the `CXX14FLAGS` flags in your Makevars file may be useful.
+CRAN also hosts the [archived source releases](https://CRAN.R-project.org/src/contrib/Archive/pedmod/).
 
 ## Example
 
@@ -229,14 +234,17 @@ sim_dat <- function(n_fams, beta = c(-3, 1, 2), sig_sq = 3){
 }
 ```
 
-The model is 
+The model is
 
-$$\begin{align*}
+$$
+\begin{aligned}
  Y_{ij} &= \begin{cases} 1 & \beta_0 + \beta_1 X_{ij} + \beta_2 B_{ij} + G_{ij} + R_{ij} > 0 \\ 0 & \text{otherwise} \end{cases} \\
  X_{ij} &\sim N(0, 1) \\
  B_{ij} &\sim \text{Bin}(0.5, 1) \\
  (G_{i1}, \dots, G_{in_{i}})^\top &\sim N^{(n_i)}(\vec 0, \sigma^2 C_{i1}) \\
- R_{ij} &\sim N(0, 1)\end{align*}$$
+ R_{ij} &\sim N(0, 1)\end{aligned}
+$$
+
  
 where $C_{i1}$ is two times the kinship matrix and $X_{ij}$ and 
 $B_{ij}$ are observed covariates. We can now estimate the model with a simulated 
@@ -1207,15 +1215,18 @@ sim_dat <- function(n_fams, beta = c(-3, 4), sig_sq = c(2, 1)){
 }
 ```
 
-The model is 
+The model is
 
-$$\begin{align*}
+$$
+\begin{aligned}
  Y_{ij} &= \begin{cases} 1 & \beta_0 + \beta_1 B_{ij} + E_{ij} + G_{ij} + R_{ij} > 0 \\ 0 & \text{otherwise} \end{cases} \\
  X_{ij} &\sim N(0, 1) \\
  B_{ij} &\sim \text{Bin}(0.1, 1) \\
  (G_{i1}, \dots, G_{in_{i}})^\top &\sim N^{(n_i)}(\vec 0, \sigma^2_G C_{i1}) \\
 (E_{i1}, \dots, E_{in_{i}})^\top &\sim N^{(n_i)}(\vec 0, \sigma^2_E C_{i2}) \\
- R_{ij} &\sim N(0, 1)\end{align*}$$
+ R_{ij} &\sim N(0, 1)\end{aligned}
+$$
+
  
 where $C_{i1}$ is two times the kinship matrix, $C_{i2}$ is singular matrix
 for the environment effect, and 
@@ -1393,11 +1404,13 @@ rbind(
 
 We use the `cluster_weights` argument above to exploit that some of the 
 log marginal likelihood terms are identical. Specifically, let $l_j$ be the 
-$j$th distinct log marginal likelihood term 
+distinct log marginal likelihood term $j$
 and $\vec\theta$ be the model parameters, then we use 
-that the log marginal likelihood is 
+that the log marginal likelihood is
 
-$$l(\vec\theta) = \sum_{j = 1}^L\sum_{i = 1}^{w_j}l_j(\vec\theta) = \sum_{j = 1}^Lw_jl_j(\vec\theta).$$
+$$
+l(\vec\theta) = \sum_{j = 1}^L\sum_{i = 1}^{w_j}l_j(\vec\theta) = \sum_{j = 1}^Lw_jl_j(\vec\theta).
+$$
 
 The unweighted version is the left hand side and the weighted version is the 
 right hand side. The two have different variances. Our 
@@ -1405,31 +1418,46 @@ quasi-Monte-Carlo method has (almost) a variance for each $\exp l_j$ which is
 $\mathcal{O}(m^{-2})$ with $m$ being the number of samples we use for each 
 $l_j$. Thus, the variance of the unweighted version is
 
-$$\sum_{l = j}^L\sum_{i = 1}^{w_j}\text{Var}(l_j(\vec\theta))$$
+$$
+\sum_{l = j}^L\sum_{i = 1}^{w_j}\text{Var}(l_j(\vec\theta))
+$$
 
-which is 
+which is
 
-$$\mathcal{O}\left(\sum_{j = 1}^L \frac{w_j}{m^2}\right)$$
+$$
+\mathcal{O}\left(\sum_{j = 1}^L \frac{w_j}{m^2}\right)
+$$
 
 However, the variance of the weighted version is
 
-$$\sum_{j = 1}^L\text{Var}(w_jl_j(\vec\theta))$$
+$$
+\sum_{j = 1}^L\text{Var}(w_jl_j(\vec\theta))
+$$
 
-which is 
+which is
 
-$$\mathcal{O}\left(\sum_{j = 1}^L \frac{w_j^2}{m^2}\right)$$
+$$
+\mathcal{O}\left(\sum_{j = 1}^L \frac{w_j^2}{m^2}\right)
+$$
 
 Though, we can get a similar variance by using $\sqrt{w_j}m$ samples for 
 term $j$. The variance then becomes
 
-$$\mathcal{O}\left(\sum_{j = 1}^L \frac{w_j^2}{w_jm^2}\right) = \mathcal{O}\left(\sum_{j = 1}^L \frac{w_j}{m^2}\right)$$
-but we do so using only 
+$$
+\mathcal{O}\left(\sum_{j = 1}^L \frac{w_j^2}{w_jm^2}\right) = \mathcal{O}\left(\sum_{j = 1}^L \frac{w_j}{m^2}\right)
+$$
 
-$$m\sum_{j = 1}^L\sqrt{w_j}$$
+but we do so using only
 
-samples rather than 
+$$
+m\sum_{j = 1}^L\sqrt{w_j}
+$$
 
-$$m\sum_{j = 1}^Lw_j.$$
+samples rather than
+
+$$
+m\sum_{j = 1}^Lw_j.
+$$
 
 ### Alternative Parameterization
 
@@ -1688,18 +1716,22 @@ use the scale invariance of the likelihood ratio. However, this is not true for
 more effects, $K > 1$. To see this, notice that proportion of variance is given 
 by
 
-$$h_i = \left(1 + \sum_{k = 1}^K\sigma_k^2\right)^{-1}\sigma_i^2\Leftrightarrow 
-  \sigma_i^2 = 
-    \frac{h_i}{1 - h_i}\left(1 + \sum_{k \in \{1,\dots,K\}\setminus\{i\}}\sigma_k^2\right)$$
+$$
+h_i = \left(1 + \sum_{k = 1}^K\sigma_k^2\right)^{-1}\sigma_i^2\Leftrightarrow
+  \sigma_i^2 =
+    \frac{h_i}{1 - h_i}\left(1 + \sum_{k \in \{1,\dots,K\}\setminus\{i\}}\sigma_k^2\right)
+$$
 
 Let $l(\vec\beta, \sigma_1^2,\dots,\sigma_K^2)$ be the log likelihood. Then the 
-profile likelihood in the proportion of variance explained by the $i$th effect 
-is 
+profile likelihood in the proportion of variance explained by the effect $i$
+is
 
-$$\tilde l_i(h_i) = \max_{\vec\beta,\sigma_1,\dots,\sigma_{k-1},\sigma_{k+1},\dots,\sigma_K}
+$$
+\tilde l_i(h_i) = \max_{\vec\beta,\sigma_1,\dots,\sigma_{k-1},\sigma_{k+1},\dots,\sigma_K}
   l\left(\vec\beta,\sigma_1,\dots,\sigma_{k-1},
   \frac{h_i}{1 - h_i}\left(1 + \sum_{k \in \{1,\dots,K\}\setminus\{i\}}\sigma_k^2\right),
-  \sigma_{k+1},\dots,\sigma_K\right)$$
+  \sigma_{k+1},\dots,\sigma_K\right)
+$$
 
 As these proportions are often the interest of the analysis, the 
 `pedmod_profile_prop` function is implemented to produce profile likelihood
@@ -1730,26 +1762,33 @@ pl_env_prop$confs # the confidence interval
 ```
 
 A wrong approach is to use the confidence interval for $\sigma_i^2$ to attempt
-to construct a confidence interval for $h_i$. To see that this is wrong, let 
+to construct a confidence interval for $h_i$. To see that this is wrong, let
 
-$$\begin{align*}
-\vec v_{i}(\sigma_i^2) &= 
+$$
+\begin{aligned}
+\vec v_{i}(\sigma_i^2) &=
   \text{arg max}_{\sigma_1^2,\dots,\sigma_{i  -1}^2, \sigma_{i + 1}^2,\dots,\sigma_K^2}
   \max_{\vec\beta}
   l\left(\vec\beta,\sigma_1^2,\dots,\sigma_K^2\right) \\
-\vec s_i(\sigma_i^2) &= 
+\vec s_i(\sigma_i^2) &=
   \left(v_{i1}(\sigma_i^2),\dots,
-        v_{i,i-1}(\sigma_i^2), \sigma_i^2, 
+        v_{i,i-1}(\sigma_i^2), \sigma_i^2,
         v_{i,i+1}(\sigma_i^2),\dots,
         v_{i,K-1}(\sigma_i^2)\right)^\top
-\end{align*}$$
+\end{aligned}
+$$
+
 Now, suppose that exists a function $g:\,(0,1)\rightarrow(0,\infty)$ such that
 
-$$h_i = \frac{g_i(h_i)}{1+\sum_{k = 0}^K s_{ik}(g_i(h_i))}$$
+$$
+h_i = \frac{g_i(h_i)}{1+\sum_{k = 0}^K s_{ik}(g_i(h_i))}
+$$
 
-Then it follows that 
+Then it follows that
 
-$$\tilde l_i(h_i) \geq \max_{\vec\beta} l(\vec\beta, \vec s_i(g_i(h_i)))$$
+$$
+\tilde l_i(h_i) \geq \max_{\vec\beta} l(\vec\beta, \vec s_i(g_i(h_i)))
+$$
 
 Thus, if one uses the profile likelihood curve of $\sigma_i^2$ to attempt to 
 construct a confidence interval for $h_i$ then the result is anti-conservative.
@@ -1994,14 +2033,17 @@ rowMeans(abs(ers_sds) < qnorm(.995)) # 99% coverage
 
 ## Individual Specific Loadings
 
-The models have used till now are in this form 
+The models have used till now are in this form
 
-$$\begin{align*}
- Y_{ij} &= \begin{cases} 1 & \vec x_{ij}^\top\vec\beta + 
-   R_{ij} + \sum_{k = 1}^K \sigma_kU_{ikj} > 0 \\ 
+$$
+\begin{aligned}
+ Y_{ij} &= \begin{cases} 1 & \vec x_{ij}^\top\vec\beta +
+   R_{ij} + \sum_{k = 1}^K \sigma_kU_{ikj} > 0 \\
    0 & \text{otherwise} \end{cases} \\
  (U_{ik1}, \dots,  U_{ikn_i})^\top &\sim N^{(n_i)}(\vec 0, C_{ik}) \\
- R_{ij} &\sim N(0, 1)\end{align*}$$
+ R_{ij} &\sim N(0, 1)\end{aligned}
+$$
+
  
 for known fixed effects covariates $\vec x_{ij}$ and scale matrices $C_{ij}$.
 The $U_{ikj}$ is the $k$'th effect on individual $j$ in cluster $i$. 
@@ -2010,46 +2052,60 @@ For instance, this could be the genetic effect or an environmental effect.
 We may consider the case where all individuals load differently on each of 
 the random effects. A model to incorporate such effects is
 
-$$\begin{align*}
- Y_{ij} &= \begin{cases} 1 & \vec x_{ij}^\top\vec\beta + 
-   R_{ij} + \sum_{k = 1}^K \sigma_k(\vec z_{ij})U_{ikj} > 0 \\ 
+$$
+\begin{aligned}
+ Y_{ij} &= \begin{cases} 1 & \vec x_{ij}^\top\vec\beta +
+   R_{ij} + \sum_{k = 1}^K \sigma_k(\vec z_{ij})U_{ikj} > 0 \\
    0 & \text{otherwise} \end{cases} \\
  \sigma_k(\vec z_{ij}) &= \exp(\vec\theta_k^\top\vec z_{ij}) \\
  (U_{ik1}, \dots,  U_{ikn_i})^\top &\sim N^{(n_i)}(\vec 0, C_{ik}) \\
- R_{ij} &\sim N(0, 1)\end{align*}$$
+ R_{ij} &\sim N(0, 1)\end{aligned}
+$$
+
  
 where the $\vec z_{ij}$ are known covariates. 
 If all the scale matrices are correlation matrices, then this implies that the
 proportion of variance attributable to the $l$'th effect for individual $j$ in 
-cluster $i$ is 
+cluster $i$ is
 
-$$\frac{\sigma_l^2(\vec z_{ij})^2}{1 + \sum_{k = 1}^K\sigma_k^2(\vec z_{ij})^2}$$
+$$
+\frac{\sigma_l^2(\vec z_{ij})^2}{1 + \sum_{k = 1}^K\sigma_k^2(\vec z_{ij})^2}
+$$
+
 rather than
 
-$$\frac{\sigma_l^2}{1 + \sum_{k = 1}^K\sigma_k^2}.$$
+$$
+\frac{\sigma_l^2}{1 + \sum_{k = 1}^K\sigma_k^2}.
+$$
 
 The model can equivalent be written as
 
-$$\begin{align*}
- Y_{ij} &= \begin{cases} 1 & \vec x_{ij}^\top\vec\beta + 
-   \epsilon_{ij} > 0 \\ 
+$$
+\begin{aligned}
+ Y_{ij} &= \begin{cases} 1 & \vec x_{ij}^\top\vec\beta +
+   \epsilon_{ij} > 0 \\
    0 & \text{otherwise} \end{cases} \\
  \sigma_k(\vec z_{ij}) &= \exp(\vec\theta_k^\top\vec z_{ij}) \\
  D_{ik} &= \text{diag}(\sigma_k(\vec z_{i1}), \dots, \sigma_k(\vec z_{in_i}))\\
- (\epsilon_{i1}, \dots,  \epsilon_{in_i})^\top &\sim 
-   N^{(n_i)}\left(\vec 0, I + \sum_{k = 1}^K D_{ik}C_{ik}D_{ik}\right)\end{align*}$$
+ (\epsilon_{i1}, \dots,  \epsilon_{in_i})^\top &\sim
+   N^{(n_i)}\left(\vec 0, I + \sum_{k = 1}^K D_{ik}C_{ik}D_{ik}\right)\end{aligned}
+$$
+
    
 where $\text{diag}(\cdots)$ returns a diagonal matrix. This form is useful for 
 simulations. 
 
-As en example, we extend our previous simulation to 
+As en example, we extend our previous simulation to
 
-$$\begin{align*}
+$$
+\begin{aligned}
  Y_{ij} &= \begin{cases} 1 & \beta_0 + \beta_1 B_{ij} + \sigma_E(\vec z_{ij})E_{ij} + \sigma_G(\vec z_{ij})G_{ij} + R_{ij} > 0 \\ 0 & \text{otherwise} \end{cases} \\
  B_{ij} &\sim \text{Bin}(0.1, 1) \\
  (G_{i1}, \dots, G_{in_{i}})^\top &\sim N^{(n_i)}(\vec 0, C_{i1}) \\
 (E_{i1}, \dots, E_{in_{i}})^\top &\sim N^{(n_i)}(\vec 0, C_{i2}) \\
- R_{ij} &\sim N(0, 1)\end{align*}$$
+ R_{ij} &\sim N(0, 1)\end{aligned}
+$$
+
  
 where $\vec z_{ij}$ is a vector containing an intercept, an indicator for 
 whether the individual is a male, and a covariate between minus one and one. 

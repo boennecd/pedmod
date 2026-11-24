@@ -93,6 +93,9 @@ std::vector<vertex> create_vertices
   (int const *from, int const *to, int const n_edges,
    int const *id, double const *vertex_weight, int const n_weights,
    double const *edge_weight){
+  if(n_edges == 0)
+    throw std::invalid_argument("the graph must contain at least one edge");
+
   // find the number greatest id
   int const * f_max = std::max_element(from, from + n_edges),
             * t_max = std::max_element(to  , to   + n_edges);
@@ -1716,8 +1719,8 @@ Rcpp::List get_biconnected_components(
     throw std::invalid_argument("size of weights_ids does not match size of weights");
 
   std::vector<vertex> vertices = create_vertices(
-    &from[0], &to[0], to.size(), &weights_ids[0], &weights[0],
-    weights_ids.size(), &edge_weights[0]);
+    from.begin(), to.begin(), to.size(), weights_ids.begin(), weights.begin(),
+    weights_ids.size(), edge_weights.begin());
   auto bicon_comps = biconnected_components(vertices).get();
   return biconnected_components_to_rcpp_list(bicon_comps);
 }
@@ -1772,8 +1775,8 @@ Rcpp::List get_block_cut_tree(
     throw std::invalid_argument("size of weights_ids does not match size of weights");
 
   std::vector<vertex> vertices = create_vertices(
-    &from[0], &to[0], to.size(), &weights_ids[0], &weights[0],
-    weights_ids.size(), &edge_weights[0]);
+    from.begin(), to.begin(), to.size(), weights_ids.begin(), weights.begin(),
+    weights_ids.size(), edge_weights.begin());
   auto bicon_comps = biconnected_components(vertices).get();
   block_cut_tree bct(bicon_comps);
 
@@ -1827,8 +1830,8 @@ Rcpp::List get_max_balanced_partition(
     throw std::invalid_argument("invalid slack value");
 
   std::vector<vertex> vertices = create_vertices(
-    &from[0], &to[0], to.size(), &weights_ids[0], &weights[0],
-    weights_ids.size(), &edge_weights[0]);
+    from.begin(), to.begin(), to.size(), weights_ids.begin(), weights.begin(),
+    weights_ids.size(), edge_weights.begin());
   auto bicon_comps = biconnected_components(vertices).get();
   block_cut_tree bct(bicon_comps);
 
@@ -1863,8 +1866,8 @@ Rcpp::List unconnected_partition_rcpp(
     throw std::invalid_argument("invalid slack value");
 
   std::vector<vertex> vertices = create_vertices(
-    &from[0], &to[0], to.size(), &weights_ids[0], &weights[0],
-    weights_ids.size(), &edge_weights[0]);
+    from.begin(), to.begin(), to.size(), weights_ids.begin(), weights.begin(),
+    weights_ids.size(), edge_weights.begin());
 
   std::unordered_set<vertex const *> init_arg;
   for(int const i : init){

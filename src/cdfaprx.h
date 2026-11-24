@@ -619,7 +619,7 @@ public:
     /// the gradient approximation
     arma::vec gradient;
     /// the hessian approximation
-    arma::vec hessian;
+    arma::mat hessian;
     /// the approximate standard errors
     arma::vec sd_errs;
   };

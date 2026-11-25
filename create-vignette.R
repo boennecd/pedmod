@@ -1,16 +1,16 @@
-library(rmarkdown)
-library(reshape2)
 (function(){
   setwd("vignettes")
 
-  render("pedigree_partitioning.Rmd", output_format = "html_document")
-  render("pedmod.Rmd", output_format = "html_document")
-  render("pedmod.Rmd", output_format = github_document(
-    math_method = "default"),
+  rmarkdown::render(input = "pedigree_partitioning.Rmd",
+                    output_format = "html_document")
+  rmarkdown::render(input = "pedmod.Rmd", output_format = "html_document")
+  rmarkdown::render(
+    input = "pedmod.Rmd",
+    output_format = rmarkdown::github_document(
+      math_method = "default", html_preview = FALSE),
     output_file = "README.md")
   file.copy("README.md", file.path("..", "README.md"), overwrite = TRUE)
   unlink("README.md")
-  unlink("README.html")
 
   fs <- list.files(file.path("man", "figures"))
   for(f in fs)

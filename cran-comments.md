@@ -1,15 +1,31 @@
-## Test environments
-* Ubuntu 20.04 LTS with gcc 10.1.0
-  R version 4.2.1
-* Ubuntu 20.04 LTS with gcc 10.1.0
-  R version 4.2.1 using Valgrind
-* GitHub actions on windows-latest (release), macOS-latest (release), 
-  ubuntu-20.04 (release), ubuntu-20.04 (old-release), and ubuntu-20.04 (devel)
-* win-builder (devel, oldrelease, and release)
-* `rhub::check_for_cran()`
-* `rhub::check(platform = c("macos-highsierra-release", "macos-highsierra-release-cran"))`
-  
-## R CMD check results
-There were no WARNINGs or ERRORs.
+## New version submission
 
-There is a NOTE about the package size in some cases.
+CRAN archived pedmod 0.2.4 on 2024-07-02. Version 0.2.5 fixes the invalid
+references that GCC UBSan reported when graph functions used unit vertex
+weights.
+
+## Check environments
+
+- Debian 13 x86_64, R 4.5.0, GCC 14.2.0, `R CMD check --as-cran`.
+- Ubuntu 26.04.1 x86_64, R 4.5.3, 4.6.2, and R-devel, GCC 15.2.0.
+  macOS 26.7.2 arm64, R 4.6.2, Apple Clang 21.0.0.
+  Windows Server 2022 x64, R 4.6.2, GCC 14.3.0.
+  All used `R CMD check --as-cran --no-manual`.
+- Fedora 44 x86_64, R-devel, GCC 16.2.1 with
+  `-fsanitize=address,undefined,bounds-strict` and
+  `R CMD check --as-cran --no-manual --no-build-vignettes`.
+- Ubuntu 26.04.1 x86_64, R-devel, Clang 23.1.6 with ASan and UBSan.
+  Both checks used `R CMD check --no-manual --no-stop-on-test-error`.
+- Fedora 44 x86_64, R-devel, GCC 16.2.1, Valgrind 3.27.1,
+  `R CMD check --no-manual --use-valgrind --no-stop-on-test-error`.
+
+## Results
+
+The standard checks reported no errors or warnings. The Debian check noted
+the prior archival. The sanitizer checks reported no sanitizer diagnostics.
+The GCC check noted deprecated matrix attribute names. The current examples
+and tests use the updated names.
+
+The check under Valgrind reported `OK`. Valgrind flagged one possibly lost
+OpenMP worker-thread allocation. A standalone OpenMP program reproduced the
+same allocation stack.

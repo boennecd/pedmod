@@ -10,14 +10,14 @@ pedigree_ll_terms(data, max_threads = 1L, n_sequences = 8L)
 pedigree_ll_terms_loadings(data, max_threads = 1L, n_sequences = 8L)
 }
 \arguments{
-\item{data}{\code{\link{list}} where each element is a list for a cluster
-with an:
-\itemize{
-  \item{\code{"X"}}{ element with the design matrix for the fixed effect,}
-  \item{\code{"Z"}}{ element with the design matrix for the loadings of the effects (only needed for \code{pedigree_ll_terms_loadings}),}
-  \item{\code{"y"}}{ element with the zero-one outcomes, and}
-  \item{\code{"scale_mats"}}{ element with a list where each element is a
-scale/correlation matrix for a particular type of effect.}
+\item{data}{A list with one entry per cluster. Each entry has these elements:
+\describe{
+  \item{\code{X}}{Design matrix for the fixed effects.}
+  \item{\code{Z}}{Design matrix for the effect loadings. Only
+  \code{pedigree_ll_terms_loadings} requires this matrix.}
+  \item{\code{y}}{Vector of binary outcomes.}
+  \item{\code{scale_mats}}{List of scale or correlation matrices, one per
+  effect type.}
 }}
 
 \item{max_threads}{maximum number of threads to use.}
@@ -53,33 +53,33 @@ faster. See \code{vignette("pedmod", "pedmod")} for examples of using
 fam_dat <- list(
   list(
     y = c(FALSE, TRUE, FALSE, FALSE),
-    X = structure(c(
+    X = structure(.Data = c(
       1, 1, 1, 1, 1.2922654151273, 0.358134905909256, -0.734963997107464,
       0.855235473516044, -1.16189500386223, -0.387298334620742,
       0.387298334620742, 1.16189500386223),
-      .Dim = 4:3, .Dimnames = list( NULL, c("(Intercept)", "X1", ""))),
-    rel_mat = structure(c(
+      dim = 4:3, dimnames = list( NULL, c("(Intercept)", "X1", ""))),
+    rel_mat = structure(.Data = c(
       1, 0.5, 0.5, 0.125, 0.5, 1, 0.5, 0.125, 0.5, 0.5,
-      1, 0.125, 0.125, 0.125, 0.125, 1), .Dim = c(4L, 4L)),
-    met_mat = structure(c(1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 1),
-                        .Dim = c(4L, 4L))),
+      1, 0.125, 0.125, 0.125, 0.125, 1), dim = c(4L, 4L)),
+    met_mat = structure(.Data = c(1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 1),
+                        dim = c(4L, 4L))),
   list(
     y = c(FALSE, FALSE, FALSE),
-    X = structure(c(
+    X = structure(.Data = c(
       1, 1, 1, -0.0388728997202442, -0.0913782435233639,
-      -0.0801619722392612, -1, 0, 1), .Dim = c(3L, 3L)),
-    rel_mat = structure(c(
-      1, 0.5, 0.125, 0.5, 1, 0.125, 0.125, 0.125, 1), .Dim = c(3L, 3L)),
-    met_mat = structure(c(
-      1, 1, 0, 1, 1, 0, 0, 0, 1), .Dim = c(3L, 3L))),
+      -0.0801619722392612, -1, 0, 1), dim = c(3L, 3L)),
+    rel_mat = structure(.Data = c(
+      1, 0.5, 0.125, 0.5, 1, 0.125, 0.125, 0.125, 1), dim = c(3L, 3L)),
+    met_mat = structure(.Data = c(
+      1, 1, 0, 1, 1, 0, 0, 0, 1), dim = c(3L, 3L))),
   list(
     y = c(TRUE, FALSE),
-    X = structure(c(
+    X = structure(.Data = c(
       1, 1, 0.305275750370738, -1.49482995913648,  -0.707106781186547,
       0.707106781186547),
-      .Dim = 2:3, .Dimnames = list( NULL, c("(Intercept)", "X1", ""))),
-    rel_mat = structure(c(1, 0.5,  0.5, 1), .Dim = c(2L, 2L)),
-    met_mat = structure(c(1, 1, 1, 1), .Dim = c(2L,  2L))))
+      dim = 2:3, dimnames = list( NULL, c("(Intercept)", "X1", ""))),
+    rel_mat = structure(.Data = c(1, 0.5,  0.5, 1), dim = c(2L, 2L)),
+    met_mat = structure(.Data = c(1, 1, 1, 1), dim = c(2L,  2L))))
 
 # get the data into the format needed for the package
 dat_arg <- lapply(fam_dat, function(x){

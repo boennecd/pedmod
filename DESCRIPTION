@@ -60,7 +60,8 @@ Suggests:
     kinship2,
     igraph,
     TruncatedNormal,
-    numDeriv
+    numDeriv,
+    microbenchmark
 Depends: 
     R (>= 3.5.0)
 VignetteBuilder: R.rsp

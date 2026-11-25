@@ -18,14 +18,11 @@ weights.
   Both checks used `R CMD check --no-manual --no-stop-on-test-error`.
 - Fedora 44 x86_64, R-devel, GCC 16.2.1, Valgrind 3.27.1,
   `R CMD check --no-manual --use-valgrind --no-stop-on-test-error`.
+- macOS Sequoia 1.52 with a M1 chip.
+- devtools::check_win_devel(), devtools::check_win_release() and 
+  devtools::check_win_oldrelease().
 
 ## Results
 
-The standard checks reported no errors or warnings. The Debian check noted
-the prior archival. The sanitizer checks reported no sanitizer diagnostics.
-The GCC check noted deprecated matrix attribute names. The current examples
-and tests use the updated names.
-
-The check under Valgrind reported `OK`. Valgrind flagged one possibly lost
-OpenMP worker-thread allocation. A standalone OpenMP program reproduced the
-same allocation stack.
+The standard checks reported no errors or warnings. When there is a note then it 
+is about the prior archival.

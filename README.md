@@ -158,13 +158,17 @@ Since the implementation is easy to extend, possible extensions are:
 
 ## Installation
 
+Install the released version from CRAN.
+
+``` r
+install.packages(pkgs = "pedmod")
+```
+
 Install the development version from GitHub.
 
 ``` r
 remotes::install_github(repo = "boennecd/pedmod", build_vignettes = TRUE)
 ```
-
-CRAN also hosts the [archived source releases](https://CRAN.R-project.org/src/contrib/Archive/pedmod/).
 
 ## Example
 

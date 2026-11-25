@@ -169,13 +169,18 @@ Since the implementation is easy to extend, possible extensions are:
     imputation in the mdgc package.
     
 ## Installation
+
+Install the released version from CRAN.
+
+```{r install_cran, eval = FALSE}
+install.packages(pkgs = "pedmod")
+```
+
 Install the development version from GitHub.
 
 ```{r how_to_install, eval = FALSE}
 remotes::install_github(repo = "boennecd/pedmod", build_vignettes = TRUE)
 ```
-
-CRAN also hosts the [archived source releases](https://CRAN.R-project.org/src/contrib/Archive/pedmod/).
 
 ## Example
 

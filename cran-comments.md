@@ -1,42 +1,31 @@
-## Resubmission after archival
+## New version submission
 
 CRAN archived pedmod 0.2.4 on 2024-07-02. Version 0.2.5 fixes the invalid
 references that GCC UBSan reported when graph functions used unit vertex
-weights. It also fixes the Rd list for `pedigree_ll_terms()` and a Hessian
-calculation that failed with current RcppArmadillo.
+weights.
 
-## Local checks
+## Check environments
 
-On Debian 13 with R 4.5.0, GCC 14.2.0 and RcppArmadillo 15.8.0-1,
-`R CMD check --as-cran pedmod_0.2.5.tar.gz` completed with zero errors,
-zero warnings and two notes. All 491 test assertions passed.
+- Debian 13 x86_64, R 4.5.0, GCC 14.2.0, `R CMD check --as-cran`.
+- Ubuntu 26.04.1 x86_64, R 4.5.3, 4.6.2, and R-devel, GCC 15.2.0.
+  macOS 26.7.2 arm64, R 4.6.2, Apple Clang 21.0.0.
+  Windows Server 2022 x64, R 4.6.2, GCC 14.3.0.
+  All used `R CMD check --as-cran --no-manual`.
+- Fedora 44 x86_64, R-devel, GCC 16.2.1 with
+  `-fsanitize=address,undefined,bounds-strict` and
+  `R CMD check --as-cran --no-manual --no-build-vignettes`.
+- Ubuntu 26.04.1 x86_64, R-devel, Clang 23.1.6 with ASan and UBSan.
+  Both checks used `R CMD check --no-manual --no-stop-on-test-error`.
+- Fedora 44 x86_64, R-devel, GCC 16.2.1, Valgrind 3.27.1,
+  `R CMD check --no-manual --use-valgrind --no-stop-on-test-error`.
 
-- The incoming feasibility check reports the previous archival.
-- The check host could not verify the current time.
+## Results
 
-The installed package occupies 5.8 MB on this system. The two prebuilt
-vignettes account for 3.9 MB, and the compiled library accounts for 1.6 MB.
-This check reported the size as informational.
+The standard checks reported no errors or warnings. The Debian check noted
+the prior archival. The sanitizer checks reported no sanitizer diagnostics.
+The GCC check noted deprecated matrix attribute names. The current examples
+and tests use the updated names.
 
-## Remote checks
-
-GitHub Actions passed all five standard checks on commit `175e4dd`.
-The checks covered R release on Linux, macOS, and Windows, plus R-devel and
-R oldrel-1 on Linux. The R-devel check reported no errors, warnings, or notes.
-[GitHub Actions run](https://github.com/boennecd/pedmod/actions/runs/45491678393)
-
-On commit `1092da6`, R-hub's `gcc-asan` check ran with GCC AddressSanitizer
-and UndefinedBehaviorSanitizer. The examples and tests passed without the
-reported misaligned-reference diagnostic or other sanitizer findings.
-The check reported one note about deprecated matrix attribute names.
-Commit `175e4dd` updates those names in the examples and tests.
-The `clang-asan` and `clang-ubsan` checks also passed.
-[R-hub sanitizer run](https://github.com/boennecd/pedmod/actions/runs/45489278065)
-
-On the same commit, `R CMD check` reported status `OK` under Valgrind.
-R-hub marked the job as failed after Valgrind reported one 384-byte
-allocation as possibly lost in GNU OpenMP worker-thread setup. Valgrind
-reported zero bytes definitely or indirectly lost. A standalone
-two-thread OpenMP program reproduced the same allocation stack without
-loading pedmod.
-[Valgrind log](https://github.com/boennecd/pedmod/actions/runs/45489278065/job/138783022246)
+The check under Valgrind reported `OK`. Valgrind flagged one possibly lost
+OpenMP worker-thread allocation. A standalone OpenMP program reproduced the
+same allocation stack.
